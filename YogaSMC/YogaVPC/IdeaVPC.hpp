@@ -92,7 +92,7 @@ private:
 
     bool initialized {false};
 
-    void setPropertiesGated(OSObject* props) override;
+    void setPropertiesGated(OSObject* props) APPLE_KEXT_OVERRIDE;
 
     bool conservationMode;
     bool FnlockMode;

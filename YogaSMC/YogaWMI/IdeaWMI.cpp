@@ -13,7 +13,7 @@ OSDefineMetaClassAndStructors(IdeaWMI, YogaWMI);
 IOService *IdeaWMI::probe(IOService *provider, SInt32 *score)
 {
     if (/* DISABLES CODE */ (false)) {
-        IOLog("not a valid ThinkPad WMI interface");
+        IOLog("not a valid IdeaPad WMI interface");
         return NULL;
     }
     // TODO: identify an appropritate interface to attach

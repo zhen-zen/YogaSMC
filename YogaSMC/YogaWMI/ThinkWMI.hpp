@@ -52,8 +52,8 @@ private:
     static constexpr const char *getMutestatus         = "HAUM";
     UInt32 mutestate;
 
-    bool initVPC() override;
-    inline OSString *getPnp() override {return OSString::withCString(PnpDeviceIdVPCThink);};
+    bool initVPC() APPLE_KEXT_OVERRIDE;
+    inline OSString *getPnp() APPLE_KEXT_OVERRIDE {return OSString::withCString(PnpDeviceIdVPCThink);};
 
     int batnum = BAT_ANY;
     bool ConservationMode;
@@ -65,8 +65,8 @@ private:
     bool updateMutestatus();
 
 public:
-    IOService *probe(IOService *provider, SInt32 *score) override;
-    IOReturn setProperties(OSObject* props) override;
+    IOService *probe(IOService *provider, SInt32 *score) APPLE_KEXT_OVERRIDE;
+    IOReturn setProperties(OSObject* props) APPLE_KEXT_OVERRIDE;
 };
 
 #endif /* ThinkWMI_hpp */

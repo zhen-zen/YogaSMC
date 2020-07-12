@@ -168,12 +168,12 @@ protected:
     bool updateTopCase();
 
 public:
-    virtual bool init(OSDictionary *dictionary) override;
-    virtual void free(void) override;
-    virtual IOService *probe(IOService *provider, SInt32 *score) override;
+    virtual bool init(OSDictionary *dictionary) APPLE_KEXT_OVERRIDE;
+    virtual void free(void) APPLE_KEXT_OVERRIDE;
+    virtual IOService *probe(IOService *provider, SInt32 *score) APPLE_KEXT_OVERRIDE;
 
-    virtual bool start(IOService *provider) override;
-    virtual void stop(IOService *provider) override;
+    virtual bool start(IOService *provider) APPLE_KEXT_OVERRIDE;
+    virtual void stop(IOService *provider) APPLE_KEXT_OVERRIDE;
 
-    virtual IOReturn message(UInt32 type, IOService *provider, void *argument) override;
+    virtual IOReturn message(UInt32 type, IOService *provider, void *argument) APPLE_KEXT_OVERRIDE;
 };

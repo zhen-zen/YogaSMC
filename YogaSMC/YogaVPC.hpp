@@ -16,9 +16,22 @@
 
 #define batteryPrompt "Battery"
 #define conservationPrompt "ConservationMode"
+#define clamshellPrompt "ClamshellMode"
+#define FnKeyPrompt "FnlockMode"
+#define VPCPrompt "VPCconfig"
 #define readECPrompt "ReadEC"
 #define writeECPrompt "WriteEC"
-#define FnKeyPrompt "FnlockMode"
+
+#define updateFailure "%s: %s evaluation failed\n"
+#define updateSuccess "%s: %s 0x%x\n"
+#define toggleFailure "%s: %s toggle failed\n"
+#define toggleSuccess "%s: %s set to 0x%x: %s\n"
+
+#define valueMatched "%s: %s already %s\n"
+#define valueInvalid "%s: Invalid value for %s\n"
+
+#define timeoutPrompt "%s: %s timeout 0x%x\n"
+#define VPCUnavailable "%s: VPC unavailable\n"
 
 #define PnpDeviceIdVPCIdea "VPC2004"
 #define PnpDeviceIdVPCThink "LEN0268"
@@ -27,6 +40,18 @@ class YogaVPC : public IOService
 {
   typedef IOService super;
   OSDeclareDefaultStructors(YogaVPC);
+
+private:
+    /**
+     *  Related ACPI methods
+     */
+    static constexpr const char *getClamshellMode  = "GCSM";
+    static constexpr const char *setClamshellMode  = "SCSM";
+
+    bool clamshellMode;
+
+    bool updateClamshell(bool update=true);
+    bool toggleClamshell();
 
 protected:
     IOWorkLoop *workLoop {nullptr};
@@ -44,15 +69,15 @@ protected:
      */
     inline virtual void updateVPC() {return;};
 
-    inline virtual void setPropertiesGated(OSObject* props) {return;};
+    virtual void setPropertiesGated(OSObject* props);
 
 public:
-    virtual bool start(IOService *provider) override;
-    virtual void stop(IOService *provider) override;
+    virtual bool start(IOService *provider) APPLE_KEXT_OVERRIDE;
+    virtual void stop(IOService *provider) APPLE_KEXT_OVERRIDE;
 
     static YogaVPC* withDevice(IOACPIPlatformDevice *device, OSString *pnp);
-    IOReturn setProperties(OSObject* props) override;
-    IOReturn message(UInt32 type, IOService *provider, void *argument) override;
+    IOReturn setProperties(OSObject* props) APPLE_KEXT_OVERRIDE;
+    IOReturn message(UInt32 type, IOService *provider, void *argument) APPLE_KEXT_OVERRIDE;
 };
 
 #endif /* YogaVPC_hpp */

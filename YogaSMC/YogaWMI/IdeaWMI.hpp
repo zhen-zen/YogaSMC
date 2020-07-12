@@ -19,17 +19,17 @@ class IdeaWMI : public YogaWMI
     OSDeclareDefaultStructors(IdeaWMI)
 
 private:
-    bool initVPC() override;
-    inline OSString *getPnp() override {return OSString::withCString(PnpDeviceIdVPCIdea);};
+    bool initVPC() APPLE_KEXT_OVERRIDE;
+    inline OSString *getPnp() APPLE_KEXT_OVERRIDE {return OSString::withCString(PnpDeviceIdVPCIdea);};
 
-    void YogaEvent(UInt32 argument) override;
+    void YogaEvent(UInt32 argument) APPLE_KEXT_OVERRIDE;
 
     IdeaVPC *dev;
 
 public:
-    IOService *probe(IOService *provider, SInt32 *score) override;
-    void stop(IOService *provider) override;
-    void free(void) override;
+    IOService *probe(IOService *provider, SInt32 *score) APPLE_KEXT_OVERRIDE;
+    void stop(IOService *provider) APPLE_KEXT_OVERRIDE;
+    void free(void) APPLE_KEXT_OVERRIDE;
 };
 
 #endif /* IdeaWMI_hpp */

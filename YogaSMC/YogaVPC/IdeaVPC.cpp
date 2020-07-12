@@ -31,13 +31,13 @@ IdeaVPC* IdeaVPC::withDevice(IOACPIPlatformDevice *device, OSString *pnp) {
 
 bool IdeaVPC::initVPC() {
     if (vpc->evaluateInteger(getVPCConfig, &config) != kIOReturnSuccess) {
-        IOLog("%s: failed to  VPC config 0x%x\n", getName(), config);
+        IOLog(updateFailure, getName(), VPCPrompt);
         return false;
     }
 
-    IOLog("%s: Got VPC config 0x%x\n", getName(), config);
+    IOLog(updateSuccess, getName(), VPCPrompt, config);
 #ifdef DEBUG
-    setProperty("VPCconfig", config, 32);
+    setProperty(VPCPrompt, config, 32);
 #endif
     cap_graphics = config >> CFG_GRAPHICS_BIT & 0x7;
     cap_bt       = config >> CFG_BT_BIT & 0x1;
@@ -102,7 +102,7 @@ bool IdeaVPC::initVPC() {
 
 void IdeaVPC::setPropertiesGated(OSObject *props) {
     if (!vpc) {
-        IOLog("%s: VPC unavailable\n", getName());
+        IOLog(VPCUnavailable, getName());
         return;
     }
 
@@ -118,35 +118,35 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
             if (key->isEqualTo(conservationPrompt)) {
                 OSBoolean * value = OSDynamicCast(OSBoolean, dict->getObject(conservationPrompt));
                 if (value == NULL) {
-                    IOLog("%s: Invalid value for battery conservation Mode\n", getName());
+                    IOLog(valueInvalid, getName(), conservationPrompt);
                     continue;
                 }
 
                 updateConservation(false);
 
                 if (value->getValue() == conservationMode) {
-                    IOLog("%s: Battery conservation Mode already %s\n", getName(), (conservationMode ? "enabled" : "disabled"));
+                    IOLog(valueMatched, getName(), conservationPrompt, (conservationMode ? "enabled" : "disabled"));
                 } else {
                     toggleConservation();
                 }
             } else if (key->isEqualTo(FnKeyPrompt)) {
                 OSBoolean * value = OSDynamicCast(OSBoolean, dict->getObject(FnKeyPrompt));
                 if (value == NULL) {
-                    IOLog("%s: Invalid value for fn lock Mode\n", getName());
+                    IOLog(valueInvalid, getName(), FnKeyPrompt);
                     continue;
                 }
 
                 updateFnlock(false);
 
                 if (value->getValue() == FnlockMode) {
-                    IOLog("%s: Fn lock Mode already %s\n", getName(), (FnlockMode ? "enabled" : "disabled"));
+                    IOLog(valueMatched, getName(), FnKeyPrompt, (FnlockMode ? "enabled" : "disabled"));
                 } else {
                     toggleFnlock();
                 }
             } else if (key->isEqualTo(readECPrompt)) {
                 OSNumber * value = OSDynamicCast(OSNumber, dict->getObject(readECPrompt));
                 if (value == NULL) {
-                    IOLog("%s: Invalid value for EC reading\n", getName());
+                    IOLog(valueInvalid, getName(), readECPrompt);
                     continue;
                 }
 
@@ -154,16 +154,21 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                 UInt8 retries = 0;
 
                 if (read_ec_data(value->unsigned32BitValue(), &result, &retries))
-                    IOLog("%s: EC 0x%x result: 0x%x %d\n", getName(), value->unsigned32BitValue(), result, retries);
+                    IOLog("%s: %s 0x%x result: 0x%x %d\n", getName(), readECPrompt, value->unsigned32BitValue(), result, retries);
                 else
-                    IOLog("%s: Failed to read EC 0x%x %d\n", getName(), value->unsigned32BitValue(), retries);
+                    IOLog("%s: %s failed 0x%x %d\n", getName(), readECPrompt, value->unsigned32BitValue(), retries);
             } else if (key->isEqualTo(writeECPrompt)) {
                 OSNumber * value = OSDynamicCast(OSNumber, dict->getObject(writeECPrompt));
                 if (value == NULL) {
-                    IOLog("%s: Invalid value for EC writing\n", getName());
+                    IOLog(valueInvalid, getName(), writeECPrompt);
                     continue;
                 }
-                IOLog("%s: EC 0x%x writing not implemented\n", getName(), value->unsigned32BitValue());
+                IOLog("%s: %s 0x%x not implemented\n", getName(), writeECPrompt, value->unsigned32BitValue());
+            } else if (key->isEqualTo(clamshellPrompt)) {
+                OSDictionary* entry = OSDictionary::withCapacity(1);
+                entry->setObject(clamshellPrompt, dict->getObject(clamshellPrompt));
+                super::setPropertiesGated(entry);
+                entry->release();
             } else {
                 IOLog("%s: Unknown property %s\n", getName(), key->getCStringNoCopy());
             }
@@ -179,14 +184,14 @@ bool IdeaVPC::updateConservation(bool update) {
     UInt32 state;
 
     if (vpc->evaluateInteger(getConservationMode, &state) != kIOReturnSuccess) {
-        IOLog("%s: Conservation mode evaluation failed\n", getName());
+        IOLog(updateFailure, getName(), conservationPrompt);
         return false;
     }
 
-    conservationMode = state >> BM_CONSERVATION_BIT & 0x1;
+    conservationMode = 1 << BM_CONSERVATION_BIT & state;
 
     if (update) {
-        IOLog("%s: Conservation mode 0x%x\n", getName(), state);
+        IOLog(updateSuccess, getName(), conservationPrompt, state);
         setProperty(conservationPrompt, conservationMode);
     }
 
@@ -197,14 +202,14 @@ bool IdeaVPC::updateFnlock(bool update) {
     UInt32 state;
 
     if (vpc->evaluateInteger(getFnlockMode, &state) != kIOReturnSuccess) {
-        IOLog("%s: Fn lock mode evaluation failed\n", getName());
+        IOLog(updateFailure, getName(), FnKeyPrompt);
         return false;
     }
 
     FnlockMode = 1 << HA_FNLOCK_BIT & state;
 
     if (update) {
-        IOLog("%s: Fn lock mode 0x%x\n", getName(), state);
+        IOLog(updateSuccess, getName(), FnKeyPrompt, state);
         setProperty(FnKeyPrompt, FnlockMode);
     }
 
@@ -215,17 +220,16 @@ bool IdeaVPC::toggleConservation() {
     UInt32 result;
 
     OSObject* params[1] = {
-        OSNumber::withNumber((conservationMode ? BMCMD_CONSERVATION_OFF : BMCMD_CONSERVATION_ON), 32)
+        OSNumber::withNumber((!conservationMode ? BMCMD_CONSERVATION_ON : BMCMD_CONSERVATION_OFF), 32)
     };
 
     if (vpc->evaluateInteger(setConservationMode, &result, params, 1) != kIOReturnSuccess || result != 0) {
-        IOLog("%s: Battery conservation mode toggle failed\n", getName());
+        IOLog(toggleFailure, getName(), conservationPrompt);
         return false;
     }
 
-    IOLog("%s: Battery conservation mode set to %d: %s\n", getName(), (conservationMode ? BMCMD_CONSERVATION_OFF : BMCMD_CONSERVATION_ON), (conservationMode ? "off" : "on"));
-
     conservationMode = !conservationMode;
+    IOLog(toggleSuccess, getName(), conservationPrompt, (conservationMode ? BMCMD_CONSERVATION_ON : BMCMD_CONSERVATION_OFF), (conservationMode ? "on" : "off"));
     setProperty(conservationPrompt, conservationMode);
     // TODO: sync with system preference
 
@@ -236,17 +240,16 @@ bool IdeaVPC::toggleFnlock() {
     UInt32 result;
 
     OSObject* params[1] = {
-        OSNumber::withNumber((FnlockMode ? HACMD_FNLOCK_OFF : HACMD_FNLOCK_ON), 32)
+        OSNumber::withNumber((!FnlockMode ? HACMD_FNLOCK_ON : HACMD_FNLOCK_OFF), 32)
     };
 
     if (vpc->evaluateInteger(setFnlockMode, &result, params, 1) != kIOReturnSuccess || result != 0) {
-        IOLog("%s: Fn lock mode toggle failed\n", getName());
+        IOLog(toggleFailure, getName(), FnKeyPrompt);
         return false;
     }
 
-    IOLog("%s: Fn lock mode set to 0x%x: %s\n", getName(), (FnlockMode ? HACMD_FNLOCK_OFF : HACMD_FNLOCK_ON), (FnlockMode ? "off" : "on"));
-
     FnlockMode = !FnlockMode;
+    IOLog(toggleSuccess, getName(), FnKeyPrompt, (FnlockMode ? HACMD_FNLOCK_ON : HACMD_FNLOCK_OFF), (FnlockMode ? "on" : "off"));
     setProperty(FnKeyPrompt, FnlockMode);
 
     return true;
@@ -338,7 +341,7 @@ void IdeaVPC::updateVPC() {
 
 bool IdeaVPC::read_ec_data(UInt32 cmd, UInt32 *result, UInt8 *retries) {
     if (!vpc) {
-        IOLog("%s: VPC unavailable\n", getName());
+        IOLog(VPCUnavailable, getName());
         return false;
     }
 
@@ -361,13 +364,13 @@ bool IdeaVPC::read_ec_data(UInt32 cmd, UInt32 *result, UInt8 *retries) {
         clock_get_uptime(&now_abs);
     } while (now_abs < deadline || *retries < 5);
 
-    IOLog("%s: timeout reading 0x%x\n", getName(), cmd);
+    IOLog(timeoutPrompt, getName(), readECPrompt, cmd);
     return false;
 }
 
 bool IdeaVPC::write_ec_data(UInt32 cmd, UInt32 value, UInt8 *retries) {
     if (!vpc) {
-        IOLog("%s: VPC unavailable\n", getName());
+        IOLog(VPCUnavailable, getName());
         return false;
     }
 
@@ -395,7 +398,7 @@ bool IdeaVPC::write_ec_data(UInt32 cmd, UInt32 value, UInt8 *retries) {
         clock_get_uptime(&now_abs);
     } while (now_abs < deadline || *retries < 5);
 
-    IOLog("%s: timeout writing 0x%x\n", getName(), cmd);
+    IOLog(timeoutPrompt, getName(), writeECPrompt, cmd);
     return false;
 }
 

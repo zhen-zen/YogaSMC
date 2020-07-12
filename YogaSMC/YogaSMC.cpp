@@ -38,12 +38,12 @@ void YogaWMI::free(void)
 IOService *YogaWMI::probe(IOService *provider, SInt32 *score)
 {
     if (strncmp(provider->getName(), "WTBT", 4) == 0) {
-        IOLog("%s: exiting on WTBT\n", getName());
+        IOLog("%s: exiting on %s\n", getName(), provider->getName());
         return NULL;
     }
     if (strncmp(provider->getName(), "WMI2", 4) == 0) {
         if (strncmp(getName(), "YogaWMI", 7) == 0) {
-            IOLog("%s: exiting on WMI2\n", getName());
+            IOLog("%s: exiting on %s\n", getName(), provider->getName());
             return NULL;
         }
     }
