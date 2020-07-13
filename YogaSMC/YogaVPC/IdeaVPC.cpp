@@ -29,6 +29,12 @@ IdeaVPC* IdeaVPC::withDevice(IOACPIPlatformDevice *device, OSString *pnp) {
     return vpc;
 }
 
+void IdeaVPC::updateAll() {
+    updateConservation();
+    updateFnlock();
+    updateVPC();
+}
+
 bool IdeaVPC::initVPC() {
     if (vpc->evaluateInteger(getVPCConfig, &config) != kIOReturnSuccess) {
         IOLog(updateFailure, getName(), VPCPrompt);
@@ -94,9 +100,7 @@ bool IdeaVPC::initVPC() {
     setProperty("Capability", capabilities);
     capabilities->release();
 #endif
-    updateConservation();
-    updateFnlock();
-    updateVPC();
+    updateAll();
     return true;
 }
 
@@ -169,6 +173,8 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                 entry->setObject(clamshellPrompt, dict->getObject(clamshellPrompt));
                 super::setPropertiesGated(entry);
                 entry->release();
+            } else if (key->isEqualTo(updatePrompt)) {
+                updateAll();
             } else {
                 IOLog("%s: Unknown property %s\n", getName(), key->getCStringNoCopy());
             }

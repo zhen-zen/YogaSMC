@@ -27,7 +27,7 @@ bool YogaVPC::start(IOService *provider) {
 
     registerService();
 
-    updateClamshell();
+    updateAll();
     return res;
 }
 
@@ -62,6 +62,11 @@ YogaVPC* YogaVPC::withDevice(IOACPIPlatformDevice *device, OSString *pnp) {
     return vpc;
 }
 
+void YogaVPC::updateAll() {
+    updateClamshell();
+    updateVPC();
+}
+
 void YogaVPC::setPropertiesGated(OSObject* props) {
     if (!vpc) {
         IOLog(VPCUnavailable, getName());
@@ -91,6 +96,8 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
                 } else {
                     toggleClamshell();
                 }
+            } else if (key->isEqualTo(updatePrompt)) {
+                updateAll();
             } else {
                 IOLog("%s: Unknown property %s\n", getName(), key->getCStringNoCopy());
             }

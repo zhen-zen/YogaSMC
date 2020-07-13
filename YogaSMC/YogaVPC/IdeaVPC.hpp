@@ -94,6 +94,8 @@ private:
 
     void setPropertiesGated(OSObject* props) APPLE_KEXT_OVERRIDE;
 
+    void updateAll();
+
     bool conservationMode;
     bool FnlockMode;
 

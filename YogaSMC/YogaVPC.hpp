@@ -21,6 +21,7 @@
 #define VPCPrompt "VPCconfig"
 #define readECPrompt "ReadEC"
 #define writeECPrompt "WriteEC"
+#define updatePrompt "Update"
 
 #define updateFailure "%s: %s evaluation failed\n"
 #define updateSuccess "%s: %s 0x%x\n"
@@ -47,6 +48,8 @@ private:
      */
     static constexpr const char *getClamshellMode  = "GCSM";
     static constexpr const char *setClamshellMode  = "SCSM";
+
+    void updateAll();
 
     bool clamshellMode;
 
