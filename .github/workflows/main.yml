@@ -34,7 +34,7 @@ jobs:
         # The configuration to build.
         #configuration: # optional
         # The SDK to use for building.
-        sdk: 10.12 # optional
+        sdk: macosx10.14 # optional
         # A list of tests to skip.
         # skip-testing: # optional
         # Arbitrary, space separated build settings (e.g. PLATFORM_NAME=iphonesimulator).
