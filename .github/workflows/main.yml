@@ -26,7 +26,7 @@ jobs:
         # The path to the xcworkspace to build. Mutually exclusive with `project`.
         #workspace: # optional
         # The path to the xcodeproj to build. Mutually exclusive with `workspace`.
-        #project: # optional
+        project: YogaSMC.xcodeproj # optional
         # The scheme to build. Required when using a workspace.
         #scheme: # optional
         # The destination specifier to build.
