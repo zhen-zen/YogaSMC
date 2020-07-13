@@ -11,16 +11,7 @@
 #define ThinkWMI_hpp
 
 #include "../YogaSMC.hpp"
-#include "../YogaVPC.hpp"
-
-// from linux/drivers/platform/x86/ideapad-laptop.c
-// TODO: https://github.com/lenovo/thinklmi
-
-enum {
-    BAT_ANY = 0,
-    BAT_PRIMARY = 1,
-    BAT_SECONDARY = 2
-};
+#include "../YogaVPC/ThinkVPC.hpp"
 
 class ThinkWMI : public YogaWMI
 {
@@ -28,45 +19,17 @@ class ThinkWMI : public YogaWMI
     OSDeclareDefaultStructors(ThinkWMI)
 
 private:
-    bool TouchPadenabled = 0;
-
-    /**
-     *  Related ACPI methods
-     */
-    static constexpr const char *getHKEYversion        = "MHKV";
-
-    OSString *pnp = OSString::withCString("LEN0268");
-
-    static constexpr const char *getCMstart            = "BCTG";
-    static constexpr const char *setCMstart            = "BCCS";
-    static constexpr const char *getCMstop             = "BCSG";
-    static constexpr const char *setCMstop             = "BCSS";
-    static constexpr const char *getCMInhibitCharge    = "BICG";
-    static constexpr const char *setCMInhibitCharge    = "BICS";
-    static constexpr const char *getCMForceDischarge   = "BDSG";
-    static constexpr const char *setCMForceDischarge   = "BDSS";
-    static constexpr const char *getCMPeakShiftState   = "PSSG";
-    static constexpr const char *setCMPeakShiftState   = "PSSS";
-
-    static constexpr const char *getAdaptiveKBD        = "MHKA";
-    static constexpr const char *getMutestatus         = "HAUM";
-    UInt32 mutestate;
-
     bool initVPC() APPLE_KEXT_OVERRIDE;
     inline OSString *getPnp() APPLE_KEXT_OVERRIDE {return OSString::withCString(PnpDeviceIdVPCThink);};
 
-    int batnum = BAT_ANY;
-    bool ConservationMode;
+    void YogaEvent(UInt32 argument) APPLE_KEXT_OVERRIDE;
 
-    bool updateConservation(const char* method, bool update=true);
-    
-    bool toggleConservation();
-    bool updateAdaptiveKBD(int arg);
-    bool updateMutestatus();
+    ThinkVPC *dev;
 
 public:
     IOService *probe(IOService *provider, SInt32 *score) APPLE_KEXT_OVERRIDE;
-    IOReturn setProperties(OSObject* props) APPLE_KEXT_OVERRIDE;
+    void stop(IOService *provider) APPLE_KEXT_OVERRIDE;
+    void free(void) APPLE_KEXT_OVERRIDE;
 };
 
 #endif /* ThinkWMI_hpp */

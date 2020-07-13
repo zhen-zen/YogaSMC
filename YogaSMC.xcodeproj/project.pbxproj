@@ -11,6 +11,8 @@
 		6F08ACEA24746B8B00681A63 /* YogaSMC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F08ACE924746B8B00681A63 /* YogaSMC.cpp */; };
 		6F48676324A293A0003AD4CA /* IdeaWMI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F48676124A293A0003AD4CA /* IdeaWMI.cpp */; };
 		6F48676424A293A0003AD4CA /* IdeaWMI.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F48676224A293A0003AD4CA /* IdeaWMI.hpp */; };
+		6F6CEDA424BC14C2004D553F /* ThinkVPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F6CEDA224BC14C2004D553F /* ThinkVPC.cpp */; };
+		6F6CEDA524BC14C2004D553F /* ThinkVPC.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F6CEDA324BC14C2004D553F /* ThinkVPC.hpp */; };
 		6F8674CD24A876E000DC2FDF /* ThinkWMI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F8674CB24A876E000DC2FDF /* ThinkWMI.cpp */; };
 		6F8674CE24A876E000DC2FDF /* ThinkWMI.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F8674CC24A876E000DC2FDF /* ThinkWMI.hpp */; };
 		6F9553BA24BA515B00215EBB /* IdeaVPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F9553B824BA515B00215EBB /* IdeaVPC.cpp */; };
@@ -33,6 +35,8 @@
 		6F08ACEB24746B8B00681A63 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		6F48676124A293A0003AD4CA /* IdeaWMI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IdeaWMI.cpp; sourceTree = "<group>"; };
 		6F48676224A293A0003AD4CA /* IdeaWMI.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IdeaWMI.hpp; sourceTree = "<group>"; };
+		6F6CEDA224BC14C2004D553F /* ThinkVPC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ThinkVPC.cpp; sourceTree = "<group>"; };
+		6F6CEDA324BC14C2004D553F /* ThinkVPC.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ThinkVPC.hpp; sourceTree = "<group>"; };
 		6F8674CB24A876E000DC2FDF /* ThinkWMI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ThinkWMI.cpp; sourceTree = "<group>"; };
 		6F8674CC24A876E000DC2FDF /* ThinkWMI.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ThinkWMI.hpp; sourceTree = "<group>"; };
 		6F9553B824BA515B00215EBB /* IdeaVPC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IdeaVPC.cpp; sourceTree = "<group>"; };
@@ -112,6 +116,8 @@
 			children = (
 				6F9553B924BA515B00215EBB /* IdeaVPC.hpp */,
 				6F9553B824BA515B00215EBB /* IdeaVPC.cpp */,
+				6F6CEDA324BC14C2004D553F /* ThinkVPC.hpp */,
+				6F6CEDA224BC14C2004D553F /* ThinkVPC.cpp */,
 			);
 			path = YogaVPC;
 			sourceTree = "<group>";
@@ -130,6 +136,7 @@
 				6FCF7F5C2474B89000A82B13 /* common.h in Headers */,
 				6FD2BB48247721040018EA36 /* bmfdec.h in Headers */,
 				6F08ACE824746B8B00681A63 /* YogaSMC.hpp in Headers */,
+				6F6CEDA524BC14C2004D553F /* ThinkVPC.hpp in Headers */,
 				6F48676424A293A0003AD4CA /* IdeaWMI.hpp in Headers */,
 				6F9553BB24BA515B00215EBB /* IdeaVPC.hpp in Headers */,
 			);
@@ -204,6 +211,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6F9553BA24BA515B00215EBB /* IdeaVPC.cpp in Sources */,
+				6F6CEDA424BC14C2004D553F /* ThinkVPC.cpp in Sources */,
 				6F08ACEA24746B8B00681A63 /* YogaSMC.cpp in Sources */,
 				6F48676324A293A0003AD4CA /* IdeaWMI.cpp in Sources */,
 				6FD2BB49247721040018EA36 /* bmfdec.c in Sources */,

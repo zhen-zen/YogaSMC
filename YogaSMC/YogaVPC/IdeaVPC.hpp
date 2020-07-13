@@ -86,9 +86,9 @@ private:
     bool cap_wifi;
     bool cap_camera;
 
-    bool initVPC() override;
+    bool initVPC() APPLE_KEXT_OVERRIDE;
 
-    void updateVPC() override;
+    void updateVPC() APPLE_KEXT_OVERRIDE;
 
     bool initialized {false};
 

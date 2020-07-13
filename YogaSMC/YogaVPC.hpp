@@ -18,6 +18,7 @@
 #define conservationPrompt "ConservationMode"
 #define clamshellPrompt "ClamshellMode"
 #define FnKeyPrompt "FnlockMode"
+#define mutePrompt "Mute"
 #define VPCPrompt "VPCconfig"
 #define readECPrompt "ReadEC"
 #define writeECPrompt "WriteEC"
