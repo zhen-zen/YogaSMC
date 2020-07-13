@@ -112,6 +112,14 @@ bool YogaWMI::start(IOService *provider)
         }
     }
 
+    if (YWMI->hasMethod(WBAT_WMI_STRING, ACPI_WMI_EXPENSIVE | ACPI_WMI_STRING)) {
+        setProperty("Feature", "WBAT");
+        // only execute once for WMI_EXPENSIVE
+        BATinfo(WBAT_BAT0_BatMaker);
+        BATinfo(WBAT_BAT0_HwId);
+        BATinfo(WBAT_BAT0_MfgDate);
+    }
+
     Event = YWMI->getEvent();
     if (Event != NULL) {
         setProperty("Event", Event);
@@ -376,5 +384,28 @@ bool YogaWMI::updateTopCase() {
         IOLog("%s: status mismatch: %d, %d\n", getName(), Keyboardenabled, TouchPadenabled);
         return false;
     }
+    return true;
+}
+
+bool YogaWMI::BATinfo(UInt32 index) {
+    OSObject* result;
+
+    OSObject* params[1] = {
+        OSNumber::withNumber(index, 32),
+    };
+
+    if (!YWMI->executeMethod(WBAT_WMI_STRING, &result, params, 1)) {
+        IOLog("%s: WBAT evaluation failed\n", getName());
+        return false;
+    }
+
+    OSString *info = OSDynamicCast(OSString, result);
+
+    if (!info) {
+        IOLog("%s: WBAT result not a string\n", getName());
+        return false;
+    }
+    IOLog("%s: WBAT %s", getName(), info->getCStringNoCopy());
+//    setProperty("WBAT", info);
     return true;
 }

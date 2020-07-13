@@ -15,7 +15,7 @@ ThinkVPC* ThinkVPC::withDevice(IOACPIPlatformDevice *device, OSString *pnp) {
     ThinkVPC* vpc = OSTypeAlloc(ThinkVPC);
 
     OSDictionary* dictionary = OSDictionary::withCapacity(1);
-    dictionary->setObject("Type", pnp);
+    dictionary->setObject("Feature", pnp);
 
     vpc->vpc = device;
 

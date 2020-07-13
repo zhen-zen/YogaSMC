@@ -258,14 +258,22 @@ bool WMI::hasMethod(const char * guid, UInt8 flg)
 bool WMI::executeMethod(const char * guid, OSObject ** result, OSObject * params[], IOItemCount paramCount)
 {
     char methodName[5];
-    OSDictionary* method = getMethod(guid, ACPI_WMI_METHOD);
+    OSDictionary* method = getMethod(guid);
 
     if (method != NULL)
     {
         OSString * methodId = OSDynamicCast(OSString, method->getObject(kWMIObjectId));
 
         if (methodId != NULL) {
-            snprintf(methodName, 5, "WM%s", methodId->getCStringNoCopy());
+            OSNumber * flags = OSDynamicCast(OSNumber, method->getObject(kWMIFlags));
+            if (flags->unsigned8BitValue() & ACPI_WMI_METHOD) {
+                snprintf(methodName, 5, ACPIMethodName, methodId->getCStringNoCopy());
+            } else if (flags->unsigned8BitValue() & ACPI_WMI_STRING) {
+                snprintf(methodName, 5, ACPIBufferName, methodId->getCStringNoCopy());
+            } else {
+                DebugLog("Type 0x%x not available for method %s\n", flags->unsigned8BitValue(), methodId->getCStringNoCopy());
+                return false;
+            }
 
             DebugLog("Calling method %s\n", methodName);
             if (mDevice->evaluateObject(methodName, result, params, paramCount) == kIOReturnSuccess)
@@ -286,7 +294,7 @@ bool WMI::executeinteger(const char * guid, UInt32 * result, OSObject * params[]
         OSString * methodId = OSDynamicCast(OSString, method->getObject(kWMIObjectId));
 
         if (methodId != NULL) {
-            snprintf(methodName, 5, "WM%s", methodId->getCStringNoCopy());
+            snprintf(methodName, 5, ACPIMethodName, methodId->getCStringNoCopy());
 
             DebugLog("Calling method %s\n", methodName);
             if (mDevice->evaluateInteger(methodName, result, params, paramCount) == kIOReturnSuccess)
@@ -310,7 +318,7 @@ bool WMI::extractBMF()
 
     OSString * methodId = OSDynamicCast(OSString, method->getObject(kWMIObjectId));
 
-    snprintf(methodName, 5, "WQ%s", methodId->getCStringNoCopy());
+    snprintf(methodName, 5, ACPIBufferName, methodId->getCStringNoCopy());
 
     DebugLog("Evaluating buffer %s\n", methodName);
     if (mDevice->evaluateObject(methodName, &bmf) != kIOReturnSuccess)

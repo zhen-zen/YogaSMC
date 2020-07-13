@@ -15,6 +15,14 @@
 #define kIOACPIMessageD0 0xd0
 #define kIOACPIMessageReserved 0x80
 
+#define WBAT_BAT0_BatMaker 0
+#define WBAT_BAT0_HwId     1
+#define WBAT_BAT0_MfgDate  2
+#define WBAT_BAT1_BatMaker 3
+#define WBAT_BAT1_HwId     4
+#define WBAT_BAT1_MfgDate  5
+
+#define WBAT_WMI_STRING "c3a03776-51ac-49aa-ad0f-f2f7d62c3f3c"
 #define YMC_WMI_METHOD "09b0ee6e-c3fd-4243-8da1-7911ff80bb8c"
 #define YMC_WMI_EVENT  "06129d99-6083-4164-81ad-f092f9d773a6"
 
@@ -60,6 +68,8 @@ private:
     const OSSymbol* _deliverNotification {nullptr};
 
     bool isYMC {false};
+
+    bool BATinfo (UInt32 index);
 
 protected:
     IOWorkLoop *workLoop {nullptr};
