@@ -33,6 +33,10 @@ bool YogaVPC::start(IOService *provider) {
 
 void YogaVPC::stop(IOService *provider) {
     IOLog("%s: Stopping\n", getName());
+    if (clamshellMode) {
+        IOLog("%s: Disabling clamshell mode\n", getName());
+        toggleClamshell();
+    }
 
     workLoop->removeEventSource(commandGate);
     OSSafeReleaseNULL(commandGate);

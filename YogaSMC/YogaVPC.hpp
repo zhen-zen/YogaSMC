@@ -46,15 +46,30 @@ class YogaVPC : public IOService
 private:
     /**
      *  Related ACPI methods
+     *  See SSDTexamples
      */
     static constexpr const char *getClamshellMode  = "GCSM";
     static constexpr const char *setClamshellMode  = "SCSM";
 
-    void updateAll();
+    /**
+     *  Clamshell mode status, default to false (same in SSDT)
+     */
+    bool clamshellMode {false};
 
-    bool clamshellMode;
-
+    /**
+     *  Update clamshell mode status
+     *
+     *  @param update  only update internal status when false
+     *
+     *  @return true if success
+     */
     bool updateClamshell(bool update=true);
+
+    /**
+     *  Toggle clamshell mode
+     *
+     *  @return true if success
+     */
     bool toggleClamshell();
 
 protected:
@@ -66,12 +81,22 @@ protected:
      */
     IOACPIPlatformDevice *vpc {nullptr};
     
+    /**
+     *  Initialize VPC EC, get config and update status
+     *
+     *  @return true if success
+     */
     inline virtual bool initVPC() {return true;};
 
     /**
      *  Update VPC EC status
      */
     inline virtual void updateVPC() {return;};
+
+    /**
+     *  Update all status
+     */
+    virtual void updateAll();
 
     virtual void setPropertiesGated(OSObject* props);
 

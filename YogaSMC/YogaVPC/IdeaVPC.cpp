@@ -175,6 +175,7 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                 entry->release();
             } else if (key->isEqualTo(updatePrompt)) {
                 updateAll();
+                super::updateAll();
             } else {
                 IOLog("%s: Unknown property %s\n", getName(), key->getCStringNoCopy());
             }

@@ -55,7 +55,7 @@ enum {
     VPCCMD_R_FAN = 0x2B,
     VPCCMD_R_SPECIAL_BUTTONS = 0x31,
     VPCCMD_W_BL_POWER = 0x33,
-};
+} VPCCMD;
 
 #define IDEAPAD_EC_TIMEOUT (200) /* in ms */
 
@@ -87,27 +87,92 @@ private:
     bool cap_camera;
 
     bool initVPC() APPLE_KEXT_OVERRIDE;
-
+    void setPropertiesGated(OSObject* props) APPLE_KEXT_OVERRIDE;
+    void updateAll() APPLE_KEXT_OVERRIDE;
     void updateVPC() APPLE_KEXT_OVERRIDE;
 
-    bool initialized {false};
+    /**
+     *  Battery conservation mode status, will be update on init
+     */
+    bool conservationMode {false};
 
-    void setPropertiesGated(OSObject* props) APPLE_KEXT_OVERRIDE;
+    /**
+     *  Fn lock mode status, will be update on init
+     */
+    bool FnlockMode {false};
 
-    void updateAll();
-
-    bool conservationMode;
-    bool FnlockMode;
-
+    /**
+     *  Update battery conservation mode status
+     *
+     *  @param update  only update internal status when false
+     *
+     *  @return true if success
+     */
     bool updateConservation(bool update=true);
+
+    /**
+     *  Update Fn lock mode status
+     *
+     *  @param update  only update internal status when false
+     *
+     *  @return true if success
+     */
     bool updateFnlock(bool update=true);
-    
+
+    /**
+     *  Toggle Fn lock mode
+     *
+     *  @return true if success
+     */
     bool toggleFnlock();
+
+    /**
+     *  Toggle battery conservation mode
+     *
+     *  @return true if success
+     */
     bool toggleConservation();
 
+    /**
+     *  Read EC data
+     *
+     *  @param cmd see VPCCMD
+     *  @param result EC read result
+     *  @param retries number of retries when reading, timeout after 5 retires or IDEAPAD_EC_TIMEOUT
+     *
+     *  @return true if success
+     */
     bool read_ec_data(UInt32 cmd, UInt32 *result, UInt8 *retries);
+
+    /**
+     *  Write EC data
+     *
+     *  @param cmd see VPCCMD
+     *  @param value EC write value
+     *  @param retries number of retries when writing, timeout after 5 retires or IDEAPAD_EC_TIMEOUT
+     *
+     *  @return true if success
+     */
     bool write_ec_data(UInt32 cmd, UInt32 value, UInt8 *retries);
+
+    /**
+     *  Write EC data
+     *
+     *  @param cmd 0 for value, 1 for VMCCMD
+     *  @param data EC value or VMCCMD
+     *
+     *  @return true if success
+     */
     bool method_vpcw(UInt32 cmd, UInt32 data);
+
+    /**
+     *  Read EC data
+     *
+     *  @param cmd 1 for status, 0 for value
+     *  @param result write status (0) or EC value
+     *
+     *  @return true if success
+     */
     bool method_vpcr(UInt32 cmd, UInt32 *result);
 
     friend class IdeaWMI;
