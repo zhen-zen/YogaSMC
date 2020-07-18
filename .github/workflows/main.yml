@@ -22,7 +22,7 @@ jobs:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
     - name: Xcodebuild Action
-      uses: sersoft-gmbh/xcodebuild-action@83c4e95
+      uses: sersoft-gmbh/xcodebuild-action@1.1
       with:
         # The path to the xcworkspace to build. Mutually exclusive with `project`.
         #workspace: # optional
@@ -43,8 +43,8 @@ jobs:
         # The action to perform (e.g. build, test, ...).
         action: build # default is test
         # Whether the output of xcodebuild should be forwarded to xcpretty.
-        #use-xcpretty: # default is true
-        derived-data-path: build/
+        use-xcpretty: false # default is true
+        #derived-data-path: build/
     - uses: actions/upload-artifact@v2
       with:
         name: YogaSMC
