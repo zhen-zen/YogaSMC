@@ -22,7 +22,7 @@ jobs:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
     - name: Xcodebuild Action
-      uses: sersoft-gmbh/xcodebuild-action@v1.1
+      uses: sersoft-gmbh/xcodebuild-action
       with:
         # The path to the xcworkspace to build. Mutually exclusive with `project`.
         #workspace: # optional
@@ -35,15 +35,15 @@ jobs:
         # The configuration to build.
         #configuration: # optional
         # The SDK to use for building.
-        # sdk: macosx10.14 # optional
+        #sdk: macosx10.14 # optional
         # A list of tests to skip.
-        # skip-testing: # optional
+        #skip-testing: # optional
         # Arbitrary, space separated build settings (e.g. PLATFORM_NAME=iphonesimulator).
-        # build-settings: # optional
+        #build-settings: # optional
         # The action to perform (e.g. build, test, ...).
         action: build # default is test
         # Whether the output of xcodebuild should be forwarded to xcpretty.
-        # use-xcpretty: # default is true
+        #use-xcpretty: # default is true
         derived-data-path: build/
     - uses: actions/upload-artifact@v2
       with:
