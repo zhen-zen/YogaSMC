@@ -31,7 +31,7 @@ jobs:
         # The scheme to build. Required when using a workspace.
         #scheme: # optional
         # The destination specifier to build.
-        #destination: # optional
+        destination: build/ # optional
         # The configuration to build.
         #configuration: # optional
         # The SDK to use for building.
@@ -47,4 +47,4 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: YogaSMC
-        path: build/YogaSMC.kext
+        path: build/YogaSMC*
