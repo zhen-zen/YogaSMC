@@ -43,9 +43,8 @@ jobs:
         # The action to perform (e.g. build, test, ...).
         action: build # default is test
         # Whether the output of xcodebuild should be forwarded to xcpretty.
-        use-xcpretty: false # default is true
-        #derived-data-path: build/
+        #use-xcpretty: # default is true
     - uses: actions/upload-artifact@v2
       with:
         name: YogaSMC
-        path: build/YogaSMC*
+        path: build/Release/YogaSMC*
