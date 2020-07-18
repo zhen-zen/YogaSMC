@@ -31,7 +31,7 @@ jobs:
         # The scheme to build. Required when using a workspace.
         #scheme: # optional
         # The destination specifier to build.
-        destination: build/ # optional
+        # destination: # optional
         # The configuration to build.
         #configuration: # optional
         # The SDK to use for building.
@@ -44,6 +44,7 @@ jobs:
         action: build # default is test
         # Whether the output of xcodebuild should be forwarded to xcpretty.
         # use-xcpretty: # default is true
+        derived-data-path: build/
     - uses: actions/upload-artifact@v2
       with:
         name: YogaSMC
