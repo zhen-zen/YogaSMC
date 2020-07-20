@@ -169,11 +169,11 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
 
     switch (type[1]) {
         case 0:
-            typeObj = OSBoolean::withBoolean(false);
+            dict->setObject("map", kOSBooleanFalse);
             break;
 
         case 0x20:
-            typeObj = OSBoolean::withBoolean(true);
+            dict->setObject("map", kOSBooleanTrue);
             break;
 
         default:
@@ -183,8 +183,6 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
             error("unknown map type");
             break;
     }
-    dict->setObject("map", typeObj);
-    typeObj->release();
 
     if (buf[2] != 0) error("wrong method pattern");
     uint32_t nlen = buf[3];
@@ -246,9 +244,7 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
                     }
 
                 default:
-                    typeObj = OSBoolean::withBoolean(false);
-                    dict->setObject("verified", typeObj);
-                    typeObj->release();
+                    dict->setObject("verified", kOSBooleanFalse);
                     break;
             }
 
@@ -321,11 +317,11 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
                     
                     switch (clen == 4 ? nbuf[0] : nbuf[0] & 0xFFFF) {
                         case 0:
-                            typeObj = OSBoolean::withBoolean(false);
+                            typeObj = kOSBooleanFalse;
                             break;
 
                         case 0xFFFF:
-                            typeObj = OSBoolean::withBoolean(true);
+                            typeObj = kOSBooleanTrue;
                             break;
 
                         default:

@@ -37,17 +37,22 @@ void YogaWMI::free(void)
 
 IOService *YogaWMI::probe(IOService *provider, SInt32 *score)
 {
-    if (strncmp(provider->getName(), "WTBT", 4) == 0) {
-        IOLog("%s: exiting on %s\n", getName(), provider->getName());
+//    OSData *data;
+//    data = OSDynamicCast(OSData, provider->getProperty("name"));
+//    name = (const char *)(data->getBytesNoCopy());
+    name = provider->getName();
+
+    if (strncmp(name, "WTBT", 4) == 0) {
+        IOLog("%s: exiting on %s\n", getName(), name);
         return NULL;
     }
     if (strncmp(provider->getName(), "WMI2", 4) == 0) {
         if (strncmp(getName(), "YogaWMI", 7) == 0) {
-            IOLog("%s: exiting on %s\n", getName(), provider->getName());
+            IOLog("%s: exiting on %s\n", getName(), name);
             return NULL;
         }
     }
-    IOLog("%s: Probing %s\n", getName(), provider->getName());
+    IOLog("%s: Probing %s\n", getName(), name);
 
     return super::probe(provider, score);
 }
@@ -114,10 +119,13 @@ bool YogaWMI::start(IOService *provider)
 
     if (YWMI->hasMethod(WBAT_WMI_STRING, ACPI_WMI_EXPENSIVE | ACPI_WMI_STRING)) {
         setProperty("Feature", "WBAT");
+        OSArray *BatteryInfo = OSArray::withCapacity(3);
         // only execute once for WMI_EXPENSIVE
-        BATinfo(WBAT_BAT0_BatMaker);
-        BATinfo(WBAT_BAT0_HwId);
-        BATinfo(WBAT_BAT0_MfgDate);
+        BatteryInfo->setObject(getBatteryInfo(WBAT_BAT0_BatMaker));
+        BatteryInfo->setObject(getBatteryInfo(WBAT_BAT0_HwId));
+        BatteryInfo->setObject(getBatteryInfo(WBAT_BAT0_MfgDate));
+        setProperty("BatteryInfo", BatteryInfo);
+        OSSafeReleaseNULL(BatteryInfo);
     }
 
     Event = YWMI->getEvent();
@@ -163,6 +171,11 @@ bool YogaWMI::start(IOService *provider)
 
       propertyMatch->release();
     }
+
+    PMinit();
+    provider->joinPMtree(this);
+    registerPowerDriver(this, IOPMPowerStates, kIOPMNumberPowerStates);
+
     return res;
 }
 
@@ -191,6 +204,8 @@ void YogaWMI::stop(IOService *provider)
     workLoop->removeEventSource(commandGate);
     OSSafeReleaseNULL(commandGate);
     OSSafeReleaseNULL(workLoop);
+
+    PMstop();
 
     super::stop(provider);
 }
@@ -387,7 +402,7 @@ bool YogaWMI::updateTopCase() {
     return true;
 }
 
-bool YogaWMI::BATinfo(UInt32 index) {
+OSString * YogaWMI::getBatteryInfo(UInt32 index) {
     OSObject* result;
 
     OSObject* params[1] = {
@@ -396,16 +411,34 @@ bool YogaWMI::BATinfo(UInt32 index) {
 
     if (!YWMI->executeMethod(WBAT_WMI_STRING, &result, params, 1)) {
         IOLog("%s: WBAT evaluation failed\n", getName());
-        return false;
+        return OSString::withCString("evaluation failed");
     }
 
     OSString *info = OSDynamicCast(OSString, result);
 
     if (!info) {
         IOLog("%s: WBAT result not a string\n", getName());
-        return false;
+        return OSString::withCString("result not a string");
     }
     IOLog("%s: WBAT %s", getName(), info->getCStringNoCopy());
-//    setProperty("WBAT", info);
-    return true;
+    return info;
+}
+
+IOReturn YogaWMI::setPowerState(unsigned long powerState, IOService *whatDevice){
+    IOLog("%s::%s powerState %ld : %s", getName(), name, powerState, powerState ? "on" : "off");
+
+    if (whatDevice != this)
+        return kIOReturnInvalid;
+
+    if (isYMC) {
+        if (powerState == 0) {
+            if (YogaMode != kYogaMode_laptop) {
+                IOLog("%s: Re-enabling top case\n", getName());
+                setTopCase(true);
+            }
+        } else {
+            YogaEvent(kIOACPIMessageD0);
+        }
+    }
+    return kIOPMAckImplied;
 }

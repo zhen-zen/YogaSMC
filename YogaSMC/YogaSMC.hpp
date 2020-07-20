@@ -28,6 +28,14 @@
 
 #define kDeliverNotifications   "RM,deliverNotifications"
 
+#define kIOPMPowerOff                       0
+#define kIOPMNumberPowerStates     2
+
+static IOPMPowerState IOPMPowerStates[kIOPMNumberPowerStates] = {
+    {1, kIOPMPowerOff, kIOPMPowerOff, kIOPMPowerOff, 0, 0, 0, 0, 0, 0, 0, 0},
+    {1, kIOPMPowerOn, kIOPMPowerOn, kIOPMPowerOn, 0, 0, 0, 0, 0, 0, 0, 0}
+};
+
 enum
 {
     // from keyboard to mouse/touchpad
@@ -69,9 +77,11 @@ private:
 
     bool isYMC {false};
 
-    bool BATinfo (UInt32 index);
+    OSString * getBatteryInfo (UInt32 index);
 
 protected:
+    const char* name;
+
     IOWorkLoop *workLoop {nullptr};
     IOCommandGate *commandGate {nullptr};
 
@@ -186,4 +196,5 @@ public:
     virtual void stop(IOService *provider) APPLE_KEXT_OVERRIDE;
 
     virtual IOReturn message(UInt32 type, IOService *provider, void *argument) APPLE_KEXT_OVERRIDE;
+    virtual IOReturn setPowerState(unsigned long powerState, IOService * whatDevice) APPLE_KEXT_OVERRIDE;
 };

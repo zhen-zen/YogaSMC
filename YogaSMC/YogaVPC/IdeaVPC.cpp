@@ -84,18 +84,10 @@ bool IdeaVPC::initVPC() {
     }
     capabilities->setObject("Graphics", value);
     value->release();
-    value = OSBoolean::withBoolean(cap_bt);
-    capabilities->setObject("Bluetooth", value);
-    value->release();
-    value = OSBoolean::withBoolean(cap_3g);
-    capabilities->setObject("3G", value);
-    value->release();
-    value = OSBoolean::withBoolean(cap_wifi);
-    capabilities->setObject("Wireless", value);
-    value->release();
-    value = OSBoolean::withBoolean(cap_camera);
-    capabilities->setObject("Camera", value);
-    value->release();
+    capabilities->setObject("Bluetooth", cap_bt ? kOSBooleanTrue : kOSBooleanFalse);
+    capabilities->setObject("3G", cap_3g ? kOSBooleanTrue : kOSBooleanFalse);
+    capabilities->setObject("Wireless", cap_wifi ? kOSBooleanTrue : kOSBooleanFalse);
+    capabilities->setObject("Camera", cap_camera ? kOSBooleanTrue : kOSBooleanFalse);
 
     setProperty("Capability", capabilities);
     capabilities->release();
