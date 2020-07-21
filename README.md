@@ -1,5 +1,7 @@
 # YogaSMC ![CI](https://github.com/zhen-zen/YogaSMC/workflows/CI/badge.svg)
 
+[![Join the chat at https://gitter.im/YogaSMC/community](https://badges.gitter.im/YogaSMC/community.svg)](https://gitter.im/YogaSMC/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 This driver consists of YogaSMC(WIP), YogaWMI anf YogaVPC.
 
 Each component can be derived for different targets. Support for Yoga series (IdeaPad) is functional. ThinkPad support is read-only, awaiting further testing.
