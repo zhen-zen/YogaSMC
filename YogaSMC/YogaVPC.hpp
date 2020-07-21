@@ -24,16 +24,16 @@
 #define writeECPrompt "WriteEC"
 #define updatePrompt "Update"
 
-#define updateFailure "%s: %s evaluation failed\n"
-#define updateSuccess "%s: %s 0x%x\n"
-#define toggleFailure "%s: %s toggle failed\n"
-#define toggleSuccess "%s: %s set to 0x%x: %s\n"
+#define updateFailure "%s::%s %s evaluation failed\n"
+#define updateSuccess "%s::%s %s 0x%x\n"
+#define toggleFailure "%s::%s %s toggle failed\n"
+#define toggleSuccess "%s::%s %s set to 0x%x: %s\n"
 
-#define valueMatched "%s: %s already %s\n"
-#define valueInvalid "%s: Invalid value for %s\n"
+#define valueMatched "%s::%s %s already %s\n"
+#define valueInvalid "%s::%s Invalid value for %s\n"
 
-#define timeoutPrompt "%s: %s timeout 0x%x\n"
-#define VPCUnavailable "%s: VPC unavailable\n"
+#define timeoutPrompt "%s::%s %s timeout 0x%x\n"
+#define VPCUnavailable "%s::%s VPC unavailable\n"
 
 #define PnpDeviceIdVPCIdea "VPC2004"
 #define PnpDeviceIdVPCThink "LEN0268"
@@ -73,6 +73,8 @@ private:
     bool toggleClamshell();
 
 protected:
+    const char* name;
+
     IOWorkLoop *workLoop {nullptr};
     IOCommandGate *commandGate {nullptr};
 

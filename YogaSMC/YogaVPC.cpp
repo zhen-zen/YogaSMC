@@ -13,7 +13,10 @@ OSDefineMetaClassAndStructors(YogaVPC, IOService);
 
 bool YogaVPC::start(IOService *provider) {
     bool res = super::start(provider);
-    IOLog("%s: Starting\n", getName());
+
+    name = provider->getName();
+
+    IOLog("%s::%s Starting\n", getName(), name);
 
     if (!initVPC())
         return false;
@@ -21,7 +24,7 @@ bool YogaVPC::start(IOService *provider) {
     workLoop = IOWorkLoop::workLoop();
     commandGate = IOCommandGate::commandGate(this);
     if (!workLoop || !commandGate || (workLoop->addEventSource(commandGate) != kIOReturnSuccess)) {
-        IOLog("%s: Failed to add commandGate\n", getName());
+        IOLog("%s::%s Failed to add commandGate\n", getName(), name);
         return false;
     }
 
@@ -32,9 +35,9 @@ bool YogaVPC::start(IOService *provider) {
 }
 
 void YogaVPC::stop(IOService *provider) {
-    IOLog("%s: Stopping\n", getName());
+    IOLog("%s::%s Stopping\n", getName(), name);
     if (clamshellMode) {
-        IOLog("%s: Disabling clamshell mode\n", getName());
+        IOLog("%s::%s Disabling clamshell mode\n", getName(), name);
         toggleClamshell();
     }
 
@@ -73,7 +76,7 @@ void YogaVPC::updateAll() {
 
 void YogaVPC::setPropertiesGated(OSObject* props) {
     if (!vpc) {
-        IOLog(VPCUnavailable, getName());
+        IOLog(VPCUnavailable, getName(), name);
         return;
     }
 
@@ -81,7 +84,7 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
     if (!dict)
         return;
 
-//    IOLog("%s: %d objects in properties\n", getName(), dict->getCount());
+//    IOLog("%s: %d objects in properties\n", getName(), name, dict->getCount());
     OSCollectionIterator* i = OSCollectionIterator::withCollection(dict);
 
     if (i != NULL) {
@@ -89,21 +92,21 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
             if (key->isEqualTo(clamshellPrompt)) {
                 OSBoolean * value = OSDynamicCast(OSBoolean, dict->getObject(clamshellPrompt));
                 if (value == NULL) {
-                    IOLog(valueInvalid, getName(), clamshellPrompt);
+                    IOLog(valueInvalid, getName(), name, clamshellPrompt);
                     continue;
                 }
 
                 updateClamshell(false);
 
                 if (value->getValue() == clamshellMode) {
-                    IOLog(valueMatched, getName(), clamshellPrompt, (clamshellMode ? "enabled" : "disabled"));
+                    IOLog(valueMatched, getName(), name, clamshellPrompt, (clamshellMode ? "enabled" : "disabled"));
                 } else {
                     toggleClamshell();
                 }
             } else if (key->isEqualTo(updatePrompt)) {
                 updateAll();
             } else {
-                IOLog("%s: Unknown property %s\n", getName(), key->getCStringNoCopy());
+                IOLog("%s::%s Unknown property %s\n", getName(), name, key->getCStringNoCopy());
             }
         }
         i->release();
@@ -119,10 +122,10 @@ IOReturn YogaVPC::setProperties(OSObject *props) {
 
 IOReturn YogaVPC::message(UInt32 type, IOService *provider, void *argument) {
     if (argument) {
-        IOLog("%s: message: type=%x, provider=%s, argument=0x%04x\n", getName(), type, provider->getName(), *((UInt32 *) argument));
+        IOLog("%s::%s message: type=%x, provider=%s, argument=0x%04x\n", getName(), name, type, provider->getName(), *((UInt32 *) argument));
         updateVPC();
     } else {
-        IOLog("%s: message: type=%x, provider=%s\n", getName(), type, provider->getName());
+        IOLog("%s::%s message: type=%x, provider=%s\n", getName(), name, type, provider->getName());
     }
     return kIOReturnSuccess;
 }
@@ -131,14 +134,14 @@ bool YogaVPC::updateClamshell(bool update) {
     UInt32 state;
 
     if (vpc->evaluateInteger(getClamshellMode, &state) != kIOReturnSuccess) {
-        IOLog(updateFailure, getName(), clamshellPrompt);
+        IOLog(updateFailure, getName(), name, clamshellPrompt);
         return false;
     }
 
     clamshellMode = state ? true : false;
 
     if (update) {
-        IOLog(updateSuccess, getName(), clamshellPrompt, state);
+        IOLog(updateSuccess, getName(), name, clamshellPrompt, state);
         setProperty(clamshellPrompt, clamshellMode);
     }
 
@@ -153,12 +156,12 @@ bool YogaVPC::toggleClamshell() {
     };
 
     if (vpc->evaluateInteger(setClamshellMode, &result, params, 1) != kIOReturnSuccess || result != 0) {
-        IOLog(toggleFailure, getName(), clamshellPrompt);
+        IOLog(toggleFailure, getName(), name, clamshellPrompt);
         return false;
     }
 
     clamshellMode = !clamshellMode;
-    IOLog(toggleSuccess, getName(), clamshellPrompt, clamshellMode, (clamshellMode ? "on" : "off"));
+    IOLog(toggleSuccess, getName(), name, clamshellPrompt, clamshellMode, (clamshellMode ? "on" : "off"));
     setProperty(clamshellPrompt, clamshellMode);
 
     return true;

@@ -37,11 +37,11 @@ void IdeaVPC::updateAll() {
 
 bool IdeaVPC::initVPC() {
     if (vpc->evaluateInteger(getVPCConfig, &config) != kIOReturnSuccess) {
-        IOLog(updateFailure, getName(), VPCPrompt);
+        IOLog(updateFailure, getName(), name, VPCPrompt);
         return false;
     }
 
-    IOLog(updateSuccess, getName(), VPCPrompt, config);
+    IOLog(updateSuccess, getName(), name, VPCPrompt, config);
 #ifdef DEBUG
     setProperty(VPCPrompt, config, 32);
 #endif
@@ -98,7 +98,7 @@ bool IdeaVPC::initVPC() {
 
 void IdeaVPC::setPropertiesGated(OSObject *props) {
     if (!vpc) {
-        IOLog(VPCUnavailable, getName());
+        IOLog(VPCUnavailable, getName(), name);
         return;
     }
 
@@ -106,7 +106,7 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
     if (!dict)
         return;
 
-//    IOLog("%s: %d objects in properties\n", getName(), dict->getCount());
+//    IOLog("%s::%s %d objects in properties\n", getName(), name, dict->getCount());
     OSCollectionIterator* i = OSCollectionIterator::withCollection(dict);
 
     if (i != NULL) {
@@ -114,35 +114,35 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
             if (key->isEqualTo(conservationPrompt)) {
                 OSBoolean * value = OSDynamicCast(OSBoolean, dict->getObject(conservationPrompt));
                 if (value == NULL) {
-                    IOLog(valueInvalid, getName(), conservationPrompt);
+                    IOLog(valueInvalid, getName(), name, conservationPrompt);
                     continue;
                 }
 
                 updateConservation(false);
 
                 if (value->getValue() == conservationMode) {
-                    IOLog(valueMatched, getName(), conservationPrompt, (conservationMode ? "enabled" : "disabled"));
+                    IOLog(valueMatched, getName(), name, conservationPrompt, (conservationMode ? "enabled" : "disabled"));
                 } else {
                     toggleConservation();
                 }
             } else if (key->isEqualTo(FnKeyPrompt)) {
                 OSBoolean * value = OSDynamicCast(OSBoolean, dict->getObject(FnKeyPrompt));
                 if (value == NULL) {
-                    IOLog(valueInvalid, getName(), FnKeyPrompt);
+                    IOLog(valueInvalid, getName(), name, FnKeyPrompt);
                     continue;
                 }
 
                 updateFnlock(false);
 
                 if (value->getValue() == FnlockMode) {
-                    IOLog(valueMatched, getName(), FnKeyPrompt, (FnlockMode ? "enabled" : "disabled"));
+                    IOLog(valueMatched, getName(), name, FnKeyPrompt, (FnlockMode ? "enabled" : "disabled"));
                 } else {
                     toggleFnlock();
                 }
             } else if (key->isEqualTo(readECPrompt)) {
                 OSNumber * value = OSDynamicCast(OSNumber, dict->getObject(readECPrompt));
                 if (value == NULL) {
-                    IOLog(valueInvalid, getName(), readECPrompt);
+                    IOLog(valueInvalid, getName(), name, readECPrompt);
                     continue;
                 }
 
@@ -150,16 +150,16 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                 UInt8 retries = 0;
 
                 if (read_ec_data(value->unsigned32BitValue(), &result, &retries))
-                    IOLog("%s: %s 0x%x result: 0x%x %d\n", getName(), readECPrompt, value->unsigned32BitValue(), result, retries);
+                    IOLog("%s::%s %s 0x%x result: 0x%x %d\n", getName(), name, readECPrompt, value->unsigned32BitValue(), result, retries);
                 else
-                    IOLog("%s: %s failed 0x%x %d\n", getName(), readECPrompt, value->unsigned32BitValue(), retries);
+                    IOLog("%s::%s %s failed 0x%x %d\n", getName(), name, readECPrompt, value->unsigned32BitValue(), retries);
             } else if (key->isEqualTo(writeECPrompt)) {
                 OSNumber * value = OSDynamicCast(OSNumber, dict->getObject(writeECPrompt));
                 if (value == NULL) {
-                    IOLog(valueInvalid, getName(), writeECPrompt);
+                    IOLog(valueInvalid, getName(), name, writeECPrompt);
                     continue;
                 }
-                IOLog("%s: %s 0x%x not implemented\n", getName(), writeECPrompt, value->unsigned32BitValue());
+                IOLog("%s::%s %s 0x%x not implemented\n", getName(), name, writeECPrompt, value->unsigned32BitValue());
             } else if (key->isEqualTo(clamshellPrompt)) {
                 OSDictionary* entry = OSDictionary::withCapacity(1);
                 entry->setObject(clamshellPrompt, dict->getObject(clamshellPrompt));
@@ -169,7 +169,7 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                 updateAll();
                 super::updateAll();
             } else {
-                IOLog("%s: Unknown property %s\n", getName(), key->getCStringNoCopy());
+                IOLog("%s::%s Unknown property %s\n", getName(), name, key->getCStringNoCopy());
             }
         }
         i->release();
@@ -183,14 +183,14 @@ bool IdeaVPC::updateConservation(bool update) {
     UInt32 state;
 
     if (vpc->evaluateInteger(getConservationMode, &state) != kIOReturnSuccess) {
-        IOLog(updateFailure, getName(), conservationPrompt);
+        IOLog(updateFailure, getName(), name, conservationPrompt);
         return false;
     }
 
     conservationMode = 1 << BM_CONSERVATION_BIT & state;
 
     if (update) {
-        IOLog(updateSuccess, getName(), conservationPrompt, state);
+        IOLog(updateSuccess, getName(), name, conservationPrompt, state);
         setProperty(conservationPrompt, conservationMode);
     }
 
@@ -201,14 +201,14 @@ bool IdeaVPC::updateFnlock(bool update) {
     UInt32 state;
 
     if (vpc->evaluateInteger(getFnlockMode, &state) != kIOReturnSuccess) {
-        IOLog(updateFailure, getName(), FnKeyPrompt);
+        IOLog(updateFailure, getName(), name, FnKeyPrompt);
         return false;
     }
 
     FnlockMode = 1 << HA_FNLOCK_BIT & state;
 
     if (update) {
-        IOLog(updateSuccess, getName(), FnKeyPrompt, state);
+        IOLog(updateSuccess, getName(), name, FnKeyPrompt, state);
         setProperty(FnKeyPrompt, FnlockMode);
     }
 
@@ -223,12 +223,12 @@ bool IdeaVPC::toggleConservation() {
     };
 
     if (vpc->evaluateInteger(setConservationMode, &result, params, 1) != kIOReturnSuccess || result != 0) {
-        IOLog(toggleFailure, getName(), conservationPrompt);
+        IOLog(toggleFailure, getName(), name, conservationPrompt);
         return false;
     }
 
     conservationMode = !conservationMode;
-    IOLog(toggleSuccess, getName(), conservationPrompt, (conservationMode ? BMCMD_CONSERVATION_ON : BMCMD_CONSERVATION_OFF), (conservationMode ? "on" : "off"));
+    IOLog(toggleSuccess, getName(), name, conservationPrompt, (conservationMode ? BMCMD_CONSERVATION_ON : BMCMD_CONSERVATION_OFF), (conservationMode ? "on" : "off"));
     setProperty(conservationPrompt, conservationMode);
     // TODO: sync with system preference
 
@@ -243,12 +243,12 @@ bool IdeaVPC::toggleFnlock() {
     };
 
     if (vpc->evaluateInteger(setFnlockMode, &result, params, 1) != kIOReturnSuccess || result != 0) {
-        IOLog(toggleFailure, getName(), FnKeyPrompt);
+        IOLog(toggleFailure, getName(), name, FnKeyPrompt);
         return false;
     }
 
     FnlockMode = !FnlockMode;
-    IOLog(toggleSuccess, getName(), FnKeyPrompt, (FnlockMode ? HACMD_FNLOCK_ON : HACMD_FNLOCK_OFF), (FnlockMode ? "on" : "off"));
+    IOLog(toggleSuccess, getName(), name, FnKeyPrompt, (FnlockMode ? HACMD_FNLOCK_ON : HACMD_FNLOCK_OFF), (FnlockMode ? "on" : "off"));
     setProperty(FnKeyPrompt, FnlockMode);
 
     return true;
@@ -259,13 +259,13 @@ void IdeaVPC::updateVPC() {
     UInt8 retries = 0;
 
     if (!read_ec_data(VPCCMD_R_VPC1, &vpc1, &retries) || !read_ec_data(VPCCMD_R_VPC2, &vpc2, &retries)) {
-        IOLog("%s: Failed to read VPC %d\n", getName(), retries);
+        IOLog("%s::%s Failed to read VPC %d\n", getName(), name, retries);
         return;
     }
 
     vpc1 = (vpc2 << 8) | vpc1;
 #ifdef DEBUG
-    IOLog("%s: read VPC EC result: 0x%x %d\n", getName(), vpc1, retries);
+    IOLog("%s::%s read VPC EC result: 0x%x %d\n", getName(), name, vpc1, retries);
     setProperty("VPCstatus", vpc1, 32);
 #endif
     for (int vpc_bit = 0; vpc_bit < 16; vpc_bit++) {
@@ -273,65 +273,65 @@ void IdeaVPC::updateVPC() {
             switch (vpc_bit) {
                 case 0:
                     if (!read_ec_data(VPCCMD_R_SPECIAL_BUTTONS, &result, &retries)) {
-                        IOLog("%s: Failed to read VPCCMD_R_SPECIAL_BUTTONS %d\n", getName(), retries);
+                        IOLog("%s::%s Failed to read VPCCMD_R_SPECIAL_BUTTONS %d\n", getName(), name, retries);
                     } else {
                         switch (result) {
                             case 0x40:
-                                IOLog("%s: Fn+Q cooling", getName());
+                                IOLog("%s::%s Fn+Q cooling", getName(), name);
                                 // TODO: fan status switch
                                 break;
 
                             default:
-                                IOLog("%s: Special button 0x%x", getName(), result);
+                                IOLog("%s::%s Special button 0x%x", getName(), name, result);
                                 break;
                         }
                     }
                     break;
 
                 case 1:
-                    IOLog("%s: Fn+Space keyboard backlight?", getName());
+                    IOLog("%s::%s Fn+Space keyboard backlight?", getName(), name);
                     // functional, TODO: read / write keyboard backlight level
                     // also on AC connect / disconnect
                     break;
 
                 case 2:
                     if (!read_ec_data(VPCCMD_R_BL_POWER, &result, &retries))
-                        IOLog("%s: Failed to read VPCCMD_R_BL_POWER %d\n", getName(), retries);
+                        IOLog("%s::%s Failed to read VPCCMD_R_BL_POWER %d\n", getName(), name, retries);
                     else
-                        IOLog("%s: Open lid? 0x%x %s", getName(), result, result ? "on" : "off");
+                        IOLog("%s::%s Open lid? 0x%x %s", getName(), name, result, result ? "on" : "off");
                     // functional, TODO: turn off screen on demand
                     break;
 
                 case 5:
                     if (!read_ec_data(VPCCMD_R_TOUCHPAD, &result, &retries))
-                        IOLog("%s: Failed to read VPCCMD_R_TOUCHPAD %d\n", getName(), retries);
+                        IOLog("%s::%s Failed to read VPCCMD_R_TOUCHPAD %d\n", getName(), name, retries);
                     else
-                        IOLog("%s: Fn+F6 touchpad 0x%x %s", getName(), result, result ? "on" : "off");
+                        IOLog("%s::%s Fn+F6 touchpad 0x%x %s", getName(), name, result, result ? "on" : "off");
                     // functional, TODO: manually toggle
                     break;
 
                 case 7:
-                    IOLog("%s: Fn+F8 camera", getName());
+                    IOLog("%s::%s Fn+F8 camera", getName(), name);
                     // TODO: camera status switch
                     break;
 
                 case 8:
-                    IOLog("%s: Fn+F4 mic", getName());
+                    IOLog("%s::%s Fn+F4 mic", getName(), name);
                     // TODO: mic status switch
                     break;
 
                 case 10:
-                    IOLog("%s: Fn+F6 touchpad on", getName());
+                    IOLog("%s::%s Fn+F6 touchpad on", getName(), name);
                     // functional, identical to case 5?
                     break;
 
                 case 13:
-                    IOLog("%s: Fn+F7 airplane mode", getName());
+                    IOLog("%s::%s Fn+F7 airplane mode", getName(), name);
                     // TODO: airplane mode switch
                     break;
 
                 default:
-                    IOLog("%s: Unknown VPC event %d", getName(), vpc_bit);
+                    IOLog("%s::%s Unknown VPC event %d", getName(), name, vpc_bit);
                     break;
             }
         }
@@ -340,7 +340,7 @@ void IdeaVPC::updateVPC() {
 
 bool IdeaVPC::read_ec_data(UInt32 cmd, UInt32 *result, UInt8 *retries) {
     if (!vpc) {
-        IOLog(VPCUnavailable, getName());
+        IOLog(VPCUnavailable, getName(), name);
         return false;
     }
 
@@ -363,13 +363,13 @@ bool IdeaVPC::read_ec_data(UInt32 cmd, UInt32 *result, UInt8 *retries) {
         clock_get_uptime(&now_abs);
     } while (now_abs < deadline || *retries < 5);
 
-    IOLog(timeoutPrompt, getName(), readECPrompt, cmd);
+    IOLog(timeoutPrompt, getName(), name, readECPrompt, cmd);
     return false;
 }
 
 bool IdeaVPC::write_ec_data(UInt32 cmd, UInt32 value, UInt8 *retries) {
     if (!vpc) {
-        IOLog(VPCUnavailable, getName());
+        IOLog(VPCUnavailable, getName(), name);
         return false;
     }
 
@@ -397,7 +397,7 @@ bool IdeaVPC::write_ec_data(UInt32 cmd, UInt32 value, UInt8 *retries) {
         clock_get_uptime(&now_abs);
     } while (now_abs < deadline || *retries < 5);
 
-    IOLog(timeoutPrompt, getName(), writeECPrompt, cmd);
+    IOLog(timeoutPrompt, getName(), name, writeECPrompt, cmd);
     return false;
 }
 

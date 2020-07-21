@@ -37,7 +37,7 @@ void IdeaWMI::free(void)
 void IdeaWMI::YogaEvent(UInt32 argument) {
     switch (argument) {
         case kIOACPIMessageReserved:
-            IOLog("%s: Type 80 -> WMI2\n", getName());
+            IOLog("%s::%s Type 80 -> WMI2\n", getName(), name);
             // force enable keyboard and touchpad
             setTopCase(true);
             if (dev) {
@@ -47,7 +47,7 @@ void IdeaWMI::YogaEvent(UInt32 argument) {
             break;
 
         default:
-            IOLog("%s: Unknown argument 0x%x\n", getName(), argument);
+            IOLog("%s::%s Unknown argument 0x%x\n", getName(), name, argument);
             break;
     }
 }

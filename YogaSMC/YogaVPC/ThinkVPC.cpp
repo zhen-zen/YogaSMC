@@ -44,12 +44,12 @@ bool ThinkVPC::updateConservation(const char * method, bool update) {
     };
 
     if (vpc->evaluateInteger(method, &result, params, 1) != kIOReturnSuccess) {
-        IOLog(updateFailure, getName(), method);
+        IOLog(updateFailure, getName(), name, method);
         return false;
     }
 
     if (update) {
-        IOLog(updateSuccess, getName(), method, result);
+        IOLog(updateSuccess, getName(), name, method, result);
         setProperty(method, result);
     }
 
@@ -58,10 +58,10 @@ bool ThinkVPC::updateConservation(const char * method, bool update) {
 
 bool ThinkVPC::updateMutestatus() {
     if (vpc->evaluateInteger(getMutestatus, &mutestate) != kIOReturnSuccess) {
-        IOLog(updateFailure, getName(), __func__);
+        IOLog(updateFailure, getName(), name, __func__);
         return false;
     }
-    IOLog(updateSuccess, getName(), __func__, mutestate);
+    IOLog(updateSuccess, getName(), name, __func__, mutestate);
     setProperty(mutePrompt, mutestate, 32);
     return true;
 }
@@ -71,17 +71,17 @@ bool ThinkVPC::initVPC() {
 
     if (vpc->evaluateInteger(getHKEYversion, &version) != kIOReturnSuccess)
     {
-        IOLog("%s: failed to get HKEY interface version\n", getName());
+        IOLog("%s::%s failed to get HKEY interface version\n", getName(), name);
         return false;
     }
 
-    IOLog("%s: HKEY interface version %x\n", getName(), version);
+    IOLog("%s::%s HKEY interface version %x\n", getName(), name, version);
 #ifdef DEBUG
     setProperty("HKEY version", version, 32);
 #endif
     switch (version >> 8) {
         case 1:
-            IOLog("%s: HKEY version 0x100 not implemented\n", getName());
+            IOLog("%s::%s HKEY version 0x100 not implemented\n", getName(), name);
             break;
 
         case 2:
@@ -90,7 +90,7 @@ bool ThinkVPC::initVPC() {
             break;
 
         default:
-            IOLog("%s: Unknown HKEY version\n", getName());
+            IOLog("%s::%s Unknown HKEY version\n", getName(), name);
             break;
     }
     updateAll();
@@ -105,11 +105,11 @@ bool ThinkVPC::updateAdaptiveKBD(int arg) {
     };
 
     if (vpc->evaluateInteger(getAdaptiveKBD, &result, params, 1) != kIOReturnSuccess) {
-        IOLog(updateFailure, getName(), __func__);
+        IOLog(updateFailure, getName(), name, __func__);
         return false;
     }
 
-    IOLog("%s: %s %d %x\n", getName(), __func__, arg, result);
+    IOLog("%s::%s %s %d %x\n", getName(), name, __func__, arg, result);
 #ifdef DEBUG
     switch (arg) {
         case 1:
@@ -121,7 +121,7 @@ bool ThinkVPC::updateAdaptiveKBD(int arg) {
             break;
             
         default:
-            IOLog("%s: Unknown MHKA command\n", getName());
+            IOLog("%s::%s Unknown MHKA command\n", getName(), name);
             break;
     }
 #endif
@@ -141,11 +141,11 @@ void ThinkVPC::updateBattery(int battery) {
             break;
             
         default:
-            IOLog(valueInvalid, getName(), batteryPrompt);
+            IOLog(valueInvalid, getName(), name, batteryPrompt);
             return;
     }
     
-    IOLog(updateSuccess, getName(), batteryPrompt, batnum);
+    IOLog(updateSuccess, getName(), name, batteryPrompt, batnum);
     
     updateConservation(getCMstart);
     updateConservation(getCMstop);
@@ -156,7 +156,7 @@ void ThinkVPC::updateBattery(int battery) {
 
 void ThinkVPC::setPropertiesGated(OSObject *props) {
     if (!vpc) {
-        IOLog(VPCUnavailable, getName());
+        IOLog(VPCUnavailable, getName(), name);
         return;
     }
 
@@ -164,7 +164,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
     if (!dict)
         return;
 
-    //    IOLog("%s: %d objects in properties\n", getName(), dict->getCount());
+    //    IOLog("%s::%s %d objects in properties\n", getName(), name, dict->getCount());
     OSCollectionIterator* i = OSCollectionIterator::withCollection(dict);
 
     if (i != NULL) {
@@ -172,7 +172,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
             if (key->isEqualTo(batteryPrompt)) {
                 OSNumber * value = OSDynamicCast(OSNumber, dict->getObject(batteryPrompt));
                 if (value == NULL) {
-                    IOLog(valueInvalid, getName(), batteryPrompt);
+                    IOLog(valueInvalid, getName(), name, batteryPrompt);
                     continue;
                 }
 
@@ -180,7 +180,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
             } else if (key->isEqualTo(mutePrompt)) {
                 updateMutestatus();
             } else {
-                IOLog("%s: Unknown property %s\n", getName(), key->getCStringNoCopy());
+                IOLog("%s::%s Unknown property %s\n", getName(), name, key->getCStringNoCopy());
             }
         }
         i->release();

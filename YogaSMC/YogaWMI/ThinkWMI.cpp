@@ -12,7 +12,7 @@
 IOService *ThinkWMI::probe(IOService *provider, SInt32 *score)
 {
     if (/* DISABLES CODE */ (false)) {
-        IOLog("not a valid ThinkPad WMI interface");
+        IOLog("%s::%s not a valid ThinkPad WMI interface", getName(), provider->getName());
         return NULL;
     }
     // TODO: identify an appropritate interface to attach
