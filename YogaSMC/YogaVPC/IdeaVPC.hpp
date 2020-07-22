@@ -75,6 +75,7 @@ private:
     static constexpr const char *setFnlockMode        = "SALS";
     static constexpr const char *readVPCStatus        = "VPCR";
     static constexpr const char *writeVPCStatus       = "VPCW";
+    static constexpr const char *getBatteryID         = "GBID";
     static constexpr const char *getBatteryInfo       = "GSBI";
 
     /**
@@ -119,6 +120,15 @@ private:
      *  @return true if success
      */
     bool updateFnlock(bool update=true);
+
+    /**
+     *  Update battery ID
+     *
+     *  @param update only update internal status when false
+     *
+     *  @return true if success
+     */
+    bool updateBatteryID(bool update=true);
 
     /**
      *  Update battery information

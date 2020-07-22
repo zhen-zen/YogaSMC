@@ -30,6 +30,7 @@ IdeaVPC* IdeaVPC::withDevice(IOACPIPlatformDevice *device, OSString *pnp) {
 }
 
 void IdeaVPC::updateAll() {
+    updateBatteryID();
     updateBatteryInfo();
     updateConservation();
     updateFnlock();
@@ -178,6 +179,45 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
     return;
 }
 
+bool IdeaVPC::updateBatteryID(bool update) {
+    OSArray *data;
+    OSObject *result;
+    UInt32 zero = 0;
+    
+    OSObject* params[1] = {
+        OSNumber::withNumber(zero, 32)
+    };
+
+    if (vpc->evaluateObject(getBatteryID, &result, params, 1) != kIOReturnSuccess) {
+        IOLog(updateFailure, getName(), name, "Battery ID");
+        return false;
+    }
+
+    data = OSDynamicCast(OSArray, result);
+    if (!data) {
+        IOLog("%s::%s Battery ID not OSArray", getName(), name);
+        return false;
+    }
+
+    OSData *cycle0 = OSDynamicCast(OSData, data->getObject(0));
+    if (!cycle0) {
+        IOLog("%s::%s Battery 0 cycle not exist", getName(), name);
+        return false;
+    }
+    UInt16 *cycleCount0 = (UInt16 *)cycle0->getBytesNoCopy();
+    if (cycleCount0[0] != 0xffff)
+        setProperty("BAT0 CycleCount", cycleCount0[0], 16);
+
+    OSData *cycle1 = OSDynamicCast(OSData, data->getObject(1));
+    if (!cycle1)
+        IOLog("%s::%s Battery 1 cycle not exist", getName(), name);
+    UInt16 *cycleCount1 = (UInt16 *)cycle1->getBytesNoCopy();
+    if (cycleCount1[0] != 0xffff)
+        setProperty("BAT1 CycleCount", cycleCount1[0], 16);
+    
+    return true;
+}
+
 bool IdeaVPC::updateBatteryInfo(bool update) {
     OSData *data;
     OSObject *result;
@@ -215,7 +255,7 @@ bool IdeaVPC::updateConservation(bool update) {
         return false;
     }
 
-    conservationMode = 1 << BM_CONSERVATION_BIT & state;
+    conservationMode = BIT(BM_CONSERVATION_BIT) & state;
 
     if (update) {
         IOLog(updateSuccess, getName(), name, conservationPrompt, state);
@@ -233,7 +273,7 @@ bool IdeaVPC::updateFnlock(bool update) {
         return false;
     }
 
-    FnlockMode = 1 << HA_FNLOCK_BIT & state;
+    FnlockMode = BIT(HA_FNLOCK_BIT) & state;
 
     if (update) {
         IOLog(updateSuccess, getName(), name, FnKeyPrompt, state);
@@ -297,7 +337,7 @@ void IdeaVPC::updateVPC() {
     setProperty("VPCstatus", vpc1, 32);
 #endif
     for (int vpc_bit = 0; vpc_bit < 16; vpc_bit++) {
-        if (1 << vpc_bit & vpc1) {
+        if (BIT(vpc_bit) & vpc1) {
             switch (vpc_bit) {
                 case 0:
                     if (!read_ec_data(VPCCMD_R_SPECIAL_BUTTONS, &result, &retries)) {

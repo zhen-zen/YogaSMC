@@ -38,6 +38,8 @@
 #define PnpDeviceIdVPCIdea "VPC2004"
 #define PnpDeviceIdVPCThink "LEN0268"
 
+#define BIT(nr) (1UL << (nr))
+
 class YogaVPC : public IOService
 {
   typedef IOService super;
