@@ -75,6 +75,7 @@ private:
     static constexpr const char *setFnlockMode        = "SALS";
     static constexpr const char *readVPCStatus        = "VPCR";
     static constexpr const char *writeVPCStatus       = "VPCW";
+    static constexpr const char *getBatteryInfo       = "GSBI";
 
     /**
      * VPC0 config
@@ -104,7 +105,7 @@ private:
     /**
      *  Update battery conservation mode status
      *
-     *  @param update  only update internal status when false
+     *  @param update only update internal status when false
      *
      *  @return true if success
      */
@@ -113,11 +114,20 @@ private:
     /**
      *  Update Fn lock mode status
      *
-     *  @param update  only update internal status when false
+     *  @param update only update internal status when false
      *
      *  @return true if success
      */
     bool updateFnlock(bool update=true);
+
+    /**
+     *  Update battery information
+     *
+     *  @param update only update internal status when false
+     *
+     *  @return true if success
+     */
+    bool updateBatteryInfo(bool update=true);
 
     /**
      *  Toggle Fn lock mode
@@ -174,6 +184,14 @@ private:
      *  @return true if success
      */
     bool method_vpcr(UInt32 cmd, UInt32 *result);
+
+    /**
+     *  Read raw data format
+     *
+     *  @param data date seperate by bit 9/5
+     *  @param batnum battery number
+     */
+    void processRawDate(UInt16 data, int batnum);
 
     friend class IdeaWMI;
 

@@ -30,6 +30,7 @@ IdeaVPC* IdeaVPC::withDevice(IOACPIPlatformDevice *device, OSString *pnp) {
 }
 
 void IdeaVPC::updateAll() {
+    updateBatteryInfo();
     updateConservation();
     updateFnlock();
     updateVPC();
@@ -92,7 +93,6 @@ bool IdeaVPC::initVPC() {
     setProperty("Capability", capabilities);
     capabilities->release();
 #endif
-    updateAll();
     return true;
 }
 
@@ -178,6 +178,34 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
     return;
 }
 
+bool IdeaVPC::updateBatteryInfo(bool update) {
+    OSData *data;
+    OSObject *result;
+    UInt32 zero = 0;
+    
+    OSObject* params[1] = {
+        OSNumber::withNumber(zero, 32)
+    };
+
+    if (vpc->evaluateObject(getBatteryInfo, &result, params, 1) != kIOReturnSuccess) {
+        IOLog(updateFailure, getName(), name, "Battery Info");
+        return false;
+    }
+
+    data = OSDynamicCast(OSData, result);
+    if (!data) {
+        IOLog("%s::%s Battery Info not OSData", getName(), name);
+        return false;
+    }
+    UInt16 * bdata = (UInt16 *)(data->getBytesNoCopy());
+    // B1DT
+    if (bdata[8] != 0)
+        processRawDate(bdata[8], 0);
+    // B2DT
+    if (bdata[9] != 0)
+        processRawDate(bdata[9], 1);
+    return true;
+}
 
 bool IdeaVPC::updateConservation(bool update) {
     UInt32 state;
@@ -418,4 +446,16 @@ bool IdeaVPC::method_vpcw(UInt32 cmd, UInt32 data) {
     };
 
     return (vpc->evaluateInteger(writeVPCStatus, &result, params, 2) == kIOReturnSuccess);
+}
+
+void IdeaVPC::processRawDate(UInt16 data, int batnum) {
+    UInt16 year, month, day;
+    year = (data >> 9) + 1980;
+    month = (data >> 5) & 0x0f;
+    day = data & 0x1f;
+    char date[11];
+    snprintf(date, 11, "%4d/%02d/%02d", year, month, day);
+    char prompt[21];
+    snprintf(prompt, 21, "BAT%1d ManufactureDate", batnum);
+    setProperty(prompt, date);
 }
