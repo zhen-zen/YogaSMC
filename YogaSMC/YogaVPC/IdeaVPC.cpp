@@ -179,16 +179,45 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
     return;
 }
 
+/*
+ * Method(GBID, 0, Serialized) will return a package in following format, while value
+ * with 0xff may be considered invalid. Four groups of 16 bits in ID field are filled
+ * with following values:
+ *
+ * BMIL/BMIH Battery Manufacturer
+ * HIDL/HIDH Hardware ID
+ * FMVL/FMVH Firmware Version
+ * DAVL/DAVH ?
+ *
+ * Name (BFIF, Package (0x04)
+ * {
+ *     Buffer (0x02)
+ *     {
+ *          0x00, 0x00                                       // Battery 0 Cycle Count
+ *     },
+ *
+ *     Buffer (0x02)
+ *     {
+ *          0xFF, 0xFF                                       // Battery 1 Cycle Count
+ *     },
+ *
+ *     Buffer (0x08)
+ *     {
+ *          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00   // Battery 0 ID
+ *     },
+ *
+ *     Buffer (0x08)
+ *     {
+ *          0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF   // Battery 1 ID
+ *     }
+ * })
+ */
+
 bool IdeaVPC::updateBatteryID(bool update) {
     OSArray *data;
     OSObject *result;
-    UInt32 zero = 0;
-    
-    OSObject* params[1] = {
-        OSNumber::withNumber(zero, 32)
-    };
 
-    if (vpc->evaluateObject(getBatteryID, &result, params, 1) != kIOReturnSuccess) {
+    if (vpc->evaluateObject(getBatteryID, &result) != kIOReturnSuccess) {
         IOLog(updateFailure, getName(), name, "Battery ID");
         return false;
     }
@@ -202,29 +231,51 @@ bool IdeaVPC::updateBatteryID(bool update) {
     OSData *cycle0 = OSDynamicCast(OSData, data->getObject(0));
     if (!cycle0) {
         IOLog("%s::%s Battery 0 cycle not exist", getName(), name);
-        return false;
+    } else {
+        UInt16 *cycleCount0 = (UInt16 *)cycle0->getBytesNoCopy();
+        if (cycleCount0[0] != 0xffff) {
+            setProperty("BAT0 CycleCount", cycleCount0[0], 16);
+            IOLog("%s::%s Battery 0 cycle count %d", getName(), name, cycleCount0[0]);
+        }
     }
-    UInt16 *cycleCount0 = (UInt16 *)cycle0->getBytesNoCopy();
-    if (cycleCount0[0] != 0xffff)
-        setProperty("BAT0 CycleCount", cycleCount0[0], 16);
 
     OSData *cycle1 = OSDynamicCast(OSData, data->getObject(1));
-    if (!cycle1)
+    if (!cycle1) {
         IOLog("%s::%s Battery 1 cycle not exist", getName(), name);
-    UInt16 *cycleCount1 = (UInt16 *)cycle1->getBytesNoCopy();
-    if (cycleCount1[0] != 0xffff)
-        setProperty("BAT1 CycleCount", cycleCount1[0], 16);
-    
+    } else {
+        UInt16 *cycleCount1 = (UInt16 *)cycle1->getBytesNoCopy();
+        if (cycleCount1[0] != 0xffff) {
+            setProperty("BAT1 CycleCount", cycleCount1[0], 16);
+            IOLog("%s::%s Battery 1 cycle count %d", getName(), name, cycleCount1[0]);
+        }
+    }
+
+    OSData *ID0 = OSDynamicCast(OSData, data->getObject(2));
+    if (!ID0) {
+        IOLog("%s::%s Battery 0 ID not exist", getName(), name);
+    } else {
+        UInt16 *batteryID0 = (UInt16 *)ID0->getBytesNoCopy();
+        if (batteryID0[0] != 0xffff)
+            IOLog("%s::%s Battery 0 ID %04x %04x %04x %04x", getName(), name, batteryID0[0], batteryID0[1], batteryID0[2], batteryID0[3]);
+    }
+
+    OSData *ID1 = OSDynamicCast(OSData, data->getObject(3));
+    if (!ID1) {
+        IOLog("%s::%s Battery 1 ID not exist", getName(), name);
+    } else {
+        UInt16 *batteryID1 = (UInt16 *)ID1->getBytesNoCopy();
+        if (batteryID1[0] != 0xffff)
+            IOLog("%s::%s Battery 1 ID %04x %04x %04x %04x", getName(), name, batteryID1[0], batteryID1[1], batteryID1[2], batteryID1[3]);
+    }
     return true;
 }
 
 bool IdeaVPC::updateBatteryInfo(bool update) {
     OSData *data;
     OSObject *result;
-    UInt32 zero = 0;
     
     OSObject* params[1] = {
-        OSNumber::withNumber(zero, 32)
+        OSNumber::withNumber((UInt32)0, 32)
     };
 
     if (vpc->evaluateObject(getBatteryInfo, &result, params, 1) != kIOReturnSuccess) {

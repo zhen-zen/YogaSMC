@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		6F08ACE824746B8B00681A63 /* YogaSMC.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F08ACE724746B8B00681A63 /* YogaSMC.hpp */; };
 		6F08ACEA24746B8B00681A63 /* YogaSMC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F08ACE924746B8B00681A63 /* YogaSMC.cpp */; };
+		6F2D45CC24C9494B00A75751 /* LICENSE in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6F2D45CB24C9494B00A75751 /* LICENSE */; };
 		6F48676324A293A0003AD4CA /* IdeaWMI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F48676124A293A0003AD4CA /* IdeaWMI.cpp */; };
 		6F48676424A293A0003AD4CA /* IdeaWMI.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F48676224A293A0003AD4CA /* IdeaWMI.hpp */; };
 		6F6CEDA424BC14C2004D553F /* ThinkVPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F6CEDA224BC14C2004D553F /* ThinkVPC.cpp */; };
@@ -28,11 +29,25 @@
 		6FD2BB8E247B37A20018EA36 /* bmfparser.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6FD2BB8C247B37A20018EA36 /* bmfparser.hpp */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		6F2D45CA24C9491C00A75751 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 16;
+			files = (
+				6F2D45CC24C9494B00A75751 /* LICENSE in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		6F08ACE424746B8B00681A63 /* YogaSMC.kext */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = YogaSMC.kext; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F08ACE724746B8B00681A63 /* YogaSMC.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = YogaSMC.hpp; sourceTree = "<group>"; };
 		6F08ACE924746B8B00681A63 /* YogaSMC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = YogaSMC.cpp; sourceTree = "<group>"; };
 		6F08ACEB24746B8B00681A63 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		6F2D45CB24C9494B00A75751 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		6F48676124A293A0003AD4CA /* IdeaWMI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IdeaWMI.cpp; sourceTree = "<group>"; };
 		6F48676224A293A0003AD4CA /* IdeaWMI.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IdeaWMI.hpp; sourceTree = "<group>"; };
 		6F6CEDA224BC14C2004D553F /* ThinkVPC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ThinkVPC.cpp; sourceTree = "<group>"; };
@@ -66,6 +81,7 @@
 		6F08ACDA24746B8B00681A63 = {
 			isa = PBXGroup;
 			children = (
+				6F2D45CB24C9494B00A75751 /* LICENSE */,
 				6F08ACE624746B8B00681A63 /* YogaSMC */,
 				6F08ACE524746B8B00681A63 /* Products */,
 			);
@@ -153,6 +169,7 @@
 				6F08ACE024746B8B00681A63 /* Sources */,
 				6F08ACE124746B8B00681A63 /* Frameworks */,
 				6F08ACE224746B8B00681A63 /* Resources */,
+				6F2D45CA24C9491C00A75751 /* CopyFiles */,
 			);
 			buildRules = (
 			);
