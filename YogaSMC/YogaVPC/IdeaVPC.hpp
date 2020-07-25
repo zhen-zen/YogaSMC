@@ -232,6 +232,14 @@ private:
      */
     void parseRawDate(UInt16 data, int batnum);
 
+    /**
+     *  Read raw temperature format
+     *
+     *  @param data temperature
+     *  @param desc description (used in setProperty)
+     */
+    void parseTemperature(UInt16 data, const char * desc);
+
     friend class IdeaWMI;
 
 public:

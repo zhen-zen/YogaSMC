@@ -320,6 +320,10 @@ bool IdeaVPC::updateBatteryInfo(bool update) {
         return false;
     }
     UInt16 * bdata = (UInt16 *)(data->getBytesNoCopy());
+    // B1TM
+    if (bdata[7] != 0) {
+        parseTemperature(bdata[7], "Battery Temperature");
+    }
     // B1DT
     if (bdata[8] != 0)
         parseRawDate(bdata[8], 0);
@@ -618,4 +622,19 @@ void IdeaVPC::parseRawDate(UInt16 data, int batnum) {
     char prompt[21];
     snprintf(prompt, 21, "BAT%1d ManufactureDate", batnum);
     setProperty(prompt, date);
+}
+
+void IdeaVPC::parseTemperature(UInt16 data, const char * desc) {
+    if ((data - 2731) < 0 || (data - 2731) > 600) {
+        setProperty(desc, data - 2731, 16);
+        IOLog("%s::%s %s critical! %d", getName(), name, desc, data - 2731);
+    }
+    // ℃ DEGREE CELSIUS UTF-8: E2 84 83
+    // ℉ DEGREE FAHRENHEIT UTF-8: E2 84 89
+    char temperature[9];
+    UInt16 celsius = data - 2731;
+    snprintf(temperature, 9, "%d.%d℃", celsius / 10, celsius % 10);
+    // UInt16 fahrenheit = (data - 2731) * 9 / 5 + 320;
+    // snprintf(temperature, 9, "%d.%d℉", fahrenheit / 10, fahrenheit % 10);
+    setProperty(desc, temperature);
 }
