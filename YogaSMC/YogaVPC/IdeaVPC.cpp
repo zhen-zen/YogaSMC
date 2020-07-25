@@ -32,9 +32,8 @@ IdeaVPC* IdeaVPC::withDevice(IOACPIPlatformDevice *device, OSString *pnp) {
 void IdeaVPC::updateAll() {
     updateBatteryID();
     updateBatteryInfo();
-    updateBacklight();
     updateConservation();
-    updateFnlock();
+    updateKeyboard();
     updateVPC();
 }
 
@@ -97,8 +96,8 @@ bool IdeaVPC::initVPC() {
 #endif
     UInt32 state;
 
-    if (vpc->evaluateInteger(getFnlockMode, &state) != kIOReturnSuccess) {
-        IOLog(updateFailure, getName(), name, getFnlockMode);
+    if (vpc->evaluateInteger(getKeyboardMode, &state) != kIOReturnSuccess) {
+        IOLog(updateFailure, getName(), name, getKeyboardMode);
         return false;
     }
 
@@ -140,13 +139,12 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                     continue;
                 }
 
-                updateBacklight(false);
+                updateKeyboard(false);
 
-                if (value->getValue() == FnlockMode) {
+                if (value->getValue() == BacklightMode)
                     IOLog(valueMatched, getName(), name, BacklightPrompt, (BacklightMode ? "enabled" : "disabled"));
-                } else {
-                    toggleFnlock();
-                }
+                else
+                    toggleBacklight();
             } else if (key->isEqualTo(conservationPrompt)) {
                 OSBoolean * value = OSDynamicCast(OSBoolean, dict->getObject(conservationPrompt));
                 if (value == NULL) {
@@ -156,11 +154,10 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
 
                 updateConservation(false);
 
-                if (value->getValue() == conservationMode) {
+                if (value->getValue() == conservationMode)
                     IOLog(valueMatched, getName(), name, conservationPrompt, (conservationMode ? "enabled" : "disabled"));
-                } else {
+                else
                     toggleConservation();
-                }
             } else if (key->isEqualTo(FnKeyPrompt)) {
                 OSBoolean * value = OSDynamicCast(OSBoolean, dict->getObject(FnKeyPrompt));
                 if (value == NULL) {
@@ -168,13 +165,12 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                     continue;
                 }
 
-                updateFnlock(false);
+                updateKeyboard(false);
 
-                if (value->getValue() == FnlockMode) {
+                if (value->getValue() == FnlockMode)
                     IOLog(valueMatched, getName(), name, FnKeyPrompt, (FnlockMode ? "enabled" : "disabled"));
-                } else {
+                else
                     toggleFnlock();
-                }
             } else if (key->isEqualTo(readECPrompt)) {
                 OSNumber * value = OSDynamicCast(OSNumber, dict->getObject(readECPrompt));
                 if (value == NULL) {
@@ -326,31 +322,10 @@ bool IdeaVPC::updateBatteryInfo(bool update) {
     UInt16 * bdata = (UInt16 *)(data->getBytesNoCopy());
     // B1DT
     if (bdata[8] != 0)
-        processRawDate(bdata[8], 0);
+        parseRawDate(bdata[8], 0);
     // B2DT
     if (bdata[9] != 0)
-        processRawDate(bdata[9], 1);
-    return true;
-}
-
-bool IdeaVPC::updateBacklight(bool update) {
-    if (!BacklightCap)
-        return true;
-
-    UInt32 state;
-
-    if (vpc->evaluateInteger(getFnlockMode, &state) != kIOReturnSuccess) {
-        IOLog(updateFailure, getName(), name, BacklightPrompt);
-        return false;
-    }
-
-    BacklightMode = BIT(HA_BACKLIGHT_BIT) & state;
-
-    if (update) {
-        IOLog(updateSuccess, getName(), name, BacklightPrompt, state);
-        setProperty(BacklightPrompt, BacklightMode);
-    }
-
+        parseRawDate(bdata[9], 1);
     return true;
 }
 
@@ -372,22 +347,28 @@ bool IdeaVPC::updateConservation(bool update) {
     return true;
 }
 
-bool IdeaVPC::updateFnlock(bool update) {
-    if (!FnlockCap)
+bool IdeaVPC::updateKeyboard(bool update) {
+    if (!FnlockCap && !BacklightCap)
         return true;
 
     UInt32 state;
 
-    if (vpc->evaluateInteger(getFnlockMode, &state) != kIOReturnSuccess) {
-        IOLog(updateFailure, getName(), name, FnKeyPrompt);
+    if (vpc->evaluateInteger(getKeyboardMode, &state) != kIOReturnSuccess) {
+        IOLog(updateFailure, getName(), name, KeyboardPrompt);
         return false;
     }
 
-    FnlockMode = BIT(HA_FNLOCK_BIT) & state;
+    if (FnlockCap)
+        FnlockMode = BIT(HA_FNLOCK_BIT) & state;
+    if (BacklightCap)
+        BacklightMode = BIT(HA_BACKLIGHT_BIT) & state;
 
     if (update) {
-        IOLog(updateSuccess, getName(), name, FnKeyPrompt, state);
-        setProperty(FnKeyPrompt, FnlockMode);
+        IOLog(updateSuccess, getName(), name, KeyboardPrompt, state);
+        if (FnlockCap)
+            setProperty(FnKeyPrompt, FnlockMode);
+        if (BacklightCap)
+            setProperty(BacklightPrompt, BacklightMode);
     }
 
     return true;
@@ -413,6 +394,28 @@ bool IdeaVPC::toggleConservation() {
     return true;
 }
 
+bool IdeaVPC::toggleBacklight() {
+    if (!BacklightCap)
+        return true;
+
+    UInt32 result;
+
+    OSObject* params[1] = {
+        OSNumber::withNumber((!BacklightMode ? HACMD_BACKLIGHT_ON : HACMD_BACKLIGHT_OFF), 32)
+    };
+
+    if (vpc->evaluateInteger(setKeyboardMode, &result, params, 1) != kIOReturnSuccess || result != 0) {
+        IOLog(toggleFailure, getName(), name, BacklightPrompt);
+        return false;
+    }
+
+    BacklightMode = !BacklightMode;
+    IOLog(toggleSuccess, getName(), name, BacklightPrompt, (BacklightMode ? HACMD_BACKLIGHT_ON : HACMD_BACKLIGHT_OFF), (BacklightMode ? "on" : "off"));
+    setProperty(BacklightPrompt, FnlockMode);
+
+    return true;
+}
+
 bool IdeaVPC::toggleFnlock() {
     if (!FnlockCap)
         return true;
@@ -423,7 +426,7 @@ bool IdeaVPC::toggleFnlock() {
         OSNumber::withNumber((!FnlockMode ? HACMD_FNLOCK_ON : HACMD_FNLOCK_OFF), 32)
     };
 
-    if (vpc->evaluateInteger(setFnlockMode, &result, params, 1) != kIOReturnSuccess || result != 0) {
+    if (vpc->evaluateInteger(setKeyboardMode, &result, params, 1) != kIOReturnSuccess || result != 0) {
         IOLog(toggleFailure, getName(), name, FnKeyPrompt);
         return false;
     }
@@ -605,7 +608,7 @@ bool IdeaVPC::method_vpcw(UInt32 cmd, UInt32 data) {
     return (vpc->evaluateInteger(writeVPCStatus, &result, params, 2) == kIOReturnSuccess);
 }
 
-void IdeaVPC::processRawDate(UInt16 data, int batnum) {
+void IdeaVPC::parseRawDate(UInt16 data, int batnum) {
     UInt16 year, month, day;
     year = (data >> 9) + 1980;
     month = (data >> 5) & 0x0f;

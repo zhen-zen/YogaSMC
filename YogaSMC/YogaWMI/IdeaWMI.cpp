@@ -41,7 +41,7 @@ void IdeaWMI::YogaEvent(UInt32 argument) {
             // force enable keyboard and touchpad
             setTopCase(true);
             if (dev) {
-                dev->updateFnlock();
+                dev->updateKeyboard();
                 dev->toggleFnlock();
             }
             break;

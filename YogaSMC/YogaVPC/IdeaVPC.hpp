@@ -30,6 +30,8 @@
 enum {
     BMCMD_CONSERVATION_ON = 3,
     BMCMD_CONSERVATION_OFF = 5,
+    HACMD_BACKLIGHT_ON = 0x8,
+    HACMD_BACKLIGHT_OFF = 0x9,
     HACMD_FNLOCK_ON = 0xe,
     HACMD_FNLOCK_OFF = 0xf,
 };
@@ -73,14 +75,14 @@ private:
      *  Related ACPI methods
      */
     static constexpr const char *getVPCConfig         = "_CFG";
-    static constexpr const char *getConservationMode  = "GBMD";
-    static constexpr const char *setConservationMode  = "SBMC";
-    static constexpr const char *getFnlockMode        = "HALS";
-    static constexpr const char *setFnlockMode        = "SALS";
-    static constexpr const char *readVPCStatus        = "VPCR";
-    static constexpr const char *writeVPCStatus       = "VPCW";
     static constexpr const char *getBatteryID         = "GBID";
     static constexpr const char *getBatteryInfo       = "GSBI";
+    static constexpr const char *getConservationMode  = "GBMD";
+    static constexpr const char *setConservationMode  = "SBMC";
+    static constexpr const char *getKeyboardMode      = "HALS";
+    static constexpr const char *setKeyboardMode      = "SALS";
+    static constexpr const char *readVPCStatus        = "VPCR";
+    static constexpr const char *writeVPCStatus       = "VPCW";
 
     /**
      * VPC0 config
@@ -124,33 +126,6 @@ private:
     bool FnlockMode {false};
 
     /**
-     *  Update backlight mode status
-     *
-     *  @param update only update internal status when false
-     *
-     *  @return true if success
-     */
-    bool updateBacklight(bool update=true);
-
-    /**
-     *  Update battery conservation mode status
-     *
-     *  @param update only update internal status when false
-     *
-     *  @return true if success
-     */
-    bool updateConservation(bool update=true);
-
-    /**
-     *  Update Fn lock mode status
-     *
-     *  @param update only update internal status when false
-     *
-     *  @return true if success
-     */
-    bool updateFnlock(bool update=true);
-
-    /**
      *  Update battery ID
      *
      *  @param update only update internal status when false
@@ -169,11 +144,29 @@ private:
     bool updateBatteryInfo(bool update=true);
 
     /**
-     *  Toggle Fn lock mode
+     *  Update battery conservation mode status
+     *
+     *  @param update only update internal status when false
      *
      *  @return true if success
      */
-    bool toggleFnlock();
+    bool updateConservation(bool update=true);
+
+    /**
+     *  Update Keyboard status
+     *
+     *  @param update only update internal status when false
+     *
+     *  @return true if success
+     */
+    bool updateKeyboard(bool update=true);
+
+    /**
+     *  Toggle backlight mode
+     *
+     *  @return true if success
+     */
+    bool toggleBacklight();
 
     /**
      *  Toggle battery conservation mode
@@ -181,6 +174,13 @@ private:
      *  @return true if success
      */
     bool toggleConservation();
+
+    /**
+     *  Toggle Fn lock mode
+     *
+     *  @return true if success
+     */
+    bool toggleFnlock();
 
     /**
      *  Read EC data
@@ -225,12 +225,12 @@ private:
     bool method_vpcr(UInt32 cmd, UInt32 *result);
 
     /**
-     *  Read raw data format
+     *  Read raw date format
      *
      *  @param data date seperate by bit 9/5
      *  @param batnum battery number
      */
-    void processRawDate(UInt16 data, int batnum);
+    void parseRawDate(UInt16 data, int batnum);
 
     friend class IdeaWMI;
 
