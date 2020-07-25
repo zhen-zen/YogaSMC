@@ -32,6 +32,7 @@ IdeaVPC* IdeaVPC::withDevice(IOACPIPlatformDevice *device, OSString *pnp) {
 void IdeaVPC::updateAll() {
     updateBatteryID();
     updateBatteryInfo();
+    updateBacklight();
     updateConservation();
     updateFnlock();
     updateVPC();
@@ -94,6 +95,26 @@ bool IdeaVPC::initVPC() {
     setProperty("Capability", capabilities);
     capabilities->release();
 #endif
+    UInt32 state;
+
+    if (vpc->evaluateInteger(getFnlockMode, &state) != kIOReturnSuccess) {
+        IOLog(updateFailure, getName(), name, getFnlockMode);
+        return false;
+    }
+
+    BacklightCap = BIT(HA_BACKLIGHT_CAP_BIT) & state;
+    if (!BacklightCap)
+        setProperty(BacklightPrompt, "disabled");
+
+    FnlockCap = BIT(HA_FNLOCK_CAP_BIT) & state;
+    if (!FnlockCap)
+        setProperty(FnKeyPrompt, "disabled");
+    if (BIT(HA_PRIMEKEY_BIT) & state)
+        setProperty("PrimeKeyType", "HotKey");
+    else
+        setProperty("PrimeKeyType", "FnKey");
+
+
     return true;
 }
 
@@ -112,7 +133,21 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
 
     if (i != NULL) {
         while (OSString* key = OSDynamicCast(OSString, i->getNextObject())) {
-            if (key->isEqualTo(conservationPrompt)) {
+            if (key->isEqualTo(BacklightPrompt)) {
+                OSBoolean * value = OSDynamicCast(OSBoolean, dict->getObject(BacklightPrompt));
+                if (value == NULL) {
+                    IOLog(valueInvalid, getName(), name, BacklightPrompt);
+                    continue;
+                }
+
+                updateBacklight(false);
+
+                if (value->getValue() == FnlockMode) {
+                    IOLog(valueMatched, getName(), name, BacklightPrompt, (BacklightMode ? "enabled" : "disabled"));
+                } else {
+                    toggleFnlock();
+                }
+            } else if (key->isEqualTo(conservationPrompt)) {
                 OSBoolean * value = OSDynamicCast(OSBoolean, dict->getObject(conservationPrompt));
                 if (value == NULL) {
                     IOLog(valueInvalid, getName(), name, conservationPrompt);
@@ -298,6 +333,27 @@ bool IdeaVPC::updateBatteryInfo(bool update) {
     return true;
 }
 
+bool IdeaVPC::updateBacklight(bool update) {
+    if (!BacklightCap)
+        return true;
+
+    UInt32 state;
+
+    if (vpc->evaluateInteger(getFnlockMode, &state) != kIOReturnSuccess) {
+        IOLog(updateFailure, getName(), name, BacklightPrompt);
+        return false;
+    }
+
+    BacklightMode = BIT(HA_BACKLIGHT_BIT) & state;
+
+    if (update) {
+        IOLog(updateSuccess, getName(), name, BacklightPrompt, state);
+        setProperty(BacklightPrompt, BacklightMode);
+    }
+
+    return true;
+}
+
 bool IdeaVPC::updateConservation(bool update) {
     UInt32 state;
 
@@ -317,6 +373,9 @@ bool IdeaVPC::updateConservation(bool update) {
 }
 
 bool IdeaVPC::updateFnlock(bool update) {
+    if (!FnlockCap)
+        return true;
+
     UInt32 state;
 
     if (vpc->evaluateInteger(getFnlockMode, &state) != kIOReturnSuccess) {
@@ -355,6 +414,9 @@ bool IdeaVPC::toggleConservation() {
 }
 
 bool IdeaVPC::toggleFnlock() {
+    if (!FnlockCap)
+        return true;
+
     UInt32 result;
 
     OSObject* params[1] = {
@@ -407,7 +469,7 @@ void IdeaVPC::updateVPC() {
                     }
                     break;
 
-                case 1:
+                case 1: // ENERGY_EVENT_GENERAL / ENERGY_EVENT_KEYBDLED_OLD
                     IOLog("%s::%s Fn+Space keyboard backlight?", getName(), name);
                     // functional, TODO: read / write keyboard backlight level
                     // also on AC connect / disconnect
@@ -434,7 +496,7 @@ void IdeaVPC::updateVPC() {
                     // TODO: camera status switch
                     break;
 
-                case 8:
+                case 8: // ENERGY_EVENT_MIC
                     IOLog("%s::%s Fn+F4 mic", getName(), name);
                     // TODO: mic status switch
                     break;
@@ -442,6 +504,10 @@ void IdeaVPC::updateVPC() {
                 case 10:
                     IOLog("%s::%s Fn+F6 touchpad on", getName(), name);
                     // functional, identical to case 5?
+                    break;
+
+                case 12: // ENERGY_EVENT_KEYBDLED
+                    IOLog("%s::%s Fn+Space keyboard backlight?", getName(), name);
                     break;
 
                 case 13:

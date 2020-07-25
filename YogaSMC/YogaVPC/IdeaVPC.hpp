@@ -14,14 +14,18 @@
 
 // from linux/drivers/platform/x86/ideapad-laptop.c
 
-#define BM_CONSERVATION_BIT (5)
-#define HA_FNLOCK_BIT       (10)
+#define BM_CONSERVATION_BIT  (5)
+#define HA_BACKLIGHT_CAP_BIT (4)
+#define HA_BACKLIGHT_BIT     (5)
+#define HA_FNLOCK_CAP_BIT    (9)
+#define HA_FNLOCK_BIT        (10)
+#define HA_PRIMEKEY_BIT      (11)
 
-#define CFG_GRAPHICS_BIT    (8)
-#define CFG_BT_BIT    (16)
-#define CFG_3G_BIT    (17)
-#define CFG_WIFI_BIT    (18)
-#define CFG_CAMERA_BIT    (19)
+#define CFG_GRAPHICS_BIT     (8)
+#define CFG_BT_BIT           (16)
+#define CFG_3G_BIT           (17)
+#define CFG_WIFI_BIT         (18)
+#define CFG_CAMERA_BIT       (19)
 
 enum {
     BMCMD_CONSERVATION_ON = 3,
@@ -93,15 +97,40 @@ private:
     void updateAll() APPLE_KEXT_OVERRIDE;
     void updateVPC() APPLE_KEXT_OVERRIDE;
 
+
     /**
-     *  Battery conservation mode status, will be update on init
+     *  Backlight mode capability, will be update on init
+     */
+    bool BacklightCap {true};
+
+    /**
+     *  Backlight mode status
+     */
+    bool BacklightMode {false};
+
+    /**
+     *  Battery conservation mode status
      */
     bool conservationMode {false};
 
     /**
-     *  Fn lock mode status, will be update on init
+     *  Fn lock mode capability, will be update on init
+     */
+    bool FnlockCap {true};
+
+    /**
+     *  Fn lock mode status
      */
     bool FnlockMode {false};
+
+    /**
+     *  Update backlight mode status
+     *
+     *  @param update only update internal status when false
+     *
+     *  @return true if success
+     */
+    bool updateBacklight(bool update=true);
 
     /**
      *  Update battery conservation mode status

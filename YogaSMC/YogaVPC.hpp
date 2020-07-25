@@ -15,6 +15,7 @@
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
 
 #define batteryPrompt "Battery"
+#define BacklightPrompt "BacklightMode"
 #define conservationPrompt "ConservationMode"
 #define clamshellPrompt "ClamshellMode"
 #define FnKeyPrompt "FnlockMode"
