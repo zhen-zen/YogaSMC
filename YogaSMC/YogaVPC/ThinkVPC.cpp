@@ -179,6 +179,13 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 updateBattery(value->unsigned8BitValue());
             } else if (key->isEqualTo(mutePrompt)) {
                 updateMutestatus();
+            } else if (key->isEqualTo(fanControlPrompt)) {
+                OSNumber * value = OSDynamicCast(OSNumber, dict->getObject(fanControlPrompt));
+                if (value == NULL) {
+                    IOLog(valueInvalid, getName(), name, FnKeyPrompt);
+                    continue;
+                }
+                setFanControl(value->unsigned32BitValue());
             } else {
                 IOLog("%s::%s Unknown property %s\n", getName(), name, key->getCStringNoCopy());
             }
@@ -187,4 +194,25 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
     }
 
     return;
+}
+
+bool ThinkVPC::setFanControl(int level) {
+    UInt32 result;
+
+    OSObject* params[1] = {
+        OSNumber::withNumber((level ? 0x00040000 : 0), 32)
+    };
+
+    if (vpc->evaluateInteger(setControl, &result, params, 1) != kIOReturnSuccess) {
+        IOLog(toggleFailure, getName(), name, fanControlPrompt);
+        return false;
+    }
+    if (!result) {
+        IOLog(toggleFailure, getName(), name, "FanControl0");
+        return false;
+    }
+
+    IOLog(toggleSuccess, getName(), name, fanControlPrompt, (level ? 0x00040000 : 0), (level ? "7" : "auto"));
+    setProperty(fanControlPrompt, level, 32);
+    return true;
 }

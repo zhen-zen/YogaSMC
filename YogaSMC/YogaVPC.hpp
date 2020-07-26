@@ -19,6 +19,7 @@
 #define conservationPrompt "ConservationMode"
 #define clamshellPrompt "ClamshellMode"
 #define FnKeyPrompt "FnlockMode"
+#define fanControlPrompt "FanControl"
 #define KeyboardPrompt "KeyboardMode"
 #define mutePrompt "Mute"
 #define VPCPrompt "VPCconfig"

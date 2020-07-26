@@ -46,6 +46,8 @@ private:
     static constexpr const char *getAdaptiveKBD        = "MHKA";
     static constexpr const char *getMutestatus         = "HAUM";
 
+    static constexpr const char *setControl            = "MHAT";
+
     UInt32 mutestate;
 
     bool initVPC() APPLE_KEXT_OVERRIDE;
@@ -62,7 +64,21 @@ private:
     bool updateAdaptiveKBD(int arg);
     bool updateMutestatus();
 
+    /**
+     *  Update battery status
+     *
+     *  @param battery battery number     BAT_ANY = 0, BAT_PRIMARY = 1, BAT_SECONDARY = 2
+     */
     void updateBattery(int battery);
+
+    /**
+     *  Set Fan Control
+     *
+     *  @param level 0 for automatic, 1-7 for level
+     *
+     *  @return true if success
+     */
+    bool setFanControl(int level);
 
     friend class ThinkWMI;
 
