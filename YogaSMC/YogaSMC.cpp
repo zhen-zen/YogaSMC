@@ -272,6 +272,7 @@ void YogaWMI::YogaEvent(UInt32 argument) {
             return;
     }
     YogaMode = value;
+    dispatchMessage(kSMC_YogaEvent, &YogaMode);
 }
 
 IOReturn YogaWMI::message(UInt32 type, IOService *provider, void *argument) {

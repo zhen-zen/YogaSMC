@@ -117,6 +117,72 @@ bool IdeaVPC::initVPC() {
     return true;
 }
 
+IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
+    switch (type)
+    {
+        case kSMC_setDisableTouchpad:
+        case kSMC_getDisableTouchpad:
+        case kPS2M_notifyKeyPressed:
+        case kPS2M_notifyKeyTime:
+        case kPS2M_resetTouchpad:
+        case kSMC_setKeyboardStatus:
+        case kSMC_getKeyboardStatus:
+            break;
+
+        case kSMC_YogaEvent:
+            IOLog("%s::%s message: YogaSMC YogaEvent 0x%04x", getName(), name, *((UInt32 *) argument));
+            if (BacklightCap && AutomaticBacklightMode) {
+                updateKeyboard();
+                if (*((UInt32 *) argument) != 1) {
+                    BacklightModeSleep = BacklightMode;
+                    if (BacklightMode)
+                        toggleBacklight();
+                } else {
+                    if (BacklightModeSleep && !BacklightMode)
+                        toggleBacklight();
+                }
+            }
+            break;
+
+        case kSMC_FnlockEvent:
+            IOLog("%s::%s message: YogaSMC FnlockEvent", getName(), name);
+            updateKeyboard();
+            toggleFnlock();
+            break;
+
+        case kSMC_PowerEvent:
+            if (BacklightCap && AutomaticBacklightMode) {
+                updateKeyboard();
+                if (*((UInt32 *) argument) == 0) {
+                    BacklightModeSleep = BacklightMode;
+                    if (BacklightMode)
+                        toggleBacklight();
+                } else {
+                    if (BacklightModeSleep && !BacklightMode)
+                        toggleBacklight();
+                }
+            }
+            break;
+
+        case kIOACPIMessageDeviceNotification:
+            if (argument) {
+                IOLog("%s::%s message: ACPI provider=%s, argument=0x%04x\n", getName(), name, provider->getName(), *((UInt32 *) argument));
+                updateVPC();
+            } else {
+                IOLog("%s::%s message: ACPI provider=%s, argument unknown", getName(), name, provider->getName());
+            }
+            break;
+
+        default:
+            if (argument)
+                IOLog("%s::%s message: type=%x, provider=%s, argument=0x%04x\n", getName(), name, type, provider->getName(), *((UInt32 *) argument));
+            else
+                IOLog("%s::%s message: type=%x, provider=%s\n", getName(), name, type, provider->getName());
+    }
+
+    return kIOReturnSuccess;
+}
+
 void IdeaVPC::setPropertiesGated(OSObject *props) {
     if (!vpc) {
         IOLog(VPCUnavailable, getName(), name);

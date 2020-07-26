@@ -58,6 +58,7 @@
 		6F9553B924BA515B00215EBB /* IdeaVPC.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IdeaVPC.hpp; sourceTree = "<group>"; };
 		6F96A30A24B93D25006562EC /* YogaVPC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = YogaVPC.cpp; sourceTree = "<group>"; };
 		6F96A30B24B93D25006562EC /* YogaVPC.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = YogaVPC.hpp; sourceTree = "<group>"; };
+		6F96F4D524CD9593005A7686 /* message.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = message.h; sourceTree = "<group>"; };
 		6FCF7F572474B74800A82B13 /* WMI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WMI.h; sourceTree = "<group>"; };
 		6FCF7F582474B74800A82B13 /* WMI.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WMI.cpp; sourceTree = "<group>"; };
 		6FCF7F5B2474B89000A82B13 /* common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
@@ -107,6 +108,7 @@
 				6FD2BB8C247B37A20018EA36 /* bmfparser.hpp */,
 				6FD2BB8B247B37A20018EA36 /* bmfparser.cpp */,
 				6FCF7F5B2474B89000A82B13 /* common.h */,
+				6F96F4D524CD9593005A7686 /* message.h */,
 				6F08ACE724746B8B00681A63 /* YogaSMC.hpp */,
 				6F08ACE924746B8B00681A63 /* YogaSMC.cpp */,
 				6F96A30B24B93D25006562EC /* YogaVPC.hpp */,

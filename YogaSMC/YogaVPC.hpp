@@ -13,6 +13,7 @@
 #include <IOKit/IOCommandGate.h>
 #include <IOKit/IOService.h>
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
+#include "message.h"
 
 #define batteryPrompt "Battery"
 #define BacklightPrompt "BacklightMode"

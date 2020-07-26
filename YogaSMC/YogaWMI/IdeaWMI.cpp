@@ -40,10 +40,7 @@ void IdeaWMI::YogaEvent(UInt32 argument) {
             IOLog("%s::%s Type 80 -> WMI2\n", getName(), name);
             // force enable keyboard and touchpad
             setTopCase(true);
-            if (dev) {
-                dev->updateKeyboard();
-                dev->toggleFnlock();
-            }
+            dispatchMessage(kSMC_FnlockEvent, NULL);
             break;
 
         default:
@@ -63,19 +60,6 @@ IOReturn IdeaWMI::setPowerState(unsigned long powerState, IOService *whatDevice)
     if (whatDevice != this)
         return kIOReturnInvalid;
 
-    // Maybe move to IdeaVPC itself
-    if (dev) {
-        if (dev->BacklightCap && dev->AutomaticBacklightMode) {
-            dev->updateKeyboard();
-            if (powerState == 0) {
-                dev->BacklightModeSleep = dev->BacklightMode;
-                if (dev->BacklightMode)
-                    dev->toggleBacklight();
-            } else {
-                if (dev->BacklightModeSleep && !dev->BacklightMode)
-                    dev->toggleBacklight();
-            }
-        }
-    }
+    dispatchMessage(kSMC_PowerEvent, &powerState);
     return super::setPowerState(powerState, whatDevice);
 }

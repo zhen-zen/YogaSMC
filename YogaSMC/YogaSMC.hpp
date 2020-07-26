@@ -10,6 +10,7 @@
 #include <IOKit/IOCommandGate.h>
 #include <IOKit/IOService.h>
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
+#include "message.h"
 #include "WMI.h"
 
 #define kIOACPIMessageD0 0xd0
@@ -38,17 +39,6 @@ static IOPMPowerState IOPMPowerStates[kIOPMNumberPowerStates] = {
 
 enum
 {
-    // from keyboard to mouse/touchpad
-    kSMC_setDisableTouchpad = iokit_vendor_specific_msg(100),   // set disable/enable touchpad (data is bool*)
-    kSMC_getDisableTouchpad = iokit_vendor_specific_msg(101),   // get disable/enable touchpad (data is bool*)
-
-    // from sensor to keyboard
-    kSMC_setKeyboardStatus  = iokit_vendor_specific_msg(200),   // set disable/enable keyboard (data is bool*)
-    kSMC_getKeyboardStatus  = iokit_vendor_specific_msg(201)    // get disable/enable keyboard (data is bool*)
-};
-
-enum
-{
     kYogaMode_laptop = 1,   // 0-90 degree
     kYogaMode_tablet = 2,   // 0/360 degree
     kYogaMode_stand  = 3,   // 180-360 degree, ∠ , screen face up
@@ -64,7 +54,6 @@ private:
 //    IOACPIPlatformDevice *device {nullptr};
     WMI* YWMI {nullptr};
 
-    void dispatchMessage(int message, void* data);
     void dispatchMessageGated(int* message, void* data);
 
     bool notificationHandler(void * refCon, IOService * newService, IONotifier * notifier);
@@ -105,6 +94,8 @@ protected:
      *  @return kIOReturnSuccess
      */
     static IOReturn VPCNotification(void *target, void *refCon, UInt32 messageType, IOService *provider, void *messageArgument, vm_size_t argSize);
+
+    void dispatchMessage(int message, void* data);
 
     OSDictionary *Event {nullptr};
 
