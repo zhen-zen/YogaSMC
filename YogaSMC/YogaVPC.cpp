@@ -11,6 +11,17 @@
 
 OSDefineMetaClassAndStructors(YogaVPC, IOService);
 
+IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
+{
+    IOLog("%s::%s Probing\n", getName(), provider->getName());
+
+    vpc = OSDynamicCast(IOACPIPlatformDevice, provider);
+    if (!vpc)
+        return nullptr;
+
+    return super::probe(provider, score);
+}
+
 bool YogaVPC::start(IOService *provider) {
     bool res = super::start(provider);
 
@@ -123,7 +134,7 @@ IOReturn YogaVPC::setProperties(OSObject *props) {
 IOReturn YogaVPC::message(UInt32 type, IOService *provider, void *argument) {
     if (argument) {
         IOLog("%s::%s message: type=%x, provider=%s, argument=0x%04x\n", getName(), name, type, provider->getName(), *((UInt32 *) argument));
-        updateVPC();
+        updateAll();
     } else {
         IOLog("%s::%s message: type=%x, provider=%s\n", getName(), name, type, provider->getName());
     }

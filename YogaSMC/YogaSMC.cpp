@@ -14,7 +14,7 @@ OSDefineMetaClassAndStructors(YogaWMI, IOService)
 bool YogaWMI::init(OSDictionary *dictionary)
 {
     bool res = super::init(dictionary);
-    IOLog("%s::%s Initializing\n", getName(), name);
+    IOLog("%s Initializing\n", getName());
 
     _deliverNotification = OSSymbol::withCString(kDeliverNotifications);
      if (_deliverNotification == NULL)
@@ -40,16 +40,16 @@ IOService *YogaWMI::probe(IOService *provider, SInt32 *score)
     name = provider->getName();
 
     if (strncmp(name, "WTBT", 4) == 0) {
-        IOLog("%s::%s exiting on %s\n", getName(), name, name);
+        IOLog("%s::%s exiting on Thunderbolt interface\n", getName(), name);
         return NULL;
     }
-    if (strncmp(name, "WMI2", 4) == 0) {
-        if (strncmp(getName(), "YogaWMI", 7) == 0) {
-            IOLog("%s::%s exiting on %s\n", getName(), name, name);
-            return NULL;
-        }
+
+    if (provider->getClient() != this) {
+        IOLog("%s::%s already loaded, exiting\n", getName(), name);
+        return NULL;
     }
-    IOLog("%s::%s Probing %s\n", getName(), name, name);
+
+    IOLog("%s::%s Probing\n", getName(), name);
 
     return super::probe(provider, score);
 }

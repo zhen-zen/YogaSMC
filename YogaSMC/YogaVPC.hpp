@@ -113,7 +113,7 @@ public:
 
     static YogaVPC* withDevice(IOACPIPlatformDevice *device, OSString *pnp);
     IOReturn setProperties(OSObject* props) APPLE_KEXT_OVERRIDE;
-    IOReturn message(UInt32 type, IOService *provider, void *argument) APPLE_KEXT_OVERRIDE;
+    virtual IOReturn message(UInt32 type, IOService *provider, void *argument) APPLE_KEXT_OVERRIDE;
 };
 
 #endif /* YogaVPC_hpp */
