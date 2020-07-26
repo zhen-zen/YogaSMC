@@ -83,7 +83,6 @@ YogaVPC* YogaVPC::withDevice(IOACPIPlatformDevice *device, OSString *pnp) {
 
 void YogaVPC::updateAll() {
     updateClamshell();
-    updateVPC();
 }
 
 void YogaVPC::setPropertiesGated(OSObject* props) {

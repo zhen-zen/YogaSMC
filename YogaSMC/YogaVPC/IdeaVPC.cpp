@@ -30,8 +30,6 @@ IdeaVPC* IdeaVPC::withDevice(IOACPIPlatformDevice *device, OSString *pnp) {
 }
 
 void IdeaVPC::updateAll() {
-    updateBatteryID();
-    updateBatteryInfo();
     updateConservation();
     updateKeyboard();
     updateVPC();
@@ -113,6 +111,8 @@ bool IdeaVPC::initVPC() {
     else
         setProperty("PrimeKeyType", "FnKey");
 
+    updateBatteryID();
+    updateBatteryInfo();
 
     return true;
 }
@@ -197,6 +197,9 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                 entry->setObject(clamshellPrompt, dict->getObject(clamshellPrompt));
                 super::setPropertiesGated(entry);
                 entry->release();
+            } else if (key->isEqualTo(batteryPrompt)) {
+                updateBatteryID();
+                updateBatteryInfo();
             } else if (key->isEqualTo(updatePrompt)) {
                 updateAll();
                 super::updateAll();
@@ -478,7 +481,7 @@ void IdeaVPC::updateVPC() {
 
                 case 1: // ENERGY_EVENT_GENERAL / ENERGY_EVENT_KEYBDLED_OLD
                     IOLog("%s::%s Fn+Space keyboard backlight?", getName(), name);
-                    // functional, TODO: read / write keyboard backlight level
+                    updateKeyboard();
                     // also on AC connect / disconnect
                     break;
 

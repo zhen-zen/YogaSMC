@@ -138,7 +138,10 @@ bool YogaWMI::start(IOService *provider)
         }
     }
 
-    findVPC();
+    if(getPnp() && !findVPC()) {
+        IOLog("%s::%s Failed to start VPC\n", getName(), name);
+        return false;
+    }
 
     workLoop = IOWorkLoop::workLoop();
     commandGate = IOCommandGate::commandGate(this);
@@ -322,9 +325,6 @@ bool YogaWMI::notificationHandler(void *refCon, IOService *newService, IONotifie
 }
 
 bool YogaWMI::findVPC() {
-    if(!getPnp())
-        return false;
-
     auto iterator = IORegistryIterator::iterateOver(gIOACPIPlane, kIORegistryIterateRecursively);
     if (!iterator) {
         IOLog("%s::%s findVPC failed\n", getName(), name);
@@ -344,6 +344,9 @@ bool YogaWMI::findVPC() {
         }
     }
     iterator->release();
+
+    if (!vpc)
+        return false;
 
     setProperty("Feature", "VPC");
     return initVPC();
