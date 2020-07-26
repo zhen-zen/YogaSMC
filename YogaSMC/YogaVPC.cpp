@@ -39,9 +39,10 @@ bool YogaVPC::start(IOService *provider) {
         return false;
     }
 
-    registerService();
-
     updateAll();
+
+    setProperty("RM,deliverNotifications", kOSBooleanTrue);
+    registerService();
     return res;
 }
 
