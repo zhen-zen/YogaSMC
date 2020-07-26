@@ -99,16 +99,25 @@ private:
     void updateAll() APPLE_KEXT_OVERRIDE;
     void updateVPC() APPLE_KEXT_OVERRIDE;
 
+    /**
+     *  Automatically turn off backlight mode on sleep
+     */
+    bool AutomaticBacklightMode {true};
 
     /**
      *  Backlight mode capability, will be update on init
      */
-    bool BacklightCap {true};
+    bool BacklightCap {false};
 
     /**
      *  Backlight mode status
      */
     bool BacklightMode {false};
+
+    /**
+     *  Backlight mode status before sleep
+     */
+    bool BacklightModeSleep {false};
 
     /**
      *  Battery conservation mode status
@@ -118,7 +127,7 @@ private:
     /**
      *  Fn lock mode capability, will be update on init
      */
-    bool FnlockCap {true};
+    bool FnlockCap {false};
 
     /**
      *  Fn lock mode status

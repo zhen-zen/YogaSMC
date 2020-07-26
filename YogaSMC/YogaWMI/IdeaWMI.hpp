@@ -30,6 +30,7 @@ public:
     IOService *probe(IOService *provider, SInt32 *score) APPLE_KEXT_OVERRIDE;
     void stop(IOService *provider) APPLE_KEXT_OVERRIDE;
     void free(void) APPLE_KEXT_OVERRIDE;
+    IOReturn setPowerState(unsigned long powerState, IOService * whatDevice) APPLE_KEXT_OVERRIDE;
 };
 
 #endif /* IdeaWMI_hpp */

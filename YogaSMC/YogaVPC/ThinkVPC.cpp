@@ -50,7 +50,7 @@ bool ThinkVPC::updateConservation(const char * method, bool update) {
 
     if (update) {
         IOLog(updateSuccess, getName(), name, method, result);
-        setProperty(method, result);
+        setProperty(method, result, 32);
     }
 
     return true;
@@ -200,7 +200,7 @@ bool ThinkVPC::setFanControl(int level) {
     UInt32 result;
 
     OSObject* params[1] = {
-        OSNumber::withNumber((level ? 0x00040000 : 0), 32)
+        OSNumber::withNumber((level ? BIT(18) : 0), 32)
     };
 
     if (vpc->evaluateInteger(setControl, &result, params, 1) != kIOReturnSuccess) {
@@ -212,7 +212,7 @@ bool ThinkVPC::setFanControl(int level) {
         return false;
     }
 
-    IOLog(toggleSuccess, getName(), name, fanControlPrompt, (level ? 0x00040000 : 0), (level ? "7" : "auto"));
+    IOLog(toggleSuccess, getName(), name, fanControlPrompt, (level ? BIT(18) : 0), (level ? "7" : "auto"));
     setProperty(fanControlPrompt, level, 32);
     return true;
 }

@@ -56,3 +56,26 @@ bool IdeaWMI::initVPC() {
     dev = IdeaVPC::withDevice(vpc, getPnp());
     return true;
 }
+
+IOReturn IdeaWMI::setPowerState(unsigned long powerState, IOService *whatDevice){
+    IOLog("%s::%s powerState %ld : %s", getName(), name, powerState, powerState ? "on" : "off");
+
+    if (whatDevice != this)
+        return kIOReturnInvalid;
+
+    // Maybe move to IdeaVPC itself
+    if (dev) {
+        if (dev->BacklightCap && dev->AutomaticBacklightMode) {
+            dev->updateKeyboard();
+            if (powerState == 0) {
+                dev->BacklightModeSleep = dev->BacklightMode;
+                if (dev->BacklightMode)
+                    dev->toggleBacklight();
+            } else {
+                if (dev->BacklightModeSleep && !dev->BacklightMode)
+                    dev->toggleBacklight();
+            }
+        }
+    }
+    return super::setPowerState(powerState, whatDevice);
+}
