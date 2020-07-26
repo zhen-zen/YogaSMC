@@ -8,6 +8,7 @@
 //
 
 #include "ThinkWMI.hpp"
+OSDefineMetaClassAndStructors(ThinkWMI, YogaWMI);
 
 IOService *ThinkWMI::probe(IOService *provider, SInt32 *score)
 {
