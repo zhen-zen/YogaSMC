@@ -22,8 +22,6 @@ private:
     bool initVPC() APPLE_KEXT_OVERRIDE;
     inline OSString *getPnp() APPLE_KEXT_OVERRIDE {return OSString::withCString(PnpDeviceIdVPCThink);};
 
-    void YogaEvent(UInt32 argument) APPLE_KEXT_OVERRIDE;
-
     ThinkVPC *dev;
 
 public:

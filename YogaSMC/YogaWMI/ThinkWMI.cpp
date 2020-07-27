@@ -34,10 +34,6 @@ void ThinkWMI::free(void)
     super::free();
 }
 
-void ThinkWMI::YogaEvent(UInt32 argument) {
-    super::YogaEvent(argument);
-}
-
 bool ThinkWMI::initVPC() {
     dev = ThinkVPC::withDevice(vpc, getPnp());
     return true;

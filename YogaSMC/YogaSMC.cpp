@@ -210,19 +210,7 @@ void YogaWMI::stop(IOService *provider)
     super::stop(provider);
 }
 
-void YogaWMI::YogaEvent(UInt32 argument) {
-    if (argument != kIOACPIMessageD0) {
-        IOLog("%s::%s Unknown argument 0x%x\n", getName(), name, argument);
-        return;
-    }
-
-    IOLog("%s::%s message: argument D0 -> WMIY\n", getName(), name);
-
-    if (!isYMC) {
-        IOLog("YogaWMI::message: unknown YMC");
-        return;
-    }
-
+void YogaWMI::updateYogaMode() {
     OSObject* params[3] = {
         OSNumber::withNumber(0ULL, 32),
         OSNumber::withNumber(0ULL, 32),
@@ -275,12 +263,48 @@ void YogaWMI::YogaEvent(UInt32 argument) {
     dispatchMessage(kSMC_YogaEvent, &YogaMode);
 }
 
+void YogaWMI::ACPIEvent(UInt32 argument) {
+    switch (argument) {
+        case kIOACPIMessageReserved:
+            IOLog("%s::%s Notification 80\n", getName(), name);
+            // force enable keyboard and touchpad
+            setTopCase(true);
+            dispatchMessage(kSMC_FnlockEvent, NULL);
+            break;
+
+        case kIOACPIMessageD0:
+            if (isYMC) {
+                IOLog("%s::%s message: Notification D0\n", getName(), name);
+                updateYogaMode();
+            } else {
+                IOLog("%s::%s message: unknown YMC", getName(), name);
+            }
+            break;
+
+        default:
+            IOLog("%s::%s Unknown ACPI Notification 0x%x\n", getName(), name, argument);
+            break;
+    }
+    return;
+}
+
 IOReturn YogaWMI::message(UInt32 type, IOService *provider, void *argument) {
-    if (argument) {
-        IOLog("%s::%s message: type=%x, provider=%s, argument=0x%04x\n", getName(), name, type, provider->getName(), *((UInt32 *) argument));
-        YogaEvent(*(UInt32 *) argument);
-    } else {
-        IOLog("%s::%s message: type=%x, provider=%s\n", getName(), name, type, provider->getName());
+    switch (type)
+    {
+        case kIOACPIMessageDeviceNotification:
+            if (argument) {
+                IOLog("%s::%s message: ACPI provider=%s, argument=0x%04x\n", getName(), name, provider->getName(), *((UInt32 *) argument));
+                ACPIEvent(*(UInt32 *) argument);
+            } else {
+                IOLog("%s::%s message: ACPI provider=%s, argument unknown", getName(), name, provider->getName());
+            }
+            break;
+
+        default:
+            if (argument)
+                IOLog("%s::%s message: type=%x, provider=%s, argument=0x%04x\n", getName(), name, type, provider->getName(), *((UInt32 *) argument));
+            else
+                IOLog("%s::%s message: type=%x, provider=%s\n", getName(), name, type, provider->getName());
     }
     return kIOReturnSuccess;
 }
@@ -438,7 +462,7 @@ IOReturn YogaWMI::setPowerState(unsigned long powerState, IOService *whatDevice)
                 setTopCase(true);
             }
         } else {
-            YogaEvent(kIOACPIMessageD0);
+            updateYogaMode();
         }
     }
     return kIOPMAckImplied;

@@ -127,11 +127,16 @@ protected:
     int YogaMode {kYogaMode_laptop};
 
     /**
+     *  Update Yoga Mode
+     */
+    void updateYogaMode();
+    
+    /**
      *  Corresponding event to trigger after receiving a message
      *
      *  @param argument  argument of message
      */
-    virtual void YogaEvent(UInt32 argument);
+    virtual void ACPIEvent(UInt32 argument);
 
     /**
      *  Current Keyboard status

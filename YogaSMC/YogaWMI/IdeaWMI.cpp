@@ -34,17 +34,17 @@ void IdeaWMI::free(void)
     super::free();
 }
 
-void IdeaWMI::YogaEvent(UInt32 argument) {
+void IdeaWMI::ACPIEvent(UInt32 argument) {
     switch (argument) {
         case kIOACPIMessageReserved:
-            IOLog("%s::%s Type 80 -> WMI2\n", getName(), name);
+            IOLog("%s::%s Notification 80\n", getName(), name);
             // force enable keyboard and touchpad
             setTopCase(true);
             dispatchMessage(kSMC_FnlockEvent, NULL);
             break;
 
         default:
-            IOLog("%s::%s Unknown argument 0x%x\n", getName(), name, argument);
+            IOLog("%s::%s Unknown ACPI Notification 0x%x\n", getName(), name, argument);
             break;
     }
 }
@@ -52,14 +52,4 @@ void IdeaWMI::YogaEvent(UInt32 argument) {
 bool IdeaWMI::initVPC() {
     dev = IdeaVPC::withDevice(vpc, getPnp());
     return true;
-}
-
-IOReturn IdeaWMI::setPowerState(unsigned long powerState, IOService *whatDevice){
-    IOLog("%s::%s powerState %ld : %s", getName(), name, powerState, powerState ? "on" : "off");
-
-    if (whatDevice != this)
-        return kIOReturnInvalid;
-
-    dispatchMessage(kSMC_PowerEvent, &powerState);
-    return super::setPowerState(powerState, whatDevice);
 }
