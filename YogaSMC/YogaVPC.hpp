@@ -25,6 +25,7 @@
 #define mutePrompt "Mute"
 #define VPCPrompt "VPCconfig"
 #define readECPrompt "ReadEC"
+#define resetPrompt "reset"
 #define writeECPrompt "WriteEC"
 #define updatePrompt "Update"
 

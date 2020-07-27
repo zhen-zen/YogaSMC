@@ -137,7 +137,7 @@ private:
     /**
      *  Initialize Keyboard status
      */
-    void initKeyboard();
+    void initEC();
     
     /**
      *  Update battery ID

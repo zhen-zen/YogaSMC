@@ -92,11 +92,7 @@ bool IdeaVPC::initVPC() {
     setProperty("Capability", capabilities);
     capabilities->release();
 #endif
-    initKeyboard();
-
-    updateBatteryID();
-    updateBatteryInfo();
-
+    initEC();
     return true;
 }
 
@@ -240,6 +236,8 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
             } else if (key->isEqualTo(updatePrompt)) {
                 updateAll();
                 super::updateAll();
+            } else if (key->isEqualTo(resetPrompt)) {
+                initEC();
             } else {
                 IOLog("%s::%s Unknown property %s\n", getName(), name, key->getCStringNoCopy());
             }
@@ -250,26 +248,37 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
     return;
 }
 
-void IdeaVPC::initKeyboard() {
-    UInt32 state;
+void IdeaVPC::initEC() {
+    UInt32 state, attempts = 0;
+    do {
+        if (vpc->evaluateInteger(getKeyboardMode, &state) == kIOReturnSuccess)
+            break;
+        if (++attempts > 5) {
+            IOLog(updateFailure, getName(), name, getKeyboardMode);
+            setProperty("EC Access", "Error");
+            return;
+        }
+        IOSleep(200);
+    } while (true);
 
-    if (vpc->evaluateInteger(getKeyboardMode, &state) != kIOReturnSuccess) {
-        IOLog(updateFailure, getName(), name, getKeyboardMode);
-        setProperty("Keyboard Control", "Unavailable");
-    } else {
-        removeProperty("Keyboard Control");
-        BacklightCap = BIT(HA_BACKLIGHT_CAP_BIT) & state;
-        if (!BacklightCap)
-            setProperty(BacklightPrompt, "disabled");
-        
-        FnlockCap = BIT(HA_FNLOCK_CAP_BIT) & state;
-        if (!FnlockCap)
-            setProperty(FnKeyPrompt, "disabled");
-        if (BIT(HA_PRIMEKEY_BIT) & state)
-            setProperty("PrimeKeyType", "HotKey");
-        else
-            setProperty("PrimeKeyType", "FnKey");
-    }
+    if (attempts)
+        setProperty("EC Access", attempts + 1, 8);
+
+    BacklightCap = BIT(HA_BACKLIGHT_CAP_BIT) & state;
+    if (!BacklightCap)
+        setProperty(BacklightPrompt, "disabled");
+    
+    FnlockCap = BIT(HA_FNLOCK_CAP_BIT) & state;
+    if (!FnlockCap)
+        setProperty(FnKeyPrompt, "disabled");
+
+    if (BIT(HA_PRIMEKEY_BIT) & state)
+        setProperty("PrimeKeyType", "HotKey");
+    else
+        setProperty("PrimeKeyType", "FnKey");
+
+    updateBatteryID();
+    updateBatteryInfo();
 }
 
 /*
@@ -707,10 +716,6 @@ IOReturn IdeaVPC::setPowerState(unsigned long powerState, IOService *whatDevice)
     if (whatDevice != this)
         return kIOReturnInvalid;
 
-    if (!BacklightCap && !FnlockCap) {
-        IOLog("%s::%s try initialize keyboard again", getName(), name);
-        initKeyboard();
-    }
     if (BacklightCap && AutomaticBacklightMode) {
         updateKeyboard();
         if (powerState == 0) {
