@@ -19,6 +19,7 @@
 #define BacklightPrompt "BacklightMode"
 #define conservationPrompt "ConservationMode"
 #define clamshellPrompt "ClamshellMode"
+#define ECLockPrompt "ECLock"
 #define FnKeyPrompt "FnlockMode"
 #define fanControlPrompt "FanControl"
 #define KeyboardPrompt "KeyboardMode"
@@ -39,9 +40,6 @@
 
 #define timeoutPrompt "%s::%s %s timeout 0x%x\n"
 #define VPCUnavailable "%s::%s VPC unavailable\n"
-
-#define PnpDeviceIdVPCIdea "VPC2004"
-#define PnpDeviceIdVPCThink "LEN0268"
 
 #define BIT(nr) (1U << (nr))
 

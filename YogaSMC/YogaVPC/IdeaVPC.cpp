@@ -204,7 +204,22 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                     IOLog(valueMatched, getName(), name, FnKeyPrompt, (FnlockMode ? "enabled" : "disabled"));
                 else
                     toggleFnlock();
+            } else if (key->isEqualTo(ECLockPrompt)) {
+                OSBoolean * value = OSDynamicCast(OSBoolean, dict->getObject(ECLockPrompt));
+                if (value == NULL) {
+                    IOLog(valueInvalid, getName(), name, ECLockPrompt);
+                    continue;
+                }
+
+                if (value->getValue())
+                    continue;
+                
+                ECLock = false;
+                IOLog("%s::%s direct VPC EC manipulation is unlocked", getName(), name);
             } else if (key->isEqualTo(readECPrompt)) {
+                if (ECLock)
+                    continue;
+
                 OSNumber * value = OSDynamicCast(OSNumber, dict->getObject(readECPrompt));
                 if (value == NULL) {
                     IOLog(valueInvalid, getName(), name, readECPrompt);
@@ -219,12 +234,24 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                 else
                     IOLog("%s::%s %s failed 0x%x %d\n", getName(), name, readECPrompt, value->unsigned32BitValue(), retries);
             } else if (key->isEqualTo(writeECPrompt)) {
+                if (ECLock)
+                    continue;
+
                 OSNumber * value = OSDynamicCast(OSNumber, dict->getObject(writeECPrompt));
                 if (value == NULL) {
                     IOLog(valueInvalid, getName(), name, writeECPrompt);
                     continue;
                 }
-                IOLog("%s::%s %s 0x%x not implemented\n", getName(), name, writeECPrompt, value->unsigned32BitValue());
+
+                UInt32 command, data;
+                UInt8 retries = 0;
+                command = value->unsigned32BitValue() >> 8;
+                data = value->unsigned32BitValue() & 0xff;
+
+                if (write_ec_data(command, data, &retries))
+                    IOLog("%s::%s %s 0x%x 0x%x success %d\n", getName(), name, writeECPrompt, command, data, retries);
+                else
+                    IOLog("%s::%s %s 0x%x 0x%x failed %d\n", getName(), name, writeECPrompt, command, data, retries);
             } else if (key->isEqualTo(clamshellPrompt)) {
                 OSDictionary* entry = OSDictionary::withCapacity(1);
                 entry->setObject(clamshellPrompt, dict->getObject(clamshellPrompt));
@@ -280,40 +307,6 @@ void IdeaVPC::initEC() {
     updateBatteryID();
     updateBatteryInfo();
 }
-
-/*
- * Method(GBID, 0, Serialized) will return a package in following format, while value
- * with 0xff may be considered invalid. Four groups of 16 bits in ID field are filled
- * with following values:
- *
- * BMIL/BMIH Battery Manufacturer
- * HIDL/HIDH Hardware ID
- * FMVL/FMVH Firmware Version
- * DAVL/DAVH ?
- *
- * Name (BFIF, Package (0x04)
- * {
- *     Buffer (0x02)
- *     {
- *          0x00, 0x00                                       // Battery 0 Cycle Count
- *     },
- *
- *     Buffer (0x02)
- *     {
- *          0xFF, 0xFF                                       // Battery 1 Cycle Count
- *     },
- *
- *     Buffer (0x08)
- *     {
- *          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00   // Battery 0 ID
- *     },
- *
- *     Buffer (0x08)
- *     {
- *          0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF   // Battery 1 ID
- *     }
- * })
- */
 
 bool IdeaVPC::updateBatteryID(bool update) {
     OSArray *data;
@@ -392,9 +385,8 @@ bool IdeaVPC::updateBatteryInfo(bool update) {
     }
     UInt16 * bdata = (UInt16 *)(data->getBytesNoCopy());
     // B1TM
-    if (bdata[7] != 0) {
-        parseTemperature(bdata[7], "Battery Temperature");
-    }
+    if (bdata[7] != 0)
+        parseTemperature(bdata[7], "BAT0 Temperature");
     // B1DT
     if (bdata[8] != 0)
         parseRawDate(bdata[8], 0);

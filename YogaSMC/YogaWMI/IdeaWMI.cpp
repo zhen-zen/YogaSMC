@@ -21,19 +21,6 @@ IOService *IdeaWMI::probe(IOService *provider, SInt32 *score)
     return super::probe(provider, score);
 }
 
-void IdeaWMI::stop(IOService *provider) {
-    if (dev)
-        dev->stop(vpc);
-    super::stop(provider);
-}
-
-void IdeaWMI::free(void)
-{
-    if (dev)
-        dev->free();
-    super::free();
-}
-
 void IdeaWMI::ACPIEvent(UInt32 argument) {
     switch (argument) {
         case kIOACPIMessageReserved:
@@ -47,9 +34,4 @@ void IdeaWMI::ACPIEvent(UInt32 argument) {
             IOLog("%s::%s Unknown ACPI Notification 0x%x\n", getName(), name, argument);
             break;
     }
-}
-
-bool IdeaWMI::initVPC() {
-    dev = IdeaVPC::withDevice(vpc, getPnp());
-    return true;
 }

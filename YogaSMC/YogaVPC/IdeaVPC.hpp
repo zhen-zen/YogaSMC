@@ -125,6 +125,11 @@ private:
     bool conservationMode {false};
 
     /**
+     *  Prohibit diirect EC manipulate by default
+     */
+    bool ECLock {true};
+
+    /**
      *  Fn lock mode capability, will be update on init
      */
     bool FnlockCap {false};
@@ -141,6 +146,38 @@ private:
     
     /**
      *  Update battery ID
+     *
+     *  Method(GBID, 0, Serialized) will return a package in following format, while value
+     *  with 0xff may be considered invalid. Four groups of 16 bits in ID field are filled
+     *  with following values:
+     *
+     *  BMIL/BMIH Battery Manufacturer
+     *  HIDL/HIDH Hardware ID
+     *  FMVL/FMVH Firmware Version
+     *  DAVL/DAVH ?
+     *
+     *  Name (BFIF, Package (0x04)
+     *  {
+     *      Buffer (0x02)
+     *      {
+     *           0x00, 0x00                                       // Battery 0 Cycle Count
+     *      },
+     *
+     *      Buffer (0x02)
+     *      {
+     *           0xFF, 0xFF                                       // Battery 1 Cycle Count
+     *      },
+     *
+     *      Buffer (0x08)
+     *      {
+     *           0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00   // Battery 0 ID
+     *      },
+     *
+     *      Buffer (0x08)
+     *      {
+     *           0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF   // Battery 1 ID
+     *      }
+     *  })
      *
      *  @param update only update internal status when false
      *

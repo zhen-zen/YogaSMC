@@ -6,7 +6,6 @@
 //  Created by Zhen on 2020/5/21.
 //  Copyright © 2020 Zhen. All rights reserved.
 //
-//#include "kern_util.hpp"
 #include <IOKit/IOCommandGate.h>
 #include <IOKit/IOService.h>
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
