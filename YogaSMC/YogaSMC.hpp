@@ -13,9 +13,6 @@
 #include "message.h"
 #include "WMI.h"
 
-#define kIOACPIMessageD0 0xd0
-#define kIOACPIMessageReserved 0x80
-
 #define WBAT_BAT0_BatMaker 0
 #define WBAT_BAT0_HwId     1
 #define WBAT_BAT0_MfgDate  2
@@ -28,14 +25,6 @@
 #define YMC_WMI_EVENT  "06129d99-6083-4164-81ad-f092f9d773a6"
 
 #define kDeliverNotifications   "RM,deliverNotifications"
-
-#define kIOPMPowerOff                       0
-#define kIOPMNumberPowerStates     2
-
-static IOPMPowerState IOPMPowerStates[kIOPMNumberPowerStates] = {
-    {1, kIOPMPowerOff, kIOPMPowerOff, kIOPMPowerOff, 0, 0, 0, 0, 0, 0, 0, 0},
-    {1, kIOPMPowerOn, kIOPMPowerOn, kIOPMPowerOn, 0, 0, 0, 0, 0, 0, 0, 0}
-};
 
 enum
 {

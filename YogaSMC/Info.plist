@@ -20,14 +20,14 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>IOKitPersonalities</key>
 	<dict>
-		<key>IdeaWMI</key>
+		<key>IdeaVPC</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
 			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 			<key>IOClass</key>
-			<string>IdeaWMI</string>
+			<string>IdeaVPC</string>
 			<key>IONameMatch</key>
-			<string>WMI2</string>
+			<string>VPC2004</string>
 			<key>IOProbeScore</key>
 			<integer>300</integer>
 			<key>IOProviderClass</key>

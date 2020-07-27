@@ -9,6 +9,17 @@
 #ifndef message_h
 #define message_h
 
+#define kIOACPIMessageD0 0xd0
+#define kIOACPIMessageReserved 0x80
+
+#define kIOPMPowerOff              0
+#define kIOPMNumberPowerStates     2
+
+static IOPMPowerState IOPMPowerStates[kIOPMNumberPowerStates] = {
+    {1, kIOPMPowerOff, kIOPMPowerOff, kIOPMPowerOff, 0, 0, 0, 0, 0, 0, 0, 0},
+    {1, kIOPMPowerOn, kIOPMPowerOn, kIOPMPowerOn, 0, 0, 0, 0, 0, 0, 0, 0}
+};
+
 enum
 {
     // from keyboard to mouse/touchpad
@@ -20,9 +31,10 @@ enum
     kSMC_getKeyboardStatus  = iokit_vendor_specific_msg(201),   // get disable/enable keyboard (data is bool*)
 
     // SMC message types
-    kSMC_YogaEvent          = iokit_vendor_specific_msg(500),
-    kSMC_FnlockEvent        = iokit_vendor_specific_msg(501),
-    kSMC_PowerEvent         = iokit_vendor_specific_msg(502)
+    kSMC_VPCType            = iokit_vendor_specific_msg(500),   // get loaded VPC type (data is UInt32*)
+    kSMC_YogaEvent          = iokit_vendor_specific_msg(501),   // Forward Yoga Event (data is UInt32*)
+    kSMC_FnlockEvent        = iokit_vendor_specific_msg(502)    // Forward Fnlock Event
+//    kSMC_PowerEvent         = iokit_vendor_specific_msg(503)
 };
 
 // from VoodooPS2

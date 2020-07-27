@@ -92,24 +92,7 @@ bool IdeaVPC::initVPC() {
     setProperty("Capability", capabilities);
     capabilities->release();
 #endif
-    UInt32 state;
-
-    if (vpc->evaluateInteger(getKeyboardMode, &state) != kIOReturnSuccess) {
-        IOLog(updateFailure, getName(), name, getKeyboardMode);
-        return false;
-    }
-
-    BacklightCap = BIT(HA_BACKLIGHT_CAP_BIT) & state;
-    if (!BacklightCap)
-        setProperty(BacklightPrompt, "disabled");
-
-    FnlockCap = BIT(HA_FNLOCK_CAP_BIT) & state;
-    if (!FnlockCap)
-        setProperty(FnKeyPrompt, "disabled");
-    if (BIT(HA_PRIMEKEY_BIT) & state)
-        setProperty("PrimeKeyType", "HotKey");
-    else
-        setProperty("PrimeKeyType", "FnKey");
+    initKeyboard();
 
     updateBatteryID();
     updateBatteryInfo();
@@ -150,24 +133,12 @@ IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
             toggleFnlock();
             break;
 
-        case kSMC_PowerEvent:
-            if (BacklightCap && AutomaticBacklightMode) {
-                updateKeyboard();
-                if (*((UInt32 *) argument) == 0) {
-                    BacklightModeSleep = BacklightMode;
-                    if (BacklightMode)
-                        toggleBacklight();
-                } else {
-                    if (BacklightModeSleep && !BacklightMode)
-                        toggleBacklight();
-                }
-            }
-            break;
-
         case kIOACPIMessageDeviceNotification:
             if (argument) {
-                IOLog("%s::%s message: ACPI provider=%s, argument=0x%04x\n", getName(), name, provider->getName(), *((UInt32 *) argument));
-                updateVPC();
+                if (*((UInt32 *) argument) == kIOACPIMessageReserved)
+                    updateVPC();
+                else
+                    IOLog("%s::%s message: ACPI provider=%s, argument unknown 0x%04x\n", getName(), name, provider->getName(), *((UInt32 *) argument));
             } else {
                 IOLog("%s::%s message: ACPI provider=%s, argument unknown", getName(), name, provider->getName());
             }
@@ -277,6 +248,28 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
     }
 
     return;
+}
+
+void IdeaVPC::initKeyboard() {
+    UInt32 state;
+
+    if (vpc->evaluateInteger(getKeyboardMode, &state) != kIOReturnSuccess) {
+        IOLog(updateFailure, getName(), name, getKeyboardMode);
+        setProperty("Keyboard Control", "Unavailable");
+    } else {
+        removeProperty("Keyboard Control");
+        BacklightCap = BIT(HA_BACKLIGHT_CAP_BIT) & state;
+        if (!BacklightCap)
+            setProperty(BacklightPrompt, "disabled");
+        
+        FnlockCap = BIT(HA_FNLOCK_CAP_BIT) & state;
+        if (!FnlockCap)
+            setProperty(FnKeyPrompt, "disabled");
+        if (BIT(HA_PRIMEKEY_BIT) & state)
+            setProperty("PrimeKeyType", "HotKey");
+        else
+            setProperty("PrimeKeyType", "FnKey");
+    }
 }
 
 /*
@@ -706,4 +699,29 @@ void IdeaVPC::parseTemperature(UInt16 data, const char * desc) {
     // UInt16 fahrenheit = (data - 2731) * 9 / 5 + 320;
     // snprintf(temperature, 9, "%d.%d℉", fahrenheit / 10, fahrenheit % 10);
     setProperty(desc, temperature);
+}
+
+IOReturn IdeaVPC::setPowerState(unsigned long powerState, IOService *whatDevice){
+    IOLog("%s::%s powerState %ld : %s", getName(), name, powerState, powerState ? "on" : "off");
+
+    if (whatDevice != this)
+        return kIOReturnInvalid;
+
+    if (!BacklightCap && !FnlockCap) {
+        IOLog("%s::%s try initialize keyboard again", getName(), name);
+        initKeyboard();
+    }
+    if (BacklightCap && AutomaticBacklightMode) {
+        updateKeyboard();
+        if (powerState == 0) {
+            BacklightModeSleep = BacklightMode;
+            if (BacklightMode)
+                toggleBacklight();
+        } else {
+            if (BacklightModeSleep && !BacklightMode)
+                toggleBacklight();
+        }
+    }
+
+    return kIOPMAckImplied;
 }

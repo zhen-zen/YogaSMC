@@ -135,6 +135,11 @@ private:
     bool FnlockMode {false};
 
     /**
+     *  Initialize Keyboard status
+     */
+    void initKeyboard();
+    
+    /**
      *  Update battery ID
      *
      *  @param update only update internal status when false
@@ -254,6 +259,7 @@ private:
 public:
     static IdeaVPC* withDevice(IOACPIPlatformDevice *device, OSString *pnp);
     IOReturn message(UInt32 type, IOService *provider, void *argument) APPLE_KEXT_OVERRIDE;
+    IOReturn setPowerState(unsigned long powerState, IOService * whatDevice) APPLE_KEXT_OVERRIDE;
 };
 
 #endif /* IdeaVPC_hpp */

@@ -41,6 +41,10 @@ bool YogaVPC::start(IOService *provider) {
 
     updateAll();
 
+    PMinit();
+    provider->joinPMtree(this);
+    registerPowerDriver(this, IOPMPowerStates, kIOPMNumberPowerStates);
+
     setProperty("RM,deliverNotifications", kOSBooleanTrue);
     registerService();
     return res;
@@ -56,6 +60,8 @@ void YogaVPC::stop(IOService *provider) {
     workLoop->removeEventSource(commandGate);
     OSSafeReleaseNULL(commandGate);
     OSSafeReleaseNULL(workLoop);
+
+    PMstop();
 
     terminate();
     detach(provider);
@@ -176,4 +182,13 @@ bool YogaVPC::toggleClamshell() {
     setProperty(clamshellPrompt, clamshellMode);
 
     return true;
+}
+
+IOReturn YogaVPC::setPowerState(unsigned long powerState, IOService *whatDevice){
+    IOLog("%s::%s powerState %ld : %s", getName(), name, powerState, powerState ? "on" : "off");
+
+    if (whatDevice != this)
+        return kIOReturnInvalid;
+
+    return kIOPMAckImplied;
 }
