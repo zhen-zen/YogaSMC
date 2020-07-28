@@ -37,7 +37,7 @@ void IdeaVPC::updateAll() {
 
 bool IdeaVPC::initVPC() {
     if (vpc->evaluateInteger(getVPCConfig, &config) != kIOReturnSuccess) {
-        IOLog(updateFailure, getName(), name, VPCPrompt);
+        IOLog(initFailure, getName(), name, getVPCConfig);
         return false;
     }
 

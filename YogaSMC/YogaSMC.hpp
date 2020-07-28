@@ -23,8 +23,6 @@
 #define YMC_WMI_METHOD "09b0ee6e-c3fd-4243-8da1-7911ff80bb8c"
 #define YMC_WMI_EVENT  "06129d99-6083-4164-81ad-f092f9d773a6"
 
-#define kDeliverNotifications   "RM,deliverNotifications"
-
 enum
 {
     kYogaMode_laptop = 1,   // 0-90 degree

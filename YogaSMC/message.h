@@ -23,6 +23,8 @@ static IOPMPowerState IOPMPowerStates[kIOPMNumberPowerStates] = {
     {1, kIOPMPowerOn, kIOPMPowerOn, kIOPMPowerOn, 0, 0, 0, 0, 0, 0, 0, 0}
 };
 
+#define kDeliverNotifications   "RM,deliverNotifications"
+
 enum
 {
     // from keyboard to mouse/touchpad

@@ -45,7 +45,7 @@ bool YogaVPC::start(IOService *provider) {
     provider->joinPMtree(this);
     registerPowerDriver(this, IOPMPowerStates, kIOPMNumberPowerStates);
 
-    setProperty("RM,deliverNotifications", kOSBooleanTrue);
+    setProperty(kDeliverNotifications, kOSBooleanTrue);
     registerService();
     return res;
 }

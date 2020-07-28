@@ -29,20 +29,20 @@
 			<key>IONameMatch</key>
 			<string>VPC2004</string>
 			<key>IOProbeScore</key>
-			<integer>300</integer>
+			<integer>100</integer>
 			<key>IOProviderClass</key>
 			<string>IOACPIPlatformDevice</string>
 		</dict>
-		<key>ThinkWMI</key>
+		<key>ThinkVPC</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
 			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 			<key>IOClass</key>
-			<string>ThinkWMI</string>
+			<string>ThinkVPC</string>
 			<key>IONameMatch</key>
-			<string>WMI1</string>
+			<string>LEN0268</string>
 			<key>IOProbeScore</key>
-			<integer>300</integer>
+			<integer>100</integer>
 			<key>IOProviderClass</key>
 			<string>IOACPIPlatformDevice</string>
 		</dict>

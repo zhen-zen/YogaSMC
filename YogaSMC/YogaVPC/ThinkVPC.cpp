@@ -71,7 +71,7 @@ bool ThinkVPC::initVPC() {
 
     if (vpc->evaluateInteger(getHKEYversion, &version) != kIOReturnSuccess)
     {
-        IOLog("%s::%s failed to get HKEY interface version\n", getName(), name);
+        IOLog(initFailure, getName(), name, getHKEYversion);
         return false;
     }
 

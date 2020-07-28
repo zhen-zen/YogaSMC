@@ -30,6 +30,7 @@
 #define writeECPrompt "WriteEC"
 #define updatePrompt "Update"
 
+#define initFailure "%s::%s %s evaluation failed, exiting\n"
 #define updateFailure "%s::%s %s evaluation failed\n"
 #define updateSuccess "%s::%s %s 0x%x\n"
 #define toggleFailure "%s::%s %s toggle failed\n"
