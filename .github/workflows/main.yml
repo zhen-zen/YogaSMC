@@ -23,7 +23,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Download macOS 10.12 SDK (script from VoodooI2C)
       run: curl -L https://github.com/alexey-lysiuk/macos-sdk/releases/download/10.12/MacOSX10.12.tar.bz2 -o /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.tar.bz2 && tar -xjf /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.tar.bz2 -C /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/
-    - name: Download Lilu / VirtualSMC SDK (script from AsusSMC/Acidanthera)
+    - name: Download Lilu / VirtualSMC SDK (script from hieplpvip/AsusSMC (Acidanthera/Lilu))
       run: src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/hieplpvip/AsusSMC/master/Scripts/bootstrap.sh) && eval "$src" || exit 1
     - name: Xcodebuild Action
       uses: sersoft-gmbh/xcodebuild-action@v1.1
