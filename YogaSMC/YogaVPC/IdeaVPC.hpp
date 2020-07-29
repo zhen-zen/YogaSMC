@@ -296,7 +296,7 @@ private:
      */
     void parseTemperature(UInt16 data, const char * desc);
 
-    friend class IdeaWMI;
+    friend class BDVT;
 
 public:
     static IdeaVPC* withDevice(IOACPIPlatformDevice *device, OSString *pnp);

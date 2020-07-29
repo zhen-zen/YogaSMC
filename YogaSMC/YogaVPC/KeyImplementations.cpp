@@ -7,17 +7,27 @@
 //
 
 #include "KeyImplementations.hpp"
-#include "IdeaVPC.hpp"
 
 SMC_RESULT BDVT::readAccess() {
     bool *ptr = reinterpret_cast<bool *>(data);
     *ptr = value;
-    DBGLOG("vpckey", "BDVT read %d", data[0]);//, *(IdeaVPC::getConservation()));
+    if (vpc)
+        DBGLOG("vpckey", "BDVT read %d / %d", data[0], vpc->conservationMode);
+    else
+        DBGLOG("vpckey", "BDVT read %d", data[0]);
     return SmcSuccess;
 }
 
 SMC_RESULT BDVT::writeAccess() {
     value = *(reinterpret_cast<bool *>(data));
-    DBGLOG("vpckey", "BDVT write %d", data[0]);
+    if (vpc) {
+        vpc->updateConservation();
+        DBGLOG("vpckey", "BDVT write %d / %d", data[0], vpc->conservationMode);
+        if (value != vpc->conservationMode) {
+            vpc->toggleConservation();
+        }
+    } else {
+        DBGLOG("vpckey", "BDVT write %d", data[0]);
+    }
     return SmcSuccess;
 }

@@ -309,7 +309,7 @@ void IdeaVPC::initEC() {
     updateBatteryID();
     updateBatteryInfo();
 
-    VirtualSMCAPI::addKey(KeyBDVT, vsmcPlugin.data, VirtualSMCAPI::valueWithFlag(false, new BDVT, SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_WRITE));
+    VirtualSMCAPI::addKey(KeyBDVT, vsmcPlugin.data, VirtualSMCAPI::valueWithFlag(false, new BDVT(this), SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_WRITE));
     vsmcNotifier = VirtualSMCAPI::registerHandler(vsmcNotificationHandler, this);
 }
 
