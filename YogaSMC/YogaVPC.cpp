@@ -11,6 +11,9 @@
 
 OSDefineMetaClassAndStructors(YogaVPC, IOService);
 
+bool ADDPR(debugEnabled) = true;
+uint32_t ADDPR(debugPrintDelay) = 0;
+
 IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
 {
     IOLog("%s::%s Probing\n", getName(), provider->getName());
@@ -191,4 +194,24 @@ IOReturn YogaVPC::setPowerState(unsigned long powerState, IOService *whatDevice)
         return kIOReturnInvalid;
 
     return kIOPMAckImplied;
+}
+
+bool YogaVPC::vsmcNotificationHandler(void *sensors, void *refCon, IOService *vsmc, IONotifier *notifier) {
+    auto self = OSDynamicCast(YogaVPC, reinterpret_cast<OSMetaClassBase*>(sensors));
+    if (sensors && vsmc) {
+        DBGLOG("yogasmc", "got vsmc notification");
+        auto &plugin = self->vsmcPlugin;
+        auto ret = vsmc->callPlatformFunction(VirtualSMCAPI::SubmitPlugin, true, sensors, &plugin, nullptr, nullptr);
+        if (ret == kIOReturnSuccess) {
+            DBGLOG("yogasmc", "submitted plugin");
+            return true;
+        } else if (ret != kIOReturnUnsupported) {
+            SYSLOG("yogasmc", "plugin submission failure %X", ret);
+        } else {
+            DBGLOG("yogasmc", "plugin submission to non vsmc");
+        }
+    } else {
+        SYSLOG("yogasmc", "got null vsmc notification");
+    }
+    return false;
 }

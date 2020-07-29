@@ -8,6 +8,7 @@
 //
 
 #include "IdeaVPC.hpp"
+#include "KeyImplementations.hpp"
 OSDefineMetaClassAndStructors(IdeaVPC, YogaVPC);
 
 IdeaVPC* IdeaVPC::withDevice(IOACPIPlatformDevice *device, OSString *pnp) {
@@ -264,6 +265,7 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                 updateAll();
                 super::updateAll();
             } else if (key->isEqualTo(resetPrompt)) {
+                conservationModeLock = false;
                 initEC();
             } else {
                 IOLog("%s::%s Unknown property %s\n", getName(), name, key->getCStringNoCopy());
@@ -306,6 +308,9 @@ void IdeaVPC::initEC() {
 
     updateBatteryID();
     updateBatteryInfo();
+
+    VirtualSMCAPI::addKey(KeyBDVT, vsmcPlugin.data, VirtualSMCAPI::valueWithFlag(false, new BDVT, SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_WRITE));
+    vsmcNotifier = VirtualSMCAPI::registerHandler(vsmcNotificationHandler, this);
 }
 
 bool IdeaVPC::updateBatteryID(bool update) {
@@ -442,6 +447,9 @@ bool IdeaVPC::updateKeyboard(bool update) {
 }
 
 bool IdeaVPC::toggleConservation() {
+    if (conservationModeLock)
+        return false;
+
     UInt32 result;
 
     OSObject* params[1] = {

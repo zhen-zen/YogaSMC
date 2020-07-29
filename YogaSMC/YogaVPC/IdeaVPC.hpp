@@ -10,7 +10,7 @@
 #ifndef IdeaVPC_hpp
 #define IdeaVPC_hpp
 
-#include "../YogaVPC.hpp"
+#include "YogaVPC.hpp"
 
 // from linux/drivers/platform/x86/ideapad-laptop.c
 
@@ -122,7 +122,12 @@ private:
     /**
      *  Battery conservation mode status
      */
-    bool conservationMode {false};
+    bool conservationMode;
+    
+    /**
+     *  Prohibit early conservation mode manipulation
+     */
+    bool conservationModeLock {true};
 
     /**
      *  Prohibit diirect EC manipulate by default

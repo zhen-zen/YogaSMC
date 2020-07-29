@@ -10,7 +10,7 @@
 #ifndef ThinkVPC_hpp
 #define ThinkVPC_hpp
 
-#include "../YogaVPC.hpp"
+#include "YogaVPC.hpp"
 
 // from linux/drivers/platform/x86/ideapad-laptop.c
 // TODO: https://github.com/lenovo/thinklmi
@@ -60,7 +60,7 @@ private:
 
     bool updateConservation(const char* method, bool update=true);
     
-    bool toggleConservation();
+//    bool toggleConservation();
     bool updateAdaptiveKBD(int arg);
     bool updateMutestatus();
 
