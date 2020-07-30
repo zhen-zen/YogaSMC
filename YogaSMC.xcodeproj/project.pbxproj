@@ -18,6 +18,8 @@
 		6F83587424D0C2B50031512F /* KeyImplementations.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F83587224D0C2B50031512F /* KeyImplementations.hpp */; };
 		6F8674CD24A876E000DC2FDF /* ThinkWMI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F8674CB24A876E000DC2FDF /* ThinkWMI.cpp */; };
 		6F8674CE24A876E000DC2FDF /* ThinkWMI.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F8674CC24A876E000DC2FDF /* ThinkWMI.hpp */; };
+		6F87BF8024D26A5D00D64375 /* YogaSMC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F87BF7E24D26A5D00D64375 /* YogaSMC.cpp */; };
+		6F87BF8124D26A5D00D64375 /* YogaSMC.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F87BF7F24D26A5D00D64375 /* YogaSMC.hpp */; };
 		6F9553BA24BA515B00215EBB /* IdeaVPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F9553B824BA515B00215EBB /* IdeaVPC.cpp */; };
 		6F9553BB24BA515B00215EBB /* IdeaVPC.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F9553B924BA515B00215EBB /* IdeaVPC.hpp */; };
 		6F96A30C24B93D25006562EC /* YogaVPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F96A30A24B93D25006562EC /* YogaVPC.cpp */; };
@@ -60,6 +62,8 @@
 		6F83587224D0C2B50031512F /* KeyImplementations.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = KeyImplementations.hpp; sourceTree = "<group>"; };
 		6F8674CB24A876E000DC2FDF /* ThinkWMI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ThinkWMI.cpp; sourceTree = "<group>"; };
 		6F8674CC24A876E000DC2FDF /* ThinkWMI.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ThinkWMI.hpp; sourceTree = "<group>"; };
+		6F87BF7E24D26A5D00D64375 /* YogaSMC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = YogaSMC.cpp; sourceTree = "<group>"; };
+		6F87BF7F24D26A5D00D64375 /* YogaSMC.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = YogaSMC.hpp; sourceTree = "<group>"; };
 		6F9553B824BA515B00215EBB /* IdeaVPC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IdeaVPC.cpp; sourceTree = "<group>"; };
 		6F9553B924BA515B00215EBB /* IdeaVPC.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IdeaVPC.hpp; sourceTree = "<group>"; };
 		6F96A30A24B93D25006562EC /* YogaVPC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = YogaVPC.cpp; sourceTree = "<group>"; };
@@ -116,10 +120,12 @@
 				6FD2BB8B247B37A20018EA36 /* bmfparser.cpp */,
 				6FCF7F5B2474B89000A82B13 /* common.h */,
 				6F96F4D524CD9593005A7686 /* message.h */,
-				6F08ACE724746B8B00681A63 /* YogaWMI.hpp */,
-				6F08ACE924746B8B00681A63 /* YogaWMI.cpp */,
+				6F87BF7F24D26A5D00D64375 /* YogaSMC.hpp */,
+				6F87BF7E24D26A5D00D64375 /* YogaSMC.cpp */,
 				6F96A30B24B93D25006562EC /* YogaVPC.hpp */,
 				6F96A30A24B93D25006562EC /* YogaVPC.cpp */,
+				6F08ACE724746B8B00681A63 /* YogaWMI.hpp */,
+				6F08ACE924746B8B00681A63 /* YogaWMI.cpp */,
 				6F08ACEB24746B8B00681A63 /* Info.plist */,
 			);
 			path = YogaSMC;
@@ -153,8 +159,8 @@
 				6F9553B824BA515B00215EBB /* IdeaVPC.cpp */,
 				6F6CEDA324BC14C2004D553F /* ThinkVPC.hpp */,
 				6F6CEDA224BC14C2004D553F /* ThinkVPC.cpp */,
-				6F83587124D0C2B50031512F /* KeyImplementations.cpp */,
 				6F83587224D0C2B50031512F /* KeyImplementations.hpp */,
+				6F83587124D0C2B50031512F /* KeyImplementations.cpp */,
 			);
 			path = YogaVPC;
 			sourceTree = "<group>";
@@ -174,6 +180,7 @@
 				6FD2BB48247721040018EA36 /* bmfdec.h in Headers */,
 				6F08ACE824746B8B00681A63 /* YogaWMI.hpp in Headers */,
 				6F6CEDA524BC14C2004D553F /* ThinkVPC.hpp in Headers */,
+				6F87BF8124D26A5D00D64375 /* YogaSMC.hpp in Headers */,
 				6F48676424A293A0003AD4CA /* IdeaWMI.hpp in Headers */,
 				6F83587424D0C2B50031512F /* KeyImplementations.hpp in Headers */,
 				6F9553BB24BA515B00215EBB /* IdeaVPC.hpp in Headers */,
@@ -248,6 +255,7 @@
 				6F96A30C24B93D25006562EC /* YogaVPC.cpp in Sources */,
 				6F8674CD24A876E000DC2FDF /* ThinkWMI.cpp in Sources */,
 				6FD2BB8D247B37A20018EA36 /* bmfparser.cpp in Sources */,
+				6F87BF8024D26A5D00D64375 /* YogaSMC.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
