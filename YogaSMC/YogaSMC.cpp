@@ -33,7 +33,7 @@ IOService *YogaSMC::probe(IOService *provider, SInt32 *score)
     name = provider->getName();
     findEC();
     
-    IOLog("%s::%s Probing\n", getName(), name);
+    IOLog("%s Probing\n", getName());
 
     return super::probe(provider, score);
 }
@@ -41,12 +41,12 @@ IOService *YogaSMC::probe(IOService *provider, SInt32 *score)
 bool YogaSMC::start(IOService *provider) {
     bool res = super::start(provider);
 
-    IOLog("%s::%s Starting\n", getName(), name);
+    IOLog("%s Starting\n", getName());
 
     workLoop = IOWorkLoop::workLoop();
     commandGate = IOCommandGate::commandGate(this);
     if (!workLoop || !commandGate || (workLoop->addEventSource(commandGate) != kIOReturnSuccess)) {
-        IOLog("%s::%s Failed to add commandGate\n", getName(), name);
+        IOLog("%s Failed to add commandGate\n", getName());
         return false;
     }
 
@@ -81,7 +81,7 @@ bool YogaSMC::start(IOService *provider) {
 
 void YogaSMC::stop(IOService *provider)
 {
-    IOLog("%s::%s Stopping\n", getName(), name);
+    IOLog("%s Stopping\n", getName());
 
     _publishNotify->remove();
     _terminateNotify->remove();
@@ -134,7 +134,7 @@ void YogaSMC::dispatchMessageGated(int* message, void* data)
 void YogaSMC::dispatchMessage(int message, void* data)
 {
     if (_notificationServices->getCount() == 0) {
-        IOLog("%s::%s No available notification consumer\n", getName(), name);
+        IOLog("%s No available notification consumer\n", getName());
         return;
     }
     commandGate->runAction(OSMemberFunctionCast(IOCommandGate::Action, this, &YogaSMC::dispatchMessageGated), &message, data);
@@ -143,12 +143,12 @@ void YogaSMC::dispatchMessage(int message, void* data)
 void YogaSMC::notificationHandlerGated(IOService *newService, IONotifier *notifier)
 {
     if (notifier == _publishNotify) {
-        IOLog("%s::%s Notification consumer published: %s\n", getName(), name, newService->getName());
+        IOLog("%s Notification consumer published: %s\n", getName(), newService->getName());
         _notificationServices->setObject(newService);
     }
 
     if (notifier == _terminateNotify) {
-        IOLog("%s::%s Notification consumer terminated: %s\n", getName(), name, newService->getName());
+        IOLog("%s Notification consumer terminated: %s\n", getName(), newService->getName());
         _notificationServices->removeObject(newService);
     }
 }
@@ -162,7 +162,7 @@ bool YogaSMC::notificationHandler(void *refCon, IOService *newService, IONotifie
 bool YogaSMC::findEC() {
     auto iterator = IORegistryIterator::iterateOver(gIOACPIPlane, kIORegistryIterateRecursively);
     if (!iterator) {
-        IOLog("%s::%s findEC failed\n", getName(), name);
+        IOLog("%s findEC failed\n", getName());
         return false;
     }
     auto pnp = OSString::withCString(PnpDeviceIdEC);
@@ -171,7 +171,7 @@ bool YogaSMC::findEC() {
         if (entry->compareName(pnp)) {
             ec = OSDynamicCast(IOACPIPlatformDevice, entry);
             if (ec) {
-                IOLog("%s::%s EC available at %s\n", getName(), name, entry->getName());
+                IOLog("%s EC available at %s\n", getName(), entry->getName());
                 break;
             }
         }
@@ -186,9 +186,81 @@ bool YogaSMC::findEC() {
     return true;
 }
 
+void YogaSMC::method_re1b(UInt32 offset) {
+    UInt32 result;
+    OSObject* params[1] = {
+        OSNumber::withNumber(offset & 0xff, 32)
+    };
+
+    if (ec->evaluateInteger("RE1B", &result, params, 1)!= kIOReturnSuccess) {
+        IOLog("%s read 0x%02x failed\n", getName(), offset);
+        return;
+    }
+
+    IOLog("%s 0x%02x: %02x\n", getName(), offset, result);
+}
+
+void YogaSMC::method_recb(UInt32 offset, UInt32 size) {
+    if (offset + size > 0x100) {
+        IOLog("%s read %d bytes @ 0x%02x exceeded\n", getName(), size, offset);
+        return;
+    }
+
+    OSObject* result;
+    // Arg0 - offset in bytes from zero-based EC
+    // Arg1 - size of buffer in bits
+    OSObject* params[2] = {
+        OSNumber::withNumber(offset, 32),
+        OSNumber::withNumber(size * 8, 32)
+    };
+
+    if (ec->evaluateObject("RECB", &result, params, 2)!= kIOReturnSuccess) {
+        IOLog("%s read %d bytes @ 0x%02x failed\n", getName(), size, offset);
+        return;
+    }
+
+    OSData* data = OSDynamicCast(OSData, result);
+    if (!data) {
+        IOLog("%s read %d bytes @ 0x%02x invalid\n", getName(), size, offset);
+        return;
+    }
+
+    if (data->getLength() != size) {
+        IOLog("%s read %d bytes @ 0x%02x, got %d bytes\n", getName(), size, offset, data->getLength());
+        return;
+    }
+
+    int len = 0x10;
+    char *buf = new char[len*3];
+    UInt8 *idata = (UInt8 *)data->getBytesNoCopy();
+    if (size > 8) {
+        IOLog("%s %d bytes @ 0x%02x\n", getName(), size, offset);
+        for (int i = 0; i < size; i += len) {
+            memset(buf, 0, len*3);
+            for (int j = 0; j < (len < size-i ? len : size-i); j++)
+                snprintf(buf+3*j, 4, "%02x ", idata[i+j]);
+            buf[len*3-1] = '\0';
+            IOLog("%s 0x%02x: %s", getName(), i, buf);
+        }
+    } else {
+        for (int j = 0; j < size; j++)
+            snprintf(buf+3*j, 4, "%02x ", idata[j]);
+        buf[size*3-1] = '\0';
+        IOLog("%s %d bytes @ 0x%02x: %s\n", getName(), size, offset, buf);
+    }
+    delete [] buf;
+}
+
+void YogaSMC::dumpECField(UInt32 value) {
+    if (value >> 8)
+        method_recb(value & 0xff, value >> 8);
+    else
+        method_re1b(value);
+}
+
 void YogaSMC::setPropertiesGated(OSObject* props) {
     if (!ec) {
-        IOLog("%s::%s EC not available", getName(), name);
+        IOLog("%s EC not available", getName());
         return;
     }
 
@@ -196,7 +268,7 @@ void YogaSMC::setPropertiesGated(OSObject* props) {
     if (!dict)
         return;
 
-//    IOLog("%s: %d objects in properties\n", getName(), name, dict->getCount());
+//    IOLog("%s: %d objects in properties\n", getName(), dict->getCount());
     OSCollectionIterator* i = OSCollectionIterator::withCollection(dict);
 
     if (i != NULL) {
@@ -204,17 +276,10 @@ void YogaSMC::setPropertiesGated(OSObject* props) {
             if (key->isEqualTo("ReadEC")) {
                 OSNumber * value = OSDynamicCast(OSNumber, dict->getObject("ReadEC"));
                 if (value == NULL) {
-                    IOLog("%s::%s invalid number", getName(), name);
+                    IOLog("%s invalid number", getName());
                     continue;
                 }
-                UInt32 result;
-                OSObject* params[1] = {
-                    OSNumber::withNumber(value->unsigned32BitValue(), 32)
-                };
-                if (ec->evaluateInteger("RE1B", &result, params, 1)!= kIOReturnSuccess)
-                    IOLog("%s::%s fetch 0x%x failed\n", getName(), name, value->unsigned32BitValue());
-                else
-                    IOLog("%s::%s 0x%x: %x\n", getName(), name, value->unsigned32BitValue(), result);
+                dumpECField(value->unsigned32BitValue());
             }
         }
         i->release();

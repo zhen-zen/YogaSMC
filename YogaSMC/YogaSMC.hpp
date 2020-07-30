@@ -60,6 +60,28 @@ protected:
 
     void dispatchMessage(int message, void* data);
 
+    /**
+     *  Wrapper for RE1B
+     *
+     *  @param offset EC field offset
+     */
+    void method_re1b(UInt32 offset);
+
+    /**
+     *  Wrapper for RECB
+     *
+     *  @param offset EC field offset
+     *  @param size EC field length in bytes
+     */
+    void method_recb(UInt32 offset, UInt32 size);
+
+    /**
+     *  Read desired EC field
+     *
+     *  @param value = offset | size << 8
+     */
+    void dumpECField(UInt32 value);
+
     virtual void setPropertiesGated(OSObject* props);
 
     /**
