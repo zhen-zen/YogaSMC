@@ -145,9 +145,11 @@ private:
     bool FnlockMode {false};
 
     /**
-     *  Initialize Keyboard status
+     *  Initialize VPC EC status
+     *
+     *  @return true if success
      */
-    void initEC();
+    bool initEC();
     
     /**
      *  Update battery ID
@@ -302,6 +304,11 @@ public:
     static IdeaVPC* withDevice(IOACPIPlatformDevice *device, OSString *pnp);
     IOReturn message(UInt32 type, IOService *provider, void *argument) APPLE_KEXT_OVERRIDE;
     IOReturn setPowerState(unsigned long powerState, IOService * whatDevice) APPLE_KEXT_OVERRIDE;
+//
+//    /**
+//     *  Get battery conservation mode status
+//     */
+//    static inline bool * getConservation() {return &conservationMode;};
 };
 
 #endif /* IdeaVPC_hpp */

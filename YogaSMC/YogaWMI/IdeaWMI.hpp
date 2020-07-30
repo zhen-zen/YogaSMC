@@ -10,7 +10,7 @@
 #ifndef IdeaWMI_hpp
 #define IdeaWMI_hpp
 
-#include "../YogaSMC.hpp"
+#include "YogaWMI.hpp"
 
 class IdeaWMI : public YogaWMI
 {

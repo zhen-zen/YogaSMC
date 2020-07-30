@@ -1,13 +1,13 @@
 //  SPDX-License-Identifier: GPL-2.0-only
 //
-//  YogaSMC.cpp
+//  YogaWMI.cpp
 //  YogaSMC
 //
 //  Created by Zhen on 2020/5/21.
 //  Copyright © 2020 Zhen. All rights reserved.
 //
 
-#include "YogaSMC.hpp"
+#include "YogaWMI.hpp"
 
 OSDefineMetaClassAndStructors(YogaWMI, IOService)
 

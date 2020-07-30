@@ -1,4 +1,5 @@
 .DS_Store
 *.aml
+*.kext
 xcuserdata/
 xcshareddata/

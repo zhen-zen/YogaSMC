@@ -93,7 +93,10 @@ bool IdeaVPC::initVPC() {
     setProperty("Capability", capabilities);
     capabilities->release();
 #endif
-    initEC();
+    if (initEC())  {
+        VirtualSMCAPI::addKey(KeyBDVT, vsmcPlugin.data, VirtualSMCAPI::valueWithFlag(false, new BDVT(this), SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_WRITE));
+        vsmcNotifier = VirtualSMCAPI::registerHandler(vsmcNotificationHandler, this);
+    }
     return true;
 }
 
@@ -277,7 +280,7 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
     return;
 }
 
-void IdeaVPC::initEC() {
+bool IdeaVPC::initEC() {
     UInt32 state, attempts = 0;
     do {
         if (vpc->evaluateInteger(getKeyboardMode, &state) == kIOReturnSuccess)
@@ -285,7 +288,7 @@ void IdeaVPC::initEC() {
         if (++attempts > 5) {
             IOLog(updateFailure, getName(), name, getKeyboardMode);
             setProperty("EC Access", "Error");
-            return;
+            return false;
         }
         IOSleep(200);
     } while (true);
@@ -308,9 +311,7 @@ void IdeaVPC::initEC() {
 
     updateBatteryID();
     updateBatteryInfo();
-
-    VirtualSMCAPI::addKey(KeyBDVT, vsmcPlugin.data, VirtualSMCAPI::valueWithFlag(false, new BDVT(this), SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_WRITE));
-    vsmcNotifier = VirtualSMCAPI::registerHandler(vsmcNotificationHandler, this);
+    return true;
 }
 
 bool IdeaVPC::updateBatteryID(bool update) {

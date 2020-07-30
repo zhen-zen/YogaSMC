@@ -10,8 +10,8 @@
 #ifndef ThinkWMI_hpp
 #define ThinkWMI_hpp
 
-#include "../YogaSMC.hpp"
-#include "../YogaVPC/ThinkVPC.hpp"
+#include "YogaWMI.hpp"
+#include "ThinkVPC.hpp"
 
 class ThinkWMI : public YogaWMI
 {

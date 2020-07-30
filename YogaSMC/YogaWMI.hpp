@@ -1,6 +1,6 @@
 //  SPDX-License-Identifier: GPL-2.0-only
 //
-//  YogaSMC.hpp
+//  YogaWMI.hpp
 //  YogaSMC
 //
 //  Created by Zhen on 2020/5/21.
