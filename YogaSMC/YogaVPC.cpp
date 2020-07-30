@@ -14,6 +14,18 @@ OSDefineMetaClassAndStructors(YogaVPC, IOService);
 bool ADDPR(debugEnabled) = true;
 uint32_t ADDPR(debugPrintDelay) = 0;
 
+bool YogaVPC::init(OSDictionary *dictionary)
+{
+    bool res = super::init(dictionary);
+    IOLog("%s Initializing\n", getName());
+
+    extern kmod_info_t kmod_info;
+    setProperty("YogaSMC,Build", __DATE__);
+    setProperty("YogaSMC,Version", kmod_info.version);
+
+    return res;
+}
+
 IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
 {
     IOLog("%s::%s Probing\n", getName(), provider->getName());

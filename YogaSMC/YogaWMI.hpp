@@ -65,22 +65,6 @@ protected:
      */
     IOACPIPlatformDevice *vpc {nullptr};
 
-    /**
-     *  VPC event notifiers
-     */
-    IONotifier *VPCNotifiers;
-
-    /**
-     *  Handle notification about VPC0
-     *
-     *  @param messageType      kIOACPIMessageDeviceNotification
-     *  @param provider         The ACPI device being connected or disconnected
-     *  @param messageArgument  nullptr
-     *
-     *  @return kIOReturnSuccess
-     */
-    static IOReturn VPCNotification(void *target, void *refCon, UInt32 messageType, IOService *provider, void *messageArgument, vm_size_t argSize);
-
     void dispatchMessage(int message, void* data);
 
     OSDictionary *Event {nullptr};
@@ -171,7 +155,6 @@ protected:
 
 public:
     virtual bool init(OSDictionary *dictionary) APPLE_KEXT_OVERRIDE;
-    virtual void free(void) APPLE_KEXT_OVERRIDE;
     virtual IOService *probe(IOService *provider, SInt32 *score) APPLE_KEXT_OVERRIDE;
 
     virtual bool start(IOService *provider) APPLE_KEXT_OVERRIDE;

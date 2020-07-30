@@ -29,12 +29,6 @@ bool YogaWMI::init(OSDictionary *dictionary)
     return res;
 }
 
-void YogaWMI::free(void)
-{
-    IOLog("%s::%s Freeing\n", getName(), name);
-    super::free();
-}
-
 IOService *YogaWMI::probe(IOService *provider, SInt32 *score)
 {
     name = provider->getName();
@@ -189,10 +183,6 @@ void YogaWMI::stop(IOService *provider)
 
     if (YWMI) {
         delete YWMI;
-    }
-
-    if (vpc && VPCNotifiers) {
-        VPCNotifiers->remove();
     }
 
     _publishNotify->remove();
@@ -361,9 +351,6 @@ bool YogaWMI::findVPC() {
             vpc = OSDynamicCast(IOACPIPlatformDevice, entry);
             if (vpc) {
                 IOLog("%s::%s findVPC available at %s\n", getName(), name, entry->getName());
-                VPCNotifiers = vpc->registerInterest(gIOGeneralInterest, VPCNotification, this);
-                if (!VPCNotifiers)
-                    IOLog("%s::%s findVPC unable to register interest for VPC notifications\n", getName(), name);
                 break;
             }
         }
@@ -375,23 +362,6 @@ bool YogaWMI::findVPC() {
 
     setProperty("Feature", "VPC");
     return initVPC();
-}
-
-IOReturn YogaWMI::VPCNotification(void *target, void *refCon, UInt32 messageType, IOService *provider, void *messageArgument, vm_size_t argSize) {
-    auto self = OSDynamicCast(YogaWMI, reinterpret_cast<OSMetaClassBase*>(target));
-    if (self == nullptr) {
-        IOLog("YogaWMI: target is not YogaWMI");
-        return kIOReturnError;
-    }
-    if (messageArgument) {
-        IOLog("%s::%s VPC %s received %x, argument=0x%04x", self->getName(), self->name, provider->getName(), messageType, *((UInt32 *) messageArgument));
-        if (*(UInt32 *)messageArgument ==  kIOACPIMessageReserved) {
-            self->updateVPC();
-        }
-    } else {
-        IOLog("%s::%s VPC %s received %x", self->getName(), self->name, provider->getName(), messageType);
-    }
-    return kIOReturnSuccess;
 }
 
 void YogaWMI::toggleTouchpad() {
