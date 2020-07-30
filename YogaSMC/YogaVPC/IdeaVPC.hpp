@@ -102,7 +102,7 @@ private:
     /**
      *  Automatically turn off backlight mode on sleep
      */
-    bool AutomaticBacklightMode {true};
+    int automaticBacklightMode {3};
 
     /**
      *  Backlight mode capability, will be update on init

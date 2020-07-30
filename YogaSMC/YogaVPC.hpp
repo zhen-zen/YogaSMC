@@ -16,8 +16,9 @@
 #include <VirtualSMCSDK/kern_vsmcapi.hpp>
 #include "message.h"
 
+#define autoBacklightPrompt "AutoBacklight"
 #define batteryPrompt "Battery"
-#define BacklightPrompt "BacklightMode"
+#define backlightPrompt "BacklightMode"
 #define conservationPrompt "ConservationMode"
 #define clamshellPrompt "ClamshellMode"
 #define ECLockPrompt "ECLock"
@@ -37,7 +38,7 @@
 #define toggleFailure "%s::%s %s toggle failed\n"
 #define toggleSuccess "%s::%s %s set to 0x%x: %s\n"
 
-#define valueMatched "%s::%s %s already %s\n"
+#define valueMatched "%s::%s %s already %x\n"
 #define valueInvalid "%s::%s Invalid value for %s\n"
 
 #define timeoutPrompt "%s::%s %s timeout 0x%x\n"

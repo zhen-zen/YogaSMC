@@ -131,7 +131,7 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
                 updateClamshell(false);
 
                 if (value->getValue() == clamshellMode) {
-                    IOLog(valueMatched, getName(), name, clamshellPrompt, (clamshellMode ? "enabled" : "disabled"));
+                    IOLog(valueMatched, getName(), name, clamshellPrompt, clamshellMode);
                 } else {
                     toggleClamshell();
                 }
