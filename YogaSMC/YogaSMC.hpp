@@ -41,11 +41,23 @@ private:
     static constexpr const char *PnpDeviceIdEC = "PNP0C09";
 
     /**
+     *  EC device
+     */
+    IOACPIPlatformDevice *ec {nullptr};
+
+    /**
      *  Find available EC on this system
      *
      *  @return true on sucess
      */
     bool findEC();
+
+    /**
+     *  Read desired EC field
+     *
+     *  @param value = offset | size << 8
+     */
+    void readECOffset(UInt32 value);
 
 protected:
     const char* name;
@@ -53,34 +65,47 @@ protected:
     IOWorkLoop *workLoop {nullptr};
     IOCommandGate *commandGate {nullptr};
 
-    /**
-     *  EC device
-     */
-    IOACPIPlatformDevice *ec {nullptr};
-
     void dispatchMessage(int message, void* data);
 
     /**
      *  Wrapper for RE1B
      *
      *  @param offset EC field offset
+     *  @param result EC field value
+     *
+     *  @return kIOReturnSuccess on success
      */
-    void method_re1b(UInt32 offset);
+    IOReturn method_re1b(UInt32 offset, UInt32 *result);
 
     /**
      *  Wrapper for RECB
      *
      *  @param offset EC field offset
      *  @param size EC field length in bytes
+     *  @param data EC field value
+     *  @return kIOReturnSuccess on success
      */
-    void method_recb(UInt32 offset, UInt32 size);
+    IOReturn method_recb(UInt32 offset, UInt32 size, UInt8 *data);
 
     /**
-     *  Read desired EC field
+     *  Wrapper for WE1B
      *
-     *  @param value = offset | size << 8
+     *  @param offset EC field offset
+     *  @param value EC field value
+     *
+     *  @return kIOReturnSuccess on success
      */
-    void dumpECField(UInt32 value);
+    IOReturn method_we1b(UInt32 offset, UInt32 result);
+
+    /**
+     *  Read custom field
+     *
+     *  @param name EC field name
+     *  @param result EC field value
+     *
+     *  @return kIOReturnSuccess on success
+     */
+    IOReturn readECName(const char* name, UInt32 *result);
 
     virtual void setPropertiesGated(OSObject* props);
 

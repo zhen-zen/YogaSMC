@@ -186,76 +186,117 @@ bool YogaSMC::findEC() {
     return true;
 }
 
-void YogaSMC::method_re1b(UInt32 offset) {
-    UInt32 result;
-    OSObject* params[1] = {
-        OSNumber::withNumber(offset & 0xff, 32)
-    };
+IOReturn YogaSMC::readECName(const char* name, UInt32 *result) {
+    IOReturn ret = ec->evaluateInteger(name, result);
+    switch (ret) {
+        case kIOReturnSuccess:
+            break;
 
-    if (ec->evaluateInteger("RE1B", &result, params, 1)!= kIOReturnSuccess) {
-        IOLog("%s read 0x%02x failed\n", getName(), offset);
-        return;
+        case kIOReturnBadArgument:
+            IOLog("%s read %s failed, bad argument (field size too large?)\n", getName(), name);
+            break;
+            
+        default:
+            IOLog("%s read %s failed %x\n", getName(), name, ret);
+            break;
     }
-
-    IOLog("%s 0x%02x: %02x\n", getName(), offset, result);
+    return ret;
 }
 
-void YogaSMC::method_recb(UInt32 offset, UInt32 size) {
-    if (offset + size > 0x100) {
-        IOLog("%s read %d bytes @ 0x%02x exceeded\n", getName(), size, offset);
-        return;
-    }
+IOReturn YogaSMC::method_re1b(UInt32 offset, UInt32 *result) {
+    OSObject* params[1] = {
+        OSNumber::withNumber(offset, 32)
+    };
 
-    OSObject* result;
+    IOReturn ret = ec->evaluateInteger("RE1B", result, params, 1);
+    if (ret != kIOReturnSuccess)
+        IOLog("%s read 0x%02x failed\n", getName(), offset);
+
+    return ret;
+}
+
+IOReturn YogaSMC::method_recb(UInt32 offset, UInt32 size, UInt8 *data) {
     // Arg0 - offset in bytes from zero-based EC
     // Arg1 - size of buffer in bits
     OSObject* params[2] = {
         OSNumber::withNumber(offset, 32),
         OSNumber::withNumber(size * 8, 32)
     };
+    OSObject* result;
 
-    if (ec->evaluateObject("RECB", &result, params, 2)!= kIOReturnSuccess) {
+    IOReturn ret = ec->evaluateObject("RECB", &result, params, 2);
+    if (ret != kIOReturnSuccess) {
         IOLog("%s read %d bytes @ 0x%02x failed\n", getName(), size, offset);
-        return;
+        return ret;
     }
 
-    OSData* data = OSDynamicCast(OSData, result);
+    OSData* osdata = OSDynamicCast(OSData, result);
     if (!data) {
         IOLog("%s read %d bytes @ 0x%02x invalid\n", getName(), size, offset);
-        return;
+        return kIOReturnNotReadable;
     }
 
-    if (data->getLength() != size) {
-        IOLog("%s read %d bytes @ 0x%02x, got %d bytes\n", getName(), size, offset, data->getLength());
-        return;
+    if (osdata->getLength() != size) {
+        IOLog("%s read %d bytes @ 0x%02x, got %d bytes\n", getName(), size, offset, osdata->getLength());
+        return kIOReturnNoBandwidth;
     }
 
-    int len = 0x10;
-    char *buf = new char[len*3];
-    UInt8 *idata = (UInt8 *)data->getBytesNoCopy();
-    if (size > 8) {
-        IOLog("%s %d bytes @ 0x%02x\n", getName(), size, offset);
-        for (int i = 0; i < size; i += len) {
-            memset(buf, 0, len*3);
-            for (int j = 0; j < (len < size-i ? len : size-i); j++)
-                snprintf(buf+3*j, 4, "%02x ", idata[i+j]);
-            buf[len*3-1] = '\0';
-            IOLog("%s 0x%02x: %s", getName(), i, buf);
-        }
-    } else {
-        for (int j = 0; j < size; j++)
-            snprintf(buf+3*j, 4, "%02x ", idata[j]);
-        buf[size*3-1] = '\0';
-        IOLog("%s %d bytes @ 0x%02x: %s\n", getName(), size, offset, buf);
-    }
-    delete [] buf;
+    memcpy(data, osdata->getBytesNoCopy(), size);
+
+    result->release();
+    return ret;
 }
 
-void YogaSMC::dumpECField(UInt32 value) {
-    if (value >> 8)
-        method_recb(value & 0xff, value >> 8);
-    else
-        method_re1b(value);
+IOReturn YogaSMC::method_we1b(UInt32 offset, UInt32 value) {
+    OSObject* params[2] = {
+        OSNumber::withNumber(offset, 32),
+        OSNumber::withNumber(value, 32)
+    };
+    UInt32 result;
+
+    IOReturn ret = ec->evaluateInteger("WE1B", &result, params, 2);
+    if (ret != kIOReturnSuccess)
+        IOLog("%s write 0x%02x @ 0x%02x failed\n", getName(), value, offset);
+
+    return ret;
+}
+
+void YogaSMC::readECOffset(UInt32 value) {
+    UInt32 size = value >> 8;
+    if (size) {
+        UInt32 offset = value & 0xff;
+        if (offset + size > 0x100) {
+            IOLog("%s read %d bytes @ 0x%02x exceeded\n", getName(), size, offset);
+            return;
+        }
+
+        UInt8 *data = new UInt8[size];
+        if (method_recb(offset, size, data) == kIOReturnSuccess) {
+            int len = 0x10;
+            char *buf = new char[len*3];
+            if (size > 8) {
+                IOLog("%s %d bytes @ 0x%02x\n", getName(), size, offset);
+                for (int i = 0; i < size; i += len) {
+                    memset(buf, 0, len*3);
+                    for (int j = 0; j < (len < size-i ? len : size-i); j++)
+                        snprintf(buf+3*j, 4, "%02x ", data[i+j]);
+                    buf[len*3-1] = '\0';
+                    IOLog("%s 0x%02x: %s", getName(), offset+i, buf);
+                }
+            } else {
+                for (int j = 0; j < size; j++)
+                    snprintf(buf+3*j, 4, "%02x ", data[j]);
+                buf[size*3-1] = '\0';
+                IOLog("%s %d bytes @ 0x%02x: %s\n", getName(), size, offset, buf);
+            }
+            delete [] buf;
+        }
+        delete [] data;
+    } else {
+        UInt32 integer;
+        if (method_re1b(value, &integer) == kIOReturnSuccess)
+            IOLog("%s 0x%02x: %02x\n", getName(), value, integer);
+    }
 }
 
 void YogaSMC::setPropertiesGated(OSObject* props) {
@@ -273,13 +314,26 @@ void YogaSMC::setPropertiesGated(OSObject* props) {
 
     if (i != NULL) {
         while (OSString* key = OSDynamicCast(OSString, i->getNextObject())) {
-            if (key->isEqualTo("ReadEC")) {
-                OSNumber * value = OSDynamicCast(OSNumber, dict->getObject("ReadEC"));
+            if (key->isEqualTo("ReadECOffset")) {
+                OSNumber * value = OSDynamicCast(OSNumber, dict->getObject("ReadECOffset"));
                 if (value == NULL) {
                     IOLog("%s invalid number", getName());
                     continue;
                 }
-                dumpECField(value->unsigned32BitValue());
+                readECOffset(value->unsigned32BitValue());
+            } else if (key->isEqualTo("ReadECName")) {
+                OSString *value = OSDynamicCast(OSString, dict->getObject("ReadECName"));
+                if (value == NULL) {
+                    IOLog("%s invalid name", getName());
+                    continue;
+                }
+                if (value->getLength() !=4) {
+                    IOLog("%s invalid length %d", getName(), value->getLength());
+                    continue;
+                }
+                UInt32 result;
+                if (readECName(value->getCStringNoCopy(), &result) == kIOReturnSuccess)
+                    IOLog("%s %s: 0x%02x\n", getName(), value->getCStringNoCopy(), result);
             }
         }
         i->release();
