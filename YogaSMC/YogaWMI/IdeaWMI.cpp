@@ -13,7 +13,7 @@ OSDefineMetaClassAndStructors(IdeaWMI, YogaWMI);
 void IdeaWMI::ACPIEvent(UInt32 argument) {
     switch (argument) {
         case kIOACPIMessageReserved:
-            IOLog("%s::%s Notification 80\n", getName(), name);
+            IOLog("%s::%s message: ACPI notification 80\n", getName(), name);
             // force enable keyboard and touchpad
             setTopCase(true);
             dispatchMessage(kSMC_FnlockEvent, nullptr);
@@ -21,15 +21,15 @@ void IdeaWMI::ACPIEvent(UInt32 argument) {
 
         case kIOACPIMessageD0:
             if (isYMC) {
-                IOLog("%s::%s message: Notification D0\n", getName(), name);
+                IOLog("%s::%s message: ACPI notification D0\n", getName(), name);
                 updateYogaMode();
             } else {
-                IOLog("%s::%s message: unknown YMC", getName(), name);
+                IOLog("%s::%s message: ACPI notification D0, unknown YMC", getName(), name);
             }
             break;
 
         default:
-            IOLog("%s::%s Unknown ACPI Notification 0x%x\n", getName(), name, argument);
+            IOLog("%s::%s message: Unknown ACPI notification 0x%x\n", getName(), name, argument);
             break;
     }
     return;

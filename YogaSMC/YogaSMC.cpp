@@ -16,7 +16,7 @@ bool YogaSMC::init(OSDictionary *dictionary)
     IOLog("%s Initializing\n", getName());
 
     _deliverNotification = OSSymbol::withCString(kDeliverNotifications);
-     if (_deliverNotification == NULL)
+     if (!_deliverNotification)
         return false;
 
     _notificationServices = OSSet::withCapacity(1);
@@ -50,7 +50,7 @@ bool YogaSMC::start(IOService *provider) {
     }
 
     OSDictionary * propertyMatch = propertyMatching(_deliverNotification, kOSBooleanTrue);
-    if (propertyMatch != NULL) {
+    if (propertyMatch) {
         IOServiceMatchingNotificationHandler notificationHandler = OSMemberFunctionCast(IOServiceMatchingNotificationHandler, this, &YogaSMC::notificationHandler);
 
         //
@@ -122,7 +122,7 @@ void YogaSMC::dispatchMessageGated(int* message, void* data)
 {
     OSCollectionIterator* i = OSCollectionIterator::withCollection(_notificationServices);
 
-    if (i != NULL) {
+    if (i) {
         while (IOService* service = OSDynamicCast(IOService, i->getNextObject())) {
             service->message(*message, this, data);
         }
@@ -311,18 +311,18 @@ void YogaSMC::setPropertiesGated(OSObject* props) {
 //    IOLog("%s: %d objects in properties\n", getName(), dict->getCount());
     OSCollectionIterator* i = OSCollectionIterator::withCollection(dict);
 
-    if (i != NULL) {
+    if (i) {
         while (OSString* key = OSDynamicCast(OSString, i->getNextObject())) {
             if (key->isEqualTo("ReadECOffset")) {
                 OSNumber * value = OSDynamicCast(OSNumber, dict->getObject("ReadECOffset"));
-                if (value == NULL) {
+                if (value == nullptr) {
                     IOLog("%s invalid number", getName());
                     continue;
                 }
                 dumpECOffset(value->unsigned32BitValue());
             } else if (key->isEqualTo("ReadECName")) {
                 OSString *value = OSDynamicCast(OSString, dict->getObject("ReadECName"));
-                if (value == NULL) {
+                if (!value) {
                     IOLog("%s invalid name", getName());
                     continue;
                 }

@@ -97,7 +97,7 @@ WMI::WMI(IOService* provider)
 
 bool WMI::initialize()
 {
-    if (mDevice != NULL) {
+    if (mDevice) {
         mData = OSDictionary::withCapacity(0);
             
         if (extractData()) {
@@ -128,7 +128,7 @@ bool WMI::extractData()
     
     data = OSDynamicCast(OSData, wdg);
     
-    if (data == NULL) {
+    if (!data) {
         AlwaysLog("%s:_WDG did not return a data blob\n", mDevice->getName());
         return false;
     }
@@ -140,7 +140,7 @@ bool WMI::extractData()
           (struct WMI_DATA*)data->getBytesNoCopy(i * WMI_DATA_SIZE, WMI_DATA_SIZE));
     }
     
-    if (bmf_guid_string != NULL)
+    if (bmf_guid_string)
         extractBMF();
 
     mDevice->setProperty("WDG", mData);
@@ -195,7 +195,7 @@ void WMI::parseWDGEntry(struct WMI_DATA* block)
     if (block->flags == 0 && block->instance_count == 1) {
         AlwaysLog("Possible BMF object %s %s", guid_string, object_id_string);
         // TODO: get BMF guid
-        if (bmf_guid_string != NULL) {
+        if (bmf_guid_string) {
             AlwaysLog("Previous BMF object %s", bmf_guid_string);
         } else {
             bmf_guid_string = new char[37];
@@ -222,8 +222,8 @@ OSDictionary* WMI::getMethod(const char * guid, UInt8 flg)
     if (mData && mData->getCount() > 0)
     {
         OSDictionary* entry = OSDynamicCast(OSDictionary, mData->getObject(guid));
-        if (entry == NULL)
-            return NULL;
+        if (!entry)
+            return nullptr;
         else
             DebugLog("GUID %s matched, verifying flag %d", guid, flg);
 
@@ -232,21 +232,21 @@ OSDictionary* WMI::getMethod(const char * guid, UInt8 flg)
             return entry;
     }
     
-    return NULL;
+    return nullptr;
 }
 
 bool WMI::hasMethod(const char * guid, UInt8 flg)
 {
     OSDictionary* method = getMethod(guid, flg);
     
-    if (method != NULL) {
+    if (method) {
         if (flg == ACPI_WMI_EVENT) {
             DebugLog("found event with guid %s\n", guid);
             return true;
         }
         OSString * methodId = OSDynamicCast(OSString, method->getObject(kWMIObjectId));
 
-        if (methodId != NULL) {
+        if (methodId) {
             DebugLog("found method %s with guid %s\n", methodId->getCStringNoCopy(), guid);
             return true;
         }
@@ -260,11 +260,11 @@ bool WMI::executeMethod(const char * guid, OSObject ** result, OSObject * params
     char methodName[5];
     OSDictionary* method = getMethod(guid);
 
-    if (method != NULL)
+    if (method)
     {
         OSString * methodId = OSDynamicCast(OSString, method->getObject(kWMIObjectId));
 
-        if (methodId != NULL) {
+        if (methodId) {
             OSNumber * flags = OSDynamicCast(OSNumber, method->getObject(kWMIFlags));
             if (flags->unsigned8BitValue() & ACPI_WMI_METHOD) {
                 snprintf(methodName, 5, ACPIMethodName, methodId->getCStringNoCopy());
@@ -289,11 +289,11 @@ bool WMI::executeinteger(const char * guid, UInt32 * result, OSObject * params[]
     char methodName[5];
     OSDictionary* method = getMethod(guid, ACPI_WMI_METHOD);
 
-    if (method != NULL)
+    if (method)
     {
         OSString * methodId = OSDynamicCast(OSString, method->getObject(kWMIObjectId));
 
-        if (methodId != NULL) {
+        if (methodId) {
             snprintf(methodName, 5, ACPIMethodName, methodId->getCStringNoCopy());
 
             DebugLog("Calling method %s\n", methodName);
@@ -313,7 +313,7 @@ bool WMI::extractBMF()
     char methodName[5]; // always 4 chars per ACPI spec
 
     OSDictionary* method = getMethod(bmf_guid_string, 0);
-    if (method == NULL)
+    if (!method)
         return false;
 
     OSString * methodId = OSDynamicCast(OSString, method->getObject(kWMIObjectId));
@@ -329,7 +329,7 @@ bool WMI::extractBMF()
     
     data = OSDynamicCast(OSData, bmf);
     
-    if (data == NULL) {
+    if (!data) {
         AlwaysLog("%s: %s did not return a data blob\n", mDevice->getName(), methodName);
         return false;
     }

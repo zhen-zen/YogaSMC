@@ -119,11 +119,11 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
 //    IOLog("%s: %d objects in properties\n", getName(), name, dict->getCount());
     OSCollectionIterator* i = OSCollectionIterator::withCollection(dict);
 
-    if (i != NULL) {
+    if (i) {
         while (OSString* key = OSDynamicCast(OSString, i->getNextObject())) {
             if (key->isEqualTo(clamshellPrompt)) {
                 OSBoolean * value = OSDynamicCast(OSBoolean, dict->getObject(clamshellPrompt));
-                if (value == NULL) {
+                if (value == nullptr) {
                     IOLog(valueInvalid, getName(), name, clamshellPrompt);
                     continue;
                 }

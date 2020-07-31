@@ -113,7 +113,7 @@ IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
             break;
 
         case kSMC_YogaEvent:
-            IOLog("%s::%s message: YogaSMC YogaEvent 0x%04x", getName(), name, *((UInt32 *) argument));
+            IOLog("%s::%s message: YogaEvent 0x%04x", getName(), name, *((UInt32 *) argument));
             if (backlightCap && automaticBacklightMode & 0x2) {
                 updateKeyboard();
                 if (*((UInt32 *) argument) != 1) {
@@ -128,7 +128,7 @@ IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
             break;
 
         case kSMC_FnlockEvent:
-            IOLog("%s::%s message: YogaSMC FnlockEvent", getName(), name);
+            IOLog("%s::%s message: FnlockEvent", getName(), name);
             updateKeyboard();
             toggleFnlock();
             break;
@@ -167,11 +167,11 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
 //    IOLog("%s::%s %d objects in properties\n", getName(), name, dict->getCount());
     OSCollectionIterator* i = OSCollectionIterator::withCollection(dict);
 
-    if (i != NULL) {
+    if (i) {
         while (OSString* key = OSDynamicCast(OSString, i->getNextObject())) {
             if (key->isEqualTo(backlightPrompt)) {
                 OSBoolean * value = OSDynamicCast(OSBoolean, dict->getObject(backlightPrompt));
-                if (value == NULL) {
+                if (value == nullptr) {
                     IOLog(valueInvalid, getName(), name, backlightPrompt);
                     continue;
                 }
@@ -184,7 +184,7 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                     toggleBacklight();
             } else if (key->isEqualTo(autoBacklightPrompt)) {
                 OSNumber * value = OSDynamicCast(OSNumber, dict->getObject(autoBacklightPrompt));
-                if (value == NULL || value->unsigned8BitValue() > 3) {
+                if (value == nullptr || value->unsigned8BitValue() > 3) {
                     IOLog(valueInvalid, getName(), name, autoBacklightPrompt);
                     continue;
                 }
@@ -197,7 +197,7 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                 }
             } else if (key->isEqualTo(conservationPrompt)) {
                 OSBoolean * value = OSDynamicCast(OSBoolean, dict->getObject(conservationPrompt));
-                if (value == NULL) {
+                if (value == nullptr) {
                     IOLog(valueInvalid, getName(), name, conservationPrompt);
                     continue;
                 }
@@ -210,7 +210,7 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                     toggleConservation();
             } else if (key->isEqualTo(FnKeyPrompt)) {
                 OSBoolean * value = OSDynamicCast(OSBoolean, dict->getObject(FnKeyPrompt));
-                if (value == NULL) {
+                if (value == nullptr) {
                     IOLog(valueInvalid, getName(), name, FnKeyPrompt);
                     continue;
                 }
@@ -223,7 +223,7 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                     toggleFnlock();
             } else if (key->isEqualTo(ECLockPrompt)) {
                 OSBoolean * value = OSDynamicCast(OSBoolean, dict->getObject(ECLockPrompt));
-                if (value == NULL) {
+                if (value == nullptr) {
                     IOLog(valueInvalid, getName(), name, ECLockPrompt);
                     continue;
                 }
@@ -238,7 +238,7 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                     continue;
 
                 OSNumber * value = OSDynamicCast(OSNumber, dict->getObject(readECPrompt));
-                if (value == NULL) {
+                if (value == nullptr) {
                     IOLog(valueInvalid, getName(), name, readECPrompt);
                     continue;
                 }
@@ -255,7 +255,7 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                     continue;
 
                 OSNumber * value = OSDynamicCast(OSNumber, dict->getObject(writeECPrompt));
-                if (value == NULL) {
+                if (value == nullptr) {
                     IOLog(valueInvalid, getName(), name, writeECPrompt);
                     continue;
                 }

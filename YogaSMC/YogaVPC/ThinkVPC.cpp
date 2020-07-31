@@ -185,11 +185,11 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
     //    IOLog("%s::%s %d objects in properties\n", getName(), name, dict->getCount());
     OSCollectionIterator* i = OSCollectionIterator::withCollection(dict);
 
-    if (i != NULL) {
+    if (i) {
         while (OSString* key = OSDynamicCast(OSString, i->getNextObject())) {
             if (key->isEqualTo(batteryPrompt)) {
                 OSNumber * value = OSDynamicCast(OSNumber, dict->getObject(batteryPrompt));
-                if (value == NULL) {
+                if (value == nullptr) {
                     IOLog(valueInvalid, getName(), name, batteryPrompt);
                     continue;
                 }
@@ -197,7 +197,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 updateBattery(value->unsigned8BitValue());
             } else if (key->isEqualTo("setCMstart")) {
                 OSNumber * value = OSDynamicCast(OSNumber, dict->getObject("setCMstart"));
-                if (value == NULL || value->unsigned32BitValue() > 100) {
+                if (value == nullptr || value->unsigned32BitValue() > 100) {
                     IOLog(valueInvalid, getName(), name, "setCMstart");
                     continue;
                 }
@@ -205,7 +205,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 setConservation(setCMstart, value->unsigned8BitValue());
             } else if (key->isEqualTo("setCMstop")) {
                 OSNumber * value = OSDynamicCast(OSNumber, dict->getObject("setCMstop"));
-                if (value == NULL || value->unsigned32BitValue() > 100) {
+                if (value == nullptr || value->unsigned32BitValue() > 100) {
                     IOLog(valueInvalid, getName(), name, "setCMstop");
                     continue;
                 }
@@ -215,7 +215,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 updateMutestatus();
             } else if (key->isEqualTo(fanControlPrompt)) {
                 OSNumber * value = OSDynamicCast(OSNumber, dict->getObject(fanControlPrompt));
-                if (value == NULL) {
+                if (value == nullptr) {
                     IOLog(valueInvalid, getName(), name, FnKeyPrompt);
                     continue;
                 }

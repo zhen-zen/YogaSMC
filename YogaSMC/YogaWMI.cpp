@@ -174,26 +174,24 @@ void YogaWMI::stop(IOService *provider)
 }
 
 void YogaWMI::ACPIEvent(UInt32 argument) {
-    IOLog("%s::%s Unknown ACPI Notification 0x%x\n", getName(), name, argument);
+    IOLog("%s::%s message: Unknown ACPI Notification 0x%x\n", getName(), name, argument);
 }
 
 IOReturn YogaWMI::message(UInt32 type, IOService *provider, void *argument) {
     switch (type)
     {
         case kIOACPIMessageDeviceNotification:
-            if (argument) {
-                IOLog("%s::%s message: ACPI provider=%s, argument=0x%04x\n", getName(), name, provider->getName(), *((UInt32 *) argument));
+            if (argument)
                 ACPIEvent(*(UInt32 *) argument);
-            } else {
-                IOLog("%s::%s message: ACPI provider=%s, argument unknown", getName(), name, provider->getName());
-            }
+            else
+                IOLog("%s::%s message: ACPI provider=%s, unknown argument\n", getName(), name, provider->getName());
             break;
 
         default:
             if (argument)
                 IOLog("%s::%s message: type=%x, provider=%s, argument=0x%04x\n", getName(), name, type, provider->getName(), *((UInt32 *) argument));
             else
-                IOLog("%s::%s message: type=%x, provider=%s\n", getName(), name, type, provider->getName());
+                IOLog("%s::%s message: type=%x, provider=%s, unknown argument\n", getName(), name, type, provider->getName());
     }
     return kIOReturnSuccess;
 }

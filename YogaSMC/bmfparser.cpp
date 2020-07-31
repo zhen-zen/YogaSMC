@@ -703,7 +703,7 @@ OSObject* MOF::parse_bmf(char * bmf_guid_string) {
     OSArray *offsets = OSArray::withCapacity(count);
     for (uint32_t i=0; i<count; i++) {
         item = parse_method((uint32_t *)(buf+nbuf[0]), nbuf[1]);
-        if (item->getObject("verified") != NULL)
+        if (item->getObject("verified"))
         {
             OSDictionary *offset = OSDictionary::withCapacity(3);
             typeObj = OSNumber::withNumber(nbuf[0], 32);
