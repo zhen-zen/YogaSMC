@@ -107,17 +107,17 @@ private:
     /**
      *  Backlight mode capability, will be update on init
      */
-    bool BacklightCap {false};
+    bool backlightCap {false};
 
     /**
      *  Backlight mode status
      */
-    bool BacklightMode {false};
+    bool backlightMode {false};
 
     /**
      *  Backlight mode status before sleep
      */
-    bool BacklightModeSleep {false};
+    bool backlightModeSleep {false};
 
     /**
      *  Battery conservation mode status

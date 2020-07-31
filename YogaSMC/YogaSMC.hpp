@@ -53,15 +53,21 @@ private:
     bool findEC();
 
     /**
-     *  Read desired EC field
+     *  Related ACPI methods
+     */
+    static constexpr const char *readECOneByte      = "RE1B";
+    static constexpr const char *readECBytes        = "RECB";
+    static constexpr const char *writeECOneByte     = "WE1B";
+    static constexpr const char *writeECBytes       = "WECB";
+
+    /**
+     *  Dump desired EC field
      *
      *  @param value = offset | size << 8
      */
-    void readECOffset(UInt32 value);
+    void dumpECOffset(UInt32 value);
 
 protected:
-    const char* name;
-
     IOWorkLoop *workLoop {nullptr};
     IOCommandGate *commandGate {nullptr};
 

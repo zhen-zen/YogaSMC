@@ -8,13 +8,19 @@ Currently it's possible to interact with the driver using [ioio](https://github.
 
 The driver will update the result in ioreg, while details can be monitored using `log stream --predicate 'processID=0 && senderImagePath contains "YogaSMC"`. 
 
-## YogaSMC (WIP)
+## YogaSMC
 Allow syncing SMC keys like sensors reading and battery conservation mode.
 
 ### EC reading:
-When [Rehabman's](https://www.tonymacx86.com/threads/guide-how-to-patch-dsdt-for-working-battery-status.116102/) battery patching method `RE1B` `RECB` present, desired EC fields (e.g. at offset `0xA4`) can be read using `ioio -s YogaSMC ReadEC 0xA4`.
+When [Rehabman's](https://www.tonymacx86.com/threads/guide-how-to-patch-dsdt-for-working-battery-status.116102/) battery patching method `RE1B` `RECB` present, desired EC fields can be read using following commands:
 
-For bulk reading, add total bytes to read before offset, e.g. `ioio -s YogaSMC ReadEC 0x10000` to read `0x100` bytes at offset `0x00` (dump whole EC).
+- One byte at specific offset: `ioio -s YogaSMC ReadECOffset 0xA4` for field at offset `0xA4` .
+
+- Bulk reading: `ioio -s YogaSMC ReadECOffset 0x1006` for `0x10` bytes at offset `0x06` (add total bytes to read before offset).
+
+-- Dump whole EC: `ioio -s YogaSMC ReadECOffset 0x10000` 
+
+- Known EC field name (no larger than 1 byte): `ioio - YogaSMC ReadECName B1CY` 
 
 ## YogaWMI
 Support for parsing WMI devices and properties (for Thunderbolt, see [al3xtjames/ThunderboltPkg](https://github.com/al3xtjames/ThunderboltPkg) instead of WMI interface).
@@ -29,10 +35,10 @@ Fn+esc (obsolete LENOVO_PAPER_LOOKING_EVENT) currently assigned to Fn mode switc
 Based on [lenovo/thinklmi](https://github.com/lenovo/thinklmi) ([iksaif/thinkpad-wmi](https://github.com/iksaif/thinkpad-wmi))
 
 ## YogaVPC
-Intercepting events on vendor-specific devices (VPC) and sync states.
+Intercepting events on vendor-specific Virtual Power Controller (VPC) devices and sync states.
 
 ### IdeaVPC
-Based on [linux/drivers/platform/x86/ideapad-laptop.c](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/ideapad-laptop.c)
+Based on [linux/drivers/platform/x86/ideapad-laptop.c](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/ideapad-laptop.c), targets `VPC0` by `_HID` `VPC2004`.
 
 Currently available functions:
 - VPC0 config parsing
@@ -42,7 +48,7 @@ Currently available functions:
 - Reading fn key code (read-only, WIP)
 
 ### ThinkVPC (WIP)
-Based on [linux/drivers/platform/x86/thinkpad_acpi.c](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/thinkpad_acpi.c)
+Based on [linux/drivers/platform/x86/thinkpad_acpi.c](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/thinkpad_acpi.c), targets `HKEY` by `_HID` `LEN0268`.
 
 Currently available functions:
 - HKEY config parsing

@@ -56,6 +56,7 @@
 		6F48676224A293A0003AD4CA /* IdeaWMI.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IdeaWMI.hpp; sourceTree = "<group>"; };
 		6F6CEDA224BC14C2004D553F /* ThinkVPC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ThinkVPC.cpp; sourceTree = "<group>"; };
 		6F6CEDA324BC14C2004D553F /* ThinkVPC.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ThinkVPC.hpp; sourceTree = "<group>"; };
+		6F70426124D2CFE900FD5659 /* SSDTSample */ = {isa = PBXFileReference; lastKnownFileType = folder; name = SSDTSample; path = YogaSMC/SSDTSample; sourceTree = "<group>"; };
 		6F83586424D0BFFD0031512F /* Headers */ = {isa = PBXFileReference; lastKnownFileType = text; name = Headers; path = Lilu.kext/Contents/Resources/Headers; sourceTree = SOURCE_ROOT; };
 		6F83586F24D0C0C90031512F /* VirtualSMCSDK */ = {isa = PBXFileReference; lastKnownFileType = text; name = VirtualSMCSDK; path = VirtualSMC.kext/Contents/Resources/VirtualSMCSDK; sourceTree = SOURCE_ROOT; };
 		6F83587124D0C2B50031512F /* KeyImplementations.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = KeyImplementations.cpp; sourceTree = "<group>"; };
@@ -93,8 +94,7 @@
 		6F08ACDA24746B8B00681A63 = {
 			isa = PBXGroup;
 			children = (
-				6F2D45CB24C9494B00A75751 /* LICENSE */,
-				6F9B2AB124D2ADD800005C16 /* README.md */,
+				6F70425F24D2CF5200FD5659 /* Docs */,
 				6F08ACE624746B8B00681A63 /* YogaSMC */,
 				6F83586324D0BFEE0031512F /* SDK */,
 				6F08ACE524746B8B00681A63 /* Products */,
@@ -112,6 +112,7 @@
 		6F08ACE624746B8B00681A63 /* YogaSMC */ = {
 			isa = PBXGroup;
 			children = (
+				6F70426024D2CFB900FD5659 /* YogaSMC */,
 				6F9553BC24BA516100215EBB /* YogaVPC */,
 				6F48676024A2937E003AD4CA /* YogaWMI */,
 				6FCF7F572474B74800A82B13 /* WMI.h */,
@@ -142,6 +143,23 @@
 				6F8674CB24A876E000DC2FDF /* ThinkWMI.cpp */,
 			);
 			path = YogaWMI;
+			sourceTree = "<group>";
+		};
+		6F70425F24D2CF5200FD5659 /* Docs */ = {
+			isa = PBXGroup;
+			children = (
+				6F70426124D2CFE900FD5659 /* SSDTSample */,
+				6F2D45CB24C9494B00A75751 /* LICENSE */,
+				6F9B2AB124D2ADD800005C16 /* README.md */,
+			);
+			name = Docs;
+			sourceTree = "<group>";
+		};
+		6F70426024D2CFB900FD5659 /* YogaSMC */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = YogaSMC;
 			sourceTree = "<group>";
 		};
 		6F83586324D0BFEE0031512F /* SDK */ = {

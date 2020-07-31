@@ -114,14 +114,14 @@ IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
 
         case kSMC_YogaEvent:
             IOLog("%s::%s message: YogaSMC YogaEvent 0x%04x", getName(), name, *((UInt32 *) argument));
-            if (BacklightCap && automaticBacklightMode & 0x2) {
+            if (backlightCap && automaticBacklightMode & 0x2) {
                 updateKeyboard();
                 if (*((UInt32 *) argument) != 1) {
-                    BacklightModeSleep = BacklightMode;
-                    if (BacklightMode)
+                    backlightModeSleep = backlightMode;
+                    if (backlightMode)
                         toggleBacklight();
                 } else {
-                    if (BacklightModeSleep && !BacklightMode)
+                    if (backlightModeSleep && !backlightMode)
                         toggleBacklight();
                 }
             }
@@ -178,8 +178,8 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
 
                 updateKeyboard(false);
 
-                if (value->getValue() == BacklightMode)
-                    IOLog(valueMatched, getName(), name, backlightPrompt, BacklightMode);
+                if (value->getValue() == backlightMode)
+                    IOLog(valueMatched, getName(), name, backlightPrompt, backlightMode);
                 else
                     toggleBacklight();
             } else if (key->isEqualTo(autoBacklightPrompt)) {
@@ -309,8 +309,8 @@ bool IdeaVPC::initEC() {
     if (attempts)
         setProperty("EC Access", attempts + 1, 8);
 
-    BacklightCap = BIT(HA_BACKLIGHT_CAP_BIT) & state;
-    if (!BacklightCap)
+    backlightCap = BIT(HA_BACKLIGHT_CAP_BIT) & state;
+    if (!backlightCap)
         setProperty(backlightPrompt, "disabled");
     else
         setProperty(autoBacklightPrompt, automaticBacklightMode, 8);
@@ -436,7 +436,7 @@ bool IdeaVPC::updateConservation(bool update) {
 }
 
 bool IdeaVPC::updateKeyboard(bool update) {
-    if (!FnlockCap && !BacklightCap)
+    if (!FnlockCap && !backlightCap)
         return true;
 
     UInt32 state;
@@ -448,15 +448,15 @@ bool IdeaVPC::updateKeyboard(bool update) {
 
     if (FnlockCap)
         FnlockMode = BIT(HA_FNLOCK_BIT) & state;
-    if (BacklightCap)
-        BacklightMode = BIT(HA_BACKLIGHT_BIT) & state;
+    if (backlightCap)
+        backlightMode = BIT(HA_BACKLIGHT_BIT) & state;
 
     if (update) {
         IOLog(updateSuccess, getName(), name, KeyboardPrompt, state);
         if (FnlockCap)
             setProperty(FnKeyPrompt, FnlockMode);
-        if (BacklightCap)
-            setProperty(backlightPrompt, BacklightMode);
+        if (backlightCap)
+            setProperty(backlightPrompt, backlightMode);
     }
 
     return true;
@@ -486,13 +486,13 @@ bool IdeaVPC::toggleConservation() {
 }
 
 bool IdeaVPC::toggleBacklight() {
-    if (!BacklightCap)
+    if (!backlightCap)
         return true;
 
     UInt32 result;
 
     OSObject* params[1] = {
-        OSNumber::withNumber((!BacklightMode ? HACMD_BACKLIGHT_ON : HACMD_BACKLIGHT_OFF), 32)
+        OSNumber::withNumber((!backlightMode ? HACMD_BACKLIGHT_ON : HACMD_BACKLIGHT_OFF), 32)
     };
 
     if (vpc->evaluateInteger(setKeyboardMode, &result, params, 1) != kIOReturnSuccess || result != 0) {
@@ -500,8 +500,8 @@ bool IdeaVPC::toggleBacklight() {
         return false;
     }
 
-    BacklightMode = !BacklightMode;
-    IOLog(toggleSuccess, getName(), name, backlightPrompt, (BacklightMode ? HACMD_BACKLIGHT_ON : HACMD_BACKLIGHT_OFF), (BacklightMode ? "on" : "off"));
+    backlightMode = !backlightMode;
+    IOLog(toggleSuccess, getName(), name, backlightPrompt, (backlightMode ? HACMD_BACKLIGHT_ON : HACMD_BACKLIGHT_OFF), (backlightMode ? "on" : "off"));
     setProperty(backlightPrompt, FnlockMode);
 
     return true;
@@ -732,14 +732,14 @@ IOReturn IdeaVPC::setPowerState(unsigned long powerState, IOService *whatDevice)
     if (whatDevice != this)
         return kIOReturnInvalid;
 
-    if (BacklightCap && automaticBacklightMode & 0x1) {
+    if (backlightCap && automaticBacklightMode & 0x1) {
         updateKeyboard();
         if (powerState == 0) {
-            BacklightModeSleep = BacklightMode;
-            if (BacklightMode)
+            backlightModeSleep = backlightMode;
+            if (backlightMode)
                 toggleBacklight();
         } else {
-            if (BacklightModeSleep && !BacklightMode)
+            if (backlightModeSleep && !backlightMode)
                 toggleBacklight();
         }
     }

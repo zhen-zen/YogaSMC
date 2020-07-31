@@ -30,11 +30,10 @@ bool YogaSMC::init(OSDictionary *dictionary)
 
 IOService *YogaSMC::probe(IOService *provider, SInt32 *score)
 {
-    name = provider->getName();
-    findEC();
-    
     IOLog("%s Probing\n", getName());
 
+    findEC();
+    
     return super::probe(provider, score);
 }
 
@@ -208,7 +207,7 @@ IOReturn YogaSMC::method_re1b(UInt32 offset, UInt32 *result) {
         OSNumber::withNumber(offset, 32)
     };
 
-    IOReturn ret = ec->evaluateInteger("RE1B", result, params, 1);
+    IOReturn ret = ec->evaluateInteger(readECOneByte, result, params, 1);
     if (ret != kIOReturnSuccess)
         IOLog("%s read 0x%02x failed\n", getName(), offset);
 
@@ -224,7 +223,7 @@ IOReturn YogaSMC::method_recb(UInt32 offset, UInt32 size, UInt8 *data) {
     };
     OSObject* result;
 
-    IOReturn ret = ec->evaluateObject("RECB", &result, params, 2);
+    IOReturn ret = ec->evaluateObject(readECBytes, &result, params, 2);
     if (ret != kIOReturnSuccess) {
         IOLog("%s read %d bytes @ 0x%02x failed\n", getName(), size, offset);
         return ret;
@@ -254,14 +253,14 @@ IOReturn YogaSMC::method_we1b(UInt32 offset, UInt32 value) {
     };
     UInt32 result;
 
-    IOReturn ret = ec->evaluateInteger("WE1B", &result, params, 2);
+    IOReturn ret = ec->evaluateInteger(writeECOneByte, &result, params, 2);
     if (ret != kIOReturnSuccess)
         IOLog("%s write 0x%02x @ 0x%02x failed\n", getName(), value, offset);
 
     return ret;
 }
 
-void YogaSMC::readECOffset(UInt32 value) {
+void YogaSMC::dumpECOffset(UInt32 value) {
     UInt32 size = value >> 8;
     if (size) {
         UInt32 offset = value & 0xff;
@@ -320,7 +319,7 @@ void YogaSMC::setPropertiesGated(OSObject* props) {
                     IOLog("%s invalid number", getName());
                     continue;
                 }
-                readECOffset(value->unsigned32BitValue());
+                dumpECOffset(value->unsigned32BitValue());
             } else if (key->isEqualTo("ReadECName")) {
                 OSString *value = OSDynamicCast(OSString, dict->getObject("ReadECName"));
                 if (value == NULL) {
