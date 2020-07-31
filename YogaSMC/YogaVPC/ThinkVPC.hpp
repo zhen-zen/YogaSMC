@@ -60,7 +60,8 @@ private:
 
     bool updateConservation(const char* method, bool update=true);
     
-//    bool toggleConservation();
+    bool setConservation(const char* method, UInt32 value);
+
     bool updateAdaptiveKBD(int arg);
     bool updateMutestatus();
 

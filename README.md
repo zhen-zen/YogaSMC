@@ -18,9 +18,9 @@ When [Rehabman's](https://www.tonymacx86.com/threads/guide-how-to-patch-dsdt-for
 
 - Bulk reading: `ioio -s YogaSMC ReadECOffset 0x1006` for `0x10` bytes at offset `0x06` (add total bytes to read before offset).
 
--- Dump whole EC: `ioio -s YogaSMC ReadECOffset 0x10000` 
+- Dump whole EC area: `ioio -s YogaSMC ReadECOffset 0x10000` 
 
-- Known EC field name (no larger than 1 byte): `ioio - YogaSMC ReadECName B1CY` 
+- Known EC field name (no larger than 1 byte): `ioio - YogaSMC ReadECName B1CY`
 
 ## YogaWMI
 Support for parsing WMI devices and properties (for Thunderbolt, see [al3xtjames/ThunderboltPkg](https://github.com/al3xtjames/ThunderboltPkg) instead of WMI interface).
@@ -52,5 +52,6 @@ Based on [linux/drivers/platform/x86/thinkpad_acpi.c](https://github.com/torvald
 
 Currently available functions:
 - HKEY config parsing
-- Battery conservation mode (read-only, WIP)
+- Battery conservation mode (experimental)
+- Fan mode (experimental)
 - Mute status (read-only, WIP)

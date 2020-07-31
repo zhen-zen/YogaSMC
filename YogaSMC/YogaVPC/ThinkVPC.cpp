@@ -56,6 +56,24 @@ bool ThinkVPC::updateConservation(const char * method, bool update) {
     return true;
 }
 
+bool ThinkVPC::setConservation(const char * method, UInt32 value) {
+    UInt32 result;
+
+    OSObject* params[1] = {
+        OSNumber::withNumber(value, 32)
+    };
+
+    if (vpc->evaluateInteger(method, &result, params, 1) != kIOReturnSuccess) {
+        IOLog(updateFailure, getName(), name, method);
+        return false;
+    }
+
+    IOLog(updateSuccess, getName(), name, method, result);
+    updateBattery(batnum);
+
+    return true;
+}
+
 bool ThinkVPC::updateMutestatus() {
     if (vpc->evaluateInteger(getMutestatus, &mutestate) != kIOReturnSuccess) {
         IOLog(updateFailure, getName(), name, __func__);
@@ -177,6 +195,22 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 }
 
                 updateBattery(value->unsigned8BitValue());
+            } else if (key->isEqualTo("setCMstart")) {
+                OSNumber * value = OSDynamicCast(OSNumber, dict->getObject("setCMstart"));
+                if (value == NULL || value->unsigned32BitValue() > 100) {
+                    IOLog(valueInvalid, getName(), name, "setCMstart");
+                    continue;
+                }
+
+                setConservation(setCMstart, value->unsigned8BitValue());
+            } else if (key->isEqualTo("setCMstop")) {
+                OSNumber * value = OSDynamicCast(OSNumber, dict->getObject("setCMstop"));
+                if (value == NULL || value->unsigned32BitValue() > 100) {
+                    IOLog(valueInvalid, getName(), name, "setCMstop");
+                    continue;
+                }
+
+                setConservation(setCMstop, value->unsigned8BitValue());
             } else if (key->isEqualTo(mutePrompt)) {
                 updateMutestatus();
             } else if (key->isEqualTo(fanControlPrompt)) {
