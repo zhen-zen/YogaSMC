@@ -11,7 +11,6 @@
 #define ThinkWMI_hpp
 
 #include "YogaWMI.hpp"
-#include "ThinkVPC.hpp"
 
 class ThinkWMI : public YogaWMI
 {
@@ -19,15 +18,9 @@ class ThinkWMI : public YogaWMI
     OSDeclareDefaultStructors(ThinkWMI)
 
 private:
-    bool initVPC() APPLE_KEXT_OVERRIDE;
     inline OSString *getPnp() APPLE_KEXT_OVERRIDE {return OSString::withCString(PnpDeviceIdVPCThink);};
 
-    ThinkVPC *dev;
-
 public:
-    IOService *probe(IOService *provider, SInt32 *score) APPLE_KEXT_OVERRIDE;
-    void stop(IOService *provider) APPLE_KEXT_OVERRIDE;
-    void free(void) APPLE_KEXT_OVERRIDE;
 };
 
 #endif /* ThinkWMI_hpp */

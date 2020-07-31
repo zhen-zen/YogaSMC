@@ -12,34 +12,12 @@
 #include "message.h"
 #include "WMI.h"
 
-#define WBAT_BAT0_BatMaker 0
-#define WBAT_BAT0_HwId     1
-#define WBAT_BAT0_MfgDate  2
-#define WBAT_BAT1_BatMaker 3
-#define WBAT_BAT1_HwId     4
-#define WBAT_BAT1_MfgDate  5
-
-#define WBAT_WMI_STRING "c3a03776-51ac-49aa-ad0f-f2f7d62c3f3c"
-#define YMC_WMI_METHOD "09b0ee6e-c3fd-4243-8da1-7911ff80bb8c"
-#define YMC_WMI_EVENT  "06129d99-6083-4164-81ad-f092f9d773a6"
-
-enum
-{
-    kYogaMode_laptop = 1,   // 0-90 degree
-    kYogaMode_tablet = 2,   // 0/360 degree
-    kYogaMode_stand  = 3,   // 180-360 degree, ∠ , screen face up
-    kYogaMode_tent   = 4    // 180-360 degree, ∧ , screen upside down, trigger rotation?
-} kYogaMode;
-
 class YogaWMI : public IOService
 {
     typedef IOService super;
     OSDeclareDefaultStructors(YogaWMI)
 
 private:
-//    IOACPIPlatformDevice *device {nullptr};
-    WMI* YWMI {nullptr};
-
     void dispatchMessageGated(int* message, void* data);
 
     bool notificationHandler(void * refCon, IOService * newService, IONotifier * notifier);
@@ -50,10 +28,6 @@ private:
     OSSet* _notificationServices {nullptr};
     const OSSymbol* _deliverNotification {nullptr};
 
-    bool isYMC {false};
-
-    OSString * getBatteryInfo (UInt32 index);
-
 protected:
     const char* name;
 
@@ -61,13 +35,11 @@ protected:
     IOCommandGate *commandGate {nullptr};
 
     /**
-     *  VPC device
+     *  WMI device, in place of provider and direct ACPI evaluations
      */
-    IOACPIPlatformDevice *vpc {nullptr};
+    WMI* YWMI {nullptr};
 
     void dispatchMessage(int message, void* data);
-
-    OSDictionary *Event {nullptr};
 
     /**
      *  Find notify id and other properties of an event
@@ -84,18 +56,6 @@ protected:
     bool findVPC();
 
     /**
-     *  Get VPC config
-     *
-     *  @return true if VPC is initialized successfully
-     */
-    inline virtual bool initVPC() {return true;};
-    
-    /**
-     *  Update VPC EC status
-     */
-    inline virtual void updateVPC() {return;};
-
-    /**
      *  Get pnp id of VPC device
      *
      *  @return nullptr if vpc is not configured
@@ -103,14 +63,19 @@ protected:
     inline virtual OSString *getPnp() {return nullptr;};
 
     /**
-     *  Current Yoga Mode, see kYogaMode
+     *  Vendor specific WMI analyze
      */
-    int YogaMode {kYogaMode_laptop};
+    inline virtual void processWMI() {};
+
+    OSDictionary *Event {nullptr};
 
     /**
-     *  Update Yoga Mode
+     *  Check WMI event id
+     *
+     *  @param cname WMI event name
+     *  @param id  WMI event id
      */
-    void updateYogaMode();
+    virtual void checkEvent(const char *cname, UInt32 id);
     
     /**
      *  Corresponding event to trigger after receiving a message
