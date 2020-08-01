@@ -123,6 +123,8 @@
 				6FD2BB8B247B37A20018EA36 /* bmfparser.cpp */,
 				6FCF7F5B2474B89000A82B13 /* common.h */,
 				6F96F4D524CD9593005A7686 /* message.h */,
+				6F83587224D0C2B50031512F /* KeyImplementations.hpp */,
+				6F83587124D0C2B50031512F /* KeyImplementations.cpp */,
 				6F87BF7F24D26A5D00D64375 /* YogaSMC.hpp */,
 				6F87BF7E24D26A5D00D64375 /* YogaSMC.cpp */,
 				6F96A30B24B93D25006562EC /* YogaVPC.hpp */,
@@ -179,8 +181,6 @@
 				6F9553B824BA515B00215EBB /* IdeaVPC.cpp */,
 				6F6CEDA324BC14C2004D553F /* ThinkVPC.hpp */,
 				6F6CEDA224BC14C2004D553F /* ThinkVPC.cpp */,
-				6F83587224D0C2B50031512F /* KeyImplementations.hpp */,
-				6F83587124D0C2B50031512F /* KeyImplementations.cpp */,
 			);
 			path = YogaVPC;
 			sourceTree = "<group>";

@@ -8,7 +8,6 @@
 //
 
 #include "IdeaVPC.hpp"
-#include "KeyImplementations.hpp"
 OSDefineMetaClassAndStructors(IdeaVPC, YogaVPC);
 
 IdeaVPC* IdeaVPC::withDevice(IOACPIPlatformDevice *device, OSString *pnp) {
@@ -54,7 +53,7 @@ bool IdeaVPC::initVPC() {
 
 #ifdef DEBUG
     OSDictionary *capabilities = OSDictionary::withCapacity(5);
-    OSObject *value;
+    OSString *value;
 
     switch (cap_graphics) {
         case 1:
@@ -93,10 +92,7 @@ bool IdeaVPC::initVPC() {
     setProperty("Capability", capabilities);
     capabilities->release();
 #endif
-    if (initEC())  {
-        VirtualSMCAPI::addKey(KeyBDVT, vsmcPlugin.data, VirtualSMCAPI::valueWithFlag(false, new BDVT(this), SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_WRITE));
-        vsmcNotifier = VirtualSMCAPI::registerHandler(vsmcNotificationHandler, this);
-    }
+    initEC();
     return true;
 }
 
@@ -113,7 +109,7 @@ IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
             break;
 
         case kSMC_YogaEvent:
-            IOLog("%s::%s message: YogaEvent 0x%04x", getName(), name, *((UInt32 *) argument));
+            IOLog("%s::%s message: %s Yoga mode 0x%x", getName(), name, provider->getName(), *((UInt32 *) argument));
             if (backlightCap && automaticBacklightMode & 0x2) {
                 updateKeyboard();
                 if (*((UInt32 *) argument) != 1) {
@@ -128,20 +124,29 @@ IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
             break;
 
         case kSMC_FnlockEvent:
-            IOLog("%s::%s message: FnlockEvent", getName(), name);
+            IOLog("%s::%s message: %s Fnlock event", getName(), name, provider->getName());
             updateKeyboard();
             toggleFnlock();
             break;
 
+        case kSMC_getConservation:
+            *(bool *)argument = conservationMode;
+            IOLog("%s::%s message: %s get conservation mode %d", getName(), name, provider->getName(), conservationMode);
+            break;
+
+        case kSMC_setConservation:
+            IOLog("%s::%s message: %s set conservation mode %d -> %d", getName(), name, provider->getName(), conservationMode, *((bool *) argument));
+            if (*((bool *) argument) != conservationMode)
+                toggleConservation();
+            break;
+
         case kIOACPIMessageDeviceNotification:
-            if (argument) {
-                if (*((UInt32 *) argument) == kIOACPIMessageReserved)
-                    updateVPC();
-                else
-                    IOLog("%s::%s message: ACPI provider=%s, argument unknown 0x%04x\n", getName(), name, provider->getName(), *((UInt32 *) argument));
-            } else {
-                IOLog("%s::%s message: ACPI provider=%s, argument unknown", getName(), name, provider->getName());
-            }
+            if (!argument)
+                IOLog("%s::%s message: Unknown ACPI notification", getName(), name);
+            else if (*((UInt32 *) argument) == kIOACPIMessageReserved)
+                updateVPC();
+            else
+                IOLog("%s::%s message: Unknown ACPI notification 0x%04x\n", getName(), name, *((UInt32 *) argument));
             break;
 
         default:
@@ -330,7 +335,6 @@ bool IdeaVPC::initEC() {
 }
 
 bool IdeaVPC::updateBatteryID(bool update) {
-    OSArray *data;
     OSObject *result;
 
     if (vpc->evaluateObject(getBatteryID, &result) != kIOReturnSuccess) {
@@ -338,9 +342,11 @@ bool IdeaVPC::updateBatteryID(bool update) {
         return false;
     }
 
+    OSArray *data;
     data = OSDynamicCast(OSArray, result);
     if (!data) {
         IOLog("%s::%s Battery ID not OSArray", getName(), name);
+        result->release();
         return false;
     }
 
@@ -383,6 +389,7 @@ bool IdeaVPC::updateBatteryID(bool update) {
         if (batteryID1[0] != 0xffff)
             IOLog("%s::%s Battery 1 ID %04x %04x %04x %04x", getName(), name, batteryID1[0], batteryID1[1], batteryID1[2], batteryID1[3]);
     }
+    data->release();
     return true;
 }
 
@@ -402,6 +409,7 @@ bool IdeaVPC::updateBatteryInfo(bool update) {
     data = OSDynamicCast(OSData, result);
     if (!data) {
         IOLog("%s::%s Battery Info not OSData", getName(), name);
+        result->release();
         return false;
     }
     UInt16 * bdata = (UInt16 *)(data->getBytesNoCopy());
@@ -414,6 +422,7 @@ bool IdeaVPC::updateBatteryInfo(bool update) {
     // B2DT
     if (bdata[9] != 0)
         parseRawDate(bdata[9], 1);
+    data->release();
     return true;
 }
 
@@ -480,7 +489,6 @@ bool IdeaVPC::toggleConservation() {
     conservationMode = !conservationMode;
     IOLog(toggleSuccess, getName(), name, conservationPrompt, (conservationMode ? BMCMD_CONSERVATION_ON : BMCMD_CONSERVATION_OFF), (conservationMode ? "on" : "off"));
     setProperty(conservationPrompt, conservationMode);
-    // TODO: sync with system preference
 
     return true;
 }

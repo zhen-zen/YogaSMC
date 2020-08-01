@@ -13,7 +13,6 @@
 #include <IOKit/IOCommandGate.h>
 #include <IOKit/IOService.h>
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
-#include <VirtualSMCSDK/kern_vsmcapi.hpp>
 #include "message.h"
 
 #define autoBacklightPrompt "AutoBacklight"
@@ -110,20 +109,6 @@ protected:
 
     virtual void setPropertiesGated(OSObject* props);
 
-    /**
-     *  VirtualSMC service registration notifier
-     */
-    IONotifier *vsmcNotifier {nullptr};
-
-    /**
-     *  Registered plugin instance
-     */
-    VirtualSMCAPI::Plugin vsmcPlugin {
-        xStringify(PRODUCT_NAME),
-        parseModuleVersion(xStringify(MODULE_VERSION)),
-        VirtualSMCAPI::Version,
-    };
-
 public:
     virtual bool init(OSDictionary *dictionary) APPLE_KEXT_OVERRIDE;
     virtual IOService *probe(IOService *provider, SInt32 *score) APPLE_KEXT_OVERRIDE;
@@ -135,16 +120,6 @@ public:
     virtual IOReturn setProperties(OSObject* props) APPLE_KEXT_OVERRIDE;
     virtual IOReturn message(UInt32 type, IOService *provider, void *argument) APPLE_KEXT_OVERRIDE;
     virtual IOReturn setPowerState(unsigned long powerState, IOService * whatDevice) APPLE_KEXT_OVERRIDE;
-
-    /**
-     *  Submit the keys to received VirtualSMC service.
-     *
-     *  @param sensors   SMCBatteryManager service
-     *  @param refCon    reference
-     *  @param vsmc      VirtualSMC service
-     *  @param notifier  created notifier
-     */
-    static bool vsmcNotificationHandler(void *sensors, void *refCon, IOService *vsmc, IONotifier *notifier);
 };
 
 #endif /* YogaVPC_hpp */

@@ -10,6 +10,9 @@
 
 OSDefineMetaClassAndStructors(YogaSMC, IOService);
 
+bool ADDPR(debugEnabled) = true;
+uint32_t ADDPR(debugPrintDelay) = 0;
+
 bool YogaSMC::init(OSDictionary *dictionary)
 {
     bool res = super::init(dictionary);
@@ -71,6 +74,8 @@ bool YogaSMC::start(IOService *provider) {
         propertyMatch->release();
 
     }
+
+    VirtualSMCAPI::addKey(KeyBDVT, vsmcPlugin.data, VirtualSMCAPI::valueWithFlag(false, new BDVT(this), SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_WRITE));
     VirtualSMCAPI::addKey(KeyCH0B, vsmcPlugin.data, VirtualSMCAPI::valueWithFlag(false, new CH0B, SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_WRITE));
     vsmcNotifier = VirtualSMCAPI::registerHandler(vsmcNotificationHandler, this);
 
@@ -344,16 +349,4 @@ void YogaSMC::setPropertiesGated(OSObject* props) {
 IOReturn YogaSMC::setProperties(OSObject *props) {
     commandGate->runAction(OSMemberFunctionCast(IOCommandGate::Action, this, &YogaSMC::setPropertiesGated), props);
     return kIOReturnSuccess;
-}
-
-SMC_RESULT CH0B::readAccess() {
-    data[0] = value;
-    DBGLOG("vpckey", "CH0B read %d", value);
-    return SmcSuccess;
-}
-
-SMC_RESULT CH0B::writeAccess() {
-    value = data[0];
-    DBGLOG("vpckey", "CH0B write %d", data[0]);
-    return SmcSuccess;
 }

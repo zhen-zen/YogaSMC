@@ -16,7 +16,7 @@ void IdeaWMI::ACPIEvent(UInt32 argument) {
             IOLog("%s::%s message: ACPI notification 80\n", getName(), name);
             // force enable keyboard and touchpad
             setTopCase(true);
-            dispatchMessage(kSMC_FnlockEvent, nullptr);
+            dispatchMessage(kSMC_FnlockEvent, NULL);
             break;
 
         case kIOACPIMessageD0:
@@ -75,7 +75,7 @@ void IdeaWMI::processWMI() {
         BatteryInfo->setObject(getBatteryInfo(WBAT_BAT0_HwId));
         BatteryInfo->setObject(getBatteryInfo(WBAT_BAT0_MfgDate));
         setProperty("BatteryInfo", BatteryInfo);
-        OSSafeReleaseNULL(BatteryInfo);
+        BatteryInfo->release();
     }
 }
 

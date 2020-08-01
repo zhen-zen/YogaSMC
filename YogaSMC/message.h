@@ -36,10 +36,11 @@ enum
     kSMC_getKeyboardStatus  = iokit_vendor_specific_msg(201),   // get disable/enable keyboard (data is bool*)
 
     // SMC message types
-    kSMC_VPCType            = iokit_vendor_specific_msg(500),   // get loaded VPC type (data is UInt32*)
-    kSMC_YogaEvent          = iokit_vendor_specific_msg(501),   // Forward Yoga Event (data is UInt32*)
-    kSMC_FnlockEvent        = iokit_vendor_specific_msg(502)    // Forward Fnlock Event
-//    kSMC_PowerEvent         = iokit_vendor_specific_msg(503)
+    kSMC_VPCType            = iokit_vendor_specific_msg(500),   // set loaded VPC type (data is UInt32*)
+    kSMC_YogaEvent          = iokit_vendor_specific_msg(501),   // set Yoga mode (data is UInt32*)
+    kSMC_FnlockEvent        = iokit_vendor_specific_msg(502),   // notify Fnlock event
+    kSMC_getConservation    = iokit_vendor_specific_msg(503),   // get conservation mode (data is bool*)
+    kSMC_setConservation    = iokit_vendor_specific_msg(504)    // set conservation mode (data is bool*)
 };
 
 // from VoodooPS2

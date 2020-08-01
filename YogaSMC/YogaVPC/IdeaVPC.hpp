@@ -298,17 +298,10 @@ private:
      */
     void parseTemperature(UInt16 data, const char * desc);
 
-    friend class BDVT;
-
 public:
     static IdeaVPC* withDevice(IOACPIPlatformDevice *device, OSString *pnp);
     IOReturn message(UInt32 type, IOService *provider, void *argument) APPLE_KEXT_OVERRIDE;
     IOReturn setPowerState(unsigned long powerState, IOService * whatDevice) APPLE_KEXT_OVERRIDE;
-//
-//    /**
-//     *  Get battery conservation mode status
-//     */
-//    static inline bool * getConservation() {return &conservationMode;};
 };
 
 #endif /* IdeaVPC_hpp */

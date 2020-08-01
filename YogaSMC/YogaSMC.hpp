@@ -13,11 +13,8 @@
 #include <IOKit/IOService.h>
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
 #include <VirtualSMCSDK/kern_vsmcapi.hpp>
+#include "KeyImplementations.hpp"
 #include "message.h"
-
-static constexpr SMC_KEY KeyCH0B = SMC_MAKE_IDENTIFIER('C','H','0','B');
-
-class CH0B : public VirtualSMCValue { protected: SMC_RESULT readAccess() override; SMC_RESULT writeAccess() override; SMC_DATA value {0};};
 
 class YogaSMC : public IOService
 {
@@ -147,6 +144,8 @@ public:
      *  @param notifier  created notifier
      */
     static bool vsmcNotificationHandler(void *sensors, void *refCon, IOService *vsmc, IONotifier *notifier);
+
+    friend BDVT;
 };
 
 #endif /* YogaSMC_hpp */
