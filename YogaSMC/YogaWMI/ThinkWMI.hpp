@@ -18,7 +18,7 @@ class ThinkWMI : public YogaWMI
     OSDeclareDefaultStructors(ThinkWMI)
 
 private:
-    inline OSString *getPnp() APPLE_KEXT_OVERRIDE {return OSString::withCString(PnpDeviceIdVPCThink);};
+    inline const char *getVPCName() APPLE_KEXT_OVERRIDE {return PnpDeviceIdVPCThink;};
 
 public:
 };

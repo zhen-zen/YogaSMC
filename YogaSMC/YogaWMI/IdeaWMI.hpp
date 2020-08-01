@@ -37,7 +37,7 @@ class IdeaWMI : public YogaWMI
     OSDeclareDefaultStructors(IdeaWMI)
 
 private:
-    inline OSString *getPnp() APPLE_KEXT_OVERRIDE {return OSString::withCString(PnpDeviceIdVPCIdea);};
+    inline const char *getVPCName() APPLE_KEXT_OVERRIDE {return PnpDeviceIdVPCIdea;};
 
     bool isYMC {false};
 

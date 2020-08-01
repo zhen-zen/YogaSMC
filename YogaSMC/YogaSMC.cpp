@@ -33,10 +33,21 @@ bool YogaSMC::init(OSDictionary *dictionary)
 
 IOService *YogaSMC::probe(IOService *provider, SInt32 *score)
 {
+    if (provider->getClient() != this) {
+        IOLog("%s already loaded, exiting\n", getName());
+        return nullptr;
+    }
+
     IOLog("%s Probing\n", getName());
 
-    findEC();
-    
+    IOACPIPlatformDevice *vpc {nullptr};
+
+    if(getVPCName() && !findPNP(getVPCName(), vpc)) {
+        IOLog("%s Failed to find compatible VPC %s\n", getName(), getVPCName());
+        return nullptr;
+    }
+
+    findPNP(PnpDeviceIdEC, ec);
     return super::probe(provider, score);
 }
 
@@ -163,19 +174,19 @@ bool YogaSMC::notificationHandler(void *refCon, IOService *newService, IONotifie
     return true;
 }
 
-bool YogaSMC::findEC() {
+bool YogaSMC::findPNP(const char *id, IOACPIPlatformDevice *dev) {
     auto iterator = IORegistryIterator::iterateOver(gIOACPIPlane, kIORegistryIterateRecursively);
     if (!iterator) {
-        IOLog("%s findEC failed\n", getName());
+        IOLog("%s findPNP failed\n", getName());
         return false;
     }
-    auto pnp = OSString::withCString(PnpDeviceIdEC);
+    auto pnp = OSString::withCString(id);
 
     while (auto entry = iterator->getNextObject()) {
         if (entry->compareName(pnp)) {
-            ec = OSDynamicCast(IOACPIPlatformDevice, entry);
-            if (ec) {
-                IOLog("%s EC available at %s\n", getName(), entry->getName());
+            dev = OSDynamicCast(IOACPIPlatformDevice, entry);
+            if (dev) {
+                IOLog("%s %s available at %s\n", getName(), id, entry->getName());
                 break;
             }
         }
@@ -183,11 +194,7 @@ bool YogaSMC::findEC() {
     iterator->release();
     pnp->release();
 
-    if (!ec)
-        return false;
-
-    setProperty("Feature", "EC");
-    return true;
+    return !!(dev);
 }
 
 IOReturn YogaSMC::readECName(const char* name, UInt32 *result) {

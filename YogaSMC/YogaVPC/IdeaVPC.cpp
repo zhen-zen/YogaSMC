@@ -131,6 +131,7 @@ IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
 
         case kSMC_getConservation:
             *(bool *)argument = conservationMode;
+            conservationModeLock = false;
             IOLog("%s::%s message: %s get conservation mode %d", getName(), name, provider->getName(), conservationMode);
             break;
 

@@ -33,21 +33,18 @@ private:
     const OSSymbol* _deliverNotification {nullptr};
 
     /**
-     * EC device identifier
-     */
-    static constexpr const char *PnpDeviceIdEC = "PNP0C09";
-
-    /**
      *  EC device
      */
     IOACPIPlatformDevice *ec {nullptr};
 
     /**
-     *  Find available EC on this system
+     *  Iterate over IOACPIPlane for PNP device
      *
+     *  @param id PNP name
+     *  @param dev target ACPI device
      *  @return true on sucess
      */
-    bool findEC();
+    bool findPNP(const char *id, IOACPIPlatformDevice *dev);
 
     /**
      *  Related ACPI methods
@@ -69,6 +66,13 @@ protected:
     IOCommandGate *commandGate {nullptr};
 
     void dispatchMessage(int message, void* data);
+
+    /**
+     *  Get pnp id of VPC device
+     *
+     *  @return nullptr if vpc is not configured
+     */
+    inline virtual const char *getVPCName() {return nullptr;};
 
     /**
      *  Wrapper for RE1B

@@ -49,18 +49,20 @@ protected:
     void getNotifyID(OSString *key);
 
     /**
-     *  Iterate through IOACPIPlane for VPC
+     *  Iterate over IOACPIPlane for PNP device
      *
+     *  @param id PNP name
+     *  @param dev target ACPI device
      *  @return true if VPC is available
      */
-    bool findVPC();
+    bool findPNP(const char *id, IOACPIPlatformDevice *dev);
 
     /**
      *  Get pnp id of VPC device
      *
-     *  @return nullptr if vpc is not configured
+     *  @return nullptr if not specified
      */
-    inline virtual OSString *getPnp() {return nullptr;};
+    inline virtual const char *getVPCName() {return nullptr;};
 
     /**
      *  Vendor specific WMI analyze

@@ -12,6 +12,7 @@
 #define kIOACPIMessageD0 0xd0
 #define kIOACPIMessageReserved 0x80
 
+#define PnpDeviceIdEC       "PNP0C09"
 #define PnpDeviceIdVPCIdea  "VPC2004"
 #define PnpDeviceIdVPCThink "LEN0268"
 
