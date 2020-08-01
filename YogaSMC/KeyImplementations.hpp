@@ -15,15 +15,14 @@
 static constexpr SMC_KEY KeyBDVT = SMC_MAKE_IDENTIFIER('B','D','V','T');
 static constexpr SMC_KEY KeyCH0B = SMC_MAKE_IDENTIFIER('C','H','0','B');
 
-class VPCKey : public VirtualSMCValue {
+class ECKey : public VirtualSMCValue {
 protected:
-    IOService *vpc;
+    IOService *dst;
 public:
-    VPCKey(IOService *src=0) : vpc(src) {};
+    ECKey(IOService *src=nullptr) : dst(src) {};
 };
 
-class BDVT : public VPCKey { using VPCKey::VPCKey; protected: SMC_RESULT readAccess() override; SMC_RESULT writeAccess() override; bool value {false}; int readcount {0}; int writecount {0};};
-
+class BDVT : public ECKey { using ECKey::ECKey; protected: SMC_RESULT readAccess() override; SMC_RESULT writeAccess() override; bool status {false};};
 class CH0B : public VirtualSMCValue { protected: SMC_RESULT readAccess() override; SMC_RESULT writeAccess() override; SMC_DATA value {0};};
 
 #endif /* KeyImplementations_hpp */

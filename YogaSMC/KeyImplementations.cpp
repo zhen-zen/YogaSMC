@@ -10,29 +10,27 @@
 #include "YogaSMC.hpp"
 
 SMC_RESULT BDVT::readAccess() {
-    readcount++;
     bool *ptr = reinterpret_cast<bool *>(data);
-    *ptr = value;
-    YogaSMC *drv = OSDynamicCast(YogaSMC, vpc);
+    YogaSMC *drv = OSDynamicCast(YogaSMC, dst);
     if (drv) {
         drv->dispatchMessage(kSMC_getConservation, ptr);
-        DBGLOG("vpckey", "%d BDVT read %d / %d", readcount, value, data[0]);
-        value = *ptr;
+        DBGLOG("vpckey", "BDVT read %d -> %d", *ptr, status);
+        status = *ptr;
     } else {
-        DBGLOG("vpckey", "%d BDVT read %d (no drv)", readcount, data[0]);
+        *ptr = status;
+        DBGLOG("vpckey", "BDVT read %d (no drv)", status);
     }
     return SmcSuccess;
 }
 
 SMC_RESULT BDVT::writeAccess() {
-    writecount++;
-    DBGLOG("vpckey", "%d BDVT write %d -> %d", writecount, value, data[0]);
     bool *ptr = reinterpret_cast<bool *>(data);
-    if (value != *ptr) {
-        YogaSMC *drv = OSDynamicCast(YogaSMC, vpc);
+    DBGLOG("vpckey", "BDVT write %d -> %d", *ptr, status);
+    if (status != *ptr) {
+        YogaSMC *drv = OSDynamicCast(YogaSMC, dst);
         if (drv)
             drv->dispatchMessage(kSMC_setConservation, ptr);
-        value = *ptr;
+        status = *ptr;
     }
     return SmcSuccess;
 }
