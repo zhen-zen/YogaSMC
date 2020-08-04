@@ -42,12 +42,12 @@ IOService *YogaSMC::probe(IOService *provider, SInt32 *score)
 
     IOACPIPlatformDevice *vpc {nullptr};
 
-    if(getVPCName() && !findPNP(getVPCName(), vpc)) {
+    if(getVPCName() && !findPNP(getVPCName(), &vpc)) {
         IOLog("%s Failed to find compatible VPC %s\n", getName(), getVPCName());
         return nullptr;
     }
 
-    findPNP(PnpDeviceIdEC, ec);
+    findPNP(PnpDeviceIdEC, &ec);
     return super::probe(provider, score);
 }
 
@@ -174,7 +174,7 @@ bool YogaSMC::notificationHandler(void *refCon, IOService *newService, IONotifie
     return true;
 }
 
-bool YogaSMC::findPNP(const char *id, IOACPIPlatformDevice *dev) {
+bool YogaSMC::findPNP(const char *id, IOACPIPlatformDevice **dev) {
     auto iterator = IORegistryIterator::iterateOver(gIOACPIPlane, kIORegistryIterateRecursively);
     if (!iterator) {
         IOLog("%s findPNP failed\n", getName());
@@ -184,9 +184,9 @@ bool YogaSMC::findPNP(const char *id, IOACPIPlatformDevice *dev) {
 
     while (auto entry = iterator->getNextObject()) {
         if (entry->compareName(pnp)) {
-            dev = OSDynamicCast(IOACPIPlatformDevice, entry);
-            if (dev) {
-                IOLog("%s %s available at %s\n", getName(), id, entry->getName());
+            *dev = OSDynamicCast(IOACPIPlatformDevice, entry);
+            if (*dev) {
+                IOLog("%s %s available at %s\n", getName(), id, (*dev)->getName());
                 break;
             }
         }
@@ -194,7 +194,7 @@ bool YogaSMC::findPNP(const char *id, IOACPIPlatformDevice *dev) {
     iterator->release();
     pnp->release();
 
-    return !!(dev);
+    return !!(*dev);
 }
 
 IOReturn YogaSMC::readECName(const char* name, UInt32 *result) {
@@ -311,14 +311,20 @@ void YogaSMC::dumpECOffset(UInt32 value) {
 }
 
 void YogaSMC::setPropertiesGated(OSObject* props) {
+    OSDictionary* dict = OSDynamicCast(OSDictionary, props);
+    if (!dict)
+        return;
+
+    if (dict->getObject("reset")) {
+        IOLog("%s reset EC", getName());
+        if (!findPNP(PnpDeviceIdEC, &ec))
+            return;
+    }
+
     if (!ec) {
         IOLog("%s EC not available", getName());
         return;
     }
-
-    OSDictionary* dict = OSDynamicCast(OSDictionary, props);
-    if (!dict)
-        return;
 
 //    IOLog("%s: %d objects in properties\n", getName(), dict->getCount());
     OSCollectionIterator* i = OSCollectionIterator::withCollection(dict);

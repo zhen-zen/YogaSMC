@@ -47,7 +47,7 @@ IOService *YogaWMI::probe(IOService *provider, SInt32 *score)
 
     IOACPIPlatformDevice *vpc {nullptr};
 
-    if(getVPCName() && !findPNP(getVPCName(), vpc)) {
+    if(getVPCName() && !findPNP(getVPCName(), &vpc)) {
         IOLog("%s::%s Failed to find VPC\n", getName(), name);
         return nullptr;
     }
@@ -238,7 +238,7 @@ bool YogaWMI::notificationHandler(void *refCon, IOService *newService, IONotifie
     return true;
 }
 
-bool YogaWMI::findPNP(const char *id, IOACPIPlatformDevice *dev) {
+bool YogaWMI::findPNP(const char *id, IOACPIPlatformDevice **dev) {
     auto iterator = IORegistryIterator::iterateOver(gIOACPIPlane, kIORegistryIterateRecursively);
     if (!iterator) {
         IOLog("%s::%s findPNP failed\n", getName(), name);
@@ -248,9 +248,9 @@ bool YogaWMI::findPNP(const char *id, IOACPIPlatformDevice *dev) {
 
     while (auto entry = iterator->getNextObject()) {
         if (entry->compareName(pnp)) {
-            dev = OSDynamicCast(IOACPIPlatformDevice, entry);
-            if (dev) {
-                IOLog("%s::%s %s available at %s\n", getName(), name, id, entry->getName());
+            *dev = OSDynamicCast(IOACPIPlatformDevice, entry);
+            if (*dev) {
+                IOLog("%s::%s %s available at %s\n", getName(), name, id, (*dev)->getName());
                 break;
             }
         }
@@ -258,7 +258,7 @@ bool YogaWMI::findPNP(const char *id, IOACPIPlatformDevice *dev) {
     iterator->release();
     pnp->release();
 
-    return !!(dev);
+    return !!(*dev);
 }
 
 void YogaWMI::toggleTouchpad() {

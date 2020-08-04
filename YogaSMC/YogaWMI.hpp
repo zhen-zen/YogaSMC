@@ -55,7 +55,7 @@ protected:
      *  @param dev target ACPI device
      *  @return true if VPC is available
      */
-    bool findPNP(const char *id, IOACPIPlatformDevice *dev);
+    bool findPNP(const char *id, IOACPIPlatformDevice **dev);
 
     /**
      *  Get pnp id of VPC device

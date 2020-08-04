@@ -44,7 +44,7 @@ private:
      *  @param dev target ACPI device
      *  @return true on sucess
      */
-    bool findPNP(const char *id, IOACPIPlatformDevice *dev);
+    bool findPNP(const char *id, IOACPIPlatformDevice **dev);
 
     /**
      *  Related ACPI methods

@@ -16,7 +16,7 @@ When [Rehabman's](https://www.tonymacx86.com/threads/guide-how-to-patch-dsdt-for
 
 - One byte at specific offset: `ioio -s YogaSMC ReadECOffset 0xA4` for field at offset `0xA4`
 - Bulk reading: `ioio -s YogaSMC ReadECOffset 0x1006` for `0x10` bytes at offset `0x06` (add total bytes to read before offset)
-- Dump whole EC area: `ioio -s YogaSMC ReadECOffset 0x10000`
+- Dump whole EC area: `ioio -s YogaSMC ReadECOffset 0x10000` (Dangerous, avoid using it frequently)
 - Known EC field name (no larger than 1 byte): `ioio -s YogaSMC ReadECName B1CY`
 
 ## YogaWMI
