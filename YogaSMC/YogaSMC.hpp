@@ -62,6 +62,8 @@ private:
     void dumpECOffset(UInt32 value);
 
 protected:
+    const char* name;
+
     IOWorkLoop *workLoop {nullptr};
     IOCommandGate *commandGate {nullptr};
 
