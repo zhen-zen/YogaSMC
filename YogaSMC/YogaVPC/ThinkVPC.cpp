@@ -75,11 +75,27 @@ bool ThinkVPC::setConservation(const char * method, UInt32 value) {
 }
 
 bool ThinkVPC::updateMutestatus() {
-    if (vpc->evaluateInteger(getMutestatus, &mutestate) != kIOReturnSuccess) {
+    if (vpc->evaluateInteger(getAudioMutestatus, &mutestate) != kIOReturnSuccess) {
         IOLog(updateFailure, getName(), name, __func__);
         return false;
     }
     IOLog(updateSuccess, getName(), name, __func__, mutestate);
+    setProperty(mutePrompt, mutestate, 32);
+    return true;
+}
+
+bool ThinkVPC::setMutestatus(UInt32 value) {
+    UInt32 result;
+
+    OSObject* params[1] = {
+        OSNumber::withNumber(value, 32)
+    };
+
+    if (vpc->evaluateInteger(setAudioMutestatus, &result, params, 1) != kIOReturnSuccess || result != value) {
+        IOLog(toggleFailure, getName(), name, __func__);
+        return false;
+    }
+    IOLog(toggleSuccess, getName(), name, __func__, mutestate);
     setProperty(mutePrompt, mutestate, 32);
     return true;
 }
@@ -112,7 +128,17 @@ bool ThinkVPC::initVPC() {
             break;
     }
     updateAll();
+
+    mutestate_orig = mutestate;
+    IOLog("%s::%s Initial HAUM setting was %d", getName(), name, mutestate_orig);
+    setMutestatus(TP_EC_MUTE_BTN_NONE);
+
     return true;
+}
+
+bool ThinkVPC::exitVPC() {
+    setMutestatus(mutestate_orig);
+    return super::exitVPC();
 }
 
 bool ThinkVPC::updateAdaptiveKBD(int arg) {
@@ -212,7 +238,18 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
 
                 setConservation(setCMstop, value->unsigned8BitValue());
             } else if (key->isEqualTo(mutePrompt)) {
+                OSNumber * value = OSDynamicCast(OSNumber, dict->getObject(mutePrompt));
+                if (value == nullptr || value->unsigned32BitValue() > 3) {
+                    IOLog(valueInvalid, getName(), name, "mutePrompt");
+                    continue;
+                }
+
                 updateMutestatus();
+
+                if (value->unsigned32BitValue() == mutestate)
+                    IOLog(valueMatched, getName(), name, mutePrompt, mutestate);
+                else
+                    setMutestatus(value->unsigned32BitValue());
             } else if (key->isEqualTo(fanControlPrompt)) {
                 OSNumber * value = OSDynamicCast(OSNumber, dict->getObject(fanControlPrompt));
                 if (value == nullptr) {

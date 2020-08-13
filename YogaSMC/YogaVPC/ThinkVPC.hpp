@@ -13,7 +13,13 @@
 #include "YogaVPC.hpp"
 
 // from linux/drivers/platform/x86/ideapad-laptop.c
-// TODO: https://github.com/lenovo/thinklmi
+
+enum tpacpi_mute_btn_mode {
+    TP_EC_MUTE_BTN_LATCH  = 0,    /* Mute mutes; up/down unmutes */
+    /* We don't know what mode 1 is. */
+    TP_EC_MUTE_BTN_NONE   = 2,    /* Mute and up/down are just keys */
+    TP_EC_MUTE_BTN_TOGGLE = 3,    /* Mute toggles; up/down unmutes */
+};
 
 enum {
     BAT_ANY = 0,
@@ -44,16 +50,20 @@ private:
     static constexpr const char *setCMPeakShiftState   = "PSSS";
 
     static constexpr const char *getAdaptiveKBD        = "MHKA";
-    static constexpr const char *getMutestatus         = "HAUM";
+    static constexpr const char *getAudioMutestatus    = "HAUM";
+    static constexpr const char *setAudioMutestatus    = "SAUM";
 
     static constexpr const char *setControl            = "MHAT";
 
     UInt32 mutestate;
 
+    UInt32 mutestate_orig;
+
     bool initVPC() APPLE_KEXT_OVERRIDE;
     void setPropertiesGated(OSObject* props) APPLE_KEXT_OVERRIDE;
     void updateAll() APPLE_KEXT_OVERRIDE;
 //    void updateVPC() APPLE_KEXT_OVERRIDE;
+    bool exitVPC() APPLE_KEXT_OVERRIDE;
 
     int batnum = BAT_ANY;
     bool ConservationMode;
@@ -64,6 +74,7 @@ private:
 
     bool updateAdaptiveKBD(int arg);
     bool updateMutestatus();
+    bool setMutestatus(UInt32 value);
 
     /**
      *  Update battery status

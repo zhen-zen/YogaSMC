@@ -12,6 +12,8 @@
 
 #include "YogaWMI.hpp"
 
+// TODO: https://github.com/lenovo/thinklmi
+
 class ThinkWMI : public YogaWMI
 {
     typedef YogaWMI super;
