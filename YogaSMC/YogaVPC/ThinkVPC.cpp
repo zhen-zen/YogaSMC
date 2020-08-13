@@ -74,12 +74,15 @@ bool ThinkVPC::setConservation(const char * method, UInt32 value) {
     return true;
 }
 
-bool ThinkVPC::updateMutestatus() {
+bool ThinkVPC::updateMutestatus(bool update) {
     if (vpc->evaluateInteger(getAudioMutestatus, &mutestate) != kIOReturnSuccess) {
         IOLog(updateFailure, getName(), name, __func__);
         return false;
     }
-    IOLog(updateSuccess, getName(), name, __func__, mutestate);
+
+    if (update)
+        IOLog(updateSuccess, getName(), name, __func__, mutestate);
+
     setProperty(mutePrompt, mutestate, 32);
     return true;
 }
@@ -95,7 +98,8 @@ bool ThinkVPC::setMutestatus(UInt32 value) {
         IOLog(toggleFailure, getName(), name, __func__);
         return false;
     }
-    IOLog(toggleSuccess, getName(), name, __func__, mutestate);
+
+    IOLog(toggleSuccess, getName(), name, __func__, mutestate, (mutestate == 2 ? "SW" : "HW"));
     setProperty(mutePrompt, mutestate, 32);
     return true;
 }
@@ -244,7 +248,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                     continue;
                 }
 
-                updateMutestatus();
+                updateMutestatus(false);
 
                 if (value->unsigned32BitValue() == mutestate)
                     IOLog(valueMatched, getName(), name, mutePrompt, mutestate);

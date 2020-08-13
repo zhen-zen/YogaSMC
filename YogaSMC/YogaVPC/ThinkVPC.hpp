@@ -73,7 +73,15 @@ private:
     bool setConservation(const char* method, UInt32 value);
 
     bool updateAdaptiveKBD(int arg);
-    bool updateMutestatus();
+
+    /**
+     *  Update Mute status
+     *
+     *  @param update only update internal status when false
+     *
+     *  @return true if success
+     */
+    bool updateMutestatus(bool update=true);
     bool setMutestatus(UInt32 value);
 
     /**
