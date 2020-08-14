@@ -12,13 +12,21 @@
 
 #include "YogaVPC.hpp"
 
-// from linux/drivers/platform/x86/ideapad-laptop.c
+// from linux/drivers/platform/x86/ideapad-laptop.c and ibm-acpi
 
 enum tpacpi_mute_btn_mode {
     TP_EC_MUTE_BTN_LATCH  = 0,    /* Mute mutes; up/down unmutes */
     /* We don't know what mode 1 is. */
     TP_EC_MUTE_BTN_NONE   = 2,    /* Mute and up/down are just keys */
     TP_EC_MUTE_BTN_TOGGLE = 3,    /* Mute toggles; up/down unmutes */
+};
+
+enum  {
+    TPACPI_AML_MUTE_GET_FUNC = 0x01,
+    TPACPI_AML_MUTE_SET_FUNC = 0x02,
+    TPACPI_AML_MUTE_SUPPORT_FUNC = 0x04,
+    TPACPI_AML_MUTE_READ_MASK = 0x01,
+    TPACPI_AML_MUTE_ERROR_STATE_MASK = 0x80000000,
 };
 
 enum {
@@ -54,6 +62,7 @@ private:
     static constexpr const char *setAudioMutestatus    = "SAUM";
     static constexpr const char *getAudioMuteLED       = "GSMS";
     static constexpr const char *setAudioMuteLED       = "SSMS"; // on_value = 1, off_value = 0
+    static constexpr const char *setAudioMuteSupport   = "SHDA";
     static constexpr const char *getMicMuteLED         = "MMTG"; // HDMC: 0x00010000
     static constexpr const char *setMicMuteLED         = "MMTS"; // on_value = 2, off_value = 0, ? = 3
 
@@ -92,11 +101,20 @@ private:
     /**
      *  Set HW Mute status
      *
-     *  @param value value
+     *  @param value status
      *
      *  @return true if success
      */
     bool setMutestatus(UInt32 value);
+
+    /**
+     *  Set Mute support
+     *
+     *  @param support off / on
+     *
+     *  @return true if success
+     */
+    bool setMuteSupport(bool support);
 
     /**
      *  Update Mute LED status
@@ -128,11 +146,11 @@ private:
     /**
      *  Set Mic Mute LED status
      *
-     *  @param status on / off
+     *  @param status 3:blink, 2:on, 0:off
      *
      *  @return true if success
      */
-    bool setMicMuteLEDStatus(bool status);
+    bool setMicMuteLEDStatus(UInt32 status);
 
     /**
      *  Update battery status

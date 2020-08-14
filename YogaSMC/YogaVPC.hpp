@@ -26,6 +26,7 @@
 #define KeyboardPrompt "KeyboardMode"
 #define mutePrompt "Mute"
 #define muteLEDPrompt "MuteLED"
+#define muteSupportPrompt "MuteSupport"
 #define micMuteLEDPrompt "MicMuteLED"
 #define VPCPrompt "VPCconfig"
 #define rapidChargePrompt "RapidChargeMode"
