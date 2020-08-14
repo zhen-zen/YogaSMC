@@ -400,3 +400,49 @@ bool ThinkVPC::setMicMuteLEDStatus(UInt32 status) {
     setProperty(micMuteLEDPrompt, status, 32);
     return true;
 }
+
+IOReturn ThinkVPC::message(UInt32 type, IOService *provider, void *argument) {
+    switch (type)
+    {
+        case kSMC_setDisableTouchpad:
+        case kSMC_getDisableTouchpad:
+        case kPS2M_notifyKeyPressed:
+        case kPS2M_notifyKeyTime:
+        case kPS2M_resetTouchpad:
+        case kSMC_setKeyboardStatus:
+        case kSMC_getKeyboardStatus:
+            break;
+
+        case kSMC_FnlockEvent:
+            break;
+
+        // TODO: determine default value for charge level
+        case kSMC_getConservation:
+        case kSMC_setConservation:
+            break;
+
+        case kIOACPIMessageDeviceNotification:
+            if (!argument)
+                IOLog("%s::%s message: Unknown ACPI notification", getName(), name);
+            else if (*((UInt32 *) argument) == kIOACPIMessageReserved)
+                updateVPC();
+            else
+                IOLog("%s::%s message: Unknown ACPI notification 0x%04x\n", getName(), name, *((UInt32 *) argument));
+            break;
+
+        default:
+            if (argument)
+                IOLog("%s::%s message: type=%x, provider=%s, argument=0x%04x\n", getName(), name, type, provider->getName(), *((UInt32 *) argument));
+            else
+                IOLog("%s::%s message: type=%x, provider=%s\n", getName(), name, type, provider->getName());
+    }
+
+    return kIOReturnSuccess;
+}
+
+void ThinkVPC::updateVPC() {
+    UInt32 result;
+    if (vpc->evaluateInteger(getHKEYevent, &result) != kIOReturnSuccess)
+        IOLog(toggleFailure, getName(), name, HotKeyPrompt);
+    IOLog("%s::%s Hotkey(MHKP) event: 0x%x \n", getName(), name, result);
+}

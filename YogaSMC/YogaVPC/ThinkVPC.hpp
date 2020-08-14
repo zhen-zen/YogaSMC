@@ -46,6 +46,7 @@ private:
      *  Related ACPI methods
      */
     static constexpr const char *getHKEYversion        = "MHKV";
+    static constexpr const char *getHKEYevent          = "MHKP";
 
     static constexpr const char *getCMstart            = "BCTG";
     static constexpr const char *setCMstart            = "BCCS";
@@ -78,7 +79,7 @@ private:
     bool initVPC() APPLE_KEXT_OVERRIDE;
     void setPropertiesGated(OSObject* props) APPLE_KEXT_OVERRIDE;
     void updateAll() APPLE_KEXT_OVERRIDE;
-//    void updateVPC() APPLE_KEXT_OVERRIDE;
+    void updateVPC() APPLE_KEXT_OVERRIDE;
     bool exitVPC() APPLE_KEXT_OVERRIDE;
 
     int batnum = BAT_ANY;
@@ -173,6 +174,7 @@ private:
 
 public:
     static ThinkVPC* withDevice(IOACPIPlatformDevice *device, OSString *pnp);
+    IOReturn message(UInt32 type, IOService *provider, void *argument) APPLE_KEXT_OVERRIDE;
 };
 
 #endif /* ThinkVPC_hpp */
