@@ -30,7 +30,7 @@ IdeaVPC* IdeaVPC::withDevice(IOACPIPlatformDevice *device, OSString *pnp) {
 }
 
 void IdeaVPC::updateAll() {
-    updateConservation();
+    updateBattery();
     updateKeyboard();
     updateVPC();
 }
@@ -131,7 +131,7 @@ IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
 
         case kSMC_getConservation:
             *(bool *)argument = conservationMode;
-            conservationModeLock = false;
+//            conservationModeLock = false;
             IOLog("%s::%s message: %s get conservation mode %d", getName(), name, provider->getName(), conservationMode);
             break;
 
@@ -208,12 +208,25 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                     continue;
                 }
 
-                updateConservation(false);
+                updateBattery(false);
 
                 if (value->getValue() == conservationMode)
                     IOLog(valueMatched, getName(), name, conservationPrompt, conservationMode);
                 else
                     toggleConservation();
+            } else if (key->isEqualTo(rapidChargePrompt)) {
+                OSBoolean * value = OSDynamicCast(OSBoolean, dict->getObject(rapidChargePrompt));
+                if (value == nullptr) {
+                    IOLog(valueInvalid, getName(), name, rapidChargePrompt);
+                    continue;
+                }
+
+                updateBattery(false);
+
+                if (value->getValue() == rapidChargeMode)
+                    IOLog(valueMatched, getName(), name, rapidChargePrompt, rapidChargeMode);
+                else
+                    toggleRapidCharge();
             } else if (key->isEqualTo(FnKeyPrompt)) {
                 OSBoolean * value = OSDynamicCast(OSBoolean, dict->getObject(FnKeyPrompt));
                 if (value == nullptr) {
@@ -427,19 +440,22 @@ bool IdeaVPC::updateBatteryInfo(bool update) {
     return true;
 }
 
-bool IdeaVPC::updateConservation(bool update) {
+bool IdeaVPC::updateBattery(bool update) {
     UInt32 state;
 
-    if (vpc->evaluateInteger(getConservationMode, &state) != kIOReturnSuccess) {
+    if (vpc->evaluateInteger(getBatteryMode, &state) != kIOReturnSuccess) {
         IOLog(updateFailure, getName(), name, conservationPrompt);
         return false;
     }
 
     conservationMode = BIT(BM_CONSERVATION_BIT) & state;
+    rapidChargeMode = BIT(BM_RAPIDCHARGE_BIT) & state;
 
     if (update) {
         IOLog(updateSuccess, getName(), name, conservationPrompt, state);
         setProperty(conservationPrompt, conservationMode);
+        IOLog(updateSuccess, getName(), name, rapidChargePrompt, state);
+        setProperty(rapidChargePrompt, rapidChargeMode);
     }
 
     return true;
@@ -482,7 +498,7 @@ bool IdeaVPC::toggleConservation() {
         OSNumber::withNumber((!conservationMode ? BMCMD_CONSERVATION_ON : BMCMD_CONSERVATION_OFF), 32)
     };
 
-    if (vpc->evaluateInteger(setConservationMode, &result, params, 1) != kIOReturnSuccess || result != 0) {
+    if (vpc->evaluateInteger(setBatteryMode, &result, params, 1) != kIOReturnSuccess || result != 0) {
         IOLog(toggleFailure, getName(), name, conservationPrompt);
         return false;
     }
@@ -490,6 +506,25 @@ bool IdeaVPC::toggleConservation() {
     conservationMode = !conservationMode;
     IOLog(toggleSuccess, getName(), name, conservationPrompt, (conservationMode ? BMCMD_CONSERVATION_ON : BMCMD_CONSERVATION_OFF), (conservationMode ? "on" : "off"));
     setProperty(conservationPrompt, conservationMode);
+
+    return true;
+}
+
+bool IdeaVPC::toggleRapidCharge() {
+    UInt32 result;
+
+    OSObject* params[1] = {
+        OSNumber::withNumber((!rapidChargeMode ? BMCMD_RAPIDCHARGE_ON : BMCMD_RAPIDCHARGE_OFF), 32)
+    };
+
+    if (vpc->evaluateInteger(setBatteryMode, &result, params, 1) != kIOReturnSuccess || result != 0) {
+        IOLog(toggleFailure, getName(), name, rapidChargePrompt);
+        return false;
+    }
+
+    rapidChargeMode = !rapidChargeMode;
+    IOLog(toggleSuccess, getName(), name, rapidChargePrompt, (rapidChargeMode ? BMCMD_RAPIDCHARGE_ON : BMCMD_RAPIDCHARGE_OFF), (rapidChargeMode ? "on" : "off"));
+    setProperty(rapidChargePrompt, conservationMode);
 
     return true;
 }

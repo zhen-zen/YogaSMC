@@ -26,6 +26,7 @@
 #define KeyboardPrompt "KeyboardMode"
 #define mutePrompt "Mute"
 #define VPCPrompt "VPCconfig"
+#define rapidChargePrompt "RapidChargeMode"
 #define readECPrompt "ReadEC"
 #define resetPrompt "reset"
 #define writeECPrompt "WriteEC"

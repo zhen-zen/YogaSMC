@@ -14,6 +14,7 @@
 
 // from linux/drivers/platform/x86/ideapad-laptop.c
 
+#define BM_RAPIDCHARGE_BIT   (2)
 #define BM_CONSERVATION_BIT  (5)
 #define HA_BACKLIGHT_CAP_BIT (4)
 #define HA_BACKLIGHT_BIT     (5)
@@ -30,6 +31,8 @@
 enum {
     BMCMD_CONSERVATION_ON = 3,
     BMCMD_CONSERVATION_OFF = 5,
+    BMCMD_RAPIDCHARGE_ON = 7,
+    BMCMD_RAPIDCHARGE_OFF = 8,
     HACMD_BACKLIGHT_ON = 0x8,
     HACMD_BACKLIGHT_OFF = 0x9,
     HACMD_FNLOCK_ON = 0xe,
@@ -77,8 +80,8 @@ private:
     static constexpr const char *getVPCConfig         = "_CFG";
     static constexpr const char *getBatteryID         = "GBID";
     static constexpr const char *getBatteryInfo       = "GSBI";
-    static constexpr const char *getConservationMode  = "GBMD";
-    static constexpr const char *setConservationMode  = "SBMC";
+    static constexpr const char *getBatteryMode       = "GBMD";
+    static constexpr const char *setBatteryMode       = "SBMC";
     static constexpr const char *getKeyboardMode      = "HALS";
     static constexpr const char *setKeyboardMode      = "SALS";
     static constexpr const char *readVPCStatus        = "VPCR";
@@ -145,6 +148,11 @@ private:
     bool FnlockMode {false};
 
     /**
+     *  Rapid charge mode status
+     */
+    bool rapidChargeMode {false};
+    
+    /**
      *  Initialize VPC EC status
      *
      *  @return true if success
@@ -208,7 +216,16 @@ private:
      *
      *  @return true if success
      */
-    bool updateConservation(bool update=true);
+    bool updateBattery(bool update=true);
+
+    /**
+     *  Update rapid charge mode status
+     *
+     *  @param update only update internal status when false
+     *
+     *  @return true if success
+     */
+    bool updateRapidCharge(bool update=true);
 
     /**
      *  Update Keyboard status
@@ -233,6 +250,12 @@ private:
      */
     bool toggleConservation();
 
+    /**
+     *  Toggle rapid charge mode
+     *
+     *  @return true if success
+     */
+    bool toggleRapidCharge();
     /**
      *  Toggle Fn lock mode
      *
