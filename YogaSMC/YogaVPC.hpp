@@ -25,6 +25,8 @@
 #define fanControlPrompt "FanControl"
 #define KeyboardPrompt "KeyboardMode"
 #define mutePrompt "Mute"
+#define muteLEDPrompt "MuteLED"
+#define micMuteLEDPrompt "MicMuteLED"
 #define VPCPrompt "VPCconfig"
 #define rapidChargePrompt "RapidChargeMode"
 #define readECPrompt "ReadEC"

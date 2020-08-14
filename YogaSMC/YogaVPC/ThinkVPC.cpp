@@ -33,6 +33,8 @@ ThinkVPC* ThinkVPC::withDevice(IOACPIPlatformDevice *device, OSString *pnp) {
 void ThinkVPC::updateAll() {
     updateBattery(BAT_ANY);
     updateMutestatus();
+    updateMuteLEDStatus();
+    updateMicMuteLEDStatus();
     updateVPC();
 }
 
@@ -88,6 +90,12 @@ bool ThinkVPC::updateMutestatus(bool update) {
 }
 
 bool ThinkVPC::setMutestatus(UInt32 value) {
+    updateMutestatus(false);
+    if (mutestate == value) {
+        IOLog(valueMatched, getName(), name, mutePrompt, mutestate);
+        return true;
+    }
+
     UInt32 result;
 
     OSObject* params[1] = {
@@ -250,10 +258,23 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
 
                 updateMutestatus(false);
 
-                if (value->unsigned32BitValue() == mutestate)
-                    IOLog(valueMatched, getName(), name, mutePrompt, mutestate);
-                else
-                    setMutestatus(value->unsigned32BitValue());
+                setMutestatus(value->unsigned32BitValue());
+            } else if (key->isEqualTo(muteLEDPrompt)) {
+                OSBoolean * value = OSDynamicCast(OSBoolean, dict->getObject(muteLEDPrompt));
+                if (value == nullptr) {
+                    IOLog(valueInvalid, getName(), name, muteLEDPrompt);
+                    continue;
+                }
+
+                setMuteLEDStatus(value->getValue());
+            } else if (key->isEqualTo(micMuteLEDPrompt)) {
+                OSBoolean * value = OSDynamicCast(OSBoolean, dict->getObject(micMuteLEDPrompt));
+                if (value == nullptr) {
+                    IOLog(valueInvalid, getName(), name, micMuteLEDPrompt);
+                    continue;
+                }
+
+                setMicMuteLEDStatus(value->getValue());
             } else if (key->isEqualTo(fanControlPrompt)) {
                 OSNumber * value = OSDynamicCast(OSNumber, dict->getObject(fanControlPrompt));
                 if (value == nullptr) {
@@ -289,5 +310,65 @@ bool ThinkVPC::setFanControl(int level) {
 
     IOLog(toggleSuccess, getName(), name, fanControlPrompt, (level ? BIT(18) : 0), (level ? "7" : "auto"));
     setProperty(fanControlPrompt, level, 32);
+    return true;
+}
+
+bool ThinkVPC::updateMuteLEDStatus(bool update) {
+    if (vpc->evaluateInteger(getAudioMuteLED, &muteLEDstate) != kIOReturnSuccess) {
+        IOLog(updateFailure, getName(), name, __func__);
+        return false;
+    }
+
+    if (update)
+        IOLog(updateSuccess, getName(), name, __func__, muteLEDstate);
+
+    setProperty(muteLEDPrompt, muteLEDstate, 32);
+    return true;
+}
+
+bool ThinkVPC::setMuteLEDStatus(bool status) {
+    UInt32 result;
+
+    OSObject* params[1] = {
+        OSNumber::withNumber(status, 32)
+    };
+
+    if (vpc->evaluateInteger(setAudioMuteLED, &result, params, 1) != kIOReturnSuccess) {
+        IOLog(toggleFailure, getName(), name, muteLEDPrompt);
+        return false;
+    }
+
+    IOLog(toggleSuccess, getName(), name, muteLEDPrompt, status, (status ? "on" : "off"));
+    setProperty(muteLEDPrompt, status);
+    return true;
+}
+
+bool ThinkVPC::updateMicMuteLEDStatus(bool update) {
+    if (vpc->evaluateInteger(getMicMuteLED, &micMuteLEDstate) != kIOReturnSuccess) {
+        IOLog(updateFailure, getName(), name, __func__);
+        return false;
+    }
+
+    if (update)
+        IOLog(updateSuccess, getName(), name, __func__, micMuteLEDstate);
+
+    setProperty(micMuteLEDPrompt, micMuteLEDstate, 32);
+    return true;
+}
+
+bool ThinkVPC::setMicMuteLEDStatus(bool status) {
+    UInt32 result;
+
+    OSObject* params[1] = {
+        OSNumber::withNumber((status ? 2 : 0), 32)
+    };
+
+    if (vpc->evaluateInteger(setMicMuteLED, &result, params, 1) != kIOReturnSuccess) {
+        IOLog(toggleFailure, getName(), name, micMuteLEDPrompt);
+        return false;
+    }
+
+    IOLog(toggleSuccess, getName(), name, micMuteLEDPrompt, status, (status ? "on" : "off"));
+    setProperty(micMuteLEDPrompt, status);
     return true;
 }

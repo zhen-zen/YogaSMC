@@ -52,10 +52,16 @@ private:
     static constexpr const char *getAdaptiveKBD        = "MHKA";
     static constexpr const char *getAudioMutestatus    = "HAUM";
     static constexpr const char *setAudioMutestatus    = "SAUM";
+    static constexpr const char *getAudioMuteLED       = "GSMS";
+    static constexpr const char *setAudioMuteLED       = "SSMS"; // on_value = 1, off_value = 0
+    static constexpr const char *getMicMuteLED         = "MMTG"; // HDMC: 0x00010000
+    static constexpr const char *setMicMuteLED         = "MMTS"; // on_value = 2, off_value = 0, ? = 3
 
     static constexpr const char *setControl            = "MHAT";
 
     UInt32 mutestate;
+    UInt32 muteLEDstate;
+    UInt32 micMuteLEDstate;
 
     UInt32 mutestate_orig;
 
@@ -75,14 +81,58 @@ private:
     bool updateAdaptiveKBD(int arg);
 
     /**
-     *  Update Mute status
+     *  Update HW Mute status
      *
      *  @param update only update internal status when false
      *
      *  @return true if success
      */
     bool updateMutestatus(bool update=true);
+
+    /**
+     *  Set HW Mute status
+     *
+     *  @param value value
+     *
+     *  @return true if success
+     */
     bool setMutestatus(UInt32 value);
+
+    /**
+     *  Update Mute LED status
+     *
+     *  @param update only update internal status when false
+     *
+     *  @return true if success
+     */
+    bool updateMuteLEDStatus(bool update=true);
+
+    /**
+     *  Set Mute LED status
+     *
+     *  @param status on / off
+     *
+     *  @return true if success
+     */
+    bool setMuteLEDStatus(bool status);
+
+    /**
+     *  Update Mic Mute LED status
+     *
+     *  @param update only update internal status when false
+     *
+     *  @return true if success
+     */
+    bool updateMicMuteLEDStatus(bool update=true);
+
+    /**
+     *  Set Mic Mute LED status
+     *
+     *  @param status on / off
+     *
+     *  @return true if success
+     */
+    bool setMicMuteLEDStatus(bool status);
 
     /**
      *  Update battery status
