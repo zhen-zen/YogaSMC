@@ -377,7 +377,10 @@ bool ThinkVPC::updateMicMuteLEDStatus(bool update) {
     if (update)
         IOLog(updateSuccess, getName(), name, __func__, micMuteLEDstate);
 
-    setProperty(micMuteLEDPrompt, micMuteLEDstate, 32);
+    if (micMuteLEDstate & TPACPI_AML_MIC_MUTE_HDMC)
+        setProperty(micMuteLEDPrompt, "HDMC");
+    else
+        setProperty(micMuteLEDPrompt, micMuteLEDstate, 32);
     return true;
 }
 
