@@ -41,7 +41,7 @@ void ThinkVPC::updateAll() {
 bool ThinkVPC::updateConservation(const char * method, bool update) {
     UInt32 result;
 
-    OSObject* params[1] = {
+    OSObject* params[] = {
         OSNumber::withNumber(batnum, 32)
     };
 
@@ -61,7 +61,7 @@ bool ThinkVPC::updateConservation(const char * method, bool update) {
 bool ThinkVPC::setConservation(const char * method, UInt32 value) {
     UInt32 result;
 
-    OSObject* params[1] = {
+    OSObject* params[] = {
         OSNumber::withNumber(value, 32)
     };
 
@@ -98,7 +98,7 @@ bool ThinkVPC::setMutestatus(UInt32 value) {
 
     UInt32 result;
 
-    OSObject* params[1] = {
+    OSObject* params[] = {
         OSNumber::withNumber(value, 32)
     };
 
@@ -142,13 +142,15 @@ bool ThinkVPC::initVPC() {
     updateAll();
 
     mutestate_orig = mutestate;
-    IOLog("%s::%s Initial HAUM setting was %d", getName(), name, mutestate_orig);
+    IOLog("%s::%s Initial HAUM setting was %d\n", getName(), name, mutestate_orig);
     setMutestatus(TP_EC_MUTE_BTN_NONE);
+    setHotkeyStatus(true);
 
     return true;
 }
 
 bool ThinkVPC::exitVPC() {
+    setHotkeyStatus(false);
     setMutestatus(mutestate_orig);
     return super::exitVPC();
 }
@@ -156,7 +158,7 @@ bool ThinkVPC::exitVPC() {
 bool ThinkVPC::updateAdaptiveKBD(int arg) {
     UInt32 result;
 
-    OSObject* params[1] = {
+    OSObject* params[] = {
         OSNumber::withNumber(arg, 32)
     };
 
@@ -303,7 +305,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
 bool ThinkVPC::setFanControl(int level) {
     UInt32 result;
 
-    OSObject* params[1] = {
+    OSObject* params[] = {
         OSNumber::withNumber((level ? BIT(18) : 0), 32)
     };
 
@@ -337,7 +339,7 @@ bool ThinkVPC::updateMuteLEDStatus(bool update) {
 bool ThinkVPC::setMuteSupport(bool support) {
     UInt32 result;
 
-    OSObject* params[1] = {
+    OSObject* params[] = {
         OSNumber::withNumber(support, 32)
     };
 
@@ -354,7 +356,7 @@ bool ThinkVPC::setMuteSupport(bool support) {
 bool ThinkVPC::setMuteLEDStatus(bool status) {
     UInt32 result;
 
-    OSObject* params[1] = {
+    OSObject* params[] = {
         OSNumber::withNumber(status, 32)
     };
 
@@ -387,7 +389,7 @@ bool ThinkVPC::updateMicMuteLEDStatus(bool update) {
 bool ThinkVPC::setMicMuteLEDStatus(UInt32 status) {
     UInt32 result;
 
-    OSObject* params[1] = {
+    OSObject* params[] = {
         OSNumber::withNumber(status, 32)
     };
 
@@ -423,7 +425,7 @@ IOReturn ThinkVPC::message(UInt32 type, IOService *provider, void *argument) {
 
         case kIOACPIMessageDeviceNotification:
             if (!argument)
-                IOLog("%s::%s message: Unknown ACPI notification", getName(), name);
+                IOLog("%s::%s message: Unknown ACPI notification\n", getName(), name);
             else if (*((UInt32 *) argument) == kIOACPIMessageReserved)
                 updateVPC();
             else
@@ -442,7 +444,154 @@ IOReturn ThinkVPC::message(UInt32 type, IOService *provider, void *argument) {
 
 void ThinkVPC::updateVPC() {
     UInt32 result;
-    if (vpc->evaluateInteger(getHKEYevent, &result) != kIOReturnSuccess)
+    if (vpc->evaluateInteger(getHKEYevent, &result) != kIOReturnSuccess) {
         IOLog(toggleFailure, getName(), name, HotKeyPrompt);
-    IOLog("%s::%s Hotkey(MHKP) event: 0x%x \n", getName(), name, result);
+        return;
+    }
+
+    if (!result)
+        return;
+
+    switch (result >> 0xC) {
+        case 1:
+            IOLog("%s::%s Hotkey(MHKP) key presses event: 0x%x \n", getName(), name, result);
+            break;
+
+        case 2:
+            IOLog("%s::%s Hotkey(MHKP) wakeup reason event: 0x%x \n", getName(), name, result);
+            break;
+
+        case 3:
+            IOLog("%s::%s Hotkey(MHKP) bay-related wakeup event: 0x%x \n", getName(), name, result);
+            break;
+
+        case 4:
+            IOLog("%s::%s Hotkey(MHKP) dock-related event: 0x%x \n", getName(), name, result);
+            break;
+
+        case 5:
+            switch (result) {
+                case TP_HKEY_EV_PEN_INSERTED:
+                    IOLog("%s::%s tablet pen inserted into bay\n", getName(), name);
+                    break;
+
+                case TP_HKEY_EV_PEN_REMOVED:
+                    IOLog("%s::%s tablet pen removed from bay\n", getName(), name);
+                    break;
+
+                case TP_HKEY_EV_TABLET_TABLET:
+                    IOLog("%s::%s tablet mode\n", getName(), name);
+                    break;
+
+                case TP_HKEY_EV_TABLET_NOTEBOOK:
+                    IOLog("%s::%s normal mode\n", getName(), name);
+                    break;
+
+                case TP_HKEY_EV_LID_CLOSE:
+                    IOLog("%s::%s Lid closed\n", getName(), name);
+                    break;
+
+                case TP_HKEY_EV_LID_OPEN:
+                    IOLog("%s::%s Lid opened\n", getName(), name);
+                    break;
+
+                case TP_HKEY_EV_BRGHT_CHANGED:
+                    IOLog("%s::%s brightness changed\n", getName(), name);
+                    break;
+
+                default:
+                    IOLog("%s::%s Hotkey(MHKP) unknown human interface event: 0x%x \n", getName(), name, result);
+                    break;
+            }
+            break;
+
+        case 6:
+            switch (result) {
+                case TP_HKEY_EV_THM_TABLE_CHANGED:
+                    IOLog("%s::%s Thermal Table has changed\n", getName(), name);
+                    break;
+
+                case TP_HKEY_EV_THM_CSM_COMPLETED:
+                    IOLog("%s::%s Thermal Control Command set completed (DYTC)\n", getName(), name);
+                    break;
+
+                case TP_HKEY_EV_THM_TRANSFM_CHANGED:
+                    IOLog("%s::%s Thermal Transformation changed (GMTS)\n", getName(), name);
+                    break;
+
+                case TP_HKEY_EV_ALARM_BAT_HOT:
+                    IOLog("%s::%s THERMAL ALARM: battery is too hot!\n", getName(), name);
+                    break;
+
+                case TP_HKEY_EV_ALARM_BAT_XHOT:
+                    IOLog("%s::%s THERMAL EMERGENCY: battery is extremely hot!\n", getName(), name);
+                    break;
+
+                case TP_HKEY_EV_ALARM_SENSOR_HOT:
+                    IOLog("%s::%s THERMAL ALARM: a sensor reports something is too hot!\n", getName(), name);
+                    break;
+
+                case TP_HKEY_EV_ALARM_SENSOR_XHOT:
+                    IOLog("%s::%s THERMAL EMERGENCY: a sensor reports something is extremely hot!\n", getName(), name);
+                    break;
+
+                case TP_HKEY_EV_AC_CHANGED:
+                    IOLog("%s::%s AC status changed\n", getName(), name);
+                    break;
+
+                case TP_HKEY_EV_KEY_NUMLOCK:
+                    IOLog("%s::%s Numlock\n", getName(), name);
+                    break;
+
+                case TP_HKEY_EV_KEY_FN:
+                    IOLog("%s::%s Fn\n", getName(), name);
+                    break;
+
+                case TP_HKEY_EV_KEY_FN_ESC:
+                    IOLog("%s::%s Fn+Esc\n", getName(), name);
+                    break;
+
+                case TP_HKEY_EV_TABLET_CHANGED:
+                    IOLog("%s::%s tablet mode has changed\n", getName(), name);
+                    break;
+
+                case TP_HKEY_EV_PALM_DETECTED:
+                    IOLog("%s::%s palm detected hovering the keyboard\n", getName(), name);
+                    break;
+
+                case TP_HKEY_EV_PALM_UNDETECTED:
+                    IOLog("%s::%s palm undetected hovering the keyboard\n", getName(), name);
+                    break;
+
+                default:
+                    IOLog("%s::%s Hotkey(MHKP) unknown thermal alarms/notices and keyboard event: 0x%x \n", getName(), name, result);
+                    break;
+            }
+            break;
+
+        case 7:
+            IOLog("%s::%s Hotkey(MHKP) misc event: 0x%x \n", getName(), name, result);
+            break;
+
+        default:
+            IOLog("%s::%s Hotkey(MHKP) unknown event: 0x%x \n", getName(), name, result);
+            break;
+    }
+}
+
+bool ThinkVPC::setHotkeyStatus(bool enable) {
+    UInt32 result;
+
+    OSObject* params[] = {
+        OSNumber::withNumber(enable, 32)
+    };
+
+    if (vpc->evaluateInteger(setHKEYstatus, &result, params, 1) != kIOReturnSuccess) {
+        IOLog(toggleFailure, getName(), name, HotKeyPrompt);
+        return false;
+    }
+
+    IOLog(toggleSuccess, getName(), name, HotKeyPrompt, enable, (enable ? "enabled" : "disabled"));
+    setProperty(HotKeyPrompt, enable);
+    return true;
 }

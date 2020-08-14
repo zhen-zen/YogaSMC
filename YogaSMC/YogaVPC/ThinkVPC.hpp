@@ -30,6 +30,76 @@ enum  {
     TPACPI_AML_MUTE_ERROR_STATE_MASK = 0x80000000,
 };
 
+/* HKEY events */
+enum tpacpi_hkey_event_t {
+    /* Hotkey-related */
+    TP_HKEY_EV_HOTKEY_BASE        = 0x1001, /* first hotkey (FN+F1) */
+    TP_HKEY_EV_BRGHT_UP        = 0x1010, /* Brightness up */
+    TP_HKEY_EV_BRGHT_DOWN        = 0x1011, /* Brightness down */
+    TP_HKEY_EV_KBD_LIGHT        = 0x1012, /* Thinklight/kbd backlight */
+    TP_HKEY_EV_VOL_UP        = 0x1015, /* Volume up or unmute */
+    TP_HKEY_EV_VOL_DOWN        = 0x1016, /* Volume down or unmute */
+    TP_HKEY_EV_VOL_MUTE        = 0x1017, /* Mixer output mute */
+
+    /* Reasons for waking up from S3/S4 */
+    TP_HKEY_EV_WKUP_S3_UNDOCK    = 0x2304, /* undock requested, S3 */
+    TP_HKEY_EV_WKUP_S4_UNDOCK    = 0x2404, /* undock requested, S4 */
+    TP_HKEY_EV_WKUP_S3_BAYEJ    = 0x2305, /* bay ejection req, S3 */
+    TP_HKEY_EV_WKUP_S4_BAYEJ    = 0x2405, /* bay ejection req, S4 */
+    TP_HKEY_EV_WKUP_S3_BATLOW    = 0x2313, /* battery empty, S3 */
+    TP_HKEY_EV_WKUP_S4_BATLOW    = 0x2413, /* battery empty, S4 */
+
+    /* Auto-sleep after eject request */
+    TP_HKEY_EV_BAYEJ_ACK        = 0x3003, /* bay ejection complete */
+    TP_HKEY_EV_UNDOCK_ACK        = 0x4003, /* undock complete */
+
+    /* Misc bay events */
+    TP_HKEY_EV_OPTDRV_EJ        = 0x3006, /* opt. drive tray ejected */
+    TP_HKEY_EV_HOTPLUG_DOCK        = 0x4010, /* docked into hotplug dock
+                             or port replicator */
+    TP_HKEY_EV_HOTPLUG_UNDOCK    = 0x4011, /* undocked from hotplug
+                             dock or port replicator */
+
+    /* User-interface events */
+    TP_HKEY_EV_LID_CLOSE        = 0x5001, /* laptop lid closed */
+    TP_HKEY_EV_LID_OPEN        = 0x5002, /* laptop lid opened */
+    TP_HKEY_EV_TABLET_TABLET    = 0x5009, /* tablet swivel up */
+    TP_HKEY_EV_TABLET_NOTEBOOK    = 0x500a, /* tablet swivel down */
+    TP_HKEY_EV_TABLET_CHANGED    = 0x60c0, /* X1 Yoga (2016):
+                           * enter/leave tablet mode
+                           */
+    TP_HKEY_EV_PEN_INSERTED        = 0x500b, /* tablet pen inserted */
+    TP_HKEY_EV_PEN_REMOVED        = 0x500c, /* tablet pen removed */
+    TP_HKEY_EV_BRGHT_CHANGED    = 0x5010, /* backlight control event */
+
+    /* Key-related user-interface events */
+    TP_HKEY_EV_KEY_NUMLOCK        = 0x6000, /* NumLock key pressed */
+    TP_HKEY_EV_KEY_FN        = 0x6005, /* Fn key pressed? E420 */
+    TP_HKEY_EV_KEY_FN_ESC           = 0x6060, /* Fn+Esc key pressed X240 */
+
+    /* Thermal events */
+    TP_HKEY_EV_ALARM_BAT_HOT    = 0x6011, /* battery too hot */
+    TP_HKEY_EV_ALARM_BAT_XHOT    = 0x6012, /* battery critically hot */
+    TP_HKEY_EV_ALARM_SENSOR_HOT    = 0x6021, /* sensor too hot */
+    TP_HKEY_EV_ALARM_SENSOR_XHOT    = 0x6022, /* sensor critically hot */
+    TP_HKEY_EV_THM_TABLE_CHANGED    = 0x6030, /* windows; thermal table changed */
+    TP_HKEY_EV_THM_CSM_COMPLETED    = 0x6032, /* windows; thermal control set
+                           * command completed. Related to
+                           * AML DYTC */
+    TP_HKEY_EV_THM_TRANSFM_CHANGED  = 0x60F0, /* windows; thermal transformation
+                           * changed. Related to AML GMTS */
+
+    /* AC-related events */
+    TP_HKEY_EV_AC_CHANGED        = 0x6040, /* AC status changed */
+
+    /* Further user-interface events */
+    TP_HKEY_EV_PALM_DETECTED    = 0x60b0, /* palm hoveres keyboard */
+    TP_HKEY_EV_PALM_UNDETECTED    = 0x60b1, /* palm removed */
+
+    /* Misc */
+    TP_HKEY_EV_RFKILL_CHANGED    = 0x7000, /* rfkill switch changed */
+};
+
 enum {
     BAT_ANY = 0,
     BAT_PRIMARY = 1,
@@ -47,6 +117,8 @@ private:
      */
     static constexpr const char *getHKEYversion        = "MHKV";
     static constexpr const char *getHKEYevent          = "MHKP";
+    static constexpr const char *getHKEYstatus         = "DHKC";
+    static constexpr const char *setHKEYstatus         = "MHKC";
 
     static constexpr const char *getCMstart            = "BCTG";
     static constexpr const char *setCMstart            = "BCCS";
@@ -90,6 +162,15 @@ private:
     bool setConservation(const char* method, UInt32 value);
 
     bool updateAdaptiveKBD(int arg);
+
+    /**
+     *  Set hotkey reporting status
+     *
+     *  @param enable enable hotkey report
+     *
+     *  @return true if success
+     */
+    bool setHotkeyStatus(bool enable);
 
     /**
      *  Update HW Mute status
