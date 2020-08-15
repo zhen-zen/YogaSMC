@@ -147,6 +147,14 @@ bool ThinkVPC::initVPC() {
     setMutestatus(TP_EC_MUTE_BTN_NONE);
     setHotkeyStatus(true);
 
+    UInt32 state;
+
+    if (vpc->evaluateInteger(getKBDBacklightLevel, &state) == kIOReturnSuccess)
+        backlightCap = BIT(KBD_BACKLIGHT_CAP_BIT) & state;
+
+    if (!backlightCap)
+        setProperty(backlightPrompt, "unsupported");
+
     return true;
 }
 
@@ -606,5 +614,49 @@ bool ThinkVPC::setHotkeyStatus(bool enable) {
 
     IOLog(toggleSuccess, getName(), name, HotKeyPrompt, enable, (enable ? "enabled" : "disabled"));
     setProperty(HotKeyPrompt, enable);
+    return true;
+}
+
+bool ThinkVPC::updateBacklight(bool update) {
+    if (!backlightCap)
+        return true;
+
+    UInt32 state;
+
+    if (vpc->evaluateInteger(getKBDBacklightLevel, &state) != kIOReturnSuccess) {
+        IOLog(updateFailure, getName(), name, KeyboardPrompt);
+        return false;
+    }
+
+    backlightLevel = state & 0x3;
+
+    if (update) {
+        IOLog(updateSuccess, getName(), name, KeyboardPrompt, state);
+        if (backlightCap)
+            setProperty(backlightPrompt, backlightLevel, 32);
+    }
+
+    return true;
+}
+
+bool ThinkVPC::setBacklight(UInt32 level) {
+    if (!backlightCap)
+        return true;
+
+    UInt32 result;
+
+    OSObject* params[1] = {
+        OSNumber::withNumber(level, 32)
+    };
+
+    if (vpc->evaluateInteger(setKBDBacklightLevel, &result, params, 1) != kIOReturnSuccess || result != 0) {
+        IOLog(toggleFailure, getName(), name, backlightPrompt);
+        return false;
+    }
+
+    backlightLevel = level;
+    IOLog(toggleSuccess, getName(), name, backlightPrompt, backlightLevel, (backlightLevel ? "on" : "off"));
+    setProperty(backlightPrompt, backlightLevel, 32);
+
     return true;
 }

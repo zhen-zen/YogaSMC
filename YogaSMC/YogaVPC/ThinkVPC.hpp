@@ -14,6 +14,8 @@
 
 // from linux/drivers/platform/x86/ideapad-laptop.c and ibm-acpi
 
+#define KBD_BACKLIGHT_CAP_BIT (9)
+
 enum tpacpi_mute_btn_mode {
     TP_EC_MUTE_BTN_LATCH  = 0,    /* Mute mutes; up/down unmutes */
     /* We don't know what mode 1 is. */
@@ -132,6 +134,9 @@ private:
     static constexpr const char *getCMPeakShiftState   = "PSSG";
     static constexpr const char *setCMPeakShiftState   = "PSSS";
 
+    static constexpr const char *getKBDBacklightLevel  = "MLCG";
+    static constexpr const char *setKBDBacklightLevel  = "MLCS";
+
     static constexpr const char *getAudioMutestatus    = "HAUM";
     static constexpr const char *setAudioMutestatus    = "SAUM";
     static constexpr const char *getAudioMuteLED       = "GSMS";
@@ -152,11 +157,15 @@ private:
      */
     UInt32 hotkey_adaptive_all_mask {0};
     
-    UInt32 mutestate;
-    UInt32 muteLEDstate;
-    UInt32 micMuteLEDstate;
+    UInt32 mutestate {0};
+    UInt32 muteLEDstate {0};
+    UInt32 micMuteLEDstate {0};
 
     UInt32 mutestate_orig;
+
+    UInt32 batnum {BAT_ANY};
+
+    bool ConservationMode;
 
     bool initVPC() APPLE_KEXT_OVERRIDE;
     void setPropertiesGated(OSObject* props) APPLE_KEXT_OVERRIDE;
@@ -164,8 +173,8 @@ private:
     void updateVPC() APPLE_KEXT_OVERRIDE;
     bool exitVPC() APPLE_KEXT_OVERRIDE;
 
-    int batnum = BAT_ANY;
-    bool ConservationMode;
+    bool updateBacklight(bool update=true) APPLE_KEXT_OVERRIDE;
+    bool setBacklight(UInt32 level) APPLE_KEXT_OVERRIDE;
 
     bool updateConservation(const char* method, bool update=true);
     
