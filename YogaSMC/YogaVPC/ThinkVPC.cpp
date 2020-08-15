@@ -128,6 +128,7 @@ bool ThinkVPC::initVPC() {
     switch (version >> 8) {
         case 1:
             IOLog("%s::%s HKEY version 0x100 not implemented\n", getName(), name);
+            updateAdaptiveKBD(0);
             break;
 
         case 2:
@@ -158,26 +159,38 @@ bool ThinkVPC::exitVPC() {
 bool ThinkVPC::updateAdaptiveKBD(int arg) {
     UInt32 result;
 
-    OSObject* params[] = {
-        OSNumber::withNumber(arg, 32)
-    };
+    if (!arg) {
+        if (vpc->evaluateInteger(getHKEYAdaptive, &result) != kIOReturnSuccess) {
+            IOLog(updateFailure, getName(), name, __func__);
+            return false;
+        }
+    } else {
+        OSObject* params[] = {
+            OSNumber::withNumber(arg, 32)
+        };
 
-    if (vpc->evaluateInteger(getAdaptiveKBD, &result, params, 1) != kIOReturnSuccess) {
-        IOLog(updateFailure, getName(), name, __func__);
-        return false;
+        if (vpc->evaluateInteger(getHKEYAdaptive, &result, params, 1) != kIOReturnSuccess) {
+            IOLog(updateFailure, getName(), name, __func__);
+            return false;
+        }
     }
 
     IOLog("%s::%s %s %d %x\n", getName(), name, __func__, arg, result);
 #ifdef DEBUG
     switch (arg) {
+        case 0:
         case 1:
-            setProperty("hotkey_all_mask", result);
+            hotkey_all_mask = result;
+            setProperty("hotkey_all_mask", result, 32);
             break;
-            
+
         case 2:
-            setProperty("AdaptiveKBD", result != 0);
+            if (result) {
+                hotkey_adaptive_all_mask = result;
+                setProperty("hotkey_adaptive_all_mask", result, 32);
+            }
             break;
-            
+
         default:
             IOLog("%s::%s Unknown MHKA command\n", getName(), name);
             break;

@@ -116,8 +116,9 @@ private:
      *  Related ACPI methods
      */
     static constexpr const char *getHKEYversion        = "MHKV";
+    static constexpr const char *getHKEYAdaptive       = "MHKA";
     static constexpr const char *getHKEYevent          = "MHKP";
-    static constexpr const char *getHKEYstatus         = "DHKC";
+    static constexpr const char *getHKEYstatus         = "DHKC"; // Actually a NameObj, not a method
     static constexpr const char *setHKEYstatus         = "MHKC";
 
     static constexpr const char *getCMstart            = "BCTG";
@@ -131,7 +132,6 @@ private:
     static constexpr const char *getCMPeakShiftState   = "PSSG";
     static constexpr const char *setCMPeakShiftState   = "PSSS";
 
-    static constexpr const char *getAdaptiveKBD        = "MHKA";
     static constexpr const char *getAudioMutestatus    = "HAUM";
     static constexpr const char *setAudioMutestatus    = "SAUM";
     static constexpr const char *getAudioMuteLED       = "GSMS";
@@ -142,6 +142,16 @@ private:
 
     static constexpr const char *setControl            = "MHAT";
 
+    /**
+     * All events supported in fw
+     */
+    UInt32 hotkey_all_mask {0x080c};
+
+    /**
+     * All adaptive events supported in fw
+     */
+    UInt32 hotkey_adaptive_all_mask {0};
+    
     UInt32 mutestate;
     UInt32 muteLEDstate;
     UInt32 micMuteLEDstate;
