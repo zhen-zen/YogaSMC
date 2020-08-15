@@ -103,26 +103,6 @@ private:
     void updateVPC() APPLE_KEXT_OVERRIDE;
 
     /**
-     *  Automatically turn off backlight mode on sleep
-     */
-    int automaticBacklightMode {3};
-
-    /**
-     *  Backlight mode capability, will be update on init
-     */
-    bool backlightCap {false};
-
-    /**
-     *  Backlight mode status
-     */
-    bool backlightMode {false};
-
-    /**
-     *  Backlight mode status before sleep
-     */
-    bool backlightModeSleep {false};
-
-    /**
      *  Battery conservation mode status
      */
     bool conservationMode;
@@ -236,12 +216,8 @@ private:
      */
     bool updateKeyboard(bool update=true);
 
-    /**
-     *  Toggle backlight mode
-     *
-     *  @return true if success
-     */
-    bool toggleBacklight();
+    inline bool updateBacklight(bool update=true) APPLE_KEXT_OVERRIDE {return updateKeyboard(update);};
+    bool setBacklight(UInt32 level) APPLE_KEXT_OVERRIDE;
 
     /**
      *  Toggle battery conservation mode
@@ -324,7 +300,6 @@ private:
 public:
     static IdeaVPC* withDevice(IOACPIPlatformDevice *device, OSString *pnp);
     IOReturn message(UInt32 type, IOService *provider, void *argument) APPLE_KEXT_OVERRIDE;
-    IOReturn setPowerState(unsigned long powerState, IOService * whatDevice) APPLE_KEXT_OVERRIDE;
 };
 
 #endif /* IdeaVPC_hpp */

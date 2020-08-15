@@ -137,6 +137,32 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
                 } else {
                     toggleClamshell();
                 }
+            } else if (key->isEqualTo(backlightPrompt)) {
+                OSNumber * value = OSDynamicCast(OSNumber, dict->getObject(backlightPrompt));
+                if (value == nullptr) {
+                    IOLog(valueInvalid, getName(), name, backlightPrompt);
+                    continue;
+                }
+
+                updateBacklight(false);
+
+                if (value->unsigned32BitValue() == backlightLevel)
+                    IOLog(valueMatched, getName(), name, backlightPrompt, backlightLevel);
+                else
+                    setBacklight(value->unsigned32BitValue());
+            } else if (key->isEqualTo(autoBacklightPrompt)) {
+                OSNumber * value = OSDynamicCast(OSNumber, dict->getObject(autoBacklightPrompt));
+                if (value == nullptr || value->unsigned8BitValue() > 3) {
+                    IOLog(valueInvalid, getName(), name, autoBacklightPrompt);
+                    continue;
+                }
+
+                if (value->unsigned8BitValue() == automaticBacklightMode) {
+                    IOLog(valueMatched, getName(), name, autoBacklightPrompt, automaticBacklightMode);
+                } else {
+                    automaticBacklightMode = value->unsigned8BitValue();
+                    setProperty(autoBacklightPrompt, automaticBacklightMode, 8);
+                }
             } else if (key->isEqualTo(updatePrompt)) {
                 updateAll();
             } else {
@@ -206,6 +232,18 @@ IOReturn YogaVPC::setPowerState(unsigned long powerState, IOService *whatDevice)
 
     if (whatDevice != this)
         return kIOReturnInvalid;
+
+    if (backlightCap && automaticBacklightMode & 0x1) {
+        updateBacklight();
+        if (powerState == 0) {
+            backlightLevelSaved = backlightLevel;
+            if (backlightLevel)
+                setBacklight(0);
+        } else {
+            if (backlightLevelSaved != backlightLevel)
+                setBacklight(backlightLevelSaved);
+        }
+    }
 
     return kIOPMAckImplied;
 }

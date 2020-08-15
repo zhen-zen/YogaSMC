@@ -119,6 +119,44 @@ protected:
     
     virtual void setPropertiesGated(OSObject* props);
 
+    /**
+     *  Automatically turn off backlight mode on sleep
+     *  BIT 0 sleep
+     *  BIT 1 Yoga Mode
+     */
+    int automaticBacklightMode {3};
+
+    /**
+     *  Backlight mode capability, will be update on init
+     */
+    bool backlightCap {false};
+
+    /**
+     *  Backlight level
+     */
+    UInt32 backlightLevel {0};
+
+    /**
+     *  Backlight level before sleep or yoga mode change
+     */
+    UInt32 backlightLevelSaved {0};
+
+    /**
+     *  Update keyboad backlight status
+     *
+     *  @param update only update internal status when false
+     *
+     *  @return true if success
+     */
+    inline virtual bool updateBacklight(bool update=true) {return true;};
+
+    /**
+     *  Set backlight mode
+     *
+     *  @return true if success
+     */
+    inline virtual bool setBacklight(UInt32 level) {return true;};
+
 public:
     virtual bool init(OSDictionary *dictionary) APPLE_KEXT_OVERRIDE;
     virtual IOService *probe(IOService *provider, SInt32 *score) APPLE_KEXT_OVERRIDE;

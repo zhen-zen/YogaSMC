@@ -113,12 +113,13 @@ IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
             if (backlightCap && automaticBacklightMode & 0x2) {
                 updateKeyboard();
                 if (*((UInt32 *) argument) != 1) {
-                    backlightModeSleep = backlightMode;
-                    if (backlightMode)
-                        toggleBacklight();
-                } else {
-                    if (backlightModeSleep && !backlightMode)
-                        toggleBacklight();
+                    if (backlightLevel) {
+                        backlightLevelSaved = backlightLevel;
+                        setBacklight(0);
+                    }
+                } else if (backlightLevelSaved != backlightLevel) {
+                    setBacklight(backlightLevelSaved);
+                    backlightLevelSaved = 0;
                 }
             }
             break;
@@ -175,33 +176,7 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
 
     if (i) {
         while (OSString* key = OSDynamicCast(OSString, i->getNextObject())) {
-            if (key->isEqualTo(backlightPrompt)) {
-                OSBoolean * value = OSDynamicCast(OSBoolean, dict->getObject(backlightPrompt));
-                if (value == nullptr) {
-                    IOLog(valueInvalid, getName(), name, backlightPrompt);
-                    continue;
-                }
-
-                updateKeyboard(false);
-
-                if (value->getValue() == backlightMode)
-                    IOLog(valueMatched, getName(), name, backlightPrompt, backlightMode);
-                else
-                    toggleBacklight();
-            } else if (key->isEqualTo(autoBacklightPrompt)) {
-                OSNumber * value = OSDynamicCast(OSNumber, dict->getObject(autoBacklightPrompt));
-                if (value == nullptr || value->unsigned8BitValue() > 3) {
-                    IOLog(valueInvalid, getName(), name, autoBacklightPrompt);
-                    continue;
-                }
-
-                if (value->unsigned8BitValue() == automaticBacklightMode) {
-                    IOLog(valueMatched, getName(), name, autoBacklightPrompt, automaticBacklightMode);
-                } else {
-                    automaticBacklightMode = value->unsigned8BitValue();
-                    setProperty(autoBacklightPrompt, automaticBacklightMode, 8);
-                }
-            } else if (key->isEqualTo(conservationPrompt)) {
+            if (key->isEqualTo(conservationPrompt)) {
                 OSBoolean * value = OSDynamicCast(OSBoolean, dict->getObject(conservationPrompt));
                 if (value == nullptr) {
                     IOLog(valueInvalid, getName(), name, conservationPrompt);
@@ -330,13 +305,13 @@ bool IdeaVPC::initEC() {
 
     backlightCap = BIT(HA_BACKLIGHT_CAP_BIT) & state;
     if (!backlightCap)
-        setProperty(backlightPrompt, "disabled");
+        setProperty(backlightPrompt, "unsupported");
     else
         setProperty(autoBacklightPrompt, automaticBacklightMode, 8);
 
     FnlockCap = BIT(HA_FNLOCK_CAP_BIT) & state;
     if (!FnlockCap)
-        setProperty(FnKeyPrompt, "disabled");
+        setProperty(FnKeyPrompt, "unsupported");
 
     if (BIT(HA_PRIMEKEY_BIT) & state)
         setProperty("PrimeKeyType", "HotKey");
@@ -475,14 +450,14 @@ bool IdeaVPC::updateKeyboard(bool update) {
     if (FnlockCap)
         FnlockMode = BIT(HA_FNLOCK_BIT) & state;
     if (backlightCap)
-        backlightMode = BIT(HA_BACKLIGHT_BIT) & state;
+        backlightLevel = (BIT(HA_BACKLIGHT_BIT) & state) ? 1 : 0;
 
     if (update) {
         IOLog(updateSuccess, getName(), name, KeyboardPrompt, state);
         if (FnlockCap)
             setProperty(FnKeyPrompt, FnlockMode);
         if (backlightCap)
-            setProperty(backlightPrompt, backlightMode);
+            setProperty(backlightPrompt, backlightLevel, 32);
     }
 
     return true;
@@ -529,14 +504,14 @@ bool IdeaVPC::toggleRapidCharge() {
     return true;
 }
 
-bool IdeaVPC::toggleBacklight() {
+bool IdeaVPC::setBacklight(UInt32 level) {
     if (!backlightCap)
         return true;
 
     UInt32 result;
 
     OSObject* params[1] = {
-        OSNumber::withNumber((!backlightMode ? HACMD_BACKLIGHT_ON : HACMD_BACKLIGHT_OFF), 32)
+        OSNumber::withNumber((level ? HACMD_BACKLIGHT_ON : HACMD_BACKLIGHT_OFF), 32)
     };
 
     if (vpc->evaluateInteger(setKeyboardMode, &result, params, 1) != kIOReturnSuccess || result != 0) {
@@ -544,9 +519,9 @@ bool IdeaVPC::toggleBacklight() {
         return false;
     }
 
-    backlightMode = !backlightMode;
-    IOLog(toggleSuccess, getName(), name, backlightPrompt, (backlightMode ? HACMD_BACKLIGHT_ON : HACMD_BACKLIGHT_OFF), (backlightMode ? "on" : "off"));
-    setProperty(backlightPrompt, FnlockMode);
+    backlightLevel = level;
+    IOLog(toggleSuccess, getName(), name, backlightPrompt, (backlightLevel ? HACMD_BACKLIGHT_ON : HACMD_BACKLIGHT_OFF), (backlightLevel ? "on" : "off"));
+    setProperty(backlightPrompt, backlightLevel);
 
     return true;
 }
@@ -768,25 +743,4 @@ void IdeaVPC::parseTemperature(UInt16 data, const char * desc) {
     // UInt16 fahrenheit = (data - 2731) * 9 / 5 + 320;
     // snprintf(temperature, 9, "%d.%d℉", fahrenheit / 10, fahrenheit % 10);
     setProperty(desc, temperature);
-}
-
-IOReturn IdeaVPC::setPowerState(unsigned long powerState, IOService *whatDevice){
-    IOLog("%s::%s powerState %ld : %s", getName(), name, powerState, powerState ? "on" : "off");
-
-    if (whatDevice != this)
-        return kIOReturnInvalid;
-
-    if (backlightCap && automaticBacklightMode & 0x1) {
-        updateKeyboard();
-        if (powerState == 0) {
-            backlightModeSleep = backlightMode;
-            if (backlightMode)
-                toggleBacklight();
-        } else {
-            if (backlightModeSleep && !backlightMode)
-                toggleBacklight();
-        }
-    }
-
-    return kIOPMAckImplied;
 }
