@@ -112,6 +112,17 @@ bool ThinkVPC::setMutestatus(UInt32 value) {
     return true;
 }
 
+IOReturn ThinkVPC::setNotificationMask(UInt32 i, UInt32 all_mask, UInt32 offset) {
+    IOReturn ret = kIOReturnSuccess;
+    OSObject* params[] = {
+        OSNumber::withNumber(i + offset + 1, 32)
+    };
+    if (all_mask & BIT(i))
+        ret = vpc->evaluateObject(setHKEYmask, nullptr, params, 1);
+    params[0]->release();
+    return ret;
+}
+
 bool ThinkVPC::initVPC() {
     UInt32 version;
 
@@ -134,12 +145,23 @@ bool ThinkVPC::initVPC() {
         case 2:
             updateAdaptiveKBD(1);
             updateAdaptiveKBD(2);
+            updateAdaptiveKBD(3);
             break;
 
         default:
             IOLog("%s::%s Unknown HKEY version\n", getName(), name);
             break;
     }
+
+    if (!hotkey_all_mask) {
+        IOLog("%s::%s Failed to acquire hotkey_all_mask\n", getName(), name);
+    } else {
+        for (UInt32 i = 0; i < 0x20; i++) {
+            if (setNotificationMask(i, hotkey_all_mask, DHKN_MASK_offset) != kIOReturnSuccess)
+                break;
+        }
+    }
+
     updateAll();
 
     mutestate_orig = mutestate;
@@ -197,6 +219,11 @@ bool ThinkVPC::updateAdaptiveKBD(int arg) {
                 hotkey_adaptive_all_mask = result;
                 setProperty("hotkey_adaptive_all_mask", result, 32);
             }
+            break;
+
+        case 3:
+            hotkey_alter_all_mask = result;
+            setProperty("hotkey_alter_all_mask", result, 32);
             break;
 
         default:

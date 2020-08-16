@@ -16,6 +16,10 @@
 
 #define KBD_BACKLIGHT_CAP_BIT (9)
 
+#define DHKN_MASK_offset 0
+#define DHKE_MASK_offset 0x20
+#define DHKF_MASK_offset 0x40
+
 enum tpacpi_mute_btn_mode {
     TP_EC_MUTE_BTN_LATCH  = 0,    /* Mute mutes; up/down unmutes */
     /* We don't know what mode 1 is. */
@@ -120,8 +124,10 @@ private:
     static constexpr const char *getHKEYversion        = "MHKV";
     static constexpr const char *getHKEYAdaptive       = "MHKA";
     static constexpr const char *getHKEYevent          = "MHKP";
-    static constexpr const char *getHKEYstatus         = "DHKC"; // Actually a NameObj, not a method
+//    static constexpr const char *getHKEYstatus         = "DHKC"; // Actually a NameObj, not a method
     static constexpr const char *setHKEYstatus         = "MHKC";
+    static constexpr const char *getHKEYmask           = "MHKN";
+    static constexpr const char *setHKEYmask           = "MHKM";
 
     static constexpr const char *getCMstart            = "BCTG";
     static constexpr const char *setCMstart            = "BCCS";
@@ -148,25 +154,32 @@ private:
     static constexpr const char *setControl            = "MHAT";
 
     /**
-     * All events supported in fw
+     * All events supported by DHKN
      */
-    UInt32 hotkey_all_mask {0x080c};
+    UInt32 hotkey_all_mask {0};
 
     /**
-     * All adaptive events supported in fw
+     * All adaptive events supported by DHKE
      */
     UInt32 hotkey_adaptive_all_mask {0};
     
+    /**
+     * Alternative (?) events supported by DHKF
+     */
+    UInt32 hotkey_alter_all_mask {0};
+
     UInt32 mutestate {0};
     UInt32 muteLEDstate {0};
     UInt32 micMuteLEDstate {0};
 
-    UInt32 mutestate_orig;
+    UInt32 mutestate_orig {0};
 
     UInt32 batnum {BAT_ANY};
 
-    bool ConservationMode;
+    bool ConservationMode {false};
 
+    IOReturn setNotificationMask(UInt32 i, UInt32 all_mask, UInt32 offset);
+    
     bool initVPC() APPLE_KEXT_OVERRIDE;
     void setPropertiesGated(OSObject* props) APPLE_KEXT_OVERRIDE;
     void updateAll() APPLE_KEXT_OVERRIDE;
