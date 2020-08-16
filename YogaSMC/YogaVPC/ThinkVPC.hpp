@@ -178,6 +178,15 @@ private:
 
     bool ConservationMode {false};
 
+    /**
+     *  Set single notification mask
+     *
+     *  @param i mask index
+     *  @param all_mask available masks
+     *  @param offset mask offset
+     *
+     *  @return true if success
+     */
     IOReturn setNotificationMask(UInt32 i, UInt32 all_mask, UInt32 offset);
     
     bool initVPC() APPLE_KEXT_OVERRIDE;

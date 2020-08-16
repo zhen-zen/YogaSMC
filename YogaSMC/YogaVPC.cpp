@@ -62,6 +62,13 @@ bool YogaVPC::start(IOService *provider) {
     return res;
 }
 
+bool YogaVPC::initVPC() {
+    if (vpc->validateObject(getClamshellMode) == kIOReturnSuccess &&
+        vpc->validateObject(setClamshellMode) == kIOReturnSuccess)
+        clamshellCap = true;
+    return true;
+}
+
 bool YogaVPC::exitVPC() {
     if (clamshellMode) {
         IOLog("%s::%s Disabling clamshell mode\n", getName(), name);
@@ -106,6 +113,7 @@ YogaVPC* YogaVPC::withDevice(IOACPIPlatformDevice *device, OSString *pnp) {
 
 void YogaVPC::updateAll() {
     updateClamshell();
+    updateBacklight();
 }
 
 void YogaVPC::setPropertiesGated(OSObject* props) {
@@ -191,6 +199,9 @@ IOReturn YogaVPC::message(UInt32 type, IOService *provider, void *argument) {
 }
 
 bool YogaVPC::updateClamshell(bool update) {
+    if (!clamshellCap)
+        return true;
+
     UInt32 state;
 
     if (vpc->evaluateInteger(getClamshellMode, &state) != kIOReturnSuccess) {
@@ -209,6 +220,9 @@ bool YogaVPC::updateClamshell(bool update) {
 }
 
 bool YogaVPC::toggleClamshell() {
+    if (!clamshellCap)
+        return true;
+
     UInt32 result;
 
     OSObject* params[1] = {

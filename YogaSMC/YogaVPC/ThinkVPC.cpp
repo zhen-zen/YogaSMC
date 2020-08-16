@@ -124,6 +124,7 @@ IOReturn ThinkVPC::setNotificationMask(UInt32 i, UInt32 all_mask, UInt32 offset)
 }
 
 bool ThinkVPC::initVPC() {
+    super::initVPC();
     UInt32 version;
 
     if (vpc->evaluateInteger(getHKEYversion, &version) != kIOReturnSuccess)

@@ -64,6 +64,11 @@ private:
     static constexpr const char *setClamshellMode  = "SCSM";
 
     /**
+     *  Clamshell mode capability, will be update on init
+     */
+    bool clamshellCap {false};
+
+    /**
      *  Clamshell mode status, default to false (same in SSDT)
      */
     bool clamshellMode {false};
@@ -100,7 +105,7 @@ protected:
      *
      *  @return true if success
      */
-    inline virtual bool initVPC() {return true;};
+    virtual bool initVPC();
 
     /**
      *  Update VPC EC status
