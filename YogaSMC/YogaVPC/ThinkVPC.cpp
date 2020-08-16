@@ -341,7 +341,10 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 }
                 setFanControl(value->unsigned32BitValue());
             } else {
-                IOLog("%s::%s Unknown property %s\n", getName(), name, key->getCStringNoCopy());
+                OSDictionary* entry = OSDictionary::withCapacity(1);
+                entry->setObject(key, dict->getObject(key));
+                super::setPropertiesGated(entry);
+                entry->release();
             }
         }
         i->release();

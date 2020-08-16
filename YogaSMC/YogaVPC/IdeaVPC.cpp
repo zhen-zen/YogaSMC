@@ -109,7 +109,7 @@ IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
             break;
 
         case kSMC_YogaEvent:
-            IOLog("%s::%s message: %s Yoga mode 0x%x", getName(), name, provider->getName(), *((UInt32 *) argument));
+            IOLog("%s::%s message: %s Yoga mode 0x%x\n", getName(), name, provider->getName(), *((UInt32 *) argument));
             if (backlightCap && automaticBacklightMode & 0x2) {
                 updateKeyboard();
                 if (*((UInt32 *) argument) != 1) {
@@ -125,7 +125,7 @@ IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
             break;
 
         case kSMC_FnlockEvent:
-            IOLog("%s::%s message: %s Fnlock event", getName(), name, provider->getName());
+            IOLog("%s::%s message: %s Fnlock event\n", getName(), name, provider->getName());
             updateKeyboard();
             toggleFnlock();
             break;
@@ -133,18 +133,18 @@ IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
         case kSMC_getConservation:
             *(bool *)argument = conservationMode;
 //            conservationModeLock = false;
-            IOLog("%s::%s message: %s get conservation mode %d", getName(), name, provider->getName(), conservationMode);
+            IOLog("%s::%s message: %s get conservation mode %d\n", getName(), name, provider->getName(), conservationMode);
             break;
 
         case kSMC_setConservation:
-            IOLog("%s::%s message: %s set conservation mode %d -> %d", getName(), name, provider->getName(), conservationMode, *((bool *) argument));
+            IOLog("%s::%s message: %s set conservation mode %d -> %d\n", getName(), name, provider->getName(), conservationMode, *((bool *) argument));
             if (*((bool *) argument) != conservationMode)
                 toggleConservation();
             break;
 
         case kIOACPIMessageDeviceNotification:
             if (!argument)
-                IOLog("%s::%s message: Unknown ACPI notification", getName(), name);
+                IOLog("%s::%s message: Unknown ACPI notification\n", getName(), name);
             else if (*((UInt32 *) argument) == kIOACPIMessageReserved)
                 updateVPC();
             else
@@ -226,7 +226,7 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                     continue;
                 
                 ECLock = false;
-                IOLog("%s::%s direct VPC EC manipulation is unlocked", getName(), name);
+                IOLog("%s::%s direct VPC EC manipulation is unlocked\n", getName(), name);
             } else if (key->isEqualTo(readECPrompt)) {
                 if (ECLock)
                     continue;
@@ -263,11 +263,6 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                     IOLog("%s::%s %s 0x%x 0x%x success %d\n", getName(), name, writeECPrompt, command, data, retries);
                 else
                     IOLog("%s::%s %s 0x%x 0x%x failed %d\n", getName(), name, writeECPrompt, command, data, retries);
-            } else if (key->isEqualTo(clamshellPrompt)) {
-                OSDictionary* entry = OSDictionary::withCapacity(1);
-                entry->setObject(clamshellPrompt, dict->getObject(clamshellPrompt));
-                super::setPropertiesGated(entry);
-                entry->release();
             } else if (key->isEqualTo(batteryPrompt)) {
                 updateBatteryID();
                 updateBatteryInfo();
@@ -278,7 +273,11 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                 conservationModeLock = false;
                 initEC();
             } else {
-                IOLog("%s::%s Unknown property %s\n", getName(), name, key->getCStringNoCopy());
+                IOLog("%s::%s process %s with YogaVPC", getName(), name, key->getCStringNoCopy());
+                OSDictionary* entry = OSDictionary::withCapacity(1);
+                entry->setObject(key, dict->getObject(key));
+                super::setPropertiesGated(entry);
+                entry->release();
             }
         }
         i->release();
@@ -334,49 +333,49 @@ bool IdeaVPC::updateBatteryID(bool update) {
     OSArray *data;
     data = OSDynamicCast(OSArray, result);
     if (!data) {
-        IOLog("%s::%s Battery ID not OSArray", getName(), name);
+        IOLog("%s::%s Battery ID not OSArray\n", getName(), name);
         result->release();
         return false;
     }
 
     OSData *cycle0 = OSDynamicCast(OSData, data->getObject(0));
     if (!cycle0) {
-        IOLog("%s::%s Battery 0 cycle not exist", getName(), name);
+        IOLog("%s::%s Battery 0 cycle not exist\n", getName(), name);
     } else {
         UInt16 *cycleCount0 = (UInt16 *)cycle0->getBytesNoCopy();
         if (cycleCount0[0] != 0xffff) {
             setProperty("BAT0 CycleCount", cycleCount0[0], 16);
-            IOLog("%s::%s Battery 0 cycle count %d", getName(), name, cycleCount0[0]);
+            IOLog("%s::%s Battery 0 cycle count %d\n", getName(), name, cycleCount0[0]);
         }
     }
 
     OSData *cycle1 = OSDynamicCast(OSData, data->getObject(1));
     if (!cycle1) {
-        IOLog("%s::%s Battery 1 cycle not exist", getName(), name);
+        IOLog("%s::%s Battery 1 cycle not exist\n", getName(), name);
     } else {
         UInt16 *cycleCount1 = (UInt16 *)cycle1->getBytesNoCopy();
         if (cycleCount1[0] != 0xffff) {
             setProperty("BAT1 CycleCount", cycleCount1[0], 16);
-            IOLog("%s::%s Battery 1 cycle count %d", getName(), name, cycleCount1[0]);
+            IOLog("%s::%s Battery 1 cycle count %d\n", getName(), name, cycleCount1[0]);
         }
     }
 
     OSData *ID0 = OSDynamicCast(OSData, data->getObject(2));
     if (!ID0) {
-        IOLog("%s::%s Battery 0 ID not exist", getName(), name);
+        IOLog("%s::%s Battery 0 ID not exist\n", getName(), name);
     } else {
         UInt16 *batteryID0 = (UInt16 *)ID0->getBytesNoCopy();
         if (batteryID0[0] != 0xffff)
-            IOLog("%s::%s Battery 0 ID %04x %04x %04x %04x", getName(), name, batteryID0[0], batteryID0[1], batteryID0[2], batteryID0[3]);
+            IOLog("%s::%s Battery 0 ID %04x %04x %04x %04x\n", getName(), name, batteryID0[0], batteryID0[1], batteryID0[2], batteryID0[3]);
     }
 
     OSData *ID1 = OSDynamicCast(OSData, data->getObject(3));
     if (!ID1) {
-        IOLog("%s::%s Battery 1 ID not exist", getName(), name);
+        IOLog("%s::%s Battery 1 ID not exist\n", getName(), name);
     } else {
         UInt16 *batteryID1 = (UInt16 *)ID1->getBytesNoCopy();
         if (batteryID1[0] != 0xffff)
-            IOLog("%s::%s Battery 1 ID %04x %04x %04x %04x", getName(), name, batteryID1[0], batteryID1[1], batteryID1[2], batteryID1[3]);
+            IOLog("%s::%s Battery 1 ID %04x %04x %04x %04x\n", getName(), name, batteryID1[0], batteryID1[1], batteryID1[2], batteryID1[3]);
     }
     data->release();
     return true;
@@ -397,7 +396,7 @@ bool IdeaVPC::updateBatteryInfo(bool update) {
 
     data = OSDynamicCast(OSData, result);
     if (!data) {
-        IOLog("%s::%s Battery Info not OSData", getName(), name);
+        IOLog("%s::%s Battery Info not OSData\n", getName(), name);
         result->release();
         return false;
     }
@@ -571,19 +570,19 @@ void IdeaVPC::updateVPC() {
                     } else {
                         switch (result) {
                             case 0x40:
-                                IOLog("%s::%s Fn+Q cooling", getName(), name);
+                                IOLog("%s::%s Fn+Q cooling\n", getName(), name);
                                 // TODO: fan status switch
                                 break;
 
                             default:
-                                IOLog("%s::%s Special button 0x%x", getName(), name, result);
+                                IOLog("%s::%s Special button 0x%x\n", getName(), name, result);
                                 break;
                         }
                     }
                     break;
 
                 case 1: // ENERGY_EVENT_GENERAL / ENERGY_EVENT_KEYBDLED_OLD
-                    IOLog("%s::%s Fn+Space keyboard backlight?", getName(), name);
+                    IOLog("%s::%s Fn+Space keyboard backlight?\n", getName(), name);
                     updateKeyboard();
                     // also on AC connect / disconnect
                     break;
@@ -592,7 +591,7 @@ void IdeaVPC::updateVPC() {
                     if (!read_ec_data(VPCCMD_R_BL_POWER, &result, &retries))
                         IOLog("%s::%s Failed to read VPCCMD_R_BL_POWER %d\n", getName(), name, retries);
                     else
-                        IOLog("%s::%s Open lid? 0x%x %s", getName(), name, result, result ? "on" : "off");
+                        IOLog("%s::%s Open lid? 0x%x %s\n", getName(), name, result, result ? "on" : "off");
                     // functional, TODO: turn off screen on demand
                     break;
 
@@ -600,36 +599,36 @@ void IdeaVPC::updateVPC() {
                     if (!read_ec_data(VPCCMD_R_TOUCHPAD, &result, &retries))
                         IOLog("%s::%s Failed to read VPCCMD_R_TOUCHPAD %d\n", getName(), name, retries);
                     else
-                        IOLog("%s::%s Fn+F6 touchpad 0x%x %s", getName(), name, result, result ? "on" : "off");
+                        IOLog("%s::%s Fn+F6 touchpad 0x%x %s\n", getName(), name, result, result ? "on" : "off");
                     // functional, TODO: manually toggle
                     break;
 
                 case 7:
-                    IOLog("%s::%s Fn+F8 camera", getName(), name);
+                    IOLog("%s::%s Fn+F8 camera\n", getName(), name);
                     // TODO: camera status switch
                     break;
 
                 case 8: // ENERGY_EVENT_MIC
-                    IOLog("%s::%s Fn+F4 mic", getName(), name);
+                    IOLog("%s::%s Fn+F4 mic\n", getName(), name);
                     // TODO: mic status switch
                     break;
 
                 case 10:
-                    IOLog("%s::%s Fn+F6 touchpad on", getName(), name);
+                    IOLog("%s::%s Fn+F6 touchpad on\n", getName(), name);
                     // functional, identical to case 5?
                     break;
 
                 case 12: // ENERGY_EVENT_KEYBDLED
-                    IOLog("%s::%s Fn+Space keyboard backlight?", getName(), name);
+                    IOLog("%s::%s Fn+Space keyboard backlight?\n", getName(), name);
                     break;
 
                 case 13:
-                    IOLog("%s::%s Fn+F7 airplane mode", getName(), name);
+                    IOLog("%s::%s Fn+F7 airplane mode\n", getName(), name);
                     // TODO: airplane mode switch
                     break;
 
                 default:
-                    IOLog("%s::%s Unknown VPC event %d", getName(), name, vpc_bit);
+                    IOLog("%s::%s Unknown VPC event %d\n", getName(), name, vpc_bit);
                     break;
             }
         }
@@ -733,7 +732,7 @@ void IdeaVPC::parseRawDate(UInt16 data, int batnum) {
 void IdeaVPC::parseTemperature(UInt16 data, const char * desc) {
     if ((data - 2731) < 0 || (data - 2731) > 600) {
         setProperty(desc, data - 2731, 16);
-        IOLog("%s::%s %s critical! %d", getName(), name, desc, data - 2731);
+        IOLog("%s::%s %s critical! %d\n", getName(), name, desc, data - 2731);
     }
     // ℃ DEGREE CELSIUS UTF-8: E2 84 83
     // ℉ DEGREE FAHRENHEIT UTF-8: E2 84 89

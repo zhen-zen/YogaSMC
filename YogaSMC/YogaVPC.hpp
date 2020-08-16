@@ -17,7 +17,7 @@
 
 #define autoBacklightPrompt "AutoBacklight"
 #define batteryPrompt "Battery"
-#define backlightPrompt "BacklightMode"
+#define backlightPrompt "BacklightLevel"
 #define conservationPrompt "ConservationMode"
 #define clamshellPrompt "ClamshellMode"
 #define ECLockPrompt "ECLock"
