@@ -32,7 +32,7 @@ ThinkVPC* ThinkVPC::withDevice(IOACPIPlatformDevice *device, OSString *pnp) {
 
 void ThinkVPC::updateAll() {
     updateBattery(BAT_ANY);
-    updateMutestatus();
+//    updateMutestatus();
     updateMuteLEDStatus();
     updateMicMuteLEDStatus();
     updateVPC();
@@ -90,11 +90,11 @@ bool ThinkVPC::updateMutestatus(bool update) {
 }
 
 bool ThinkVPC::setMutestatus(UInt32 value) {
-    updateMutestatus(false);
-    if (mutestate == value) {
-        IOLog(valueMatched, getName(), name, mutePrompt, mutestate);
-        return true;
-    }
+//    updateMutestatus(false);
+//    if (mutestate == value) {
+//        IOLog(valueMatched, getName(), name, mutePrompt, mutestate);
+//        return true;
+//    }
 
     UInt32 result;
 
@@ -112,14 +112,16 @@ bool ThinkVPC::setMutestatus(UInt32 value) {
     return true;
 }
 
-IOReturn ThinkVPC::setNotificationMask(UInt32 i, UInt32 all_mask, UInt32 offset) {
+IOReturn ThinkVPC::setNotificationMask(UInt32 i, UInt32 all_mask, UInt32 offset, bool enable) {
     IOReturn ret = kIOReturnSuccess;
     OSObject* params[] = {
-        OSNumber::withNumber(i + offset + 1, 32)
+        OSNumber::withNumber(i + offset + 1, 32),
+        OSNumber::withNumber(enable, 32),
     };
     if (all_mask & BIT(i))
         ret = vpc->evaluateObject(setHKEYmask, nullptr, params, 1);
     params[0]->release();
+    params[1]->release();
     return ret;
 }
 
@@ -310,7 +312,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                     continue;
                 }
 
-                updateMutestatus(false);
+//                updateMutestatus(false);
 
                 setMutestatus(value->unsigned32BitValue());
             } else if (key->isEqualTo(muteLEDPrompt)) {

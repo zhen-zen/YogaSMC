@@ -387,7 +387,7 @@ bool IdeaVPC::updateBatteryInfo(bool update) {
     OSObject *result;
     
     OSObject* params[1] = {
-        OSNumber::withNumber((UInt32)0, 32)
+        OSNumber::withNumber(0ULL, 32)
     };
 
     if (vpc->evaluateObject(getBatteryInfo, &result, params, 1) != kIOReturnSuccess) {

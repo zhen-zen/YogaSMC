@@ -184,10 +184,11 @@ private:
      *  @param i mask index
      *  @param all_mask available masks
      *  @param offset mask offset
+     *  @param enable desired status
      *
      *  @return true if success
      */
-    IOReturn setNotificationMask(UInt32 i, UInt32 all_mask, UInt32 offset);
+    IOReturn setNotificationMask(UInt32 i, UInt32 all_mask, UInt32 offset, bool enable=true);
     
     bool initVPC() APPLE_KEXT_OVERRIDE;
     void setPropertiesGated(OSObject* props) APPLE_KEXT_OVERRIDE;
