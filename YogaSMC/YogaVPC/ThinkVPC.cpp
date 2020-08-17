@@ -171,8 +171,11 @@ bool ThinkVPC::initVPC() {
     setHotkeyStatus(true);
 
     UInt32 state;
+    OSObject* params[] = {
+        OSNumber::withNumber(0ULL, 32)
+    };
 
-    if (vpc->evaluateInteger(getKBDBacklightLevel, &state, nullptr, 1) == kIOReturnSuccess)
+    if (vpc->evaluateInteger(getKBDBacklightLevel, &state, params, 1) == kIOReturnSuccess)
         backlightCap = BIT(KBD_BACKLIGHT_CAP_BIT) & state;
 
     if (!backlightCap)
@@ -376,7 +379,11 @@ bool ThinkVPC::setFanControl(int level) {
 }
 
 bool ThinkVPC::updateMuteLEDStatus(bool update) {
-    if (vpc->evaluateInteger(getAudioMuteLED, &muteLEDstate, nullptr, 1) != kIOReturnSuccess) {
+    OSObject* params[] = {
+        OSNumber::withNumber(0ULL, 32)
+    };
+
+    if (vpc->evaluateInteger(getAudioMuteLED, &muteLEDstate, params, 1) != kIOReturnSuccess) {
         IOLog(updateFailure, getName(), name, __func__);
         return false;
     }
@@ -661,8 +668,11 @@ bool ThinkVPC::updateBacklight(bool update) {
         return true;
 
     UInt32 state;
+    OSObject* params[] = {
+        OSNumber::withNumber(0ULL, 32)
+    };
 
-    if (vpc->evaluateInteger(getKBDBacklightLevel, &state, nullptr, 1) != kIOReturnSuccess) {
+    if (vpc->evaluateInteger(getKBDBacklightLevel, &state, params, 1) != kIOReturnSuccess) {
         IOLog(updateFailure, getName(), name, KeyboardPrompt);
         return false;
     }
