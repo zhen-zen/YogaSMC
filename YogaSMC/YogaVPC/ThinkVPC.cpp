@@ -31,6 +31,9 @@ ThinkVPC* ThinkVPC::withDevice(IOACPIPlatformDevice *device, OSString *pnp) {
 }
 
 void ThinkVPC::updateAll() {
+    getNotificationMask(1);
+    getNotificationMask(2);
+    getNotificationMask(3);
     updateBattery(BAT_ANY);
 //    updateMutestatus();
     updateMuteLEDStatus();
@@ -102,7 +105,7 @@ bool ThinkVPC::setMutestatus(UInt32 value) {
         OSNumber::withNumber(value, 32)
     };
 
-    if (vpc->evaluateInteger(setAudioMutestatus, &result, params, 1) != kIOReturnSuccess || result != value) {
+    if (vpc->evaluateInteger(setAudioMutestatus, &result, params, 1) != kIOReturnSuccess) {
         IOLog(toggleFailure, getName(), name, __func__);
         return false;
     }
@@ -110,6 +113,36 @@ bool ThinkVPC::setMutestatus(UInt32 value) {
     IOLog(toggleSuccess, getName(), name, __func__, mutestate, (mutestate == 2 ? "SW" : "HW"));
     setProperty(mutePrompt, mutestate, 32);
     return true;
+}
+
+void ThinkVPC::getNotificationMask(UInt32 index) {
+    UInt32 result;
+
+    OSObject* params[] = {
+        OSNumber::withNumber(index, 32),
+    };
+
+    if (vpc->evaluateInteger(getHKEYmask, &result, params, 1) != kIOReturnSuccess) {
+        IOLog(toggleFailure, getName(), name, __func__);
+        return;
+    }
+
+    switch (index) {
+        case 1:
+            setProperty("DHKN", result, 32);
+            break;
+
+        case 2:
+            setProperty("DHKE", result, 32);
+            break;
+
+        case 3:
+            setProperty("DHKF", result, 32);
+            break;
+
+        default:
+            break;
+    }
 }
 
 IOReturn ThinkVPC::setNotificationMask(UInt32 i, UInt32 all_mask, UInt32 offset, bool enable) {

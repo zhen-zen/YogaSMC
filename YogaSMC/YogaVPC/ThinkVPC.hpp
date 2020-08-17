@@ -189,7 +189,14 @@ private:
      *  @return true if success
      */
     IOReturn setNotificationMask(UInt32 i, UInt32 all_mask, UInt32 offset, bool enable=true);
-    
+
+    /**
+     *  Get notification mask
+     *
+     *  @param index
+     */
+    void getNotificationMask(UInt32 index);
+
     bool initVPC() APPLE_KEXT_OVERRIDE;
     void setPropertiesGated(OSObject* props) APPLE_KEXT_OVERRIDE;
     void updateAll() APPLE_KEXT_OVERRIDE;
