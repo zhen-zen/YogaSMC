@@ -33,10 +33,10 @@ bool YogaSMC::init(OSDictionary *dictionary)
 
 IOService *YogaSMC::probe(IOService *provider, SInt32 *score)
 {
-    if (provider->getClient() != this) {
-        IOLog("%s already loaded, exiting\n", provider->getClient()->getName());
-        return nullptr;
-    }
+//    if (provider->getClient() != this) {
+//        IOLog("%s already loaded, exiting\n", provider->getClient()->getName());
+//        return nullptr;
+//    }
 
     IOLog("%s Probing\n", getName());
 
@@ -256,7 +256,7 @@ IOReturn YogaSMC::method_recb(UInt32 offset, UInt32 size, UInt8 *data) {
         return kIOReturnNoBandwidth;
     }
 
-    memcpy(data, osdata->getBytesNoCopy(), size);
+    lilu_os_memcpy(data, osdata->getBytesNoCopy(), size);
 
     result->release();
     return ret;
@@ -296,7 +296,7 @@ void YogaSMC::dumpECOffset(UInt32 value) {
                     for (int j = 0; j < (len < size-i ? len : size-i); j++)
                         snprintf(buf+3*j, 4, "%02x ", data[i+j]);
                     buf[len*3-1] = '\0';
-                    IOLog("%s::%s 0x%02x: %s", getName(), name, offset+i, buf);
+                    IOLog("%s::%s 0x%02x: %s\n", getName(), name, offset+i, buf);
                 }
             } else {
                 for (int j = 0; j < size; j++)
