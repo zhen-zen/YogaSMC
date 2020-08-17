@@ -60,10 +60,10 @@ enum DYTC_command {
 };
 
 struct __attribute__((packed)) DYTC_ARG {
-    UInt16 cmd;
-    UInt8 reg;
-    UInt8 reportTypeID;
-    UInt8 opcode;
+    UInt32 command;
+    UInt8 ICFunc;
+    UInt8 ICMode;
+    UInt8 validF;
 };
 
 #define DYTC_GET_LAPMODE_BIT 17 /* Set when in lapmode */
