@@ -66,6 +66,19 @@ bool YogaVPC::initVPC() {
     if (vpc->validateObject(getClamshellMode) == kIOReturnSuccess &&
         vpc->validateObject(setClamshellMode) == kIOReturnSuccess)
         clamshellCap = true;
+
+    if (vpc->validateObject(setThermalControl) == kIOReturnSuccess) {
+        UInt64 result;
+        if (setDYTCMode(DYTC_CMD_VER, &result)) {
+            setProperty("DYTCVersion", result, 64);
+            if (setDYTCMode(DYTC_CMD_GET, &result)) {
+                DYTCCap = true;
+                DYTCMode = result;
+                setProperty("DYTCMode", result, 64);
+            }
+        }
+    }
+
     return true;
 }
 
@@ -260,4 +273,23 @@ IOReturn YogaVPC::setPowerState(unsigned long powerState, IOService *whatDevice)
     }
 
     return kIOPMAckImplied;
+}
+
+bool YogaVPC::setDYTCMode(UInt32 command, UInt64* result, UInt8 ICFunc, UInt8 ICMode, bool ValidF, bool update) {
+    UInt64 cmd = command & 0x1ff;
+    cmd |= (ICFunc & 0xF) << 0x0C;
+    cmd |= (ICMode & 0xF) << 0x10;
+    cmd |= ValidF << 0x14;
+
+    OSObject* params[1] = {
+        OSNumber::withNumber(cmd, 64)
+    };
+
+    if (vpc->evaluateInteger(setThermalControl, result, params, 1) != kIOReturnSuccess) {
+        IOLog(toggleFailure, getName(), name, DYTCPrompt);
+        return false;
+    }
+
+    IOLog("%s::%s %s 0x%llx\n", getName(), name, DYTCPrompt, *result);
+    return true;
 }

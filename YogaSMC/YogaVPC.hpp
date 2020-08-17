@@ -20,6 +20,7 @@
 #define backlightPrompt "BacklightLevel"
 #define conservationPrompt "ConservationMode"
 #define clamshellPrompt "ClamshellMode"
+#define DYTCPrompt "DYTCMode"
 #define ECLockPrompt "ECLock"
 #define FnKeyPrompt "FnlockMode"
 #define fanControlPrompt "FanControl"
@@ -50,6 +51,23 @@
 
 #define BIT(nr) (1U << (nr))
 
+enum DYTC_command {
+    DYTC_CMD_VER   = 0,    /* Get DYTC Version */
+    DYTC_CMD_SET   = 1,    /* Set current IC function and mode */
+    DYTC_CMD_GET   = 2,    /* Get current IC function and mode */
+    /* 3-7, 0x0100 unknown yet, capability? */
+    DYTC_CMD_RESET = 0x1ff,    /* Reset current IC function and mode */
+};
+
+struct __attribute__((packed)) DYTC_ARG {
+    UInt16 cmd;
+    UInt8 reg;
+    UInt8 reportTypeID;
+    UInt8 opcode;
+};
+
+#define DYTC_GET_LAPMODE_BIT 17 /* Set when in lapmode */
+
 class YogaVPC : public IOService
 {
   typedef IOService super;
@@ -62,6 +80,9 @@ private:
      */
     static constexpr const char *getClamshellMode  = "GCSM";
     static constexpr const char *setClamshellMode  = "SCSM";
+
+    /* Dynamic thermal control, available on IdeaVPC, ThinkVPC */
+    static constexpr const char *setThermalControl = "DYTC";
 
     /**
      *  Clamshell mode capability, will be update on init
@@ -161,6 +182,30 @@ protected:
      *  @return true if success
      */
     inline virtual bool setBacklight(UInt32 level) {return true;};
+
+    /**
+     *  DYTC capability, will be update on init
+     */
+    bool DYTCCap {false};
+
+    /**
+     *  DYTC mode
+     */
+    UInt64 DYTCMode {0};
+
+    /**
+     *  Set DYTC mode
+     *
+     *  @param command  see DYTC_command
+     *  @param result result
+     *  @param ICFunc
+     *  @param ICMode
+     *  @param ValidF
+     *  @param update  only update internal status when false
+     *
+     *  @return true if success
+     */
+    bool setDYTCMode(UInt32 command, UInt64* result, UInt8 ICFunc=0, UInt8 ICMode=0, bool ValidF=false, bool update=true);
 
 public:
     virtual bool init(OSDictionary *dictionary) APPLE_KEXT_OVERRIDE;
