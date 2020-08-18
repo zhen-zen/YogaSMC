@@ -376,7 +376,8 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                     IOLog(valueInvalid, getName(), name, FnKeyPrompt);
                     continue;
                 }
-                setFanControl(value->unsigned32BitValue());
+//                setFanControl(value->unsigned32BitValue());
+                updateFanControl(value->unsigned32BitValue());
             } else {
                 OSDictionary* entry = OSDictionary::withCapacity(1);
                 entry->setObject(key, dict->getObject(key));
@@ -390,6 +391,23 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
     return;
 }
 
+bool ThinkVPC::updateFanControl(UInt32 status, bool update) {
+    OSObject* params[] = {
+        OSNumber::withNumber(status, 32)
+    };
+
+    if (vpc->evaluateInteger(getThermalControl, &thermalstate, params, 1) != kIOReturnSuccess) {
+        IOLog(updateFailure, getName(), name, __func__);
+        return false;
+    }
+
+    if (update)
+        IOLog(updateSuccess, getName(), name, __func__, thermalstate);
+
+    setProperty(fanControlPrompt, thermalstate, 32);
+    return true;
+}
+
 bool ThinkVPC::setFanControl(int level) {
     UInt32 result;
 
@@ -397,7 +415,7 @@ bool ThinkVPC::setFanControl(int level) {
         OSNumber::withNumber((level ? BIT(18) : 0), 32)
     };
 
-    if (vpc->evaluateInteger(setControl, &result, params, 1) != kIOReturnSuccess) {
+    if (vpc->evaluateInteger(setThermalControl, &result, params, 1) != kIOReturnSuccess) {
         IOLog(toggleFailure, getName(), name, fanControlPrompt);
         return false;
     }

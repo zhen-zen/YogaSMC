@@ -160,7 +160,8 @@ private:
     static constexpr const char *getMicMuteLED         = "MMTG"; // HDMC: 0x00010000
     static constexpr const char *setMicMuteLED         = "MMTS"; // on_value = 2, off_value = 0, ? = 3
 
-    static constexpr const char *setControl            = "MHAT";
+    static constexpr const char *getThermalControl     = "MHGT";
+    static constexpr const char *setThermalControl     = "MHAT";
 
     /**
      * All events supported by DHKN
@@ -182,6 +183,8 @@ private:
     UInt32 micMuteLEDstate {0};
 
     UInt32 mutestate_orig {0};
+
+    UInt32 thermalstate {0};
 
     UInt32 batnum {BAT_ANY};
 
@@ -301,13 +304,23 @@ private:
     void updateBattery(int battery);
 
     /**
-     *  Set Fan Control
+     *  Set Fan control status
      *
      *  @param level 0 for automatic, 1-7 for level
      *
      *  @return true if success
      */
     bool setFanControl(int level);
+
+    /**
+     *  Update Fan control status
+     *
+     *  @param status TBD
+     *  @param update only update internal status when false
+     *
+     *  @return true if success
+     */
+    bool updateFanControl(UInt32 status=0, bool update=true);
 
     friend class ThinkWMI;
 
