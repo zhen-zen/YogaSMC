@@ -110,11 +110,25 @@ private:
      */
     bool toggleClamshell();
 
+    /**
+     *  Iterate over IOACPIPlane for PNP device
+     *
+     *  @param id PNP name
+     *  @param dev target ACPI device
+     *  @return true on sucess
+     */
+    bool findPNP(const char *id, IOACPIPlatformDevice **dev);
+
 protected:
     const char* name;
 
     IOWorkLoop *workLoop {nullptr};
     IOCommandGate *commandGate {nullptr};
+
+    /**
+     *  EC device
+     */
+    IOACPIPlatformDevice *ec {nullptr};
 
     /**
      *  VPC device

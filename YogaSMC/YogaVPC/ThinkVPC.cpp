@@ -35,7 +35,7 @@ void ThinkVPC::updateAll() {
     getNotificationMask(2);
     getNotificationMask(3);
     updateBattery(BAT_ANY);
-//    updateMutestatus();
+    updateMutestatus();
     updateMuteLEDStatus();
     updateMicMuteLEDStatus();
     updateVPC();
@@ -80,7 +80,7 @@ bool ThinkVPC::setConservation(const char * method, UInt32 value) {
 }
 
 bool ThinkVPC::updateMutestatus(bool update) {
-    if (vpc->evaluateInteger(getAudioMutestatus, &mutestate) != kIOReturnSuccess) {
+    if (ec->evaluateInteger(getAudioMutestatus, &mutestate) != kIOReturnSuccess) {
         IOLog(updateFailure, getName(), name, __func__);
         return false;
     }
@@ -93,11 +93,11 @@ bool ThinkVPC::updateMutestatus(bool update) {
 }
 
 bool ThinkVPC::setMutestatus(UInt32 value) {
-//    updateMutestatus(false);
-//    if (mutestate == value) {
-//        IOLog(valueMatched, getName(), name, mutePrompt, mutestate);
-//        return true;
-//    }
+    updateMutestatus(false);
+    if (mutestate == value) {
+        IOLog(valueMatched, getName(), name, mutePrompt, mutestate);
+        return true;
+    }
 
     UInt32 result;
 
@@ -344,8 +344,6 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                     IOLog(valueInvalid, getName(), name, "mutePrompt");
                     continue;
                 }
-
-//                updateMutestatus(false);
 
                 setMutestatus(value->unsigned32BitValue());
             } else if (key->isEqualTo(muteLEDPrompt)) {

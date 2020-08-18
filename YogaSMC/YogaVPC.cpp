@@ -28,7 +28,7 @@ IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
     IOLog("%s::%s Probing\n", getName(), provider->getName());
 
     vpc = OSDynamicCast(IOACPIPlatformDevice, provider);
-    if (!vpc)
+    if (!vpc || !findPNP(PnpDeviceIdEC, &ec))
         return nullptr;
 
     return super::probe(provider, score);
@@ -293,3 +293,27 @@ bool YogaVPC::setDYTCMode(UInt32 command, UInt64* result, UInt8 ICFunc, UInt8 IC
     IOLog("%s::%s %s 0x%llx\n", getName(), name, DYTCPrompt, *result);
     return true;
 }
+
+bool YogaVPC::findPNP(const char *id, IOACPIPlatformDevice **dev) {
+    auto iterator = IORegistryIterator::iterateOver(gIOACPIPlane, kIORegistryIterateRecursively);
+    if (!iterator) {
+        IOLog("%s findPNP failed\n", getName());
+        return nullptr;
+    }
+    auto pnp = OSString::withCString(id);
+
+    while (auto entry = iterator->getNextObject()) {
+        if (entry->compareName(pnp)) {
+            *dev = OSDynamicCast(IOACPIPlatformDevice, entry);
+            if (*dev) {
+                IOLog("%s %s available at %s\n", getName(), id, (*dev)->getName());
+                break;
+            }
+        }
+    }
+    iterator->release();
+    pnp->release();
+
+    return !!(*dev);
+}
+
