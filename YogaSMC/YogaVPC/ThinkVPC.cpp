@@ -147,12 +147,13 @@ void ThinkVPC::getNotificationMask(UInt32 index) {
 
 IOReturn ThinkVPC::setNotificationMask(UInt32 i, UInt32 all_mask, UInt32 offset, bool enable) {
     IOReturn ret = kIOReturnSuccess;
+    UInt32 result;
     OSObject* params[] = {
         OSNumber::withNumber(i + offset + 1, 32),
         OSNumber::withNumber(enable ? 1 : 0, 32),
     };
     if (all_mask & BIT(i)) {
-        ret = vpc->evaluateObject(setHKEYmask, nullptr, params, 1);
+        ret = vpc->evaluateInteger(setHKEYmask, &result, params, 1);
         IOLog("%s::%s setting HKEY mask BIT %x\n", getName(), name, i);
     }
     params[0]->release();
