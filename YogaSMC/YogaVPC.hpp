@@ -27,6 +27,7 @@
 #define fanControlPrompt "FanControl"
 #define KeyboardPrompt "KeyboardMode"
 #define HotKeyPrompt "HotKey"
+#define LEDPrompt "LED"
 #define mutePrompt "Mute"
 #define muteLEDPrompt "MuteLED"
 #define muteSupportPrompt "MuteSupport"

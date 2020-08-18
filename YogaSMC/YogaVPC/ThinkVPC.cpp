@@ -378,6 +378,14 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 }
 
                 setBeepStatus(value->unsigned8BitValue());
+            } else if (key->isEqualTo(LEDPrompt)) {
+                OSNumber * value = OSDynamicCast(OSNumber, dict->getObject(LEDPrompt));
+                if (value == nullptr || value->unsigned32BitValue() > 0xff) {
+                    IOLog(valueInvalid, getName(), name, LEDPrompt);
+                    continue;
+                }
+
+                setLEDStatus(value->unsigned8BitValue());
             } else if (key->isEqualTo(fanControlPrompt)) {
                 OSNumber * value = OSDynamicCast(OSNumber, dict->getObject(fanControlPrompt));
                 if (value == nullptr) {
@@ -472,19 +480,33 @@ bool ThinkVPC::setMuteSupport(bool support) {
 }
 
 bool ThinkVPC::setBeepStatus(UInt8 status) {
-    UInt32 result;
-
     OSObject* params[] = {
         OSNumber::withNumber(status, 32)
     };
 
-    if (ec->evaluateInteger(setBeep, &result, params, 1) != kIOReturnSuccess) {
+    if (ec->evaluateObject(setBeep, nullptr, params, 1) != kIOReturnSuccess) {
         IOLog(toggleFailure, getName(), name, beepPrompt);
         return false;
     }
 
     IOLog(toggleSuccess, getName(), name, beepPrompt, status, (status ? "on" : "off"));
     setProperty(beepPrompt, status);
+    return true;
+}
+
+bool ThinkVPC::setLEDStatus(UInt8 status) {
+    OSObject* params[] = {
+        OSNumber::withNumber(status & 0x0f, 32),
+        OSNumber::withNumber(status & 0xf0, 32),
+    };
+
+    if (ec->evaluateObject(setLED, nullptr, params, 2) != kIOReturnSuccess) {
+        IOLog(toggleFailure, getName(), name, LEDPrompt);
+        return false;
+    }
+
+    IOLog(toggleSuccess, getName(), name, LEDPrompt, status, (status ? "on" : "off"));
+    setProperty(LEDPrompt, status);
     return true;
 }
 
