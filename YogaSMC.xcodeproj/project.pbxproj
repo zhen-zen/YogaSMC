@@ -20,6 +20,26 @@
 		6F8674CE24A876E000DC2FDF /* ThinkWMI.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F8674CC24A876E000DC2FDF /* ThinkWMI.hpp */; };
 		6F87BF8024D26A5D00D64375 /* YogaSMC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F87BF7E24D26A5D00D64375 /* YogaSMC.cpp */; };
 		6F87BF8124D26A5D00D64375 /* YogaSMC.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F87BF7F24D26A5D00D64375 /* YogaSMC.hpp */; };
+		6F88067824EB575F00ACD6C8 /* ThinkWMI.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F8674CC24A876E000DC2FDF /* ThinkWMI.hpp */; };
+		6F88067924EB575F00ACD6C8 /* WMI.h in Headers */ = {isa = PBXBuildFile; fileRef = 6FCF7F572474B74800A82B13 /* WMI.h */; };
+		6F88067A24EB575F00ACD6C8 /* YogaVPC.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F96A30B24B93D25006562EC /* YogaVPC.hpp */; };
+		6F88067B24EB575F00ACD6C8 /* bmfparser.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6FD2BB8C247B37A20018EA36 /* bmfparser.hpp */; };
+		6F88067C24EB575F00ACD6C8 /* common.h in Headers */ = {isa = PBXBuildFile; fileRef = 6FCF7F5B2474B89000A82B13 /* common.h */; };
+		6F88067D24EB575F00ACD6C8 /* bmfdec.h in Headers */ = {isa = PBXBuildFile; fileRef = 6FD2BB46247721040018EA36 /* bmfdec.h */; };
+		6F88067E24EB575F00ACD6C8 /* YogaWMI.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F08ACE724746B8B00681A63 /* YogaWMI.hpp */; };
+		6F88067F24EB575F00ACD6C8 /* ThinkVPC.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F6CEDA324BC14C2004D553F /* ThinkVPC.hpp */; };
+		6F88068124EB575F00ACD6C8 /* IdeaWMI.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F48676224A293A0003AD4CA /* IdeaWMI.hpp */; };
+		6F88068324EB575F00ACD6C8 /* IdeaVPC.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F9553B924BA515B00215EBB /* IdeaVPC.hpp */; };
+		6F88068524EB575F00ACD6C8 /* IdeaVPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F9553B824BA515B00215EBB /* IdeaVPC.cpp */; };
+		6F88068624EB575F00ACD6C8 /* ThinkVPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F6CEDA224BC14C2004D553F /* ThinkVPC.cpp */; };
+		6F88068724EB575F00ACD6C8 /* YogaWMI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F08ACE924746B8B00681A63 /* YogaWMI.cpp */; };
+		6F88068924EB575F00ACD6C8 /* IdeaWMI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F48676124A293A0003AD4CA /* IdeaWMI.cpp */; };
+		6F88068A24EB575F00ACD6C8 /* bmfdec.c in Sources */ = {isa = PBXBuildFile; fileRef = 6FD2BB47247721040018EA36 /* bmfdec.c */; };
+		6F88068B24EB575F00ACD6C8 /* WMI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6FCF7F582474B74800A82B13 /* WMI.cpp */; };
+		6F88068C24EB575F00ACD6C8 /* YogaVPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F96A30A24B93D25006562EC /* YogaVPC.cpp */; };
+		6F88068D24EB575F00ACD6C8 /* ThinkWMI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F8674CB24A876E000DC2FDF /* ThinkWMI.cpp */; };
+		6F88068E24EB575F00ACD6C8 /* bmfparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6FD2BB8B247B37A20018EA36 /* bmfparser.cpp */; };
+		6F88069224EB575F00ACD6C8 /* LICENSE in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6F2D45CB24C9494B00A75751 /* LICENSE */; };
 		6F9553BA24BA515B00215EBB /* IdeaVPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F9553B824BA515B00215EBB /* IdeaVPC.cpp */; };
 		6F9553BB24BA515B00215EBB /* IdeaVPC.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F9553B924BA515B00215EBB /* IdeaVPC.hpp */; };
 		6F96A30C24B93D25006562EC /* YogaVPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F96A30A24B93D25006562EC /* YogaVPC.cpp */; };
@@ -44,6 +64,16 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		6F88069124EB575F00ACD6C8 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 16;
+			files = (
+				6F88069224EB575F00ACD6C8 /* LICENSE in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
@@ -65,6 +95,8 @@
 		6F8674CC24A876E000DC2FDF /* ThinkWMI.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ThinkWMI.hpp; sourceTree = "<group>"; };
 		6F87BF7E24D26A5D00D64375 /* YogaSMC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = YogaSMC.cpp; sourceTree = "<group>"; };
 		6F87BF7F24D26A5D00D64375 /* YogaSMC.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = YogaSMC.hpp; sourceTree = "<group>"; };
+		6F88069624EB575F00ACD6C8 /* YogaSMCAlter.kext */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = YogaSMCAlter.kext; sourceTree = BUILT_PRODUCTS_DIR; };
+		6F88069724EB575F00ACD6C8 /* Alter-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Alter-Info.plist"; sourceTree = "<group>"; };
 		6F9553B824BA515B00215EBB /* IdeaVPC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IdeaVPC.cpp; sourceTree = "<group>"; };
 		6F9553B924BA515B00215EBB /* IdeaVPC.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IdeaVPC.hpp; sourceTree = "<group>"; };
 		6F96A30A24B93D25006562EC /* YogaVPC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = YogaVPC.cpp; sourceTree = "<group>"; };
@@ -88,6 +120,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		6F88069024EB575F00ACD6C8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -105,6 +144,7 @@
 			isa = PBXGroup;
 			children = (
 				6F08ACE424746B8B00681A63 /* YogaSMC.kext */,
+				6F88069624EB575F00ACD6C8 /* YogaSMCAlter.kext */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -132,6 +172,7 @@
 				6F08ACE724746B8B00681A63 /* YogaWMI.hpp */,
 				6F08ACE924746B8B00681A63 /* YogaWMI.cpp */,
 				6F08ACEB24746B8B00681A63 /* Info.plist */,
+				6F88069724EB575F00ACD6C8 /* Alter-Info.plist */,
 			);
 			path = YogaSMC;
 			sourceTree = "<group>";
@@ -207,6 +248,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		6F88067724EB575F00ACD6C8 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6F88067824EB575F00ACD6C8 /* ThinkWMI.hpp in Headers */,
+				6F88067924EB575F00ACD6C8 /* WMI.h in Headers */,
+				6F88067A24EB575F00ACD6C8 /* YogaVPC.hpp in Headers */,
+				6F88067B24EB575F00ACD6C8 /* bmfparser.hpp in Headers */,
+				6F88067C24EB575F00ACD6C8 /* common.h in Headers */,
+				6F88067D24EB575F00ACD6C8 /* bmfdec.h in Headers */,
+				6F88067E24EB575F00ACD6C8 /* YogaWMI.hpp in Headers */,
+				6F88067F24EB575F00ACD6C8 /* ThinkVPC.hpp in Headers */,
+				6F88068124EB575F00ACD6C8 /* IdeaWMI.hpp in Headers */,
+				6F88068324EB575F00ACD6C8 /* IdeaVPC.hpp in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
@@ -226,6 +284,24 @@
 			name = YogaSMC;
 			productName = YogaSMC;
 			productReference = 6F08ACE424746B8B00681A63 /* YogaSMC.kext */;
+			productType = "com.apple.product-type.kernel-extension";
+		};
+		6F88067624EB575F00ACD6C8 /* YogaSMCAlter */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6F88069324EB575F00ACD6C8 /* Build configuration list for PBXNativeTarget "YogaSMCAlter" */;
+			buildPhases = (
+				6F88067724EB575F00ACD6C8 /* Headers */,
+				6F88068424EB575F00ACD6C8 /* Sources */,
+				6F88069024EB575F00ACD6C8 /* Frameworks */,
+				6F88069124EB575F00ACD6C8 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = YogaSMCAlter;
+			productName = YogaSMC;
+			productReference = 6F88069624EB575F00ACD6C8 /* YogaSMCAlter.kext */;
 			productType = "com.apple.product-type.kernel-extension";
 		};
 /* End PBXNativeTarget section */
@@ -256,6 +332,7 @@
 			projectRoot = "";
 			targets = (
 				6F08ACE324746B8B00681A63 /* YogaSMC */,
+				6F88067624EB575F00ACD6C8 /* YogaSMCAlter */,
 			);
 		};
 /* End PBXProject section */
@@ -276,6 +353,22 @@
 				6F8674CD24A876E000DC2FDF /* ThinkWMI.cpp in Sources */,
 				6FD2BB8D247B37A20018EA36 /* bmfparser.cpp in Sources */,
 				6F87BF8024D26A5D00D64375 /* YogaSMC.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6F88068424EB575F00ACD6C8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6F88068524EB575F00ACD6C8 /* IdeaVPC.cpp in Sources */,
+				6F88068624EB575F00ACD6C8 /* ThinkVPC.cpp in Sources */,
+				6F88068724EB575F00ACD6C8 /* YogaWMI.cpp in Sources */,
+				6F88068924EB575F00ACD6C8 /* IdeaWMI.cpp in Sources */,
+				6F88068A24EB575F00ACD6C8 /* bmfdec.c in Sources */,
+				6F88068B24EB575F00ACD6C8 /* WMI.cpp in Sources */,
+				6F88068C24EB575F00ACD6C8 /* YogaVPC.cpp in Sources */,
+				6F88068D24EB575F00ACD6C8 /* ThinkWMI.cpp in Sources */,
+				6F88068E24EB575F00ACD6C8 /* bmfparser.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -477,6 +570,74 @@
 			};
 			name = Release;
 		};
+		6F88069424EB575F00ACD6C8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
+				CLANG_ANALYZER_DEADCODE_DEADSTORES = NO;
+				CLANG_ANALYZER_DIVIDE_BY_ZERO = NO;
+				CLANG_ANALYZER_NULL_DEREFERENCE = NO;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1.0.0;
+				DEVELOPMENT_TEAM = "";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"MODULE_VERSION=$(MODULE_VERSION)",
+					"PRODUCT_NAME=$(PRODUCT_NAME)",
+					"$(inherited)",
+				);
+				HEADER_SEARCH_PATHS = "${PROJECT_DIR}";
+				INFOPLIST_FILE = YogaSMC/Alter-Info.plist;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MARKETING_VERSION = 1.0.0;
+				MODULE_NAME = org.zhen.YogaSMC;
+				MODULE_VERSION = 1.0.0;
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-Wno-inconsistent-missing-override",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.zhen.YogaSMC;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				RUN_CLANG_STATIC_ANALYZER = YES;
+				WRAPPER_EXTENSION = kext;
+			};
+			name = Debug;
+		};
+		6F88069524EB575F00ACD6C8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
+				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1.0.0;
+				DEVELOPMENT_TEAM = "";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"MODULE_VERSION=$(MODULE_VERSION)",
+					"PRODUCT_NAME=$(PRODUCT_NAME)",
+					"$(inherited)",
+				);
+				HEADER_SEARCH_PATHS = "${PROJECT_DIR}";
+				INFOPLIST_FILE = YogaSMC/Alter-Info.plist;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MARKETING_VERSION = 1.0.0;
+				MODULE_NAME = org.zhen.YogaSMC;
+				MODULE_VERSION = 1.0.0;
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-Wno-inconsistent-missing-override",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.zhen.YogaSMC;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				WRAPPER_EXTENSION = kext;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -494,6 +655,15 @@
 			buildConfigurations = (
 				6F08ACEF24746B8B00681A63 /* Debug */,
 				6F08ACF024746B8B00681A63 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		6F88069324EB575F00ACD6C8 /* Build configuration list for PBXNativeTarget "YogaSMCAlter" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6F88069424EB575F00ACD6C8 /* Debug */,
+				6F88069524EB575F00ACD6C8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
