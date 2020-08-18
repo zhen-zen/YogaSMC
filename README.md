@@ -47,11 +47,13 @@ Currently available functions:
 - Keyboard backlight: support automatic on / off on sleep (bit 0) and yoga mode (bit 1)
 - Reading fn key code (read-only, WIP)
 
-### ThinkVPC (WIP)
+### ThinkVPC
 Based on [linux/drivers/platform/x86/thinkpad_acpi.c](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/thinkpad_acpi.c), targets `HKEY` using `_HID` `LEN0268`.
 
 Currently available functions:
-- HKEY config parsing
+- Hotkey polling
 - Battery conservation mode (experimental)
 - Fan mode (experimental)
 - Mute status (read-only, WIP)
+- Audio / Mic Mute LED
+- Keyboard backlight

@@ -39,13 +39,22 @@ enum  {
 /* HKEY events */
 enum tpacpi_hkey_event_t {
     /* Hotkey-related */
-    TP_HKEY_EV_HOTKEY_BASE        = 0x1001, /* first hotkey (FN+F1) */
-    TP_HKEY_EV_BRGHT_UP        = 0x1010, /* Brightness up */
-    TP_HKEY_EV_BRGHT_DOWN        = 0x1011, /* Brightness down */
-    TP_HKEY_EV_KBD_LIGHT        = 0x1012, /* Thinklight/kbd backlight */
-    TP_HKEY_EV_VOL_UP        = 0x1015, /* Volume up or unmute */
-    TP_HKEY_EV_VOL_DOWN        = 0x1016, /* Volume down or unmute */
-    TP_HKEY_EV_VOL_MUTE        = 0x1017, /* Mixer output mute */
+    TP_HKEY_EV_HOTKEY_BASE      = 0x1001, /* first hotkey (FN+F1) */
+    TP_HKEY_EV_NETWORK          = 0x1005, /* Network (F8, _Q64) */
+    TP_HKEY_EV_DISPLAY          = 0x1007, /* Dual Display (F7, _Q16/_Q19) */
+    TP_HKEY_EV_BRGHT_UP         = 0x1010, /* Brightness up (F6, _Q14/_Q1C) */
+    TP_HKEY_EV_BRGHT_DOWN       = 0x1011, /* Brightness down (F5, _Q15/_Q1D) */
+    TP_HKEY_EV_KBD_LIGHT        = 0x1012, /* Thinklight/kbd backlight (Fn+Space, _Q1F) */
+    TP_HKEY_EV_VOL_UP           = 0x1015, /* Volume up or unmute */
+    TP_HKEY_EV_VOL_DOWN         = 0x1016, /* Volume down or unmute */
+    TP_HKEY_EV_VOL_MUTE         = 0x1017, /* Mixer output mute */
+    TP_HKEY_EV_MIC_MUTE         = 0x101B, /* Microphone Mute (F4, _Q6A) */
+    TP_HKEY_EV_SETTING          = 0x101D, /* Settings (F9, _Q66) */
+
+    /* Hotkey-related (preset masks) */
+    TP_HKEY_EV_STAR             = 0x1311, /* Star (F12, _Q62) */
+    TP_HKEY_EV_BLUETOOTH        = 0x1314, /* Bluetooth (F10, _Q60) */
+    TP_HKEY_EV_KEYBOARD         = 0x1315, /* Keyboard (F11, _Q61) */
 
     /* Reasons for waking up from S3/S4 */
     TP_HKEY_EV_WKUP_S3_UNDOCK    = 0x2304, /* undock requested, S3 */
