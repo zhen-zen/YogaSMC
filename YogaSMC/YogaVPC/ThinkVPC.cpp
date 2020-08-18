@@ -149,10 +149,12 @@ IOReturn ThinkVPC::setNotificationMask(UInt32 i, UInt32 all_mask, UInt32 offset,
     IOReturn ret = kIOReturnSuccess;
     OSObject* params[] = {
         OSNumber::withNumber(i + offset + 1, 32),
-        OSNumber::withNumber(enable, 32),
+        OSNumber::withNumber(enable ? 1 : 0, 32),
     };
-    if (all_mask & BIT(i))
+    if (all_mask & BIT(i)) {
         ret = vpc->evaluateObject(setHKEYmask, nullptr, params, 1);
+        IOLog("%s::%s setting HKEY mask BIT %x\n", getName(), name, i);
+    }
     params[0]->release();
     params[1]->release();
     return ret;
@@ -189,13 +191,13 @@ bool ThinkVPC::initVPC() {
             break;
     }
 
-    if (!hotkey_all_mask) {
-        IOLog("%s::%s Failed to acquire hotkey_all_mask\n", getName(), name);
-    } else {
+    if (hotkey_all_mask) {
         for (UInt32 i = 0; i < 0x20; i++) {
             if (setNotificationMask(i, hotkey_all_mask, DHKN_MASK_offset) != kIOReturnSuccess)
                 break;
         }
+    } else {
+        IOLog("%s::%s Failed to acquire hotkey_all_mask\n", getName(), name);
     }
 
     updateAll();
