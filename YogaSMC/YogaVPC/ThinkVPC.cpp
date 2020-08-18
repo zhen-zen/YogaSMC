@@ -245,7 +245,6 @@ bool ThinkVPC::updateAdaptiveKBD(int arg) {
     }
 
     IOLog("%s::%s %s %d %x\n", getName(), name, __func__, arg, result);
-#ifdef DEBUG
     switch (arg) {
         case 0:
         case 1:
@@ -269,7 +268,6 @@ bool ThinkVPC::updateAdaptiveKBD(int arg) {
             IOLog("%s::%s Unknown MHKA command\n", getName(), name);
             break;
     }
-#endif
     return true;
 }
 
