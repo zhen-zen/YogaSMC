@@ -39,7 +39,6 @@
 		6F88068C24EB575F00ACD6C8 /* YogaVPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F96A30A24B93D25006562EC /* YogaVPC.cpp */; };
 		6F88068D24EB575F00ACD6C8 /* ThinkWMI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F8674CB24A876E000DC2FDF /* ThinkWMI.cpp */; };
 		6F88068E24EB575F00ACD6C8 /* bmfparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6FD2BB8B247B37A20018EA36 /* bmfparser.cpp */; };
-		6F88069224EB575F00ACD6C8 /* LICENSE in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6F2D45CB24C9494B00A75751 /* LICENSE */; };
 		6F9553BA24BA515B00215EBB /* IdeaVPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F9553B824BA515B00215EBB /* IdeaVPC.cpp */; };
 		6F9553BB24BA515B00215EBB /* IdeaVPC.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F9553B924BA515B00215EBB /* IdeaVPC.hpp */; };
 		6F96A30C24B93D25006562EC /* YogaVPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F96A30A24B93D25006562EC /* YogaVPC.cpp */; };
@@ -53,6 +52,23 @@
 		6FD2BB8E247B37A20018EA36 /* bmfparser.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6FD2BB8C247B37A20018EA36 /* bmfparser.hpp */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		6F97877424EB61C7008B03D2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6F08ACDB24746B8B00681A63 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6F08ACE324746B8B00681A63;
+			remoteInfo = YogaSMC;
+		};
+		6F97877624EB61CA008B03D2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6F08ACDB24746B8B00681A63 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6F88067624EB575F00ACD6C8;
+			remoteInfo = YogaSMCAlter;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXCopyFilesBuildPhase section */
 		6F2D45CA24C9491C00A75751 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -61,16 +77,6 @@
 			dstSubfolderSpec = 16;
 			files = (
 				6F2D45CC24C9494B00A75751 /* LICENSE in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		6F88069124EB575F00ACD6C8 /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 16;
-			files = (
-				6F88069224EB575F00ACD6C8 /* LICENSE in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -267,6 +273,25 @@
 		};
 /* End PBXHeadersBuildPhase section */
 
+/* Begin PBXLegacyTarget section */
+		6F97877024EB61BB008B03D2 /* BuildAll */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "";
+			buildConfigurationList = 6F97877324EB61BB008B03D2 /* Build configuration list for PBXLegacyTarget "BuildAll" */;
+			buildPhases = (
+			);
+			buildToolPath = /bin/date;
+			buildWorkingDirectory = "";
+			dependencies = (
+				6F97877724EB61CA008B03D2 /* PBXTargetDependency */,
+				6F97877524EB61C7008B03D2 /* PBXTargetDependency */,
+			);
+			name = BuildAll;
+			passBuildSettingsInEnvironment = 1;
+			productName = BuildAll;
+		};
+/* End PBXLegacyTarget section */
+
 /* Begin PBXNativeTarget section */
 		6F08ACE324746B8B00681A63 /* YogaSMC */ = {
 			isa = PBXNativeTarget;
@@ -293,7 +318,6 @@
 				6F88067724EB575F00ACD6C8 /* Headers */,
 				6F88068424EB575F00ACD6C8 /* Sources */,
 				6F88069024EB575F00ACD6C8 /* Frameworks */,
-				6F88069124EB575F00ACD6C8 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -316,6 +340,9 @@
 					6F08ACE324746B8B00681A63 = {
 						CreatedOnToolsVersion = 11.4.1;
 					};
+					6F97877024EB61BB008B03D2 = {
+						CreatedOnToolsVersion = 12.0;
+					};
 				};
 			};
 			buildConfigurationList = 6F08ACDE24746B8B00681A63 /* Build configuration list for PBXProject "YogaSMC" */;
@@ -333,6 +360,7 @@
 			targets = (
 				6F08ACE324746B8B00681A63 /* YogaSMC */,
 				6F88067624EB575F00ACD6C8 /* YogaSMCAlter */,
+				6F97877024EB61BB008B03D2 /* BuildAll */,
 			);
 		};
 /* End PBXProject section */
@@ -373,6 +401,19 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		6F97877524EB61C7008B03D2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6F08ACE324746B8B00681A63 /* YogaSMC */;
+			targetProxy = 6F97877424EB61C7008B03D2 /* PBXContainerItemProxy */;
+		};
+		6F97877724EB61CA008B03D2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6F88067624EB575F00ACD6C8 /* YogaSMCAlter */;
+			targetProxy = 6F97877624EB61CA008B03D2 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		6F08ACEC24746B8B00681A63 /* Debug */ = {
@@ -589,7 +630,7 @@
 					"$(inherited)",
 				);
 				HEADER_SEARCH_PATHS = "${PROJECT_DIR}";
-				INFOPLIST_FILE = YogaSMC/Alter-Info.plist;
+				INFOPLIST_FILE = "YogaSMC/Alter-Info.plist";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MARKETING_VERSION = 1.0.0;
 				MODULE_NAME = org.zhen.YogaSMC;
@@ -622,7 +663,7 @@
 					"$(inherited)",
 				);
 				HEADER_SEARCH_PATHS = "${PROJECT_DIR}";
-				INFOPLIST_FILE = YogaSMC/Alter-Info.plist;
+				INFOPLIST_FILE = "YogaSMC/Alter-Info.plist";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MARKETING_VERSION = 1.0.0;
 				MODULE_NAME = org.zhen.YogaSMC;
@@ -635,6 +676,33 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				WRAPPER_EXTENSION = kext;
+			};
+			name = Release;
+		};
+		6F97877124EB61BB008B03D2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				DEBUGGING_SYMBOLS = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		6F97877224EB61BB008B03D2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
 		};
@@ -664,6 +732,15 @@
 			buildConfigurations = (
 				6F88069424EB575F00ACD6C8 /* Debug */,
 				6F88069524EB575F00ACD6C8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		6F97877324EB61BB008B03D2 /* Build configuration list for PBXLegacyTarget "BuildAll" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6F97877124EB61BB008B03D2 /* Debug */,
+				6F97877224EB61BB008B03D2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

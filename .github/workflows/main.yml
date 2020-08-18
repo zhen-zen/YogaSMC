@@ -43,7 +43,7 @@ jobs:
         # A list of tests to skip.
         #skip-testing: # optional
         # Arbitrary, space separated build settings (e.g. PLATFORM_NAME=iphonesimulator).
-        #build-settings: # optional
+        build-settings: -target BuildAll
         # The action to perform (e.g. build, test, ...).
         action: build # default is test
         # Whether the output of xcodebuild should be forwarded to xcpretty.
