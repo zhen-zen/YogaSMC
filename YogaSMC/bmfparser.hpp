@@ -44,12 +44,13 @@ enum mof_data_type {
 class MOF {
     
 public:
-    MOF(char *data, uint32_t size, OSDictionary *mData) {buf = data; this->size = size; this->mData = mData;};
+    MOF(char *data, uint32_t size, OSDictionary *mData, const char* name) : buf(data), size(size), mData(mData), wmi_name(name) {};
     MOF();
 //    OSObject* parse_bmf(uuid_t bmf_guid);
     OSObject* parse_bmf(char * bmf_guid_string);
     bool parsed;
 private:
+    const char* wmi_name;
     char *parse_string(char *buf, uint32_t size);
     uint16_t parse_valuemap(uint16_t *buf, bool map, uint32_t i);
     uint32_t parse_valuemap(int32_t *buf, bool map, uint32_t i);

@@ -344,7 +344,7 @@ bool WMI::extractBMF()
 
     mDevice->setProperty("MOF size", size, sizeof(uint32_t)*8);
         
-    MOF mof(pout, size, mData);
+    MOF mof(pout, size, mData, name);
     mDevice->removeProperty("MOF");
     mDevice->removeProperty("BMF data");
     OSObject *result = mof.parse_bmf(bmf_guid_string);

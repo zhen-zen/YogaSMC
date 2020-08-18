@@ -11,9 +11,9 @@
 #include "common.h"
 #include <uuid/uuid.h>
 
-#define error(str) do { IOLog("%d: error %s at %s:%d\n", indent, str, __func__, __LINE__); parsed = false; return dict;} while (0)
-#define errors(str) do { IOLog("%d: error %s at %s:%d\n", indent, str, __func__, __LINE__); parsed = false;} while (0)
-#define warning(str) do { IOLog("%d: warning %s at %s:%d\n", indent, str, __func__, __LINE__);} while (0)
+#define error(str) do { IOLog("YogaWMI::%s %d: error %s at %s:%d\n", wmi_name, indent, str, __func__, __LINE__); parsed = false; return dict;} while (0)
+#define errors(str) do { IOLog("YogaWMI::%s %d: error %s at %s:%d\n", wmi_name, indent, str, __func__, __LINE__); parsed = false;} while (0)
+#define warning(str) do { IOLog("YogaWMI::%s %d: warning %s at %s:%d\n", wmi_name, indent, str, __func__, __LINE__);} while (0)
 
 char *MOF::parse_string(char *buf, uint32_t size) {
   uint16_t *buf2 = (uint16_t *)buf;

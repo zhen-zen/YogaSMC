@@ -21,10 +21,10 @@
 #define common_h
 
 #ifdef DEBUG
-#define DebugLog(args...) do { IOLog("YogaWMI: " args); } while (0)
+#define DebugLog(args...) do { IOLog("YogaWMI:: " args); } while (0)
 #else
 #define DebugLog(args...) do { } while (0)
 #endif
-#define AlwaysLog(args...) do { IOLog("YogaWMI: " args); } while (0)
+#define AlwaysLog(args...) do { IOLog("YogaWMI:: " args); } while (0)
 
 #endif /* common_h */
