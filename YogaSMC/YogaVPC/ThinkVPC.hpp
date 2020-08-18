@@ -152,7 +152,9 @@ private:
     static constexpr const char *getKBDBacklightLevel  = "MLCG";
     static constexpr const char *setKBDBacklightLevel  = "MLCS";
 
-    static constexpr const char *getAudioMutestatus    = "HAUM";
+    static constexpr const char *setBeep               = "BEEP"; // EC
+
+    static constexpr const char *getAudioMutestatus    = "HAUM"; // EC
     static constexpr const char *setAudioMutestatus    = "SAUM";
     static constexpr const char *getAudioMuteLED       = "GSMS";
     static constexpr const char *setAudioMuteLED       = "SSMS"; // on_value = 1, off_value = 0
@@ -268,6 +270,15 @@ private:
      *  @return true if success
      */
     bool updateMuteLEDStatus(bool update=true);
+
+    /**
+     *  Set Beep status
+     *
+     *  @param status length
+     *
+     *  @return true if success
+     */
+    bool setBeepStatus(UInt8 status);
 
     /**
      *  Set Mute LED status

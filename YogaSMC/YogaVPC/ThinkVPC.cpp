@@ -370,6 +370,14 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 }
 
                 setMuteSupport(value->getValue());
+            } else if (key->isEqualTo(beepPrompt)) {
+                OSNumber * value = OSDynamicCast(OSNumber, dict->getObject(beepPrompt));
+                if (value == nullptr || value->unsigned32BitValue() > 0xff) {
+                    IOLog(valueInvalid, getName(), name, beepPrompt);
+                    continue;
+                }
+
+                setBeepStatus(value->unsigned8BitValue());
             } else if (key->isEqualTo(fanControlPrompt)) {
                 OSNumber * value = OSDynamicCast(OSNumber, dict->getObject(fanControlPrompt));
                 if (value == nullptr) {
@@ -460,6 +468,23 @@ bool ThinkVPC::setMuteSupport(bool support) {
 
     IOLog(toggleSuccess, getName(), name, muteSupportPrompt, support, (support ? "disable" : "enable"));
     setProperty(muteSupportPrompt, support);
+    return true;
+}
+
+bool ThinkVPC::setBeepStatus(UInt8 status) {
+    UInt32 result;
+
+    OSObject* params[] = {
+        OSNumber::withNumber(status, 32)
+    };
+
+    if (ec->evaluateInteger(setBeep, &result, params, 1) != kIOReturnSuccess) {
+        IOLog(toggleFailure, getName(), name, beepPrompt);
+        return false;
+    }
+
+    IOLog(toggleSuccess, getName(), name, beepPrompt, status, (status ? "on" : "off"));
+    setProperty(beepPrompt, status);
     return true;
 }
 

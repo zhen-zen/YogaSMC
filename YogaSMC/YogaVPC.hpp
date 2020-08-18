@@ -18,6 +18,7 @@
 #define autoBacklightPrompt "AutoBacklight"
 #define batteryPrompt "Battery"
 #define backlightPrompt "BacklightLevel"
+#define beepPrompt "Beep"
 #define conservationPrompt "ConservationMode"
 #define clamshellPrompt "ClamshellMode"
 #define DYTCPrompt "DYTCMode"
