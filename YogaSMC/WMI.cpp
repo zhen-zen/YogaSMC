@@ -90,21 +90,16 @@ OSString * parseWMIFlags(UInt8 flags)
     return (OSString::withCString(output));
 }
 
-WMI::WMI(IOService* provider)
-{
-    mDevice = OSDynamicCast(IOACPIPlatformDevice, provider);
-}
-
 bool WMI::initialize()
 {
     if (mDevice) {
-        mData = OSDictionary::withCapacity(0);
-            
-        if (extractData()) {
+        name = mDevice->getName();
+        mData = OSDictionary::withCapacity(1);
+        mEvent = OSDictionary::withCapacity(1);
+        if (extractData())
             return true;
-        }
 
-        AlwaysLog("WMI method %s not found on object %s\n", kWMIMethod, mDevice->getName());
+        AlwaysLog("%s WMI method %s not found\n", name, kWMIMethod);
     }
     return false;
 }
@@ -112,6 +107,7 @@ bool WMI::initialize()
 WMI::~WMI()
 {
     OSSafeReleaseNULL(mData);
+    OSSafeReleaseNULL(mEvent);
 }
 
 // Parse the _WDG method output for WMI data blocks
@@ -122,23 +118,21 @@ bool WMI::extractData()
 
     if (mDevice->evaluateObject(kWMIMethod, &wdg) != kIOReturnSuccess)
     {
-        AlwaysLog("ACPI object %s does not export _WDG data\n", mDevice->getName());
+        AlwaysLog("%s ACPI object does not export _WDG data\n", name);
         return false;
     }
     
     data = OSDynamicCast(OSData, wdg);
     
     if (!data) {
-        AlwaysLog("%s:_WDG did not return a data blob\n", mDevice->getName());
+        AlwaysLog("%s _WDG did not return a data blob\n", name);
         return false;
     }
 
     int count = data->getLength() / WMI_DATA_SIZE;
     
-    for (int i = 0; i < count; i++) {
-        parseWDGEntry(
-          (struct WMI_DATA*)data->getBytesNoCopy(i * WMI_DATA_SIZE, WMI_DATA_SIZE));
-    }
+    for (int i = 0; i < count; i++)
+        parseWDGEntry((struct WMI_DATA*)data->getBytesNoCopy(i * WMI_DATA_SIZE, WMI_DATA_SIZE));
     
     if (bmf_guid_string)
         extractBMF();
@@ -172,6 +166,9 @@ void WMI::parseWDGEntry(struct WMI_DATA* block)
     if (block->flags & ACPI_WMI_EVENT) {
         value = OSNumber::withNumber(block->notify_id, 8);
         dict->setObject(kWMINotifyId, value);
+        char notify_id_string[3];
+        snprintf(notify_id_string, 3, "%2x", block->notify_id);
+        mEvent->setObject(notify_id_string, dict);
     } else {
         snprintf(object_id_string, 3, "%c%c", block->object_id[0], block->object_id[1]);
         value = OSString::withCString(object_id_string);
@@ -193,10 +190,10 @@ void WMI::parseWDGEntry(struct WMI_DATA* block)
     value->release();
 #endif
     if (block->flags == 0 && block->instance_count == 1) {
-        AlwaysLog("Possible BMF object %s %s", guid_string, object_id_string);
+        AlwaysLog("%s Possible BMF object %s %s\n", name, guid_string, object_id_string);
         // TODO: get BMF guid
         if (bmf_guid_string) {
-            AlwaysLog("Previous BMF object %s", bmf_guid_string);
+            AlwaysLog("%s Previous BMF object %s\n", name, bmf_guid_string);
         } else {
             bmf_guid_string = new char[37];
             uuid_unparse_lower(hostUUID, bmf_guid_string);
@@ -204,16 +201,6 @@ void WMI::parseWDGEntry(struct WMI_DATA* block)
     }
 
     mData->setObject(guid_string, dict);
-    if (block->flags & ACPI_WMI_EVENT) {
-        char notify_id_string[3];
-        snprintf(notify_id_string, 3, "%2x", block->notify_id);
-        if (!mEvent) {
-            mEvent = OSDictionary::withCapacity(1);
-        } else {
-            mEvent->ensureCapacity(mEvent->getCount()+1);
-        }
-        mEvent->setObject(notify_id_string, dict);
-    }
     dict->release();
 }
 
@@ -221,13 +208,13 @@ OSDictionary* WMI::getMethod(const char * guid, UInt8 flg)
 {
     if (mData && mData->getCount() > 0)
     {
-        OSDictionary* entry = OSDynamicCast(OSDictionary, mData->getObject(guid));
+        OSDictionary *entry = OSDynamicCast(OSDictionary, mData->getObject(guid));
         if (!entry)
             return nullptr;
-        else
-            DebugLog("GUID %s matched, verifying flag %d", guid, flg);
 
-        OSNumber * flags = OSDynamicCast(OSNumber, entry->getObject(kWMIFlags));
+        DebugLog("%s GUID %s matched, verifying flag %d\n", name, guid, flg);
+
+        OSNumber *flags = OSDynamicCast(OSNumber, entry->getObject(kWMIFlags));
         if (!flg | (flags->unsigned32BitValue() & flg))
             return entry;
     }
@@ -237,17 +224,17 @@ OSDictionary* WMI::getMethod(const char * guid, UInt8 flg)
 
 bool WMI::hasMethod(const char * guid, UInt8 flg)
 {
-    OSDictionary* method = getMethod(guid, flg);
+    OSDictionary *method = getMethod(guid, flg);
     
     if (method) {
         if (flg == ACPI_WMI_EVENT) {
-            DebugLog("found event with guid %s\n", guid);
+            DebugLog("%s found event with guid %s\n", name, guid);
             return true;
         }
-        OSString * methodId = OSDynamicCast(OSString, method->getObject(kWMIObjectId));
+        OSString *methodId = OSDynamicCast(OSString, method->getObject(kWMIObjectId));
 
         if (methodId) {
-            DebugLog("found method %s with guid %s\n", methodId->getCStringNoCopy(), guid);
+            DebugLog("%s found method %s with guid %s\n", name, methodId->getCStringNoCopy(), guid);
             return true;
         }
     }
@@ -258,24 +245,24 @@ bool WMI::hasMethod(const char * guid, UInt8 flg)
 bool WMI::executeMethod(const char * guid, OSObject ** result, OSObject * params[], IOItemCount paramCount)
 {
     char methodName[5];
-    OSDictionary* method = getMethod(guid);
+    OSDictionary *method = getMethod(guid);
 
     if (method)
     {
-        OSString * methodId = OSDynamicCast(OSString, method->getObject(kWMIObjectId));
+        OSString *methodId = OSDynamicCast(OSString, method->getObject(kWMIObjectId));
 
         if (methodId) {
-            OSNumber * flags = OSDynamicCast(OSNumber, method->getObject(kWMIFlags));
+            OSNumber *flags = OSDynamicCast(OSNumber, method->getObject(kWMIFlags));
             if (flags->unsigned8BitValue() & ACPI_WMI_METHOD) {
                 snprintf(methodName, 5, ACPIMethodName, methodId->getCStringNoCopy());
             } else if (flags->unsigned8BitValue() & ACPI_WMI_STRING) {
                 snprintf(methodName, 5, ACPIBufferName, methodId->getCStringNoCopy());
             } else {
-                DebugLog("Type 0x%x not available for method %s\n", flags->unsigned8BitValue(), methodId->getCStringNoCopy());
+                DebugLog("%s Type 0x%x not available for method %s\n", name, flags->unsigned8BitValue(), methodId->getCStringNoCopy());
                 return false;
             }
 
-            DebugLog("Calling method %s\n", methodName);
+            DebugLog("%s Calling method %s\n", name, methodName);
             if (mDevice->evaluateObject(methodName, result, params, paramCount) == kIOReturnSuccess)
                 return true;
         }
@@ -284,25 +271,19 @@ bool WMI::executeMethod(const char * guid, OSObject ** result, OSObject * params
     return false;
 }
 
-bool WMI::executeinteger(const char * guid, UInt32 * result, OSObject * params[], IOItemCount paramCount)
+bool WMI::executeInteger(const char * guid, UInt32 * result, OSObject * params[], IOItemCount paramCount)
 {
-    char methodName[5];
-    OSDictionary* method = getMethod(guid, ACPI_WMI_METHOD);
-
-    if (method)
-    {
-        OSString * methodId = OSDynamicCast(OSString, method->getObject(kWMIObjectId));
-
-        if (methodId) {
-            snprintf(methodName, 5, ACPIMethodName, methodId->getCStringNoCopy());
-
-            DebugLog("Calling method %s\n", methodName);
-            if (mDevice->evaluateInteger(methodName, result, params, paramCount) == kIOReturnSuccess)
-                return true;
+    bool ret = false;
+    OSObject *obj = nullptr;
+    if (executeMethod(guid, &obj, params, paramCount)) {
+        OSNumber *num = OSDynamicCast(OSNumber, obj);
+        if (num != nullptr) {
+            ret = true;
+            *result = num->unsigned32BitValue();
         }
     }
-
-    return false;
+    if (obj) obj->release();
+    return ret;
 }
 
 bool WMI::extractBMF()
@@ -312,25 +293,25 @@ bool WMI::extractBMF()
 
     char methodName[5]; // always 4 chars per ACPI spec
 
-    OSDictionary* method = getMethod(bmf_guid_string, 0);
+    OSDictionary *method = getMethod(bmf_guid_string, 0);
     if (!method)
         return false;
 
-    OSString * methodId = OSDynamicCast(OSString, method->getObject(kWMIObjectId));
+    OSString *methodId = OSDynamicCast(OSString, method->getObject(kWMIObjectId));
 
     snprintf(methodName, 5, ACPIBufferName, methodId->getCStringNoCopy());
 
     DebugLog("Evaluating buffer %s\n", methodName);
     if (mDevice->evaluateObject(methodName, &bmf) != kIOReturnSuccess)
     {
-        AlwaysLog("%s: ACPI object %s does not export BMF data\n", mDevice->getName(), methodName);
+        AlwaysLog("%s ACPI object %s does not export BMF data\n", name, methodName);
         return false;
     }
     
     data = OSDynamicCast(OSData, bmf);
     
     if (!data) {
-        AlwaysLog("%s: %s did not return a data blob\n", mDevice->getName(), methodName);
+        AlwaysLog("%s %s did not return a data blob\n", name, methodName);
         return false;
     }
     
@@ -338,7 +319,7 @@ bool WMI::extractBMF()
     
     if (len <= 16)
     {
-        AlwaysLog("%s: %s too short\n", mDevice->getName(), methodName);
+        AlwaysLog("%s %s too short\n", name, methodName);
         return false;
     }
     
@@ -346,7 +327,7 @@ bool WMI::extractBMF()
 
     if (pin[0] != 0x424D4F46 || pin[1] != 0x01 || pin[2] != len-16)
     {
-        AlwaysLog("%s: %s format invalid\n", mDevice->getName(), methodName);
+        AlwaysLog("%s %s format invalid\n", name, methodName);
         return false;
     }
 
@@ -355,10 +336,11 @@ bool WMI::extractBMF()
     uint32_t size = pin[3];
     char *pout = new char[size];
     if (ds_dec((char *)pin+16, len-16, pout, size, 0) != size) {
-        AlwaysLog("%s: %s Decompress failed\n", mDevice->getName(), methodName);
+        AlwaysLog("%s %s Decompress failed\n", name, methodName);
         return false;
     }
     pin = nullptr;
+    OSSafeReleaseNULL(data);
 
     mDevice->setProperty("MOF size", size, sizeof(uint32_t)*8);
         
@@ -369,9 +351,7 @@ bool WMI::extractBMF()
     mDevice->setProperty("MOF", result);
     if (!mof.parsed)
         mDevice->setProperty("BMF data", data);
-//    else
-    OSSafeReleaseNULL(data);
-    
+
     OSSafeReleaseNULL(result);
     delete[] pout;
     

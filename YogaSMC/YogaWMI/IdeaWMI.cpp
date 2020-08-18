@@ -88,7 +88,7 @@ void IdeaWMI::updateYogaMode() {
 
     UInt32 value;
     
-    if (!YWMI->executeinteger(GSENSOR_DATA_WMI_METHOD, &value, params, 3)) {
+    if (!YWMI->executeInteger(GSENSOR_DATA_WMI_METHOD, &value, params, 3)) {
         setProperty("YogaMode", false);
         IOLog("%s::%s YogaMode: detection failed\n", getName(), name);
         return;

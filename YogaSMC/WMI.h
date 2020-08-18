@@ -53,17 +53,18 @@ class WMI
     IOACPIPlatformDevice* mDevice {nullptr};
     OSDictionary* mData = {nullptr};
     OSDictionary* mEvent = {nullptr};
+    const char* name;
 
 public:
     // Constructor
-    WMI(IOService *provider);
+    WMI(IOService *provider) : mDevice(OSDynamicCast(IOACPIPlatformDevice, provider)) {};
     // Destructor
     ~WMI();
 
     bool initialize();
     bool hasMethod(const char * guid, UInt8 flg = ACPI_WMI_METHOD);
     bool executeMethod(const char * guid, OSObject ** result = 0, OSObject * params[] = 0, IOItemCount paramCount = 0);
-    bool executeinteger(const char * guid, UInt32 * result, OSObject * params[] = 0, IOItemCount paramCount = 0);
+    bool executeInteger(const char * guid, UInt32 * result, OSObject * params[] = 0, IOItemCount paramCount = 0);
     inline IOACPIPlatformDevice* getACPIDevice() { return mDevice; }
     inline OSDictionary* getEvent() { return mEvent; }
 
