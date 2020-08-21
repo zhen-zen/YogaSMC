@@ -78,13 +78,14 @@ bool YogaVPC::initVPC() {
 
     if (vpc->validateObject(setThermalControl) == kIOReturnSuccess) {
         UInt64 result;
-        if (setDYTCMode(DYTC_CMD_VER, &result)) {
+        if (DYTCCommand(DYTC_CMD_QUERY, &result)) {
+            dytc_version = (result >> DYTC_QUERY_REV_BIT) & 0xF;
             setProperty("DYTCVersion", result, 64);
-            if (setDYTCMode(DYTC_CMD_GET, &result)) {
-                DYTCCap = true;
-                DYTCMode = result;
-                setProperty("DYTCMode", result, 64);
-            }
+            setProperty("DYTCVer", dytc_version, 4);
+            DYTCCap = true;
+        } else {
+            setProperty("DYTC", "error");
+            IOLog(updateFailure, getName(), name, DYTCPrompt);
         }
     }
 
@@ -134,8 +135,9 @@ YogaVPC* YogaVPC::withDevice(IOACPIPlatformDevice *device, OSString *pnp) {
 }
 
 void YogaVPC::updateAll() {
-    updateClamshell();
     updateBacklight();
+    updateClamshell();
+    updateDYTC();
 }
 
 void YogaVPC::setPropertiesGated(OSObject* props) {
@@ -304,7 +306,7 @@ IOReturn YogaVPC::setPowerState(unsigned long powerState, IOService *whatDevice)
     return kIOPMAckImplied;
 }
 
-bool YogaVPC::setDYTCMode(UInt32 command, UInt64* result, UInt8 ICFunc, UInt8 ICMode, bool ValidF, bool update) {
+bool YogaVPC::DYTCCommand(UInt32 command, UInt64* result, UInt8 ICFunc, UInt8 ICMode, bool ValidF) {
     UInt64 cmd = command & 0x1ff;
     cmd |= (ICFunc & 0xF) << 0x0C;
     cmd |= (ICMode & 0xF) << 0x10;
@@ -318,8 +320,77 @@ bool YogaVPC::setDYTCMode(UInt32 command, UInt64* result, UInt8 ICFunc, UInt8 IC
         IOLog(toggleFailure, getName(), name, DYTCPrompt);
         return false;
     }
-
+#ifdef DEBUG
     IOLog("%s::%s %s 0x%llx\n", getName(), name, DYTCPrompt, *result);
+#endif
+    return true;
+}
+
+bool YogaVPC::updateDYTC(bool update) {
+    if (!DYTCCap) {
+        return true;
+    }
+    UInt64 result;
+    if (!DYTCCommand(DYTC_CMD_GET, &result))
+        return false;
+
+    DYTCMode = result;
+    setProperty(DYTCPrompt, result, 64);
+
+    int funcmode = (result >> DYTC_GET_FUNCTION_BIT) & 0xF;
+    switch (funcmode) {
+        case DYTC_FUNCTION_STD:
+            setProperty(DYTCFuncPrompt, "Standard");
+            break;
+
+        case DYTC_FUNCTION_CQL:
+            setProperty(DYTCFuncPrompt, "Lap");
+           /* We can't get the mode when in CQL mode - so we disable CQL
+            * mode retrieve the mode and then enable it again.
+            */
+            UInt64 dummy;
+            if (!DYTCCommand(DYTC_CMD_SET, &dummy, DYTC_FUNCTION_CQL, 0xf, false))
+                return false;
+            if (!DYTCCommand(DYTC_CMD_GET, &result))
+                return false;
+            if (!DYTCCommand(DYTC_CMD_SET, &dummy, DYTC_FUNCTION_CQL, 0xf, true))
+                return false;
+            break;
+
+        case DYTC_FUNCTION_MMC:
+            setProperty(DYTCFuncPrompt, "Desk");
+            break;
+
+        default:
+            IOLog(valueUnknown, getName(), name, DYTCFuncPrompt, funcmode);
+            setProperty(DYTCFuncPrompt, funcmode, 4);
+            break;
+    }
+
+    int perfmode = (result >> DYTC_GET_MODE_BIT) & 0xF;
+    switch (funcmode) {
+        case DYTC_MODE_PERFORM:
+            if (funcmode == DYTC_FUNCTION_CQL)
+                setProperty(DYTCPerfPrompt, "Performance (Reduced as lapmode active)");
+            else
+                setProperty(DYTCPerfPrompt, "Performance");
+            break;
+
+        case DYTC_MODE_QUIET:
+            setProperty(DYTCPerfPrompt, "Quiet");
+            break;
+
+        case DYTC_MODE_BALANCE:
+            setProperty(DYTCPerfPrompt, "Balance");
+            break;
+
+        default:
+            IOLog(valueUnknown, getName(), name, DYTCPerfPrompt, perfmode);
+            setProperty(DYTCPerfPrompt, perfmode, 4);
+            break;
+    }
+    if (update)
+        IOLog("%s::%s %s 0x%llx\n", getName(), name, DYTCPrompt, result);
     return true;
 }
 

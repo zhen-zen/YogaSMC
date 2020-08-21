@@ -23,6 +23,8 @@
 #define conservationPrompt "ConservationMode"
 #define clamshellPrompt "ClamshellMode"
 #define DYTCPrompt "DYTCMode"
+#define DYTCFuncPrompt "DYTCFuncMode"
+#define DYTCPerfPrompt "DYTCPerfMode"
 #define ECLockPrompt "ECLock"
 #define FnKeyPrompt "FnlockMode"
 #define fanControlPrompt "FanControl"
@@ -48,6 +50,7 @@
 
 #define valueMatched "%s::%s %s already %x\n"
 #define valueInvalid "%s::%s Invalid value for %s\n"
+#define valueUnknown "%s::%s Unknown value for %s: %d\n"
 
 #define timeoutPrompt "%s::%s %s timeout 0x%x\n"
 #define VPCUnavailable "%s::%s VPC unavailable\n"
@@ -55,7 +58,7 @@
 #define BIT(nr) (1U << (nr))
 
 enum DYTC_command {
-    DYTC_CMD_VER   = 0,    /* Get DYTC Version */
+    DYTC_CMD_QUERY = 0,    /* Get DYTC Version */
     DYTC_CMD_SET   = 1,    /* Set current IC function and mode */
     DYTC_CMD_GET   = 2,    /* Get current IC function and mode */
     /* 3-7, 0x0100 unknown yet, capability? */
@@ -69,7 +72,25 @@ struct __attribute__((packed)) DYTC_ARG {
     UInt8 validF;
 };
 
-#define DYTC_GET_LAPMODE_BIT 17 /* Set when in lapmode */
+#define DYTC_QUERY_ENABLE_BIT 8  /* Bit 8 - 0 = disabled, 1 = enabled */
+#define DYTC_QUERY_SUBREV_BIT 16 /* Bits 16 - 27 - sub revisision */
+#define DYTC_QUERY_REV_BIT    28 /* Bits 28 - 31 - revision */
+
+#define DYTC_GET_FUNCTION_BIT 8  /* Bits 8-11 - function setting */
+#define DYTC_GET_MODE_BIT     12 /* Bits 12-15 - mode setting */
+#define DYTC_GET_LAPMODE_BIT  17 /* Bit 17 - lapmode. Set when on lap */
+
+#define DYTC_SET_FUNCTION_BIT 12 /* Bits 12-15 - funct setting */
+#define DYTC_SET_MODE_BIT     16 /* Bits 16-19 - mode setting */
+#define DYTC_SET_VALID_BIT    20 /* Bit 20 - 1 = on, 0 = off */
+
+#define DYTC_FUNCTION_STD     0  /* Function = 0, standard mode */
+#define DYTC_FUNCTION_CQL     1  /* Function = 1, lap mode */
+#define DYTC_FUNCTION_MMC     11 /* Function = 11, desk mode */
+
+#define DYTC_MODE_PERFORM     2  /* High power mode aka performance */
+#define DYTC_MODE_QUIET       3  /* low power mode aka quiet */
+#define DYTC_MODE_BALANCE   0xF  /* default mode aka balance */
 
 class YogaVPC : public IOService
 {
@@ -224,6 +245,11 @@ protected:
      *  DYTC mode
      */
     UInt64 DYTCMode {0};
+    
+    /**
+     *  DYTC Version
+     */
+    int dytc_version {0};
 
     /**
      *  Set DYTC mode
@@ -233,11 +259,20 @@ protected:
      *  @param ICFunc
      *  @param ICMode
      *  @param ValidF
-     *  @param update  only update internal status when false
      *
      *  @return true if success
      */
-    bool setDYTCMode(UInt32 command, UInt64* result, UInt8 ICFunc=0, UInt8 ICMode=0, bool ValidF=false, bool update=true);
+    bool DYTCCommand(UInt32 command, UInt64* result, UInt8 ICFunc=0, UInt8 ICMode=0, bool ValidF=false);
+
+    /**
+     *  Update DYTC status
+     *
+     *  @param update only update internal status when false
+     *
+     *  @return true if success
+     */
+    bool updateDYTC(bool update=true);
+
 
     /**
      *  Wrapper for RE1B
