@@ -690,10 +690,11 @@ void ThinkVPC::updateVPC() {
                 case TP_HKEY_EV_THM_CSM_COMPLETED:
                     IOLog("%s::%s Thermal Control Command set completed (DYTC)\n", getName(), name);
                     UInt64 output;
-                    if (DYTCCap && setDYTCMode(DYTC_CMD_GET, &output)) {
+                    if (DYTCCap && DYTCCommand(DYTC_CMD_GET, &output)) {
                         DYTCMode = output;
                         setProperty("DYTCMode", output, 64);
-                        IOLog("%s::%s DYTC lapmode %s\n", getName(), name, (output & BIT(DYTC_GET_LAPMODE_BIT) ? "on" : "off"));
+                        setProperty("lapmode", output & BIT(DYTC_GET_LAPMODE_BIT));
+                        IOLog("%s::%s DYTC lapmode 0x%llx %s\n", getName(), name, output, (output & BIT(DYTC_GET_LAPMODE_BIT) ? "on" : "off"));
                     }
                     break;
 
