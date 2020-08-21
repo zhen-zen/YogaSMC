@@ -28,7 +28,16 @@ IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
     IOLog("%s::%s Probing\n", getName(), provider->getName());
 
     vpc = OSDynamicCast(IOACPIPlatformDevice, provider);
-    if (!vpc || !findPNP(PnpDeviceIdEC, &ec))
+    if (!vpc)
+        return nullptr;
+
+    IORegistryEntry* parent = vpc->getParentEntry(gIOACPIPlane);
+    auto pnp = OSString::withCString(PnpDeviceIdEC);
+    if (parent->compareName(pnp))
+        ec = OSDynamicCast(IOACPIPlatformDevice, parent);
+    pnp->release();
+
+    if (!ec)
         return nullptr;
 
     return super::probe(provider, score);
@@ -267,7 +276,7 @@ IOReturn YogaVPC::setPowerState(unsigned long powerState, IOService *whatDevice)
             if (backlightLevel)
                 setBacklight(0);
         } else {
-            if (backlightLevelSaved != backlightLevel)
+            if (!backlightLevel && backlightLevelSaved)
                 setBacklight(backlightLevelSaved);
         }
     }
