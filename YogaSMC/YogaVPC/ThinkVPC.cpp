@@ -378,6 +378,23 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 }
 
                 setBeepStatus(value->unsigned8BitValue());
+            } else if (key->isEqualTo(SSTPrompt)) {
+                OSNumber * value = OSDynamicCast(OSNumber, dict->getObject(SSTPrompt));
+                if (value == nullptr || value->unsigned32BitValue() > 0x4) {
+                    IOLog(valueInvalid, getName(), name, SSTPrompt);
+                    continue;
+                }
+
+                OSObject* params[] = {
+                    OSNumber::withNumber(value->unsigned32BitValue(), 32)
+                };
+
+                char const *property[5] = {"Indicator off", "Working", "Waking", "Sleeping", "Sleeping (S4)"};
+
+                if (ec->evaluateObject("CSSI", nullptr, params, 1) != kIOReturnSuccess)
+                    IOLog(toggleFailure, getName(), name, SSTPrompt);
+                else
+                    IOLog(toggleSuccess, getName(), name, SSTPrompt, value->unsigned32BitValue(), property[value->unsigned32BitValue()]);
             } else if (key->isEqualTo(LEDPrompt)) {
                 OSNumber * value = OSDynamicCast(OSNumber, dict->getObject(LEDPrompt));
                 if (value == nullptr || value->unsigned32BitValue() > 0xff) {
