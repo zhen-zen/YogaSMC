@@ -8,7 +8,7 @@ Currently it's possible to interact with the driver using [ioio](https://github.
 
 The driver will update the result in ioreg, while details can be monitored using `log stream --predicate 'processID=0 && senderImagePath contains "YogaSMC"`. 
 
-## YogaSMC
+## YogaSMC (WIP)
 Allow syncing SMC keys like sensors reading and battery conservation mode.
 
 ### EC reading:
@@ -27,7 +27,7 @@ Support for parsing WMI devices and properties.
 Based on [the-darkvoid/macOS-IOElectrify](https://github.com/the-darkvoid/macOS-IOElectrify/) ([Dolnor/IOWMIFamily](https://github.com/Dolnor/IOWMIFamily/)) and [bmfparser](https://github.com/zhen-zen/bmfparser) ([pali/bmfdec](https://github.com/pali/bmfdec))
 
 ### IdeaWMI
-Support Yoga Mode detection and disabling keyboard/touchpad when flipped.
+Support Yoga Mode detection, extra battery information and disabling keyboard/touchpad when flipped.
 
 Fn+esc (obsolete paper looking function) currently assigned to Fn mode switch.
 
@@ -35,25 +35,28 @@ Fn+esc (obsolete paper looking function) currently assigned to Fn mode switch.
 Based on [lenovo/thinklmi](https://github.com/lenovo/thinklmi) ([iksaif/thinkpad-wmi](https://github.com/iksaif/thinkpad-wmi))
 
 ## YogaVPC
-Intercepting events on vendor-specific Virtual Power Controller (VPC) devices and sync states.
+Intercepting events on vendor-specific Virtual Power Controller (VPC) devices and sync states, some instructions are on [project boards](https://github.com/zhen-zen/YogaSMC/projects/).
+
+Currently available functions:
+- EC reading (see above)
+- DYTC setting (available for idea/think)
+- Keyboard backlight: support automatic on / off on sleep (bit 0) and yoga mode (bit 1)
 
 ### IdeaVPC
 Based on [linux/drivers/platform/x86/ideapad-laptop.c](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/ideapad-laptop.c), targets `VPC0` using `_HID` `VPC2004`.
 
 Currently available functions:
-- VPC0 config parsing
+- Hotkey polling
 - Battery conservation mode
+- Quick charge mode (need testing)
 - Fn lock mode
-- Keyboard backlight: support automatic on / off on sleep (bit 0) and yoga mode (bit 1)
-- Reading fn key code (read-only, WIP)
 
 ### ThinkVPC
 Based on [linux/drivers/platform/x86/thinkpad_acpi.c](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/thinkpad_acpi.c), targets `HKEY` using `_HID` `LEN0268`.
 
 Currently available functions:
 - Hotkey polling
-- Battery conservation mode (experimental)
-- Fan mode (experimental)
-- Mute status (read-only, WIP)
+- Battery conservation mode
+- Basic Fan control (WIP)
+- HW Mute status (read-only)
 - Audio / Mic Mute LED
-- Keyboard backlight
