@@ -247,9 +247,14 @@ protected:
     UInt64 DYTCMode {0};
     
     /**
-     *  DYTC Version
+     *  DYTC Revision
      */
-    int dytc_version {0};
+    int DYTCRevision {0};
+
+    /**
+     *  DYTC Subversion
+     */
+    int DYTCSubRevision {0};
 
     /**
      *  Set DYTC mode

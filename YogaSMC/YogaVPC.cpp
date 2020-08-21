@@ -79,10 +79,16 @@ bool YogaVPC::initVPC() {
     if (vpc->validateObject(setThermalControl) == kIOReturnSuccess) {
         UInt64 result;
         if (DYTCCommand(DYTC_CMD_QUERY, &result)) {
-            dytc_version = (result >> DYTC_QUERY_REV_BIT) & 0xF;
-            setProperty("DYTCVersion", result, 64);
-            setProperty("DYTCVer", dytc_version, 4);
-            DYTCCap = true;
+            DYTCCap = (result >> DYTC_QUERY_ENABLE_BIT) & 0x1;
+            setProperty("DYTC", DYTCCap);
+            if (DYTCCap) {
+                DYTCRevision = (result >> DYTC_QUERY_REV_BIT) & 0xF;
+                DYTCSubRevision = (result >> DYTC_QUERY_SUBREV_BIT) & 0xF;
+                setProperty("DYTCRevision", DYTCRevision, 4);
+                setProperty("DYTCSubRevision", DYTCSubRevision, 4);
+            } else {
+                IOLog(updateSuccess, getName(), name, DYTCPrompt, DYTCCap);
+            }
         } else {
             setProperty("DYTC", "error");
             IOLog(updateFailure, getName(), name, DYTCPrompt);
@@ -344,17 +350,15 @@ bool YogaVPC::updateDYTC(bool update) {
             break;
 
         case DYTC_FUNCTION_CQL:
-            setProperty(DYTCFuncPrompt, "Lap");
            /* We can't get the mode when in CQL mode - so we disable CQL
             * mode retrieve the mode and then enable it again.
             */
             UInt64 dummy;
-            if (!DYTCCommand(DYTC_CMD_SET, &dummy, DYTC_FUNCTION_CQL, 0xf, false))
+            if (!DYTCCommand(DYTC_CMD_SET, &dummy, DYTC_FUNCTION_CQL, 0xf, false) ||
+                !DYTCCommand(DYTC_CMD_GET, &result) ||
+                !DYTCCommand(DYTC_CMD_SET, &dummy, DYTC_FUNCTION_CQL, 0xf, true))
                 return false;
-            if (!DYTCCommand(DYTC_CMD_GET, &result))
-                return false;
-            if (!DYTCCommand(DYTC_CMD_SET, &dummy, DYTC_FUNCTION_CQL, 0xf, true))
-                return false;
+            setProperty(DYTCFuncPrompt, "Lap");
             break;
 
         case DYTC_FUNCTION_MMC:
@@ -368,7 +372,7 @@ bool YogaVPC::updateDYTC(bool update) {
     }
 
     int perfmode = (result >> DYTC_GET_MODE_BIT) & 0xF;
-    switch (funcmode) {
+    switch (perfmode) {
         case DYTC_MODE_PERFORM:
             if (funcmode == DYTC_FUNCTION_CQL)
                 setProperty(DYTCPerfPrompt, "Performance (Reduced as lapmode active)");

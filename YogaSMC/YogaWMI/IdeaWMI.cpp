@@ -125,7 +125,7 @@ void IdeaWMI::updateYogaMode() {
 
         default:
             IOLog("%s::%s Unknown yoga mode: %d\n", getName(), name, value);
-            setProperty("YogaMode", value);
+            setProperty("YogaMode", value, 32);
             return;
     }
     YogaMode = value;
