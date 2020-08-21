@@ -152,6 +152,7 @@ private:
     static constexpr const char *getKBDBacklightLevel  = "MLCG";
     static constexpr const char *setKBDBacklightLevel  = "MLCS";
 
+    static constexpr const char *setHKEYBeep           = "MHKB";
     static constexpr const char *setBeep               = "BEEP"; // EC
     static constexpr const char *setLED                = "LED"; // EC
 
@@ -280,6 +281,15 @@ private:
      *  @return true if success
      */
     bool setBeepStatus(UInt8 status);
+
+    /**
+     *  Enable Beep status
+     *
+     *  @param enable status
+     *
+     *  @return true if success
+     */
+    bool enableBeep(bool enable);
 
     /**
      *  Set LED status
