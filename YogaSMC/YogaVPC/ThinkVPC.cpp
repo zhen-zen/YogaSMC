@@ -391,7 +391,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
 
                 char const *property[5] = {"Indicator off", "Working", "Waking", "Sleeping", "Sleeping (S4)"};
 
-                if (ec->evaluateObject("CSSI", nullptr, params, 1) != kIOReturnSuccess)
+                if (vpc->evaluateObject("CSSI", nullptr, params, 1) != kIOReturnSuccess)
                     IOLog(toggleFailure, getName(), name, SSTPrompt);
                 else
                     IOLog(toggleSuccess, getName(), name, SSTPrompt, value->unsigned32BitValue(), property[value->unsigned32BitValue()]);
