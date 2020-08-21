@@ -274,7 +274,6 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                 conservationModeLock = false;
                 initEC();
             } else {
-                IOLog("%s::%s process %s with YogaVPC", getName(), name, key->getCStringNoCopy());
                 OSDictionary* entry = OSDictionary::withCapacity(1);
                 entry->setObject(key, dict->getObject(key));
                 super::setPropertiesGated(entry);
@@ -419,7 +418,7 @@ bool IdeaVPC::updateBattery(bool update) {
     UInt32 state;
 
     if (vpc->evaluateInteger(getBatteryMode, &state) != kIOReturnSuccess) {
-        IOLog(updateFailure, getName(), name, conservationPrompt);
+        IOLog(updateFailure, getName(), name, batteryPrompt);
         return false;
     }
 
@@ -427,9 +426,8 @@ bool IdeaVPC::updateBattery(bool update) {
     rapidChargeMode = BIT(BM_RAPIDCHARGE_BIT) & state;
 
     if (update) {
-        IOLog(updateSuccess, getName(), name, conservationPrompt, state);
+        IOLog(updateSuccess, getName(), name, batteryPrompt, state);
         setProperty(conservationPrompt, conservationMode);
-        IOLog(updateSuccess, getName(), name, rapidChargePrompt, state);
         setProperty(rapidChargePrompt, rapidChargeMode);
     }
 
