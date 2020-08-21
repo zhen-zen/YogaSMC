@@ -40,6 +40,7 @@ enum  {
 enum tpacpi_hkey_event_t {
     /* Hotkey-related */
     TP_HKEY_EV_HOTKEY_BASE      = 0x1001, /* first hotkey (FN+F1) */
+    TP_HKEY_EV_SLEEP            = 0x1004, /* Sleep button */
     TP_HKEY_EV_NETWORK          = 0x1005, /* Network (F8, _Q64) */
     TP_HKEY_EV_DISPLAY          = 0x1007, /* Dual Display (F7, _Q16/_Q19) */
     TP_HKEY_EV_BRGHT_UP         = 0x1010, /* Brightness up (F6, _Q14/_Q1C) */
@@ -101,6 +102,7 @@ enum tpacpi_hkey_event_t {
     TP_HKEY_EV_THM_CSM_COMPLETED    = 0x6032, /* windows; thermal control set
                            * command completed. Related to
                            * AML DYTC */
+    TP_HKEY_EV_LID_STATUS_CHANGED    = 0x60D0, /* lid status changed */
     TP_HKEY_EV_THM_TRANSFM_CHANGED  = 0x60F0, /* windows; thermal transformation
                            * changed. Related to AML GMTS */
 

@@ -522,7 +522,7 @@ bool ThinkVPC::enableBeep(bool enable) {
         OSNumber::withNumber(enable, 32)
     };
 
-    if (ec->evaluateObject(setHKEYBeep, nullptr, params, 1) != kIOReturnSuccess) {
+    if (vpc->evaluateObject(setHKEYBeep, nullptr, params, 1) != kIOReturnSuccess) {
         IOLog(toggleFailure, getName(), name, beepPrompt);
         return false;
     }
@@ -651,7 +651,18 @@ void ThinkVPC::updateVPC() {
 
     switch (result >> 0xC) {
         case 1:
-            IOLog("%s::%s Hotkey(MHKP) key presses event: 0x%x \n", getName(), name, result);
+            switch (result) {
+                case TP_HKEY_EV_KBD_LIGHT:
+                    updateBacklight();
+
+                case TP_HKEY_EV_BRGHT_UP:
+                case TP_HKEY_EV_BRGHT_DOWN:
+                    break;;
+
+                default:
+                    IOLog("%s::%s Hotkey(MHKP) key presses event: 0x%x \n", getName(), name, result);
+                    break;
+            }
             break;
 
         case 2:
@@ -753,6 +764,9 @@ void ThinkVPC::updateVPC() {
 
                 case TP_HKEY_EV_KEY_FN_ESC:
                     IOLog("%s::%s Fn+Esc\n", getName(), name);
+                    break;
+
+                case TP_HKEY_EV_LID_STATUS_CHANGED:
                     break;
 
                 case TP_HKEY_EV_TABLET_CHANGED:
