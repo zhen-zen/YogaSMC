@@ -257,11 +257,6 @@ protected:
     int DYTCSubRevision {0};
 
     /**
-     *  DYTC Status
-     */
-    OSDictionary* DYTCStatus {nullptr};
-
-    /**
      *  Set DYTC mode
      *
      *  @param command  see DYTC_command

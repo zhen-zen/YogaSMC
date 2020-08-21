@@ -83,15 +83,16 @@ bool YogaVPC::initVPC() {
             if (DYTCCap) {
                 DYTCRevision = (result >> DYTC_QUERY_REV_BIT) & 0xF;
                 DYTCSubRevision = (result >> DYTC_QUERY_SUBREV_BIT) & 0xF;
-                DYTCStatus = OSDictionary::withCapacity(4);
-                OSNumber *value;
+                OSDictionary *status = OSDictionary::withCapacity(4);
+                OSObject *value;
                 value = OSNumber::withNumber(DYTCRevision, 4);
-                DYTCStatus->setObject("Revision", value);
+                status->setObject("Revision", value);
                 value->release();
                 value = OSNumber::withNumber(DYTCSubRevision, 4);
-                DYTCStatus->setObject("SubRevision", value);
+                status->setObject("SubRevision", value);
                 value->release();
-                setProperty("DYTC", DYTCStatus);
+                setProperty("DYTC", status);
+                status->release();
             } else {
                 setProperty("DYTC", false);
             }
@@ -389,9 +390,16 @@ bool YogaVPC::updateDYTC(bool update) {
         return false;
 
     DYTCMode = result;
-    setProperty(DYTCPrompt, result, 64);
+//    setProperty(DYTCPrompt, result, 64);
+    OSDictionary *status = OSDictionary::withCapacity(4);
+    OSObject *value;
+    value = OSNumber::withNumber(DYTCRevision, 4);
+    status->setObject("Revision", value);
+    value->release();
+    value = OSNumber::withNumber(DYTCSubRevision, 4);
+    status->setObject("SubRevision", value);
+    value->release();
 
-    OSString* value;
     int funcmode = (result >> DYTC_GET_FUNCTION_BIT) & 0xF;
     switch (funcmode) {
         case DYTC_FUNCTION_STD:
@@ -405,8 +413,10 @@ bool YogaVPC::updateDYTC(bool update) {
             UInt64 dummy;
             if (!DYTCCommand(DYTC_CMD_SET, &dummy, DYTC_FUNCTION_CQL, 0xf, false) ||
                 !DYTCCommand(DYTC_CMD_GET, &result) ||
-                !DYTCCommand(DYTC_CMD_SET, &dummy, DYTC_FUNCTION_CQL, 0xf, true))
+                !DYTCCommand(DYTC_CMD_SET, &dummy, DYTC_FUNCTION_CQL, 0xf, true)) {
+                status->release();
                 return false;
+            }
             value = OSString::withCString("Lap");
             break;
 
@@ -421,8 +431,7 @@ bool YogaVPC::updateDYTC(bool update) {
             value = OSString::withCString(Unknown);
             break;
     }
-    if (update)
-        DYTCStatus->setObject("FuncMode", value);
+    status->setObject("FuncMode", value);
     value->release();
 
     int perfmode = (result >> DYTC_GET_MODE_BIT) & 0xF;
@@ -449,9 +458,10 @@ bool YogaVPC::updateDYTC(bool update) {
             value = OSString::withCString(Unknown);
             break;
     }
-    if (update)
-        DYTCStatus->setObject("PerfMode", value);
+    status->setObject("PerfMode", value);
     value->release();
+    setProperty("DYTC", status);
+    status->release();
 
     if (update)
         IOLog("%s::%s %s 0x%llx\n", getName(), name, DYTCPrompt, result);
