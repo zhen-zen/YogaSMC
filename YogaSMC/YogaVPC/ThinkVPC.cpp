@@ -39,6 +39,7 @@ void ThinkVPC::updateAll() {
     updateMuteLEDStatus();
     updateMicMuteLEDStatus();
     updateVPC();
+    setMicMuteLEDStatus(0);
 }
 
 bool ThinkVPC::updateConservation(const char * method, bool update) {
@@ -566,18 +567,18 @@ bool ThinkVPC::setMuteLEDStatus(bool status) {
 }
 
 bool ThinkVPC::updateMicMuteLEDStatus(bool update) {
-    if (vpc->evaluateInteger(getMicMuteLED, &micMuteLEDstate) != kIOReturnSuccess) {
+    if (vpc->evaluateInteger(getMicMuteLED, &micMuteLEDcap) != kIOReturnSuccess) {
         IOLog(updateFailure, getName(), name, __func__);
         return false;
     }
 
     if (update)
-        IOLog(updateSuccess, getName(), name, __func__, micMuteLEDstate);
+        IOLog(updateSuccess, getName(), name, __func__, micMuteLEDcap);
 
-    if (micMuteLEDstate & TPACPI_AML_MIC_MUTE_HDMC)
+    if (micMuteLEDcap & TPACPI_AML_MIC_MUTE_HDMC)
         setProperty(micMuteLEDPrompt, "HDMC");
     else
-        setProperty(micMuteLEDPrompt, micMuteLEDstate, 32);
+        setProperty(micMuteLEDPrompt, micMuteLEDcap, 32);
     return true;
 }
 
@@ -657,8 +658,12 @@ void ThinkVPC::updateVPC() {
 
                 case TP_HKEY_EV_BRGHT_UP:
                 case TP_HKEY_EV_BRGHT_DOWN:
-                    break;;
+                    break;
 
+                case TP_HKEY_EV_MIC_MUTE:
+                    setMicMuteLEDStatus(micMuteLEDstate ? 0 : 2);
+                    break;
+                    
                 default:
                     IOLog("%s::%s Hotkey(MHKP) key presses event: 0x%x \n", getName(), name, result);
                     break;
