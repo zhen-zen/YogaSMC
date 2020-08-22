@@ -392,16 +392,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                     continue;
                 }
 
-                OSObject* params[] = {
-                    OSNumber::withNumber(value->unsigned32BitValue(), 32)
-                };
-
-                char const *property[5] = {"Indicator off", "Working", "Waking", "Sleeping", "Sleeping (S4)"};
-
-                if (vpc->evaluateObject("CSSI", nullptr, params, 1) != kIOReturnSuccess)
-                    IOLog(toggleFailure, getName(), name, SSTPrompt);
-                else
-                    IOLog(toggleSuccess, getName(), name, SSTPrompt, value->unsigned32BitValue(), property[value->unsigned32BitValue()]);
+                setSSTStatus(value->unsigned32BitValue());
             } else if (key->isEqualTo(LEDPrompt)) {
                 OSNumber * value = OSDynamicCast(OSNumber, dict->getObject(LEDPrompt));
                 if (value == nullptr || value->unsigned32BitValue() > 0xff) {
@@ -594,6 +585,7 @@ bool ThinkVPC::setMicMuteLEDStatus(UInt32 status) {
         return false;
     }
 
+    micMuteLEDstate = status;
     IOLog(toggleSuccess, getName(), name, micMuteLEDPrompt, status, (status ? "on / blink" : "off"));
     setProperty(micMuteLEDPrompt, status, 32);
     return true;
@@ -865,3 +857,38 @@ bool ThinkVPC::setBacklight(UInt32 level) {
 
     return true;
 }
+
+bool ThinkVPC::setSSTStatus(UInt32 value) {
+    OSObject* params[] = {
+        OSNumber::withNumber(value, 32)
+    };
+    
+    if (vpc->evaluateObject("CSSI", nullptr, params, 1) != kIOReturnSuccess) {
+        IOLog(toggleFailure, getName(), name, SSTPrompt);
+        return false;
+    }
+
+    char const *property[5] = {"Indicator off", "Working", "Waking", "Sleeping", "Sleeping (S4)"};
+    
+    IOLog(toggleSuccess, getName(), name, SSTPrompt, value, property[value]);
+    return true;
+}
+
+IOReturn ThinkVPC::setPowerState(unsigned long powerState, IOService *whatDevice){
+    if (super::setPowerState(powerState, whatDevice) != kIOPMAckImplied)
+        return kIOReturnInvalid;
+
+    if (powerState == 0) {
+        muteLEDstateSaved = muteLEDstate;
+        if (muteLEDstate)
+            setBacklight(0);
+        setSSTStatus(3);
+    } else {
+        if (muteLEDstateSaved)
+            setBacklight(muteLEDstateSaved);
+        setSSTStatus(0);
+    }
+
+    return kIOPMAckImplied;
+}
+

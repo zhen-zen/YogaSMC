@@ -186,6 +186,7 @@ private:
 
     UInt32 mutestate {0};
     UInt32 muteLEDstate {0};
+    UInt32 muteLEDstateSaved {0};
     UInt32 micMuteLEDcap {0};
     UInt32 micMuteLEDstate {0};
 
@@ -356,11 +357,21 @@ private:
      */
     bool updateFanControl(UInt32 status=0, bool update=true);
 
+    /**
+     *  Set _SI._SST status
+     *
+     *  @param value 0-4
+     *
+     *  @return true if success
+     */
+    bool setSSTStatus(UInt32 value);
+
     friend class ThinkWMI;
 
 public:
     static ThinkVPC* withDevice(IOACPIPlatformDevice *device, OSString *pnp);
     IOReturn message(UInt32 type, IOService *provider, void *argument) APPLE_KEXT_OVERRIDE;
+    IOReturn setPowerState(unsigned long powerState, IOService * whatDevice) APPLE_KEXT_OVERRIDE;
 };
 
 #endif /* ThinkVPC_hpp */
