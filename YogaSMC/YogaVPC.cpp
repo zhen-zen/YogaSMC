@@ -76,6 +76,10 @@ bool YogaVPC::initVPC() {
         vpc->validateObject(setClamshellMode) == kIOReturnSuccess)
         clamshellCap = true;
 
+    if (ec->validateObject(readECOneByte) == kIOReturnSuccess &&
+        ec->validateObject(readECBytes) == kIOReturnSuccess)
+        ECReadCap = true;
+
     if (vpc->validateObject(setThermalControl) == kIOReturnSuccess) {
         UInt64 result;
         if (DYTCCommand(DYTC_CMD_QUERY, &result)) {
@@ -210,6 +214,10 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
                     setProperty(autoBacklightPrompt, automaticBacklightMode, 8);
                 }
             } else if (key->isEqualTo("ReadECOffset")) {
+                if (!ECReadCap) {
+                    IOLog("%s::%s %s not supported\n", getName(), name, "EC Read");
+                    continue;
+                }
                 OSNumber * value = OSDynamicCast(OSNumber, dict->getObject("ReadECOffset"));
                 if (value == nullptr) {
                     IOLog("%s::%s invalid number\n", getName(), name);
@@ -231,7 +239,7 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
                     IOLog("%s::%s %s: 0x%02x\n", getName(), name, value->getCStringNoCopy(), result);
             } else if (key->isEqualTo(DYTCPrompt)) {
                 if (!DYTCCap) {
-                    IOLog("%s::%s %s not supported", getName(), name, DYTCPrompt);
+                    IOLog("%s::%s %s not supported\n", getName(), name, DYTCPrompt);
                     continue;
                 }
                 OSString * value = OSDynamicCast(OSString, dict->getObject(DYTCPrompt));

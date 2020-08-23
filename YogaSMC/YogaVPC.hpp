@@ -288,6 +288,11 @@ protected:
     bool setDYTC(int perfmode);
 
     /**
+     *  EC read capability, will be update on init
+     */
+    bool ECReadCap {false};
+
+    /**
      *  Wrapper for RE1B
      *
      *  @param offset EC field offset
