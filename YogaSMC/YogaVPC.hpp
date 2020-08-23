@@ -15,6 +15,10 @@
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
 #include "message.h"
 
+#ifndef ALTER
+#include "YogaSMC.hpp"
+#endif
+
 #define autoBacklightPrompt "AutoBacklight"
 #define batteryPrompt "Battery"
 #define backlightPrompt "BacklightLevel"
