@@ -155,8 +155,10 @@ private:
      *  Dump desired EC field
      *
      *  @param value = offset | size << 8
+     *
+     *  @return true if success
      */
-    void dumpECOffset(UInt32 value);
+    bool dumpECOffset(UInt32 value);
 
 protected:
     const char* name;
@@ -308,9 +310,10 @@ protected:
      *  @param offset EC field offset
      *  @param size EC field length in bytes
      *  @param data EC field value
+     *
      *  @return kIOReturnSuccess on success
      */
-    IOReturn method_recb(UInt32 offset, UInt32 size, UInt8 *data);
+    IOReturn method_recb(UInt32 offset, UInt32 size, OSData **data);
 
     /**
      *  Wrapper for WE1B

@@ -552,7 +552,10 @@ IOReturn YogaVPC::method_re1b(UInt32 offset, UInt32 *result) {
     return ret;
 }
 
-IOReturn YogaVPC::method_recb(UInt32 offset, UInt32 size, UInt8 *data) {
+IOReturn YogaVPC::method_recb(UInt32 offset, UInt32 size, OSData **data) {
+    if (!ECReadCap)
+        return kIOReturnUnsupported;
+
     // Arg0 - offset in bytes from zero-based EC
     // Arg1 - size of buffer in bits
     OSObject* params[2] = {
@@ -561,30 +564,25 @@ IOReturn YogaVPC::method_recb(UInt32 offset, UInt32 size, UInt8 *data) {
     };
     OSObject* result;
 
-    IOReturn ret = ec->evaluateObject(readECBytes, &result, params, 2);
-    if (ret != kIOReturnSuccess) {
+    if (ec->evaluateObject(readECBytes, &result, params, 2) != kIOReturnSuccess || !(*data = OSDynamicCast(OSData, result))) {
         IOLog("%s::%s read %d bytes @ 0x%02x failed\n", getName(), name, size, offset);
-        return ret;
+        OSSafeReleaseNULL(result);
+        return kIOReturnInvalid;
     }
 
-    OSData* osdata = OSDynamicCast(OSData, result);
-    if (!data) {
-        IOLog("%s::%s read %d bytes @ 0x%02x invalid\n", getName(), name, size, offset);
-        return kIOReturnNotReadable;
-    }
-
-    if (osdata->getLength() != size) {
-        IOLog("%s::%s read %d bytes @ 0x%02x, got %d bytes\n", getName(), name, size, offset, osdata->getLength());
+    if ((*data)->getLength() != size) {
+        IOLog("%s::%s read %d bytes @ 0x%02x, got %d bytes\n", getName(), name, size, offset, (*data)->getLength());
+        OSSafeReleaseNULL(result);
         return kIOReturnNoBandwidth;
     }
 
-    memcpy(data, osdata->getBytesNoCopy(), size);
-
-    result->release();
-    return ret;
+    return kIOReturnSuccess;
 }
 
 IOReturn YogaVPC::method_we1b(UInt32 offset, UInt32 value) {
+    if (!ECReadCap)
+        return kIOReturnUnsupported;
+
     OSObject* params[2] = {
         OSNumber::withNumber(offset, 32),
         OSNumber::withNumber(value, 32)
@@ -598,41 +596,46 @@ IOReturn YogaVPC::method_we1b(UInt32 offset, UInt32 value) {
     return ret;
 }
 
-void YogaVPC::dumpECOffset(UInt32 value) {
+bool YogaVPC::dumpECOffset(UInt32 value) {
+    bool ret = false;
     UInt32 size = value >> 8;
     if (size) {
         UInt32 offset = value & 0xff;
         if (offset + size > 0x100) {
             IOLog("%s::%s read %d bytes @ 0x%02x exceeded\n", getName(), name, size, offset);
-            return;
-        }
-
-        UInt8 *data = new UInt8[size];
-        if (method_recb(offset, size, data) == kIOReturnSuccess) {
-            int len = 0x10;
-            char *buf = new char[len*3];
-            if (size > 8) {
-                IOLog("%s::%s %d bytes @ 0x%02x\n", getName(), name, size, offset);
-                for (int i = 0; i < size; i += len) {
-                    memset(buf, 0, len*3);
-                    for (int j = 0; j < (len < size-i ? len : size-i); j++)
-                        snprintf(buf+3*j, 4, "%02x ", data[i+j]);
-                    buf[len*3-1] = '\0';
-                    IOLog("%s::%s 0x%02x: %s\n", getName(), name, offset+i, buf);
+        } else {
+            OSData* result;
+            if (method_recb(offset, size, &result) == kIOReturnSuccess) {
+                const UInt8* data = reinterpret_cast<const UInt8 *>(result->getBytesNoCopy());
+                int len = 0x10;
+                char *buf = new char[len*3];
+                if (size > 8) {
+                    IOLog("%s::%s %d bytes @ 0x%02x\n", getName(), name, size, offset);
+                    for (int i = 0; i < size; i += len) {
+                        memset(buf, 0, len*3);
+                        for (int j = 0; j < (len < size-i ? len : size-i); j++)
+                            snprintf(buf+3*j, 4, "%02x ", data[i+j]);
+                        buf[len*3-1] = '\0';
+                        IOLog("%s::%s 0x%02x: %s\n", getName(), name, offset+i, buf);
+                    }
+                } else {
+                    for (int j = 0; j < size; j++)
+                        snprintf(buf+3*j, 4, "%02x ", data[j]);
+                    buf[size*3-1] = '\0';
+                    IOLog("%s::%s %d bytes @ 0x%02x: %s\n", getName(), name, size, offset, buf);
                 }
-            } else {
-                for (int j = 0; j < size; j++)
-                    snprintf(buf+3*j, 4, "%02x ", data[j]);
-                buf[size*3-1] = '\0';
-                IOLog("%s::%s %d bytes @ 0x%02x: %s\n", getName(), name, size, offset, buf);
+                delete [] buf;
+                result->release();
+                ret = true;
             }
-            delete [] buf;
         }
-        delete [] data;
     } else {
         UInt32 integer;
-        if (method_re1b(value, &integer) == kIOReturnSuccess)
+        if (method_re1b(value, &integer) == kIOReturnSuccess) {
             IOLog("%s::%s 0x%02x: %02x\n", getName(), name, value, integer);
+            ret = true;
+        }
     }
+    return ret;
 }
 
