@@ -14,7 +14,7 @@ SMC_RESULT BDVT::readAccess() {
     YogaSMC *drv = OSDynamicCast(YogaSMC, dst);
     if (drv) {
         drv->dispatchMessage(kSMC_getConservation, ptr);
-        DBGLOG("vpckey", "BDVT read %d -> %d", *ptr, status);
+        DBGLOG("vpckey", "BDVT read %d -> %d", status, *ptr);
         status = *ptr;
     } else {
         *ptr = status;
@@ -25,12 +25,22 @@ SMC_RESULT BDVT::readAccess() {
 
 SMC_RESULT BDVT::writeAccess() {
     bool *ptr = reinterpret_cast<bool *>(data);
+    YogaSMC *drv = OSDynamicCast(YogaSMC, dst);
+    // update internal status first
+    if (drv) {
+        drv->dispatchMessage(kSMC_getConservation, &status);
+        DBGLOG("vpckey", "BDVT update %d", status);
+    }
     DBGLOG("vpckey", "BDVT write %d -> %d", *ptr, status);
     if (status != *ptr) {
-        YogaSMC *drv = OSDynamicCast(YogaSMC, dst);
-        if (drv)
+        if (drv) {
             drv->dispatchMessage(kSMC_setConservation, ptr);
-        status = *ptr;
+            drv->dispatchMessage(kSMC_getConservation, &status);
+            DBGLOG("vpckey", "BDVT update %d", status);
+            *ptr = status;
+        } else {
+            status = *ptr;
+        }
     }
     return SmcSuccess;
 }

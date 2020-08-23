@@ -175,7 +175,19 @@ protected:
      *  VPC device
      */
     IOACPIPlatformDevice *vpc {nullptr};
-    
+#ifndef ALTER
+    /**
+     *  SMC service
+     */
+    YogaSMC *smc;
+
+    /**
+     *  Initialize SMC
+     *
+     *  @return true if success
+     */
+    inline virtual void initSMC() {smc = YogaSMC::withDevice(this, ec);};
+#endif
     /**
      *  Initialize VPC EC, get config and update status
      *

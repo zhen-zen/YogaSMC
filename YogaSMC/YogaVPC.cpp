@@ -39,7 +39,9 @@ IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
 
     if (!ec)
         return nullptr;
-
+#ifndef ALTER
+    initSMC();
+#endif
     return super::probe(provider, score);
 }
 
@@ -121,7 +123,12 @@ bool YogaVPC::exitVPC() {
 void YogaVPC::stop(IOService *provider) {
     IOLog("%s::%s Stopping\n", getName(), name);
     exitVPC();
-
+#ifndef ALTER
+    if (smc) {
+        smc->stop(this);
+        smc->detach(this);
+    }
+#endif
     workLoop->removeEventSource(commandGate);
     OSSafeReleaseNULL(commandGate);
     OSSafeReleaseNULL(workLoop);
