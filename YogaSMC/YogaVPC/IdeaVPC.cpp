@@ -10,25 +10,6 @@
 #include "IdeaVPC.hpp"
 OSDefineMetaClassAndStructors(IdeaVPC, YogaVPC);
 
-IdeaVPC* IdeaVPC::withDevice(IOACPIPlatformDevice *device, OSString *pnp) {
-    IdeaVPC* vpc = OSTypeAlloc(IdeaVPC);
-
-    OSDictionary* dictionary = OSDictionary::withCapacity(1);
-    dictionary->setObject("Feature", pnp);
-
-    vpc->vpc = device;
-
-    if (!vpc->init(dictionary) ||
-        !vpc->attach(device) ||
-        !vpc->start(device)) {
-        OSSafeReleaseNULL(vpc);
-    }
-
-    dictionary->release();
-
-    return vpc;
-}
-
 void IdeaVPC::updateAll() {
     updateBattery();
     updateKeyboard();

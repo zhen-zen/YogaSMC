@@ -11,25 +11,6 @@
 
 OSDefineMetaClassAndStructors(ThinkVPC, YogaVPC);
 
-ThinkVPC* ThinkVPC::withDevice(IOACPIPlatformDevice *device, OSString *pnp) {
-    ThinkVPC* vpc = OSTypeAlloc(ThinkVPC);
-
-    OSDictionary* dictionary = OSDictionary::withCapacity(1);
-    dictionary->setObject("Feature", pnp);
-
-    vpc->vpc = device;
-
-    if (!vpc->init(dictionary) ||
-        !vpc->attach(device) ||
-        !vpc->start(device)) {
-        OSSafeReleaseNULL(vpc);
-    }
-
-    dictionary->release();
-
-    return vpc;
-}
-
 void ThinkVPC::updateAll() {
     getNotificationMask(1);
     getNotificationMask(2);
@@ -314,7 +295,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 OSNumber * value;
                 getPropertyNumber(batteryPrompt);
                 batnum = value->unsigned8BitValue();
-                updateBattery();
+                updateBattery(value->unsigned8BitValue());
             } else if (key->isEqualTo("setCMstart")) {
                 OSNumber * value;
                 getPropertyNumber("setCMstart");

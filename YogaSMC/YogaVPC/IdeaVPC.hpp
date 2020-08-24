@@ -298,7 +298,6 @@ private:
     void parseTemperature(UInt16 data, const char * desc);
 
 public:
-    static IdeaVPC* withDevice(IOACPIPlatformDevice *device, OSString *pnp);
     IOReturn message(UInt32 type, IOService *provider, void *argument) APPLE_KEXT_OVERRIDE;
 };
 

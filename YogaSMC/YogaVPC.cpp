@@ -140,25 +140,6 @@ void YogaVPC::stop(IOService *provider) {
     super::stop(provider);
 }
 
-YogaVPC* YogaVPC::withDevice(IOACPIPlatformDevice *device, OSString *pnp) {
-    YogaVPC* vpc = OSTypeAlloc(YogaVPC);
-
-    OSDictionary* dictionary = OSDictionary::withCapacity(1);
-    dictionary->setObject("Type", pnp);
-    
-    vpc->vpc = device;
-
-    if (!vpc->init(dictionary) ||
-        !vpc->attach(device) ||
-        !vpc->start(device)) {
-        OSSafeReleaseNULL(vpc);
-    }
-
-    dictionary->release();
-
-    return vpc;
-}
-
 void YogaVPC::updateAll() {
     updateBacklight();
     updateClamshell();
