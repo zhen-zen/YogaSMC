@@ -28,49 +28,30 @@ jobs:
     - name: Xcodebuild Debug
       uses: sersoft-gmbh/xcodebuild-action@v1.1
       with:
-        # The path to the xcworkspace to build. Mutually exclusive with `project`.
-        #workspace: # optional
-        # The path to the xcodeproj to build. Mutually exclusive with `workspace`.
-        project: YogaSMC.xcodeproj # optional
+        project: YogaSMC.xcodeproj
         # The scheme to build. Required when using a workspace.
         #scheme: # optional
         # The destination specifier to build.
         # destination: # optional
-        # The configuration to build.
         configuration: Debug
-        # The SDK to use for building.
-        sdk: macosx10.12 # optional
-        # A list of tests to skip.
-        #skip-testing: # optional
+        sdk: macosx10.12
         # Arbitrary, space separated build settings (e.g. PLATFORM_NAME=iphonesimulator).
         build-settings: -target BuildAll
         # The action to perform (e.g. build, test, ...).
         action: build # default is test
-        # Whether the output of xcodebuild should be forwarded to xcpretty.
-        #use-xcpretty: # default is true
     - name: Xcodebuild Release
       uses: sersoft-gmbh/xcodebuild-action@v1.1
       with:
-        # The path to the xcworkspace to build. Mutually exclusive with `project`.
-        #workspace: # optional
-        # The path to the xcodeproj to build. Mutually exclusive with `workspace`.
-        project: YogaSMC.xcodeproj # optional
-        # The scheme to build. Required when using a workspace.
-        #scheme: # optional
+        project: YogaSMC.xcodeproj
         # The destination specifier to build.
         # destination: # optional
         # The configuration to build.
         configuration: Release
-        # The SDK to use for building.
-        sdk: macosx10.12 # optional
-        # A list of tests to skip.
-        #skip-testing: # optional
+        sdk: macosx10.12
         # Arbitrary, space separated build settings (e.g. PLATFORM_NAME=iphonesimulator).
         build-settings: -target BuildAll
         # The action to perform (e.g. build, test, ...).
         action: build # default is test
-        # Whether the output of xcodebuild should be forwarded to xcpretty.
-        #use-xcpretty: # default is true
     - uses: actions/upload-artifact@v2
       with:
         name: YogaSMC-Debug
@@ -78,7 +59,7 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: YogaSMC-Release
-        path: 
+        path: |
           build/Release/
           !build/Release/*.dSYM
     - uses: actions/upload-artifact@v2
