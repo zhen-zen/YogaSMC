@@ -147,6 +147,7 @@ bool WMI::extractData()
 void WMI::parseWDGEntry(struct WMI_DATA* block)
 {
     char guid_string[37];
+    char notify_id_string[3];
     char object_id_string[3];
     OSDictionary *dict = OSDictionary::withCapacity(7);
     OSObject *value;
@@ -156,30 +157,19 @@ void WMI::parseWDGEntry(struct WMI_DATA* block)
     le_uuid_dec(&block->guid, &hostUUID);
     uuid_unparse_lower(hostUUID, guid_string);
 
-    value = OSString::withCString(guid_string);
-    dict->setObject(kWMIGuid, value);
-    value->release();
+    setPropertyString(dict, kWMIGuid, guid_string);
 
     if (block->flags & ACPI_WMI_EVENT) {
-        value = OSNumber::withNumber(block->notify_id, 8);
-        dict->setObject(kWMINotifyId, value);
-        char notify_id_string[3];
+        setPropertyNumber(dict, kWMINotifyId, block->notify_id, 8);
         snprintf(notify_id_string, 3, "%2x", block->notify_id);
         mEvent->setObject(notify_id_string, dict);
     } else {
         snprintf(object_id_string, 3, "%c%c", block->object_id[0], block->object_id[1]);
-        value = OSString::withCString(object_id_string);
-        dict->setObject(kWMIObjectId, value);
+        setPropertyString(dict, kWMIObjectId, object_id_string);
     }
-    value->release();
 
-    value = OSNumber::withNumber(block->instance_count, 8);
-    dict->setObject(kWMIInstanceCount, value);
-    value->release();
-    
-    value = OSNumber::withNumber(block->flags, 8);
-    dict->setObject(kWMIFlags, value);
-    value->release();
+    setPropertyNumber(dict, kWMIInstanceCount, block->instance_count, 8);
+    setPropertyNumber(dict, kWMIFlags, block->flags, 8);
     
 #ifdef DEBUG
     value = parseWMIFlags(block->flags);

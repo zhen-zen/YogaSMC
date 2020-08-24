@@ -31,12 +31,12 @@ bool ThinkVPC::updateConservation(const char * method, bool update) {
     };
 
     if (vpc->evaluateInteger(method, &result, params, 1) != kIOReturnSuccess) {
-        IOLog(updateFailure, method);
+        AlwaysLog(updateFailure, method);
         return false;
     }
 
     if (update) {
-        IOLog(updateSuccess, method, result);
+        DebugLog(updateSuccess, method, result);
         setProperty(method, result, 32);
     }
 
@@ -51,11 +51,11 @@ bool ThinkVPC::setConservation(const char * method, UInt32 value) {
     };
 
     if (vpc->evaluateInteger(method, &result, params, 1) != kIOReturnSuccess) {
-        IOLog(updateFailure, method);
+        AlwaysLog(updateFailure, method);
         return false;
     }
 
-    IOLog(updateSuccess, method, result);
+    DebugLog(updateSuccess, method, result);
     updateBattery(batnum);
 
     return true;
@@ -63,12 +63,12 @@ bool ThinkVPC::setConservation(const char * method, UInt32 value) {
 
 bool ThinkVPC::updateMutestatus(bool update) {
     if (ec->evaluateInteger(getAudioMutestatus, &mutestate) != kIOReturnSuccess) {
-        IOLog(updateFailure, __func__);
+        AlwaysLog(updateFailure, __func__);
         return false;
     }
 
     if (update)
-        IOLog(updateSuccess, __func__, mutestate);
+        DebugLog(updateSuccess, __func__, mutestate);
 
     setProperty(mutePrompt, mutestate, 32);
     return true;
@@ -77,7 +77,7 @@ bool ThinkVPC::updateMutestatus(bool update) {
 bool ThinkVPC::setMutestatus(UInt32 value) {
     updateMutestatus(false);
     if (mutestate == value) {
-        IOLog(valueMatched, mutePrompt, mutestate);
+        DebugLog(valueMatched, mutePrompt, mutestate);
         return true;
     }
 
@@ -88,11 +88,11 @@ bool ThinkVPC::setMutestatus(UInt32 value) {
     };
 
     if (vpc->evaluateInteger(setAudioMutestatus, &result, params, 1) != kIOReturnSuccess) {
-        IOLog(toggleFailure, __func__);
+        AlwaysLog(toggleFailure, __func__);
         return false;
     }
 
-    IOLog(toggleSuccess, __func__, mutestate, (mutestate == 2 ? "SW" : "HW"));
+    DebugLog(toggleSuccess, __func__, mutestate, (mutestate == 2 ? "SW" : "HW"));
     setProperty(mutePrompt, mutestate, 32);
     return true;
 }
@@ -105,7 +105,7 @@ void ThinkVPC::getNotificationMask(UInt32 index) {
     };
 
     if (vpc->evaluateInteger(getHKEYmask, &result, params, 1) != kIOReturnSuccess) {
-        IOLog(toggleFailure, __func__);
+        AlwaysLog(toggleFailure, __func__);
         return;
     }
 
@@ -214,7 +214,7 @@ bool ThinkVPC::updateAdaptiveKBD(int arg) {
 
     if (!arg) {
         if (vpc->evaluateInteger(getHKEYAdaptive, &result) != kIOReturnSuccess) {
-            IOLog(updateFailure, __func__);
+            AlwaysLog(updateFailure, __func__);
             return false;
         }
     } else {
@@ -223,7 +223,7 @@ bool ThinkVPC::updateAdaptiveKBD(int arg) {
         };
 
         if (vpc->evaluateInteger(getHKEYAdaptive, &result, params, 1) != kIOReturnSuccess) {
-            IOLog(updateFailure, __func__);
+            AlwaysLog(updateFailure, __func__);
             return false;
         }
     }
@@ -268,11 +268,11 @@ void ThinkVPC::updateBattery(int battery) {
             break;
             
         default:
-            IOLog(valueInvalid, batteryPrompt);
+            AlwaysLog(valueInvalid, batteryPrompt);
             return;
     }
 
-    IOLog(updateSuccess, batteryPrompt, batnum);
+    DebugLog(updateSuccess, batteryPrompt, batnum);
 
     updateConservation(getCMstart);
     updateConservation(getCMstop);
@@ -337,7 +337,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 OSNumber * value;
                 getPropertyNumber(LEDPrompt);
                 if (value->unsigned32BitValue() > 0xff) {
-                    IOLog(valueInvalid, LEDPrompt);
+                    AlwaysLog(valueInvalid, LEDPrompt);
                     continue;
                 } else {
                     setLEDStatus(value->unsigned8BitValue());
@@ -366,12 +366,12 @@ bool ThinkVPC::updateFanControl(UInt32 status, bool update) {
     };
 
     if (vpc->evaluateInteger(getThermalControl, &thermalstate, params, 1) != kIOReturnSuccess) {
-        IOLog(updateFailure, __func__);
+        AlwaysLog(updateFailure, __func__);
         return false;
     }
 
     if (update)
-        IOLog(updateSuccess, __func__, thermalstate);
+        DebugLog(updateSuccess, __func__, thermalstate);
 
     setProperty(fanControlPrompt, thermalstate, 32);
     return true;
@@ -385,15 +385,15 @@ bool ThinkVPC::setFanControl(int level) {
     };
 
     if (vpc->evaluateInteger(setThermalControl, &result, params, 1) != kIOReturnSuccess) {
-        IOLog(toggleFailure, fanControlPrompt);
+        AlwaysLog(toggleFailure, fanControlPrompt);
         return false;
     }
     if (!result) {
-        IOLog(toggleFailure, "FanControl0");
+        AlwaysLog(toggleFailure, "FanControl0");
         return false;
     }
 
-    IOLog(toggleSuccess, fanControlPrompt, (level ? BIT(18) : 0), (level ? "7" : "auto"));
+    DebugLog(toggleSuccess, fanControlPrompt, (level ? BIT(18) : 0), (level ? "7" : "auto"));
     setProperty(fanControlPrompt, level, 32);
     return true;
 }
@@ -404,12 +404,12 @@ bool ThinkVPC::updateMuteLEDStatus(bool update) {
     };
 
     if (vpc->evaluateInteger(getAudioMuteLED, &muteLEDstate, params, 1) != kIOReturnSuccess) {
-        IOLog(updateFailure, __func__);
+        AlwaysLog(updateFailure, __func__);
         return false;
     }
 
     if (update)
-        IOLog(updateSuccess, __func__, muteLEDstate);
+        DebugLog(updateSuccess, __func__, muteLEDstate);
 
     setProperty(muteLEDPrompt, muteLEDstate, 32);
     return true;
@@ -423,11 +423,11 @@ bool ThinkVPC::setMuteSupport(bool support) {
     };
 
     if (vpc->evaluateInteger(setAudioMuteSupport, &result, params, 1) != kIOReturnSuccess || result & TPACPI_AML_MUTE_ERROR_STATE_MASK) {
-        IOLog(toggleFailure, muteSupportPrompt);
+        AlwaysLog(toggleFailure, muteSupportPrompt);
         return false;
     }
 
-    IOLog(toggleSuccess, muteSupportPrompt, support, (support ? "disable" : "enable"));
+    DebugLog(toggleSuccess, muteSupportPrompt, support, (support ? "disable" : "enable"));
     setProperty(muteSupportPrompt, support);
     return true;
 }
@@ -438,11 +438,11 @@ bool ThinkVPC::setBeepStatus(UInt8 status) {
     };
 
     if (ec->evaluateObject(setBeep, nullptr, params, 1) != kIOReturnSuccess) {
-        IOLog(toggleFailure, beepPrompt);
+        AlwaysLog(toggleFailure, beepPrompt);
         return false;
     }
 
-    IOLog(toggleSuccess, beepPrompt, status, (status ? "on" : "off"));
+    DebugLog(toggleSuccess, beepPrompt, status, (status ? "on" : "off"));
     setProperty(beepPrompt, status);
     return true;
 }
@@ -453,11 +453,11 @@ bool ThinkVPC::enableBeep(bool enable) {
     };
 
     if (vpc->evaluateObject(setHKEYBeep, nullptr, params, 1) != kIOReturnSuccess) {
-        IOLog(toggleFailure, beepPrompt);
+        AlwaysLog(toggleFailure, beepPrompt);
         return false;
     }
 
-    IOLog(toggleSuccess, beepPrompt, enable, (enable ? "enabled" : "disabled"));
+    DebugLog(toggleSuccess, beepPrompt, enable, (enable ? "enabled" : "disabled"));
     setProperty(beepPrompt, enable);
     return true;
 }
@@ -469,11 +469,11 @@ bool ThinkVPC::setLEDStatus(UInt8 status) {
     };
 
     if (ec->evaluateObject(setLED, nullptr, params, 2) != kIOReturnSuccess) {
-        IOLog(toggleFailure, LEDPrompt);
+        AlwaysLog(toggleFailure, LEDPrompt);
         return false;
     }
 
-    IOLog(toggleSuccess, LEDPrompt, status, (status ? "on" : "off"));
+    DebugLog(toggleSuccess, LEDPrompt, status, (status ? "on" : "off"));
     setProperty(LEDPrompt, status);
     return true;
 }
@@ -486,23 +486,23 @@ bool ThinkVPC::setMuteLEDStatus(bool status) {
     };
 
     if (vpc->evaluateInteger(setAudioMuteLED, &result, params, 1) != kIOReturnSuccess) {
-        IOLog(toggleFailure, muteLEDPrompt);
+        AlwaysLog(toggleFailure, muteLEDPrompt);
         return false;
     }
 
-    IOLog(toggleSuccess, muteLEDPrompt, status, (status ? "on" : "off"));
+    DebugLog(toggleSuccess, muteLEDPrompt, status, (status ? "on" : "off"));
     setProperty(muteLEDPrompt, status);
     return true;
 }
 
 bool ThinkVPC::updateMicMuteLEDStatus(bool update) {
     if (vpc->evaluateInteger(getMicMuteLED, &micMuteLEDcap) != kIOReturnSuccess) {
-        IOLog(updateFailure, __func__);
+        AlwaysLog(updateFailure, __func__);
         return false;
     }
 
     if (update)
-        IOLog(updateSuccess, __func__, micMuteLEDcap);
+        DebugLog(updateSuccess, __func__, micMuteLEDcap);
 
     if (micMuteLEDcap & TPACPI_AML_MIC_MUTE_HDMC)
         setProperty(micMuteLEDPrompt, "HDMC");
@@ -519,12 +519,12 @@ bool ThinkVPC::setMicMuteLEDStatus(UInt32 status) {
     };
 
     if (vpc->evaluateInteger(setMicMuteLED, &result, params, 1) != kIOReturnSuccess) {
-        IOLog(toggleFailure, micMuteLEDPrompt);
+        AlwaysLog(toggleFailure, micMuteLEDPrompt);
         return false;
     }
 
     micMuteLEDstate = status;
-    IOLog(toggleSuccess, micMuteLEDPrompt, status, (status ? "on / blink" : "off"));
+    DebugLog(toggleSuccess, micMuteLEDPrompt, status, (status ? "on / blink" : "off"));
     setProperty(micMuteLEDPrompt, status, 32);
     return true;
 }
@@ -571,7 +571,7 @@ IOReturn ThinkVPC::message(UInt32 type, IOService *provider, void *argument) {
 void ThinkVPC::updateVPC() {
     UInt32 result;
     if (vpc->evaluateInteger(getHKEYevent, &result) != kIOReturnSuccess) {
-        IOLog(toggleFailure, HotKeyPrompt);
+        AlwaysLog(toggleFailure, HotKeyPrompt);
         return;
     }
 
@@ -740,11 +740,11 @@ bool ThinkVPC::setHotkeyStatus(bool enable) {
     };
 
     if (vpc->evaluateInteger(setHKEYstatus, &result, params, 1) != kIOReturnSuccess) {
-        IOLog(toggleFailure, HotKeyPrompt);
+        AlwaysLog(toggleFailure, HotKeyPrompt);
         return false;
     }
 
-    IOLog(toggleSuccess, HotKeyPrompt, enable, (enable ? "enabled" : "disabled"));
+    DebugLog(toggleSuccess, HotKeyPrompt, enable, (enable ? "enabled" : "disabled"));
     setProperty(HotKeyPrompt, enable);
     return true;
 }
@@ -759,14 +759,14 @@ bool ThinkVPC::updateBacklight(bool update) {
     };
 
     if (vpc->evaluateInteger(getKBDBacklightLevel, &state, params, 1) != kIOReturnSuccess) {
-        IOLog(updateFailure, KeyboardPrompt);
+        AlwaysLog(updateFailure, KeyboardPrompt);
         return false;
     }
 
     backlightLevel = state & 0x3;
 
     if (update) {
-        IOLog(updateSuccess, KeyboardPrompt, state);
+        DebugLog(updateSuccess, KeyboardPrompt, state);
         if (backlightCap)
             setProperty(backlightPrompt, backlightLevel, 32);
     }
@@ -785,12 +785,12 @@ bool ThinkVPC::setBacklight(UInt32 level) {
     };
 
     if (vpc->evaluateInteger(setKBDBacklightLevel, &result, params, 1) != kIOReturnSuccess || result != 0) {
-        IOLog(toggleFailure, backlightPrompt);
+        AlwaysLog(toggleFailure, backlightPrompt);
         return false;
     }
 
     backlightLevel = level;
-    IOLog(toggleSuccess, backlightPrompt, backlightLevel, (backlightLevel ? "on" : "off"));
+    DebugLog(toggleSuccess, backlightPrompt, backlightLevel, (backlightLevel ? "on" : "off"));
     setProperty(backlightPrompt, backlightLevel, 32);
 
     return true;
@@ -802,13 +802,13 @@ bool ThinkVPC::setSSTStatus(UInt32 value) {
     };
     
     if (vpc->evaluateObject("CSSI", nullptr, params, 1) != kIOReturnSuccess) {
-        IOLog(toggleFailure, SSTPrompt);
+        AlwaysLog(toggleFailure, SSTPrompt);
         return false;
     }
 
     char const *property[5] = {"Indicator off", "Working", "Waking", "Sleeping", "Sleeping (S4)"};
     
-    IOLog(toggleSuccess, SSTPrompt, value, property[value]);
+    DebugLog(toggleSuccess, SSTPrompt, value, property[value]);
     return true;
 }
 

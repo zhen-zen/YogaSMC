@@ -91,21 +91,17 @@ bool YogaVPC::initVPC() {
                 DYTCSubRevision = (result >> DYTC_QUERY_SUBREV_BIT) & 0xF;
                 OSDictionary *status = OSDictionary::withCapacity(4);
                 OSObject *value;
-                value = OSNumber::withNumber(DYTCRevision, 4);
-                status->setObject("Revision", value);
-                value->release();
-                value = OSNumber::withNumber(DYTCSubRevision, 4);
-                status->setObject("SubRevision", value);
-                value->release();
+                setPropertyNumber(status, "Revision", DYTCRevision, 4);
+                setPropertyNumber(status, "SubRevision", DYTCSubRevision, 4);
                 setProperty("DYTC", status);
                 status->release();
             } else {
                 setProperty("DYTC", false);
             }
-            IOLog(updateSuccess, DYTCPrompt, DYTCCap);
+            DebugLog(updateSuccess, DYTCPrompt, DYTCCap);
         } else {
             setProperty("DYTC", "error");
-            IOLog(updateFailure, DYTCPrompt);
+            AlwaysLog(updateFailure, DYTCPrompt);
         }
     }
 
@@ -151,7 +147,7 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
     if (!dict)
         return;
 
-//    IOLog("%s: %d objects in properties\n", dict->getCount());
+//    DebugLog("Found %d objects in properties\n", dict->getCount());
     OSCollectionIterator* i = OSCollectionIterator::withCollection(dict);
 
     if (i) {
@@ -161,7 +157,7 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
                 getPropertyBoolean(clamshellPrompt);
                 updateClamshell(false);
                 if (value->getValue() == clamshellMode) {
-                    IOLog(valueMatched, clamshellPrompt, clamshellMode);
+                    DebugLog(valueMatched, clamshellPrompt, clamshellMode);
                 } else {
                     toggleClamshell();
                 }
@@ -170,16 +166,16 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
                 getPropertyNumber(backlightPrompt);
                 updateBacklight(false);
                 if (value->unsigned32BitValue() == backlightLevel)
-                    IOLog(valueMatched, backlightPrompt, backlightLevel);
+                    DebugLog(valueMatched, backlightPrompt, backlightLevel);
                 else
                     setBacklight(value->unsigned32BitValue());
             } else if (key->isEqualTo(autoBacklightPrompt)) {
                 OSNumber * value;
                 getPropertyNumber(autoBacklightPrompt);
                 if (value->unsigned8BitValue() > 3) {
-                    IOLog(valueInvalid, autoBacklightPrompt);
+                    AlwaysLog(valueInvalid, autoBacklightPrompt);
                 } else if (value->unsigned8BitValue() == automaticBacklightMode) {
-                    IOLog(valueMatched, autoBacklightPrompt, automaticBacklightMode);
+                    DebugLog(valueMatched, autoBacklightPrompt, automaticBacklightMode);
                 } else {
                     automaticBacklightMode = value->unsigned8BitValue();
                     setProperty(autoBacklightPrompt, automaticBacklightMode, 8);
@@ -233,13 +229,13 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
                         break;
 
                     default:
-                        IOLog(valueInvalid, DYTCPrompt);
+                        AlwaysLog(valueInvalid, DYTCPrompt);
                         continue;;
                 }
                 if (!setDYTC(mode))
-                    IOLog(toggleFailure, DYTCPrompt);
+                    AlwaysLog(toggleFailure, DYTCPrompt);
                 else
-                    IOLog(toggleSuccess, DYTCPrompt, mode, "see ioreg");
+                    DebugLog(toggleSuccess, DYTCPrompt, mode, "see ioreg");
             } else if (key->isEqualTo(updatePrompt)) {
                 updateAll();
             } else {
@@ -274,14 +270,14 @@ bool YogaVPC::updateClamshell(bool update) {
     UInt32 state;
 
     if (vpc->evaluateInteger(getClamshellMode, &state) != kIOReturnSuccess) {
-        IOLog(updateFailure, clamshellPrompt);
+        AlwaysLog(updateFailure, clamshellPrompt);
         return false;
     }
 
     clamshellMode = state ? true : false;
 
     if (update) {
-        IOLog(updateSuccess, clamshellPrompt, state);
+        DebugLog(updateSuccess, clamshellPrompt, state);
         setProperty(clamshellPrompt, clamshellMode);
     }
 
@@ -299,12 +295,12 @@ bool YogaVPC::toggleClamshell() {
     };
 
     if (vpc->evaluateInteger(setClamshellMode, &result, params, 1) != kIOReturnSuccess || result != 0) {
-        IOLog(toggleFailure, clamshellPrompt);
+        AlwaysLog(toggleFailure, clamshellPrompt);
         return false;
     }
 
     clamshellMode = !clamshellMode;
-    IOLog(toggleSuccess, clamshellPrompt, clamshellMode, (clamshellMode ? "on" : "off"));
+    DebugLog(toggleSuccess, clamshellPrompt, clamshellMode, (clamshellMode ? "on" : "off"));
     setProperty(clamshellPrompt, clamshellMode);
 
     return true;
@@ -342,7 +338,7 @@ bool YogaVPC::DYTCCommand(UInt32 command, UInt64* result, UInt8 ICFunc, UInt8 IC
     };
 
     if (vpc->evaluateInteger(setThermalControl, result, params, 1) != kIOReturnSuccess) {
-        IOLog(toggleFailure, DYTCPrompt);
+        AlwaysLog(toggleFailure, DYTCPrompt);
         return false;
     }
 #ifdef DEBUG
@@ -363,17 +359,13 @@ bool YogaVPC::updateDYTC(bool update) {
 //    setProperty(DYTCPrompt, result, 64);
     OSDictionary *status = OSDictionary::withCapacity(4);
     OSObject *value;
-    value = OSNumber::withNumber(DYTCRevision, 4);
-    status->setObject("Revision", value);
-    value->release();
-    value = OSNumber::withNumber(DYTCSubRevision, 4);
-    status->setObject("SubRevision", value);
-    value->release();
+    setPropertyNumber(status, "Revision", DYTCRevision, 4);
+    setPropertyNumber(status, "SubRevision", DYTCSubRevision, 4);
 
     int funcmode = (result >> DYTC_GET_FUNCTION_BIT) & 0xF;
     switch (funcmode) {
         case DYTC_FUNCTION_STD:
-            value = OSString::withCString("Standard");
+            setPropertyString(status, "FuncMode", "Standard");
             break;
 
         case DYTC_FUNCTION_CQL:
@@ -387,49 +379,45 @@ bool YogaVPC::updateDYTC(bool update) {
                 status->release();
                 return false;
             }
-            value = OSString::withCString("Lap");
+            setPropertyString(status, "FuncMode", "Lap");
             break;
 
         case DYTC_FUNCTION_MMC:
-            value = OSString::withCString("Desk");
+            setPropertyString(status, "FuncMode", "Desk");
             break;
 
         default:
-            IOLog(valueUnknown, DYTCFuncPrompt, funcmode);
+            AlwaysLog(valueUnknown, DYTCFuncPrompt, funcmode);
             char Unknown[10];
             snprintf(Unknown, 10, "Unknown:%1x", funcmode);
-            value = OSString::withCString(Unknown);
+            setPropertyString(status, "FuncMode", Unknown);
             break;
     }
-    status->setObject("FuncMode", value);
-    value->release();
 
     int perfmode = (result >> DYTC_GET_MODE_BIT) & 0xF;
     switch (perfmode) {
         case DYTC_MODE_PERFORM:
             if (funcmode == DYTC_FUNCTION_CQL)
-                value = OSString::withCString("Performance (Reduced as lapmode active)");
+                setPropertyString(status, "PerfMode", "Performance (Reduced as lapmode active)");
             else
-                value = OSString::withCString("Performance");
+                setPropertyString(status, "PerfMode", "Performance");
             break;
 
         case DYTC_MODE_QUIET:
-            value = OSString::withCString("Quiet");
+            setPropertyString(status, "PerfMode", "Quiet");
             break;
 
         case DYTC_MODE_BALANCE:
-            value = OSString::withCString("Balance");
+            setPropertyString(status, "PerfMode", "Balance");
             break;
 
         default:
-            IOLog(valueUnknown, DYTCPerfPrompt, perfmode);
+            AlwaysLog(valueUnknown, DYTCPerfPrompt, perfmode);
             char Unknown[10];
             snprintf(Unknown, 10, "Unknown:%1x", perfmode);
-            value = OSString::withCString(Unknown);
+            setPropertyString(status, "PerfMode", Unknown);
             break;
     }
-    status->setObject("PerfMode", value);
-    value->release();
     setProperty("DYTC", status);
     status->release();
 
@@ -465,7 +453,7 @@ bool YogaVPC::setDYTC(int perfmode) {
 bool YogaVPC::findPNP(const char *id, IOACPIPlatformDevice **dev) {
     auto iterator = IORegistryIterator::iterateOver(gIOACPIPlane, kIORegistryIterateRecursively);
     if (!iterator) {
-        IOLog("%s findPNP failed\n", getName());
+        AlwaysLog("findPNP failed\n");
         return nullptr;
     }
     auto pnp = OSString::withCString(id);
@@ -474,7 +462,7 @@ bool YogaVPC::findPNP(const char *id, IOACPIPlatformDevice **dev) {
         if (entry->compareName(pnp)) {
             *dev = OSDynamicCast(IOACPIPlatformDevice, entry);
             if (*dev) {
-                IOLog("%s %s available at %s\n", getName(), id, (*dev)->getName());
+                AlwaysLog("%s available at %s\n", id, (*dev)->getName());
                 break;
             }
         }

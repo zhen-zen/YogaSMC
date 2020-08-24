@@ -23,7 +23,7 @@ bool IdeaVPC::initVPC() {
         return false;
     }
 
-    IOLog(updateSuccess, VPCPrompt, config);
+    DebugLog(updateSuccess, VPCPrompt, config);
 #ifdef DEBUG
     setProperty(VPCPrompt, config, 32);
 #endif
@@ -39,33 +39,31 @@ bool IdeaVPC::initVPC() {
 
     switch (cap_graphics) {
         case 1:
-            value = OSString::withCString("Intel");
+            setPropertyString(capabilities, "Graphics", "Intel");
             break;
 
         case 2:
-            value = OSString::withCString("ATI");
+            setPropertyString(capabilities, "Graphics", "ATI");
             break;
 
         case 3:
-            value = OSString::withCString("Nvidia");
+            setPropertyString(capabilities, "Graphics", "Nvidia");
             break;
 
         case 4:
-            value = OSString::withCString("Intel and ATI");
+            setPropertyString(capabilities, "Graphics", "Intel and ATI");
             break;
 
         case 5:
-            value = OSString::withCString("Intel and Nvidia");
+            setPropertyString(capabilities, "Graphics", "Intel and Nvidia");
             break;
 
         default:
             char Unknown[10];
             snprintf(Unknown, 10, "Unknown:%1x", cap_graphics);
-            value = OSString::withCString(Unknown);
+            setPropertyString(capabilities, "Graphics", Unknown);
             break;
     }
-    capabilities->setObject("Graphics", value);
-    value->release();
     setPropertyBoolean(capabilities, "Bluetooth", cap_bt);
     setPropertyBoolean(capabilities, "3G", cap_3g);
     setPropertyBoolean(capabilities, "Wireless", cap_wifi);
@@ -158,7 +156,7 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                 updateBattery(false);
 
                 if (value->getValue() == conservationMode)
-                    IOLog(valueMatched, conservationPrompt, conservationMode);
+                    DebugLog(valueMatched, conservationPrompt, conservationMode);
                 else
                     toggleConservation();
             } else if (key->isEqualTo(rapidChargePrompt)) {
@@ -167,7 +165,7 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                 updateBattery(false);
 
                 if (value->getValue() == rapidChargeMode)
-                    IOLog(valueMatched, rapidChargePrompt, rapidChargeMode);
+                    DebugLog(valueMatched, rapidChargePrompt, rapidChargeMode);
                 else
                     toggleRapidCharge();
             } else if (key->isEqualTo(FnKeyPrompt)) {
@@ -176,7 +174,7 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                 updateKeyboard(false);
 
                 if (value->getValue() == FnlockMode)
-                    IOLog(valueMatched, FnKeyPrompt, FnlockMode);
+                    DebugLog(valueMatched, FnKeyPrompt, FnlockMode);
                 else
                     toggleFnlock();
             } else if (key->isEqualTo(ECLockPrompt)) {
@@ -243,7 +241,7 @@ bool IdeaVPC::initEC() {
         if (vpc->evaluateInteger(getKeyboardMode, &state) == kIOReturnSuccess)
             break;
         if (++attempts > 5) {
-            IOLog(updateFailure, getKeyboardMode);
+            AlwaysLog(updateFailure, getKeyboardMode);
             setProperty("EC Access", "Error");
             return false;
         }
@@ -277,7 +275,7 @@ bool IdeaVPC::updateBatteryID(bool update) {
     OSObject *result;
 
     if (vpc->evaluateObject(getBatteryID, &result) != kIOReturnSuccess) {
-        IOLog(updateFailure, "Battery ID");
+        AlwaysLog(updateFailure, "Battery ID");
         return false;
     }
 
@@ -341,7 +339,7 @@ bool IdeaVPC::updateBatteryInfo(bool update) {
     };
 
     if (vpc->evaluateObject(getBatteryInfo, &result, params, 1) != kIOReturnSuccess) {
-        IOLog(updateFailure, "Battery Info");
+        AlwaysLog(updateFailure, "Battery Info");
         return false;
     }
 
@@ -369,7 +367,7 @@ bool IdeaVPC::updateBattery(bool update) {
     UInt32 state;
 
     if (vpc->evaluateInteger(getBatteryMode, &state) != kIOReturnSuccess) {
-        IOLog(updateFailure, batteryPrompt);
+        AlwaysLog(updateFailure, batteryPrompt);
         return false;
     }
 
@@ -377,7 +375,7 @@ bool IdeaVPC::updateBattery(bool update) {
     rapidChargeMode = BIT(BM_RAPIDCHARGE_BIT) & state;
 
     if (update) {
-        IOLog(updateSuccess, batteryPrompt, state);
+        DebugLog(updateSuccess, batteryPrompt, state);
         setProperty(conservationPrompt, conservationMode);
         setProperty(rapidChargePrompt, rapidChargeMode);
     }
@@ -392,7 +390,7 @@ bool IdeaVPC::updateKeyboard(bool update) {
     UInt32 state;
 
     if (vpc->evaluateInteger(getKeyboardMode, &state) != kIOReturnSuccess) {
-        IOLog(updateFailure, KeyboardPrompt);
+        AlwaysLog(updateFailure, KeyboardPrompt);
         return false;
     }
 
@@ -402,7 +400,7 @@ bool IdeaVPC::updateKeyboard(bool update) {
         backlightLevel = (BIT(HA_BACKLIGHT_BIT) & state) ? 1 : 0;
 
     if (update) {
-        IOLog(updateSuccess, KeyboardPrompt, state);
+        DebugLog(updateSuccess, KeyboardPrompt, state);
         if (FnlockCap)
             setProperty(FnKeyPrompt, FnlockMode);
         if (backlightCap)
@@ -423,12 +421,12 @@ bool IdeaVPC::toggleConservation() {
     };
 
     if (vpc->evaluateInteger(setBatteryMode, &result, params, 1) != kIOReturnSuccess || result != 0) {
-        IOLog(toggleFailure, conservationPrompt);
+        AlwaysLog(toggleFailure, conservationPrompt);
         return false;
     }
 
     conservationMode = !conservationMode;
-    IOLog(toggleSuccess, conservationPrompt, (conservationMode ? BMCMD_CONSERVATION_ON : BMCMD_CONSERVATION_OFF), (conservationMode ? "on" : "off"));
+    DebugLog(toggleSuccess, conservationPrompt, (conservationMode ? BMCMD_CONSERVATION_ON : BMCMD_CONSERVATION_OFF), (conservationMode ? "on" : "off"));
     setProperty(conservationPrompt, conservationMode);
 
     return true;
@@ -442,12 +440,12 @@ bool IdeaVPC::toggleRapidCharge() {
     };
 
     if (vpc->evaluateInteger(setBatteryMode, &result, params, 1) != kIOReturnSuccess || result != 0) {
-        IOLog(toggleFailure, rapidChargePrompt);
+        AlwaysLog(toggleFailure, rapidChargePrompt);
         return false;
     }
 
     rapidChargeMode = !rapidChargeMode;
-    IOLog(toggleSuccess, rapidChargePrompt, (rapidChargeMode ? BMCMD_RAPIDCHARGE_ON : BMCMD_RAPIDCHARGE_OFF), (rapidChargeMode ? "on" : "off"));
+    DebugLog(toggleSuccess, rapidChargePrompt, (rapidChargeMode ? BMCMD_RAPIDCHARGE_ON : BMCMD_RAPIDCHARGE_OFF), (rapidChargeMode ? "on" : "off"));
     setProperty(rapidChargePrompt, conservationMode);
 
     return true;
@@ -464,12 +462,12 @@ bool IdeaVPC::setBacklight(UInt32 level) {
     };
 
     if (vpc->evaluateInteger(setKeyboardMode, &result, params, 1) != kIOReturnSuccess || result != 0) {
-        IOLog(toggleFailure, backlightPrompt);
+        AlwaysLog(toggleFailure, backlightPrompt);
         return false;
     }
 
     backlightLevel = level;
-    IOLog(toggleSuccess, backlightPrompt, (backlightLevel ? HACMD_BACKLIGHT_ON : HACMD_BACKLIGHT_OFF), (backlightLevel ? "on" : "off"));
+    DebugLog(toggleSuccess, backlightPrompt, (backlightLevel ? HACMD_BACKLIGHT_ON : HACMD_BACKLIGHT_OFF), (backlightLevel ? "on" : "off"));
     setProperty(backlightPrompt, backlightLevel);
 
     return true;
@@ -486,12 +484,12 @@ bool IdeaVPC::toggleFnlock() {
     };
 
     if (vpc->evaluateInteger(setKeyboardMode, &result, params, 1) != kIOReturnSuccess || result != 0) {
-        IOLog(toggleFailure, FnKeyPrompt);
+        AlwaysLog(toggleFailure, FnKeyPrompt);
         return false;
     }
 
     FnlockMode = !FnlockMode;
-    IOLog(toggleSuccess, FnKeyPrompt, (FnlockMode ? HACMD_FNLOCK_ON : HACMD_FNLOCK_OFF), (FnlockMode ? "on" : "off"));
+    DebugLog(toggleSuccess, FnKeyPrompt, (FnlockMode ? HACMD_FNLOCK_ON : HACMD_FNLOCK_OFF), (FnlockMode ? "on" : "off"));
     setProperty(FnKeyPrompt, FnlockMode);
 
     return true;
@@ -605,7 +603,7 @@ bool IdeaVPC::read_ec_data(UInt32 cmd, UInt32 *result, UInt8 *retries) {
         clock_get_uptime(&now_abs);
     } while (now_abs < deadline || *retries < 5);
 
-    IOLog(timeoutPrompt, readECPrompt, cmd);
+    AlwaysLog(timeoutPrompt, readECPrompt, cmd);
     return false;
 }
 
@@ -634,7 +632,7 @@ bool IdeaVPC::write_ec_data(UInt32 cmd, UInt32 value, UInt8 *retries) {
         clock_get_uptime(&now_abs);
     } while (now_abs < deadline || *retries < 5);
 
-    IOLog(timeoutPrompt, writeECPrompt, cmd);
+    AlwaysLog(timeoutPrompt, writeECPrompt, cmd);
     return false;
 }
 

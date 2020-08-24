@@ -17,7 +17,8 @@ bool YogaSMC::init(OSDictionary *dictionary)
 {
     if (!super::init(dictionary))
         return false;
-    IOLog("%s Initializing\n", getName());
+    name = "";
+    DebugLog("Initializing\n");
 
     _deliverNotification = OSSymbol::withCString(kDeliverNotifications);
      if (!_deliverNotification)
@@ -41,12 +42,12 @@ bool YogaSMC::start(IOService *provider) {
     else
         name = "";
 
-    IOLog("%s::%s Starting\n", getName(), name);
+    DebugLog("Starting\n");
 
     workLoop = IOWorkLoop::workLoop();
     commandGate = IOCommandGate::commandGate(this);
     if (!workLoop || !commandGate || (workLoop->addEventSource(commandGate) != kIOReturnSuccess)) {
-        IOLog("%s::%s Failed to add commandGate\n", getName(), name);
+        AlwaysLog("Failed to add commandGate\n");
         return false;
     }
 
@@ -83,7 +84,7 @@ bool YogaSMC::start(IOService *provider) {
 
 void YogaSMC::stop(IOService *provider)
 {
-    IOLog("%s::%s Stopping\n", getName(), name);
+    AlwaysLog("Stopping\n");
 
     _publishNotify->remove();
     _terminateNotify->remove();
@@ -136,7 +137,7 @@ void YogaSMC::dispatchMessageGated(int* message, void* data)
 void YogaSMC::dispatchMessage(int message, void* data)
 {
     if (_notificationServices->getCount() == 0) {
-        IOLog("%s::%s No available notification consumer\n", getName(), name);
+        AlwaysLog("No available notification consumer\n");
         return;
     }
     commandGate->runAction(OSMemberFunctionCast(IOCommandGate::Action, this, &YogaSMC::dispatchMessageGated), &message, data);
@@ -145,12 +146,12 @@ void YogaSMC::dispatchMessage(int message, void* data)
 void YogaSMC::notificationHandlerGated(IOService *newService, IONotifier *notifier)
 {
     if (notifier == _publishNotify) {
-        IOLog("%s::%s Notification consumer published: %s\n", getName(), name, newService->getName());
+        DebugLog("Notification consumer published: %s\n", newService->getName());
         _notificationServices->setObject(newService);
     }
 
     if (notifier == _terminateNotify) {
-        IOLog("%s::%s Notification consumer terminated: %s\n", getName(), name, newService->getName());
+        DebugLog("Notification consumer terminated: %s\n", newService->getName());
         _notificationServices->removeObject(newService);
     }
 }

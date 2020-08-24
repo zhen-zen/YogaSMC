@@ -68,4 +68,13 @@
         } \
     } while (0)
 
+#define setPropertyBytes(dict, name, data, len) \
+    do { \
+        value = OSData::withBytes(data, len); \
+        if (value != nullptr) { \
+            dict->setObject(name, value); \
+            value->release(); \
+        } \
+    } while (0)
+
 #endif /* common_h */

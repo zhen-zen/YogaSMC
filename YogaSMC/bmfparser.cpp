@@ -11,9 +11,9 @@
 #include "common.h"
 #include <uuid/uuid.h>
 
-#define error(str) do { IOLog("YogaWMI::%s %d: error %s at %s:%d\n", wmi_name, indent, str, __func__, __LINE__); parsed = false; return dict;} while (0)
-#define errors(str) do { IOLog("YogaWMI::%s %d: error %s at %s:%d\n", wmi_name, indent, str, __func__, __LINE__); parsed = false;} while (0)
-#define warning(str) do { IOLog("YogaWMI::%s %d: warning %s at %s:%d\n", wmi_name, indent, str, __func__, __LINE__);} while (0)
+#define error(str) do { IOLog("YogaBMF::%s %d: error %s at %s:%d\n", wmi_name, indent, str, __func__, __LINE__); parsed = false; return dict;} while (0)
+#define errors(str) do { IOLog("YogaBMF::%s %d: error %s at %s:%d\n", wmi_name, indent, str, __func__, __LINE__); parsed = false;} while (0)
+#define warning(str) do { IOLog("YogaBMF::%s %d: warning %s at %s:%d\n", wmi_name, indent, str, __func__, __LINE__);} while (0)
 
 char *MOF::parse_string(char *buf, uint32_t size) {
   uint16_t *buf2 = (uint16_t *)buf;
@@ -101,12 +101,10 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
     indent +=1;
     OSDictionary *dict = OSDictionary::withCapacity(5);
     uint8_t *type = (uint8_t *)buf + 4;
-    OSObject *typeObj;
+    OSObject *value;
     OSDictionary *item;
 #ifdef DEBUG
-    typeObj = OSNumber::withNumber(buf[0], 32);
-    dict->setObject("length", typeObj);
-    typeObj->release();
+    setPropertyNumber(dict, "length", buf[0], 32);
 #endif
 
     switch (verify) {
@@ -134,38 +132,34 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
 
     switch (type[0]) {
         case MOF_BOOLEAN:
-            typeObj = OSString::withCString("BOOLEAN");
+            setPropertyString(dict, "type", "BOOLEAN");
             break;
 
         case MOF_STRING:
-            typeObj = OSString::withCString("STRING");
+            setPropertyString(dict, "type", "STRING");
             break;
 
         case MOF_SINT32:
-            typeObj = OSString::withCString("SINT32");
+            setPropertyString(dict, "type", "SINT32");
             break;
 
         case MOF_OBJECT:
-            typeObj = OSString::withCString("OBJECT");
+            setPropertyString(dict, "type", "OBJECT");
             break;
 
         case MOF_UINT8:
-            typeObj = OSString::withCString("UINT8");
+            setPropertyString(dict, "type", "UINT8");
             break;
 
         case MOF_UINT32:
-            typeObj = OSString::withCString("UINT32");
+            setPropertyString(dict, "type", "UINT32");
             break;
 
         default:
-            typeObj = OSNumber::withNumber(type[0], 8);
-            dict->setObject("type", typeObj);
-            OSSafeReleaseNULL(typeObj);
+            setPropertyNumber(dict, "type", type[0], 8);
             error("unknown type");
             break;
     }
-    dict->setObject("type", typeObj);
-    typeObj->release();
 
     switch (type[1]) {
         case 0:
@@ -177,9 +171,7 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
             break;
 
         default:
-            typeObj = OSNumber::withNumber(type[1], 8);
-            dict->setObject("map", typeObj);
-            OSSafeReleaseNULL(typeObj);
+            setPropertyNumber(dict, "map", type[1], 8);
             error("unknown map type");
             break;
     }
@@ -280,9 +272,7 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
                     {
                         valuemap = OSArray::withCapacity(count);
                         vmap = OSDictionary::withCapacity(count);
-                        typeObj = OSString::withCString("Values");
-                        dict->setObject(name, typeObj);
-                        typeObj->release();
+                        setPropertyString(dict, name, "Values");
                     }
                     for (uint32_t i=0; i<count; i++) {
                         switch (type[0]) {
@@ -317,11 +307,11 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
                     
                     switch (clen == 4 ? nbuf[0] : nbuf[0] & 0xFFFF) {
                         case 0:
-                            typeObj = kOSBooleanFalse;
+                            dict->setObject(name, kOSBooleanFalse);
                             break;
 
                         case 0xFFFF:
-                            typeObj = kOSBooleanTrue;
+                            dict->setObject(name, kOSBooleanTrue);
                             break;
 
                         default:
@@ -333,23 +323,21 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
                 case MOF_STRING:
                     if (!verify)
                         dict->flushCollection();
-                    typeObj = OSString::withCString(parse_string((char *)nbuf, clen));
+                    setPropertyString(dict, name, parse_string((char *)nbuf, clen));
                     break;
 
                 case MOF_SINT32:
                     if (!verify)
                         dict->flushCollection();
                     if (clen != 4) error("sint32 length mismatch");
-                    typeObj = OSNumber::withNumber(nbuf[0], 32); // TODO: should be signed int here
+                    setPropertyNumber(dict, name, nbuf[0], 32); // TODO: should be signed int here
                     break;
 
                 default:
                     errors("unexpected value type");
-                    typeObj = OSData::withBytes(nbuf, buf[0]-0x10-nlen);
+                    setPropertyBytes(dict, name, nbuf, buf[0]-0x10-nlen);
                     break;
                 }
-                dict->setObject(name, typeObj);
-                typeObj->release();
             }
         }
     }
@@ -436,29 +424,25 @@ OSDictionary* MOF::parse_class(uint32_t *buf) {
     indent +=1;
     OSDictionary *dict = OSDictionary::withCapacity(11);
     uint32_t type = buf[1];
-    OSObject *typeObj;
+    OSObject *value;
     OSDictionary *item;
 
     switch (type) {
         case 0:
-            typeObj = OSString::withCString("class");
+            setPropertyString(dict, "type", "class");
             break;
 
         case 0xFFFFFFFF:
-            typeObj = OSString::withCString("parameter");
+            setPropertyString(dict, "type", "parameter");
             break;
 
         default:
             error("Wrong class type");
             break;
     }
-    dict->setObject("type", typeObj);
-    typeObj->release();
 
 #ifdef DEBUG
-    typeObj = OSNumber::withNumber(buf[0], 32);
-    dict->setObject("length", typeObj);
-    typeObj->release();
+    setPropertyNumber(dict, "length", buf[0], 32);
 #endif
     
     uint32_t count;
@@ -502,16 +486,11 @@ OSDictionary* MOF::parse_class(uint32_t *buf) {
                     if (!uuid_parse(guid->getCStringNoCopy(), guid_t)) {
                         uuid_unparse_lower(guid_t, guid_string);
                         OSDictionary * entry = OSDynamicCast(OSDictionary, mData->getObject(guid_string));
-                        if (entry) {
-//                            entry->removeObject(kWMIEvaluate);
+                        if (entry)
                             entry->setObject("MOF", dict);
-//                            dict->setObject("WDG", entry);
-                        } else {
+                        else
                             IOLog("%d: GUID 36 not found %s", indent, guid_string);
-                        }
-                        typeObj = OSString::withCString(guid_string);
-                        dict->setObject("WDG", typeObj);
-                        typeObj->release();
+                        setPropertyString(dict, "WDG", guid_string);
                         break;
                     }
                     
@@ -521,19 +500,11 @@ OSDictionary* MOF::parse_class(uint32_t *buf) {
                     if (!uuid_parse(guid_string, guid_t)) {
                         uuid_unparse_lower(guid_t, guid_string);
                         OSDictionary * entry = OSDynamicCast(OSDictionary, mData->getObject(guid_string));
-                        if (entry) {
-//                            entry->removeObject(kWMIEvaluate);
-//                            dict->setObject("WDG", entry);
+                        if (entry)
                             entry->setObject("MOF", dict);
-                        } else {
+                        else
                             IOLog("%d: GUID 38 not found %s", indent, guid_string);
-//                            typeObj = OSString::withCString(guid_string);
-//                            dict->setObject("WDG", typeObj);
-//                            typeObj->release();
-                        }
-                        typeObj = OSString::withCString(guid_string);
-                        dict->setObject("WDG", typeObj);
-                        typeObj->release();
+                        setPropertyString(dict, "WDG", guid_string);
                         break;
                     }
 
@@ -654,27 +625,18 @@ OSObject* MOF::parse_bmf(char * bmf_guid_string) {
     
     uint32_t count = nbuf[4];
     OSDictionary *dict = OSDictionary::withCapacity(5+count);
-    OSObject *typeObj;
+    OSObject *value;
     OSDictionary *item;
 
     OSDictionary * entry = OSDynamicCast(OSDictionary, mData->getObject(bmf_guid_string));
-    if (entry) {
-//        entry->removeObject(kWMIEvaluate);
-//        dict->setObject("WDG", entry);
-        typeObj = OSString::withCString("base");
-        entry->setObject("MOF", typeObj);
-        typeObj->release();
-    } else {
+    if (entry)
+        setPropertyString(dict, "MOF", "Base");
+    else
         IOLog("%d: MOF GUID not found %s", indent, bmf_guid_string);
-    }
-    typeObj = OSString::withCString(bmf_guid_string);
-    dict->setObject("WDG", typeObj);
-    typeObj->release();
+    setPropertyString(dict, "WDG", bmf_guid_string);
 
 #ifdef DEBUG
-    typeObj = OSNumber::withNumber(nbuf[1], 32);
-    dict->setObject("length", typeObj);
-    typeObj->release();
+    setPropertyNumber(dict, "length", nbuf[1], 32);
 #endif
 
     nbuf+=5;
@@ -706,32 +668,28 @@ OSObject* MOF::parse_bmf(char * bmf_guid_string) {
         if (item->getObject("verified"))
         {
             OSDictionary *offset = OSDictionary::withCapacity(3);
-            typeObj = OSNumber::withNumber(nbuf[0], 32);
-            offset->setObject("address", typeObj);
-            typeObj->release();
+            setPropertyNumber(offset, "address", nbuf[0], 32);
             switch (nbuf[1]) {
                 case MOF_OFFSET_BOOLEAN:
-                    typeObj = OSString::withCString("BOOLEAN");
+                    setPropertyString(offset, "type", "BOOLEAN");
                     break;
 
                 case MOF_OFFSET_OBJECT:
-                    typeObj = OSString::withCString("OBJECT, tosubclass");
+                    setPropertyString(offset, "type", "OBJECT, tosubclass");
                     break;
 
                 case MOF_OFFSET_STRING:
-                    typeObj = OSString::withCString("STRING");
+                    setPropertyString(offset, "type", "STRING");
                     break;
 
                 case MOF_OFFSET_SINT32:
-                    typeObj = OSString::withCString("SINT32");
+                    setPropertyString(offset, "type", "SINT32");
                     break;
 
                 default:
-                    typeObj = OSString::withCString("UNKNOWN");
+                    setPropertyString(offset, "type", "UNKNOWN");
                     break;
             }
-            offset->setObject("type", typeObj);
-            typeObj->release();
             offset->merge(item);
             offsets->setObject(offset);
             offset->release();

@@ -14,8 +14,9 @@ OSDefineMetaClassAndStructors(YogaWMI, IOService)
 bool YogaWMI::init(OSDictionary *dictionary)
 {
     if(!super::init(dictionary))
-        return false;;
-    IOLog("%s Initializing\n", getName());
+        return false;
+    name = "";
+    DebugLog("Initializing\n");
 
     _deliverNotification = OSSymbol::withCString(kDeliverNotifications);
      if (!_deliverNotification)

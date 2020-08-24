@@ -14,6 +14,7 @@
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
 #include <VirtualSMCSDK/kern_vsmcapi.hpp>
 #include "KeyImplementations.hpp"
+#include "common.h"
 #include "message.h"
 
 class YogaSMC : public IOService
