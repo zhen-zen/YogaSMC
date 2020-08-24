@@ -313,12 +313,33 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 OSNumber * value;
                 getPropertyNumber("setCMPeakShiftState");
                 setConservation(setCMPeakShiftState, value->unsigned8BitValue());
-            } else if (key->isEqualTo("GMKS") || key->isEqualTo("GSKL") || key->isEqualTo("GHSL")) {
+            } else if (key->isEqualTo("GMKS")) {
                 UInt32 result;
-                if (vpc->evaluateInteger(key->getCStringNoCopy(), &result))
-                    AlwaysLog(updateSuccess, key->getCStringNoCopy(), result);
+                if (vpc->evaluateInteger("GMKS", &result))
+                    AlwaysLog(updateSuccess, "GMKS", result);
                 else
-                    AlwaysLog(updateFailure, key->getCStringNoCopy());
+                    AlwaysLog(updateFailure, "GMKS");
+            } else if (key->isEqualTo("GSKL")) {
+                OSNumber * value;
+                getPropertyNumber("setCMForceDischarge");
+                UInt32 result;
+                OSObject* params[1] = {
+                    value
+                };
+                if (vpc->evaluateInteger("GSKL", &result, params, 1))
+                    AlwaysLog(updateSuccess, "GSKL", result);
+                else
+                    AlwaysLog(updateFailure, "GSKL");
+            } else if (key->isEqualTo("GHSL")) {
+                UInt32 result;
+                OSObject* params[1] = {
+                    OSNumber::withNumber(0ULL, 32)
+                };
+                if (vpc->evaluateInteger("GHSL", &result, params, 1))
+                    AlwaysLog(updateSuccess, "GHSL", result);
+                else
+                    AlwaysLog(updateFailure, "GHSL");
+                params[0]->release();
             } else if (key->isEqualTo(mutePrompt)) {
                 OSNumber * value;
                 getPropertyNumber(mutePrompt);
