@@ -37,7 +37,7 @@ jobs:
         # The destination specifier to build.
         # destination: # optional
         # The configuration to build.
-        #configuration: # optional
+        configuration: [ Debug, Release ]
         # The SDK to use for building.
         sdk: macosx10.12 # optional
         # A list of tests to skip.
