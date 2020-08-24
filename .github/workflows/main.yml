@@ -73,5 +73,9 @@ jobs:
         #use-xcpretty: # default is true
     - uses: actions/upload-artifact@v2
       with:
-        name: YogaSMC
-        path: build/
+        name: YogaSMC-Debug
+        path: build/Debug
+    - uses: actions/upload-artifact@v2
+      with:
+        name: YogaSMC-Release
+        path: build/Release
