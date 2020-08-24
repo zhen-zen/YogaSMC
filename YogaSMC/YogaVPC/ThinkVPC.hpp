@@ -189,6 +189,7 @@ private:
     UInt32 muteLEDstateSaved {0};
     UInt32 micMuteLEDcap {0};
     UInt32 micMuteLEDstate {0};
+    UInt32 micMuteLEDstateSaved {0};
 
     UInt32 mutestate_orig {0};
 

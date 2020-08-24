@@ -312,7 +312,7 @@ IOReturn YogaVPC::setPowerState(unsigned long powerState, IOService *whatDevice)
     if (whatDevice != this)
         return kIOReturnInvalid;
 
-    if (backlightCap && automaticBacklightMode & 0x1) {
+    if (backlightCap && (automaticBacklightMode & BIT(0))) {
         updateBacklight();
         if (powerState == 0) {
             backlightLevelSaved = backlightLevel;

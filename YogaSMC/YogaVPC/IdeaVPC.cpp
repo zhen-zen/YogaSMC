@@ -89,16 +89,15 @@ IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
 
         case kSMC_YogaEvent:
             AlwaysLog("message: %s Yoga mode 0x%x\n", provider->getName(), *((UInt32 *) argument));
-            if (backlightCap && automaticBacklightMode & 0x2) {
+            if (backlightCap && automaticBacklightMode & BIT(1)) {
                 updateKeyboard();
                 if (*((UInt32 *) argument) != 1) {
-                    if (backlightLevel) {
-                        backlightLevelSaved = backlightLevel;
+                    backlightLevelSaved = backlightLevel;
+                    if (backlightLevel)
                         setBacklight(0);
-                    }
-                } else if (backlightLevelSaved != backlightLevel) {
-                    setBacklight(backlightLevelSaved);
-                    backlightLevelSaved = 0;
+                } else {
+                    if (backlightLevelSaved != backlightLevel)
+                        setBacklight(backlightLevelSaved);
                 }
             }
             break;

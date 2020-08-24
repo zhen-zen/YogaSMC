@@ -177,10 +177,13 @@ protected:
 
     /**
      *  Automatically turn off backlight mode on sleep
-     *  BIT 0 sleep
-     *  BIT 1 Yoga Mode
+     *  BIT 0 Keyboard backlight
+     *  BIT 1 Keyboard backlight on yoga mode
+     *  BIT 2 _SI._SST
+     *  BIT 3 Mute LED
+     *  BIT 4 Mic Mute LED
      */
-    int automaticBacklightMode {3};
+    UInt32 automaticBacklightMode {0xf};
 
     /**
      *  Backlight mode capability, will be update on init

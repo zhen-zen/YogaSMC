@@ -826,14 +826,25 @@ IOReturn ThinkVPC::setPowerState(unsigned long powerState, IOService *whatDevice
         return kIOReturnInvalid;
 
     if (powerState == 0) {
-        muteLEDstateSaved = muteLEDstate;
-        if (muteLEDstate)
-            setBacklight(0);
-        setSSTStatus(3);
+        if (automaticBacklightMode & BIT(2))
+            setSSTStatus(3);
+        if ((automaticBacklightMode & BIT(3))) {
+            muteLEDstateSaved = muteLEDstate;
+            if (muteLEDstate)
+                setMuteLEDStatus(false);
+        }
+        if (automaticBacklightMode & BIT(4)) {
+            micMuteLEDstateSaved = micMuteLEDstate;
+            if (micMuteLEDstate)
+                setMicMuteLEDStatus(0);
+        }
     } else {
-        if (muteLEDstateSaved)
-            setBacklight(muteLEDstateSaved);
-        setSSTStatus(0);
+        if (automaticBacklightMode & BIT(2))
+            setSSTStatus(0);
+        if ((automaticBacklightMode & BIT(3)) && muteLEDstateSaved)
+            setMuteLEDStatus(true);
+        if ((automaticBacklightMode & BIT(4)) && micMuteLEDstateSaved)
+            setMicMuteLEDStatus(micMuteLEDstateSaved);
     }
 
     return kIOPMAckImplied;
