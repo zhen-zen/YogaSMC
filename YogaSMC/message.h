@@ -1,3 +1,4 @@
+//  SPDX-License-Identifier: GPL-2.0-only
 //
 //  message.h
 //  YogaSMC
@@ -25,6 +26,45 @@ static IOPMPowerState IOPMPowerStates[kIOPMNumberPowerStates] = {
 };
 
 #define kDeliverNotifications   "RM,deliverNotifications"
+
+#define autoBacklightPrompt "AutoBacklight"
+#define batteryPrompt "Battery"
+#define backlightPrompt "BacklightLevel"
+#define beepPrompt "Beep"
+#define SSTPrompt "SST"
+#define conservationPrompt "ConservationMode"
+#define clamshellPrompt "ClamshellMode"
+#define DYTCPrompt "DYTCMode"
+#define DYTCFuncPrompt "DYTCFuncMode"
+#define DYTCPerfPrompt "DYTCPerfMode"
+#define ECLockPrompt "ECLock"
+#define FnKeyPrompt "FnlockMode"
+#define fanControlPrompt "FanControl"
+#define KeyboardPrompt "KeyboardMode"
+#define HotKeyPrompt "HotKey"
+#define LEDPrompt "LED"
+#define mutePrompt "Mute"
+#define muteLEDPrompt "MuteLED"
+#define muteSupportPrompt "MuteSupport"
+#define micMuteLEDPrompt "MicMuteLED"
+#define VPCPrompt "VPCconfig"
+#define rapidChargePrompt "RapidChargeMode"
+#define readECPrompt "ReadEC"
+#define resetPrompt "reset"
+#define writeECPrompt "WriteEC"
+#define updatePrompt "Update"
+
+#define initFailure "%s evaluation failed, exiting\n"
+#define updateFailure "%s evaluation failed\n"
+#define updateSuccess "%s 0x%x\n"
+#define toggleFailure "%s toggle failed\n"
+#define toggleSuccess "%s set to 0x%x: %s\n"
+
+#define valueMatched "%s already %x\n"
+#define valueInvalid "Invalid value for %s\n"
+#define valueUnknown "Unknown value for %s: %d\n"
+
+#define timeoutPrompt "%s timeout 0x%x\n"
 
 enum
 {

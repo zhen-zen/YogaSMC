@@ -13,53 +13,12 @@
 #include <IOKit/IOCommandGate.h>
 #include <IOKit/IOService.h>
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
+#include "common.h"
 #include "message.h"
 
 #ifndef ALTER
 #include "YogaSMC.hpp"
 #endif
-
-#define autoBacklightPrompt "AutoBacklight"
-#define batteryPrompt "Battery"
-#define backlightPrompt "BacklightLevel"
-#define beepPrompt "Beep"
-#define SSTPrompt "SST"
-#define conservationPrompt "ConservationMode"
-#define clamshellPrompt "ClamshellMode"
-#define DYTCPrompt "DYTCMode"
-#define DYTCFuncPrompt "DYTCFuncMode"
-#define DYTCPerfPrompt "DYTCPerfMode"
-#define ECLockPrompt "ECLock"
-#define FnKeyPrompt "FnlockMode"
-#define fanControlPrompt "FanControl"
-#define KeyboardPrompt "KeyboardMode"
-#define HotKeyPrompt "HotKey"
-#define LEDPrompt "LED"
-#define mutePrompt "Mute"
-#define muteLEDPrompt "MuteLED"
-#define muteSupportPrompt "MuteSupport"
-#define micMuteLEDPrompt "MicMuteLED"
-#define VPCPrompt "VPCconfig"
-#define rapidChargePrompt "RapidChargeMode"
-#define readECPrompt "ReadEC"
-#define resetPrompt "reset"
-#define writeECPrompt "WriteEC"
-#define updatePrompt "Update"
-
-#define initFailure "%s::%s %s evaluation failed, exiting\n"
-#define updateFailure "%s::%s %s evaluation failed\n"
-#define updateSuccess "%s::%s %s 0x%x\n"
-#define toggleFailure "%s::%s %s toggle failed\n"
-#define toggleSuccess "%s::%s %s set to 0x%x: %s\n"
-
-#define valueMatched "%s::%s %s already %x\n"
-#define valueInvalid "%s::%s Invalid value for %s\n"
-#define valueUnknown "%s::%s Unknown value for %s: %d\n"
-
-#define timeoutPrompt "%s::%s %s timeout 0x%x\n"
-#define VPCUnavailable "%s::%s VPC unavailable\n"
-
-#define BIT(nr) (1U << (nr))
 
 enum DYTC_command {
     DYTC_CMD_QUERY = 0,    /* Get DYTC Version */

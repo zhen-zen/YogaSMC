@@ -13,22 +13,24 @@ OSDefineMetaClassAndStructors(YogaVPC, IOService);
 
 bool YogaVPC::init(OSDictionary *dictionary)
 {
-    bool res = super::init(dictionary);
-    IOLog("%s Initializing\n", getName());
+    if (!super::init(dictionary))
+        return false;;
+    name = "";
+    DebugLog("Initializing\n");
 
     extern kmod_info_t kmod_info;
     setProperty("YogaSMC,Build", __DATE__);
     setProperty("YogaSMC,Version", kmod_info.version);
 
-    return res;
+    return true;
 }
 
 IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
 {
-    IOLog("%s::%s Probing\n", getName(), provider->getName());
+    name = provider->getName();
+    DebugLog("Probing\n");
 
-    vpc = OSDynamicCast(IOACPIPlatformDevice, provider);
-    if (!vpc)
+    if (!(vpc = OSDynamicCast(IOACPIPlatformDevice, provider)))
         return nullptr;
 
     IORegistryEntry* parent = vpc->getParentEntry(gIOACPIPlane);
@@ -46,21 +48,19 @@ IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
 }
 
 bool YogaVPC::start(IOService *provider) {
-    bool res = super::start(provider);
-
-    name = provider->getName();
-
-    IOLog("%s::%s Starting\n", getName(), name);
-
-    if (!initVPC())
+    if (!super::start(provider))
         return false;
+    DebugLog("Starting\n");
 
     workLoop = IOWorkLoop::workLoop();
     commandGate = IOCommandGate::commandGate(this);
     if (!workLoop || !commandGate || (workLoop->addEventSource(commandGate) != kIOReturnSuccess)) {
-        IOLog("%s::%s Failed to add commandGate\n", getName(), name);
+        AlwaysLog("Failed to add commandGate\n");
         return false;
     }
+
+    if (!initVPC())
+        return false;
 
     updateAll();
 
@@ -70,7 +70,7 @@ bool YogaVPC::start(IOService *provider) {
 
     setProperty(kDeliverNotifications, kOSBooleanTrue);
     registerService();
-    return res;
+    return true;
 }
 
 bool YogaVPC::initVPC() {
@@ -102,10 +102,10 @@ bool YogaVPC::initVPC() {
             } else {
                 setProperty("DYTC", false);
             }
-            IOLog(updateSuccess, getName(), name, DYTCPrompt, DYTCCap);
+            IOLog(updateSuccess, DYTCPrompt, DYTCCap);
         } else {
             setProperty("DYTC", "error");
-            IOLog(updateFailure, getName(), name, DYTCPrompt);
+            IOLog(updateFailure, DYTCPrompt);
         }
     }
 
@@ -114,14 +114,14 @@ bool YogaVPC::initVPC() {
 
 bool YogaVPC::exitVPC() {
     if (clamshellMode) {
-        IOLog("%s::%s Disabling clamshell mode\n", getName(), name);
+        AlwaysLog("Disabling clamshell mode\n");
         toggleClamshell();
     }
     return true;
 }
 
 void YogaVPC::stop(IOService *provider) {
-    IOLog("%s::%s Stopping\n", getName(), name);
+    DebugLog("Stopping\n");
     exitVPC();
 #ifndef ALTER
     if (smc) {
@@ -166,94 +166,68 @@ void YogaVPC::updateAll() {
 }
 
 void YogaVPC::setPropertiesGated(OSObject* props) {
-    if (!vpc) {
-        IOLog(VPCUnavailable, getName(), name);
-        return;
-    }
-
     OSDictionary* dict = OSDynamicCast(OSDictionary, props);
     if (!dict)
         return;
 
-//    IOLog("%s: %d objects in properties\n", getName(), name, dict->getCount());
+//    IOLog("%s: %d objects in properties\n", dict->getCount());
     OSCollectionIterator* i = OSCollectionIterator::withCollection(dict);
 
     if (i) {
         while (OSString* key = OSDynamicCast(OSString, i->getNextObject())) {
             if (key->isEqualTo(clamshellPrompt)) {
-                OSBoolean * value = OSDynamicCast(OSBoolean, dict->getObject(clamshellPrompt));
-                if (value == nullptr) {
-                    IOLog(valueInvalid, getName(), name, clamshellPrompt);
-                    continue;
-                }
-
+                OSBoolean * value;
+                getPropertyBoolean(clamshellPrompt);
                 updateClamshell(false);
-
                 if (value->getValue() == clamshellMode) {
-                    IOLog(valueMatched, getName(), name, clamshellPrompt, clamshellMode);
+                    IOLog(valueMatched, clamshellPrompt, clamshellMode);
                 } else {
                     toggleClamshell();
                 }
             } else if (key->isEqualTo(backlightPrompt)) {
-                OSNumber * value = OSDynamicCast(OSNumber, dict->getObject(backlightPrompt));
-                if (value == nullptr) {
-                    IOLog(valueInvalid, getName(), name, backlightPrompt);
-                    continue;
-                }
-
+                OSNumber * value;
+                getPropertyNumber(backlightPrompt);
                 updateBacklight(false);
-
                 if (value->unsigned32BitValue() == backlightLevel)
-                    IOLog(valueMatched, getName(), name, backlightPrompt, backlightLevel);
+                    IOLog(valueMatched, backlightPrompt, backlightLevel);
                 else
                     setBacklight(value->unsigned32BitValue());
             } else if (key->isEqualTo(autoBacklightPrompt)) {
-                OSNumber * value = OSDynamicCast(OSNumber, dict->getObject(autoBacklightPrompt));
-                if (value == nullptr || value->unsigned8BitValue() > 3) {
-                    IOLog(valueInvalid, getName(), name, autoBacklightPrompt);
-                    continue;
-                }
-
-                if (value->unsigned8BitValue() == automaticBacklightMode) {
-                    IOLog(valueMatched, getName(), name, autoBacklightPrompt, automaticBacklightMode);
+                OSNumber * value;
+                getPropertyNumber(autoBacklightPrompt);
+                if (value->unsigned8BitValue() > 3) {
+                    IOLog(valueInvalid, autoBacklightPrompt);
+                } else if (value->unsigned8BitValue() == automaticBacklightMode) {
+                    IOLog(valueMatched, autoBacklightPrompt, automaticBacklightMode);
                 } else {
                     automaticBacklightMode = value->unsigned8BitValue();
                     setProperty(autoBacklightPrompt, automaticBacklightMode, 8);
                 }
             } else if (key->isEqualTo("ReadECOffset")) {
                 if (!ECReadCap) {
-                    IOLog("%s::%s %s not supported\n", getName(), name, "EC Read");
+                    AlwaysLog("%s not supported\n", "EC Read");
                     continue;
                 }
-                OSNumber * value = OSDynamicCast(OSNumber, dict->getObject("ReadECOffset"));
-                if (value == nullptr) {
-                    IOLog("%s::%s invalid number\n", getName(), name);
-                    continue;
-                }
+                OSNumber * value;
+                getPropertyNumber("ReadECOffset");
                 dumpECOffset(value->unsigned32BitValue());
             } else if (key->isEqualTo("ReadECName")) {
-                OSString *value = OSDynamicCast(OSString, dict->getObject("ReadECName"));
-                if (!value) {
-                    IOLog("%s::%s invalid name\n", getName(), name);
-                    continue;
-                }
+                OSString *value;
+                getPropertyString("ReadECName");
                 if (value->getLength() !=4) {
-                    IOLog("%s::%s invalid length %d\n", getName(), name, value->getLength());
+                    AlwaysLog("invalid length %d\n", value->getLength());
                     continue;
                 }
                 UInt32 result;
                 if (readECName(value->getCStringNoCopy(), &result) == kIOReturnSuccess)
-                    IOLog("%s::%s %s: 0x%02x\n", getName(), name, value->getCStringNoCopy(), result);
+                    AlwaysLog("%s: 0x%02x\n", value->getCStringNoCopy(), result);
             } else if (key->isEqualTo(DYTCPrompt)) {
                 if (!DYTCCap) {
-                    IOLog("%s::%s %s not supported\n", getName(), name, DYTCPrompt);
+                    AlwaysLog("%s not supported\n", DYTCPrompt);
                     continue;
                 }
-                OSString * value = OSDynamicCast(OSString, dict->getObject(DYTCPrompt));
-                if (value == nullptr) {
-                    IOLog(valueInvalid, getName(), name, DYTCPrompt);
-                    continue;
-                }
+                OSString *value;
+                getPropertyString(DYTCPrompt);
                 int mode;
                 switch (value->getChar(0)) {
                     case 'l':
@@ -278,17 +252,17 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
                         break;
 
                     default:
-                        IOLog(valueInvalid, getName(), name, DYTCPrompt);
+                        IOLog(valueInvalid, DYTCPrompt);
                         continue;;
                 }
                 if (!setDYTC(mode))
-                    IOLog(toggleFailure, getName(), name, DYTCPrompt);
+                    IOLog(toggleFailure, DYTCPrompt);
                 else
-                    IOLog(toggleSuccess, getName(), name, DYTCPrompt, mode, "see ioreg");
+                    IOLog(toggleSuccess, DYTCPrompt, mode, "see ioreg");
             } else if (key->isEqualTo(updatePrompt)) {
                 updateAll();
             } else {
-                IOLog("%s::%s Unknown property %s\n", getName(), name, key->getCStringNoCopy());
+                AlwaysLog("Unknown property %s\n", key->getCStringNoCopy());
             }
         }
         i->release();
@@ -304,10 +278,10 @@ IOReturn YogaVPC::setProperties(OSObject *props) {
 
 IOReturn YogaVPC::message(UInt32 type, IOService *provider, void *argument) {
     if (argument) {
-        IOLog("%s::%s message: type=%x, provider=%s, argument=0x%04x\n", getName(), name, type, provider->getName(), *((UInt32 *) argument));
+        AlwaysLog("message: type=%x, provider=%s, argument=0x%04x\n", type, provider->getName(), *((UInt32 *) argument));
         updateAll();
     } else {
-        IOLog("%s::%s message: type=%x, provider=%s\n", getName(), name, type, provider->getName());
+        AlwaysLog("message: type=%x, provider=%s\n", type, provider->getName());
     }
     return kIOReturnSuccess;
 }
@@ -319,14 +293,14 @@ bool YogaVPC::updateClamshell(bool update) {
     UInt32 state;
 
     if (vpc->evaluateInteger(getClamshellMode, &state) != kIOReturnSuccess) {
-        IOLog(updateFailure, getName(), name, clamshellPrompt);
+        IOLog(updateFailure, clamshellPrompt);
         return false;
     }
 
     clamshellMode = state ? true : false;
 
     if (update) {
-        IOLog(updateSuccess, getName(), name, clamshellPrompt, state);
+        IOLog(updateSuccess, clamshellPrompt, state);
         setProperty(clamshellPrompt, clamshellMode);
     }
 
@@ -344,19 +318,19 @@ bool YogaVPC::toggleClamshell() {
     };
 
     if (vpc->evaluateInteger(setClamshellMode, &result, params, 1) != kIOReturnSuccess || result != 0) {
-        IOLog(toggleFailure, getName(), name, clamshellPrompt);
+        IOLog(toggleFailure, clamshellPrompt);
         return false;
     }
 
     clamshellMode = !clamshellMode;
-    IOLog(toggleSuccess, getName(), name, clamshellPrompt, clamshellMode, (clamshellMode ? "on" : "off"));
+    IOLog(toggleSuccess, clamshellPrompt, clamshellMode, (clamshellMode ? "on" : "off"));
     setProperty(clamshellPrompt, clamshellMode);
 
     return true;
 }
 
 IOReturn YogaVPC::setPowerState(unsigned long powerState, IOService *whatDevice){
-    IOLog("%s::%s powerState %ld : %s\n", getName(), name, powerState, powerState ? "on" : "off");
+    AlwaysLog("powerState %ld : %s\n", powerState, powerState ? "on" : "off");
 
     if (whatDevice != this)
         return kIOReturnInvalid;
@@ -387,11 +361,11 @@ bool YogaVPC::DYTCCommand(UInt32 command, UInt64* result, UInt8 ICFunc, UInt8 IC
     };
 
     if (vpc->evaluateInteger(setThermalControl, result, params, 1) != kIOReturnSuccess) {
-        IOLog(toggleFailure, getName(), name, DYTCPrompt);
+        IOLog(toggleFailure, DYTCPrompt);
         return false;
     }
 #ifdef DEBUG
-    IOLog("%s::%s %s 0x%llx 0x%llx\n", getName(), name, DYTCPrompt, cmd, *result);
+    AlwaysLog("%s 0x%llx 0x%llx\n", DYTCPrompt, cmd, *result);
 #endif
     return true;
 }
@@ -440,7 +414,7 @@ bool YogaVPC::updateDYTC(bool update) {
             break;
 
         default:
-            IOLog(valueUnknown, getName(), name, DYTCFuncPrompt, funcmode);
+            IOLog(valueUnknown, DYTCFuncPrompt, funcmode);
             char Unknown[10];
             snprintf(Unknown, 10, "Unknown:%1x", funcmode);
             value = OSString::withCString(Unknown);
@@ -467,7 +441,7 @@ bool YogaVPC::updateDYTC(bool update) {
             break;
 
         default:
-            IOLog(valueUnknown, getName(), name, DYTCPerfPrompt, perfmode);
+            IOLog(valueUnknown, DYTCPerfPrompt, perfmode);
             char Unknown[10];
             snprintf(Unknown, 10, "Unknown:%1x", perfmode);
             value = OSString::withCString(Unknown);
@@ -479,7 +453,7 @@ bool YogaVPC::updateDYTC(bool update) {
     status->release();
 
     if (update)
-        IOLog("%s::%s %s 0x%llx\n", getName(), name, DYTCPrompt, result);
+        AlwaysLog("%s 0x%llx\n", DYTCPrompt, result);
     return true;
 }
 
@@ -537,11 +511,11 @@ IOReturn YogaVPC::readECName(const char* name, UInt32 *result) {
             break;
 
         case kIOReturnBadArgument:
-            IOLog("%s::%s read %s failed, bad argument (field size too large?)\n", getName(), name, name);
+            AlwaysLog("read %s failed, bad argument (field size too large?)\n", name);
             break;
             
         default:
-            IOLog("%s::%s read %s failed %x\n", getName(), name, name, ret);
+            AlwaysLog("read %s failed %x\n", name, ret);
             break;
     }
     return ret;
@@ -554,7 +528,7 @@ IOReturn YogaVPC::method_re1b(UInt32 offset, UInt32 *result) {
 
     IOReturn ret = ec->evaluateInteger(readECOneByte, result, params, 1);
     if (ret != kIOReturnSuccess)
-        IOLog("%s::%s read 0x%02x failed\n", getName(), name, offset);
+        AlwaysLog("read 0x%02x failed\n", offset);
 
     return ret;
 }
@@ -572,13 +546,13 @@ IOReturn YogaVPC::method_recb(UInt32 offset, UInt32 size, OSData **data) {
     OSObject* result;
 
     if (ec->evaluateObject(readECBytes, &result, params, 2) != kIOReturnSuccess || !(*data = OSDynamicCast(OSData, result))) {
-        IOLog("%s::%s read %d bytes @ 0x%02x failed\n", getName(), name, size, offset);
+        AlwaysLog("read %d bytes @ 0x%02x failed\n", size, offset);
         OSSafeReleaseNULL(result);
         return kIOReturnInvalid;
     }
 
     if ((*data)->getLength() != size) {
-        IOLog("%s::%s read %d bytes @ 0x%02x, got %d bytes\n", getName(), name, size, offset, (*data)->getLength());
+        AlwaysLog("read %d bytes @ 0x%02x, got %d bytes\n", size, offset, (*data)->getLength());
         OSSafeReleaseNULL(result);
         return kIOReturnNoBandwidth;
     }
@@ -598,7 +572,7 @@ IOReturn YogaVPC::method_we1b(UInt32 offset, UInt32 value) {
 
     IOReturn ret = ec->evaluateInteger(writeECOneByte, &result, params, 2);
     if (ret != kIOReturnSuccess)
-        IOLog("%s::%s write 0x%02x @ 0x%02x failed\n", getName(), name, value, offset);
+        AlwaysLog("write 0x%02x @ 0x%02x failed\n", value, offset);
 
     return ret;
 }
@@ -609,7 +583,7 @@ bool YogaVPC::dumpECOffset(UInt32 value) {
     if (size) {
         UInt32 offset = value & 0xff;
         if (offset + size > 0x100) {
-            IOLog("%s::%s read %d bytes @ 0x%02x exceeded\n", getName(), name, size, offset);
+            AlwaysLog("read %d bytes @ 0x%02x exceeded\n", size, offset);
         } else {
             OSData* result;
             if (method_recb(offset, size, &result) == kIOReturnSuccess) {
@@ -617,19 +591,19 @@ bool YogaVPC::dumpECOffset(UInt32 value) {
                 int len = 0x10;
                 char *buf = new char[len*3];
                 if (size > 8) {
-                    IOLog("%s::%s %d bytes @ 0x%02x\n", getName(), name, size, offset);
+                    AlwaysLog("%d bytes @ 0x%02x\n", size, offset);
                     for (int i = 0; i < size; i += len) {
                         memset(buf, 0, len*3);
                         for (int j = 0; j < (len < size-i ? len : size-i); j++)
                             snprintf(buf+3*j, 4, "%02x ", data[i+j]);
                         buf[len*3-1] = '\0';
-                        IOLog("%s::%s 0x%02x: %s\n", getName(), name, offset+i, buf);
+                        AlwaysLog("0x%02x: %s\n", offset+i, buf);
                     }
                 } else {
                     for (int j = 0; j < size; j++)
                         snprintf(buf+3*j, 4, "%02x ", data[j]);
                     buf[size*3-1] = '\0';
-                    IOLog("%s::%s %d bytes @ 0x%02x: %s\n", getName(), name, size, offset, buf);
+                    AlwaysLog("%d bytes @ 0x%02x: %s\n", size, offset, buf);
                 }
                 delete [] buf;
                 result->release();
@@ -639,7 +613,7 @@ bool YogaVPC::dumpECOffset(UInt32 value) {
     } else {
         UInt32 integer;
         if (method_re1b(value, &integer) == kIOReturnSuccess) {
-            IOLog("%s::%s 0x%02x: %02x\n", getName(), name, value, integer);
+            AlwaysLog("0x%02x: %02x\n", value, integer);
             ret = true;
         }
     }

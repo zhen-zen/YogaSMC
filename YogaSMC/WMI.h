@@ -69,6 +69,7 @@ public:
     inline OSDictionary* getEvent() { return mEvent; }
 
 private:
+    inline const char *getName() {return mDevice->getName();}
     bool extractData();
     bool extractBMF();
     void parseWDGEntry(struct WMI_DATA * block);

@@ -1,30 +1,71 @@
-/*
- *  Released under "The GNU General Public License (GPL-2.0)"
- *
- *  This program is free software; you can redistribute it and/or modify it
- *  under the terms of the GNU General Public License as published by the
- *  Free Software Foundation; either version 2 of the License, or (at your
- *  option) any later version.
- *
- *  This program is distributed in the hope that it will be useful, but
- *  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- *  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
- *  for more details.
- *
- *  You should have received a copy of the GNU General Public License along
- *  with this program; if not, write to the Free Software Foundation, Inc.,
- *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
+//  SPDX-License-Identifier: GPL-2.0-only
+//
+//  common.h
+//  YogaSMC
+//
+//  Created by Zhen on 8/23/20.
+//  Copyright © 2020 Zhen. All rights reserved.
+//
 
 #ifndef common_h
 #define common_h
 
 #ifdef DEBUG
-#define DebugLog(args...) do { IOLog("YogaWMI::" args); } while (0)
+#define DebugLog(str, ...) do { IOLog("%s::%s " str, getName(), name, ## __VA_ARGS__); } while (0)
 #else
-#define DebugLog(args...) do { } while (0)
+#define DebugLog(str, ...) do { } while (0)
 #endif
-#define AlwaysLog(args...) do { IOLog("YogaWMI::" args); } while (0)
+#define AlwaysLog(str, ...) do { IOLog("%s::%s " str, getName(), name, ## __VA_ARGS__); } while (0)
+
+#define BIT(nr) (1U << (nr))
+
+#define getPropertyBoolean(prompt)     \
+    do { \
+        value = OSDynamicCast(OSBoolean, dict->getObject(prompt));   \
+        if (value == nullptr) { \
+            AlwaysLog(valueInvalid, prompt);  \
+            continue;   \
+        } \
+    } while (0)
+
+#define getPropertyNumber(prompt)     \
+    do { \
+        value = OSDynamicCast(OSNumber, dict->getObject(prompt));   \
+        if (value == nullptr) { \
+            AlwaysLog(valueInvalid, prompt);  \
+            continue;   \
+        } \
+    } while (0)
+
+#define getPropertyString(prompt)     \
+    do { \
+        value = OSDynamicCast(OSString, dict->getObject(prompt));   \
+        if (value == nullptr) { \
+            AlwaysLog(valueInvalid, prompt);  \
+            continue;   \
+        } \
+    } while (0)
+
+#define setPropertyBoolean(dict, name, boolean) \
+    do { dict->setObject(name, boolean ? kOSBooleanTrue : kOSBooleanFalse); } while (0)
+
+// define a OSNumber(OSObject) *value before use
+#define setPropertyNumber(dict, name, number, bits) \
+    do { \
+        value = OSNumber::withNumber(number, bits); \
+        if (value != nullptr) { \
+            dict->setObject(name, value); \
+            value->release(); \
+        } \
+    } while (0)
+
+#define setPropertyString(dict, name, str) \
+    do { \
+        value = OSString::withCString(str); \
+        if (value != nullptr) { \
+            dict->setObject(name, value); \
+            value->release(); \
+        } \
+    } while (0)
 
 #endif /* common_h */

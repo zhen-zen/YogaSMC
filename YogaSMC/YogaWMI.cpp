@@ -13,7 +13,8 @@ OSDefineMetaClassAndStructors(YogaWMI, IOService)
 
 bool YogaWMI::init(OSDictionary *dictionary)
 {
-    bool res = super::init(dictionary);
+    if(!super::init(dictionary))
+        return false;;
     IOLog("%s Initializing\n", getName());
 
     _deliverNotification = OSSymbol::withCString(kDeliverNotifications);
@@ -26,7 +27,7 @@ bool YogaWMI::init(OSDictionary *dictionary)
     setProperty("YogaSMC,Build", __DATE__);
     setProperty("YogaSMC,Version", kmod_info.version);
 
-    return res;
+    return true;
 }
 
 IOService *YogaWMI::probe(IOService *provider, SInt32 *score)
@@ -34,21 +35,21 @@ IOService *YogaWMI::probe(IOService *provider, SInt32 *score)
     name = provider->getName();
 
     if (strncmp(name, "WTBT", 4) == 0) {
-        IOLog("%s::%s exiting on Thunderbolt interface\n", getName(), name);
+        DebugLog("Exit on Thunderbolt interface\n");
         return nullptr;
     }
 
     if (provider->getClient() != this) {
-        IOLog("%s::%s already loaded, exiting\n", getName(), name);
+        DebugLog("Already loaded, exiting\n");
         return nullptr;
     }
 
-    IOLog("%s::%s Probing\n", getName(), name);
+    DebugLog("Probing\n");
 
     IOACPIPlatformDevice *vpc {nullptr};
 
     if(getVPCName() && !findPNP(getVPCName(), &vpc)) {
-        IOLog("%s::%s Failed to find VPC\n", getName(), name);
+        AlwaysLog("Failed to find VPC\n");
         return nullptr;
     }
 
@@ -57,36 +58,36 @@ IOService *YogaWMI::probe(IOService *provider, SInt32 *score)
 
 void YogaWMI::checkEvent(const char *cname, UInt32 id) {
     if (id == kIOACPIMessageReserved)
-        IOLog("%s::%s found reserved notify id 0x%x for %s\n", getName(), name, id, cname);
+        AlwaysLog("found reserved notify id 0x%x for %s\n", id, cname);
     else
-        IOLog("%s::%s found unknown notify id 0x%x for %s\n", getName(), name, id, cname);
+        AlwaysLog("found unknown notify id 0x%x for %s\n", id, cname);
 }
 
 void YogaWMI::getNotifyID(OSString *key) {
     OSDictionary *item = OSDynamicCast(OSDictionary, Event->getObject(key));
     if (!item) {
-        IOLog("%s::%s found unparsed notify id %s\n", getName(), name, key->getCStringNoCopy());
+        AlwaysLog("found unparsed notify id %s\n", key->getCStringNoCopy());
         return;
     }
     OSNumber *id = OSDynamicCast(OSNumber, item->getObject(kWMINotifyId));
     if (id != nullptr) {
-        IOLog("%s::%s found invalid notify id %s\n", getName(), name, key->getCStringNoCopy());
+        AlwaysLog("found invalid notify id %s\n", key->getCStringNoCopy());
         return;
     }
     char notify_id_string[3];
     snprintf(notify_id_string, 3, "%2x", id->unsigned8BitValue());
     if (strncmp(key->getCStringNoCopy(), notify_id_string, 2) != 0) {
-        IOLog("%s::%s notify id %s mismatch %x\n", getName(), name, key->getCStringNoCopy(), id->unsigned8BitValue());
+        AlwaysLog("notify id %s mismatch %x\n", key->getCStringNoCopy(), id->unsigned8BitValue());
     }
 
     OSDictionary *mof = OSDynamicCast(OSDictionary, item->getObject("MOF"));
     if (!mof) {
-        IOLog("%s::%s found notify id 0x%x with no description\n", getName(), name, id->unsigned8BitValue());
+        AlwaysLog("found notify id 0x%x with no description\n", id->unsigned8BitValue());
         return;
     }
     OSString *cname = OSDynamicCast(OSString, mof->getObject("__CLASS"));
     if (!cname) {
-        IOLog("%s::%s found notify id 0x%x with no __CLASS\n", getName(), name, id->unsigned8BitValue());
+        AlwaysLog("found notify id 0x%x with no __CLASS\n", id->unsigned8BitValue());
         return;
     }
     checkEvent(cname->getCStringNoCopy(), id->unsigned8BitValue());
@@ -96,7 +97,7 @@ void YogaWMI::getNotifyID(OSString *key) {
 bool YogaWMI::start(IOService *provider)
 {
     bool res = super::start(provider);
-    IOLog("%s::%s Starting\n", getName(), name);
+    AlwaysLog("Starting\n");
 
     YWMI = new WMI(provider);
     YWMI->initialize();
@@ -119,7 +120,7 @@ bool YogaWMI::start(IOService *provider)
     workLoop = IOWorkLoop::workLoop();
     commandGate = IOCommandGate::commandGate(this);
     if (!workLoop || !commandGate || (workLoop->addEventSource(commandGate) != kIOReturnSuccess)) {
-        IOLog("%s::%s Failed to add commandGate\n", getName(), name);
+        AlwaysLog("Failed to add commandGate\n");
         return false;
     }
 
@@ -154,7 +155,7 @@ bool YogaWMI::start(IOService *provider)
 
 void YogaWMI::stop(IOService *provider)
 {
-    IOLog("%s::%s Stopping\n", getName(), name);
+    AlwaysLog("Stopping\n");
 
     if (YWMI) {
         delete YWMI;
@@ -176,7 +177,7 @@ void YogaWMI::stop(IOService *provider)
 }
 
 void YogaWMI::ACPIEvent(UInt32 argument) {
-    IOLog("%s::%s message: Unknown ACPI Notification 0x%x\n", getName(), name, argument);
+    AlwaysLog("message: Unknown ACPI Notification 0x%x\n", argument);
 }
 
 IOReturn YogaWMI::message(UInt32 type, IOService *provider, void *argument) {
@@ -186,14 +187,14 @@ IOReturn YogaWMI::message(UInt32 type, IOService *provider, void *argument) {
             if (argument)
                 ACPIEvent(*(UInt32 *) argument);
             else
-                IOLog("%s::%s message: ACPI provider=%s, unknown argument\n", getName(), name, provider->getName());
+                AlwaysLog("message: ACPI provider=%s, unknown argument\n", provider->getName());
             break;
 
         default:
             if (argument)
-                IOLog("%s::%s message: type=%x, provider=%s, argument=0x%04x\n", getName(), name, type, provider->getName(), *((UInt32 *) argument));
+                AlwaysLog("message: type=%x, provider=%s, argument=0x%04x\n", type, provider->getName(), *((UInt32 *) argument));
             else
-                IOLog("%s::%s message: type=%x, provider=%s, unknown argument\n", getName(), name, type, provider->getName());
+                AlwaysLog("message: type=%x, provider=%s, unknown argument\n", type, provider->getName());
     }
     return kIOReturnSuccess;
 }
@@ -213,7 +214,7 @@ void YogaWMI::dispatchMessageGated(int* message, void* data)
 void YogaWMI::dispatchMessage(int message, void* data)
 {
     if (_notificationServices->getCount() == 0) {
-        IOLog("%s::%s No available notification consumer\n", getName(), name);
+        AlwaysLog("No available notification consumer\n");
         return;
     }
     commandGate->runAction(OSMemberFunctionCast(IOCommandGate::Action, this, &YogaWMI::dispatchMessageGated), &message, data);
@@ -222,12 +223,12 @@ void YogaWMI::dispatchMessage(int message, void* data)
 void YogaWMI::notificationHandlerGated(IOService *newService, IONotifier *notifier)
 {
     if (notifier == _publishNotify) {
-        IOLog("%s::%s Notification consumer published: %s\n", getName(), name, newService->getName());
+        DebugLog("Notification consumer published: %s\n", newService->getName());
         _notificationServices->setObject(newService);
     }
 
     if (notifier == _terminateNotify) {
-        IOLog("%s::%s Notification consumer terminated: %s\n", getName(), name, newService->getName());
+        DebugLog("Notification consumer terminated: %s\n", newService->getName());
         _notificationServices->removeObject(newService);
     }
 }
@@ -241,7 +242,7 @@ bool YogaWMI::notificationHandler(void *refCon, IOService *newService, IONotifie
 bool YogaWMI::findPNP(const char *id, IOACPIPlatformDevice **dev) {
     auto iterator = IORegistryIterator::iterateOver(gIOACPIPlane, kIORegistryIterateRecursively);
     if (!iterator) {
-        IOLog("%s::%s findPNP failed\n", getName(), name);
+        AlwaysLog("findPNP failed\n");
         return false;
     }
     auto pnp = OSString::withCString(id);
@@ -250,7 +251,7 @@ bool YogaWMI::findPNP(const char *id, IOACPIPlatformDevice **dev) {
         if (entry->compareName(pnp)) {
             *dev = OSDynamicCast(IOACPIPlatformDevice, entry);
             if (*dev) {
-                IOLog("%s::%s %s available at %s\n", getName(), name, id, (*dev)->getName());
+                DebugLog("%s available at %s\n", id, (*dev)->getName());
                 break;
             }
         }
@@ -265,7 +266,7 @@ void YogaWMI::toggleTouchpad() {
     dispatchMessage(kSMC_getDisableTouchpad, &TouchPadenabled);
     TouchPadenabled = !TouchPadenabled;
     dispatchMessage(kSMC_setDisableTouchpad, &TouchPadenabled);
-    IOLog("%s::%s TouchPad Input %s\n", getName(), name, TouchPadenabled ? "enabled" : "disabled");
+    DebugLog("TouchPad Input %s\n", TouchPadenabled ? "enabled" : "disabled");
     setProperty("TouchPadEnabled", TouchPadenabled);
 }
 
@@ -273,14 +274,14 @@ void YogaWMI::toggleKeyboard() {
     dispatchMessage(kSMC_getKeyboardStatus, &Keyboardenabled);
     Keyboardenabled = !Keyboardenabled;
     dispatchMessage(kSMC_setKeyboardStatus, &Keyboardenabled);
-    IOLog("%s::%s Keyboard Input %s\n", getName(), name, Keyboardenabled ? "enabled" : "disabled");
+    DebugLog("Keyboard Input %s\n", Keyboardenabled ? "enabled" : "disabled");
     setProperty("KeyboardEnabled", Keyboardenabled);
 }
 
 void YogaWMI::setTopCase(bool enable) {
     dispatchMessage(kSMC_setKeyboardStatus, &enable);
     dispatchMessage(kSMC_setDisableTouchpad, &enable);
-    IOLog("%s::%s TopCase Input %s\n", getName(), name, enable ? "enabled" : "disabled");
+    DebugLog("TopCase Input %s\n", enable ? "enabled" : "disabled");
     setProperty("TopCaseEnabled", enable);
 }
 
@@ -288,15 +289,14 @@ bool YogaWMI::updateTopCase() {
     dispatchMessage(kSMC_getKeyboardStatus, &Keyboardenabled);
     dispatchMessage(kSMC_getDisableTouchpad, &TouchPadenabled);
     if (Keyboardenabled != TouchPadenabled) {
-        IOLog("%s::%s status mismatch: %d, %d\n", getName(), name, Keyboardenabled, TouchPadenabled);
+        AlwaysLog("status mismatch: %d, %d\n", Keyboardenabled, TouchPadenabled);
         return false;
     }
     return true;
 }
 
 IOReturn YogaWMI::setPowerState(unsigned long powerState, IOService *whatDevice){
-    IOLog("%s::%s powerState %ld : %s", getName(), name, powerState, powerState ? "on" : "off");
-
+    DebugLog("powerState %ld : %s", powerState, powerState ? "on" : "off");
     if (whatDevice != this)
         return kIOReturnInvalid;
 

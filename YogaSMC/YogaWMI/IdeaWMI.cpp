@@ -13,7 +13,7 @@ OSDefineMetaClassAndStructors(IdeaWMI, YogaWMI);
 void IdeaWMI::ACPIEvent(UInt32 argument) {
     switch (argument) {
         case kIOACPIMessageReserved:
-            IOLog("%s::%s message: ACPI notification 80\n", getName(), name);
+            AlwaysLog("message: ACPI notification 80\n");
             // force enable keyboard and touchpad
             setTopCase(true);
             dispatchMessage(kSMC_FnlockEvent, NULL);
@@ -21,22 +21,22 @@ void IdeaWMI::ACPIEvent(UInt32 argument) {
 
         case kIOACPIMessageD0:
             if (isYMC) {
-                IOLog("%s::%s message: ACPI notification D0\n", getName(), name);
+                AlwaysLog("message: ACPI notification D0\n");
                 updateYogaMode();
             } else {
-                IOLog("%s::%s message: ACPI notification D0, unknown YMC", getName(), name);
+                AlwaysLog("message: ACPI notification D0, unknown YMC");
             }
             break;
 
         default:
-            IOLog("%s::%s message: Unknown ACPI notification 0x%x\n", getName(), name, argument);
+            AlwaysLog("message: Unknown ACPI notification 0x%x\n", argument);
             break;
     }
     return;
 }
 
 IOReturn IdeaWMI::setPowerState(unsigned long powerState, IOService *whatDevice){
-    IOLog("%s::%s powerState %ld : %s", getName(), name, powerState, powerState ? "on" : "off");
+    AlwaysLog("powerState %ld : %s", powerState, powerState ? "on" : "off");
 
     if (whatDevice != this)
         return kIOReturnInvalid;
@@ -44,7 +44,7 @@ IOReturn IdeaWMI::setPowerState(unsigned long powerState, IOService *whatDevice)
     if (isYMC) {
         if (powerState == 0) {
             if (YogaMode != kYogaMode_laptop) {
-                IOLog("%s::%s Re-enabling top case\n", getName(), name);
+                AlwaysLog("Re-enabling top case\n");
                 setTopCase(true);
             }
         } else {
@@ -60,7 +60,7 @@ void IdeaWMI::processWMI() {
             setProperty("Feature", "Yoga Mode Control");
             isYMC = true;
         } else {
-            IOLog("%s::%s YMC method not found\n", getName(), name);
+            AlwaysLog("YMC method not found\n");
         }
     }
 
@@ -90,11 +90,11 @@ void IdeaWMI::updateYogaMode() {
     
     if (!YWMI->executeInteger(GSENSOR_DATA_WMI_METHOD, &value, params, 3)) {
         setProperty("YogaMode", false);
-        IOLog("%s::%s YogaMode: detection failed\n", getName(), name);
+        AlwaysLog("YogaMode: detection failed\n");
         return;
     }
 
-    IOLog("%s::%s YogaMode: %d\n", getName(), name, value);
+    AlwaysLog("YogaMode: %d\n", value);
     bool sync = updateTopCase();
     if (YogaMode == value && sync)
         return;
@@ -124,7 +124,7 @@ void IdeaWMI::updateYogaMode() {
             break;
 
         default:
-            IOLog("%s::%s Unknown yoga mode: %d\n", getName(), name, value);
+            AlwaysLog("Unknown yoga mode: %d\n", value);
             setProperty("YogaMode", value, 32);
             return;
     }
@@ -134,7 +134,7 @@ void IdeaWMI::updateYogaMode() {
 
 void IdeaWMI::stop(IOService *provider) {
     if (YogaMode != kYogaMode_laptop) {
-        IOLog("%s::%s Re-enabling top case\n", getName(), name);
+        AlwaysLog("Re-enabling top case\n");
         setTopCase(true);
     }
     super::stop(provider);
@@ -148,32 +148,32 @@ OSString * IdeaWMI::getBatteryInfo(UInt32 index) {
     };
 
     if (!YWMI->executeMethod(BAT_INFO_WMI_STRING, &result, params, 1)) {
-        IOLog("%s::%s WBAT evaluation failed\n", getName(), name);
+        AlwaysLog("WBAT evaluation failed\n");
         return OSString::withCString("evaluation failed");
     }
 
     OSString *info = OSDynamicCast(OSString, result);
 
     if (!info) {
-        IOLog("%s::%s WBAT result not a string\n", getName(), name);
+        AlwaysLog("WBAT result not a string\n");
         return OSString::withCString("result not a string");
     }
-    IOLog("%s::%s WBAT %s", getName(), name, info->getCStringNoCopy());
+    AlwaysLog("WBAT %s", info->getCStringNoCopy());
     return info;
 }
 
 void IdeaWMI::checkEvent(const char *cname, UInt32 id) {
     switch (id) {
         case kIOACPIMessageReserved:
-            IOLog("%s::%s found reserved notify id 0x%x for %s\n", getName(), name, id, cname);
+            AlwaysLog("found reserved notify id 0x%x for %s\n", id, cname);
             break;
             
         case kIOACPIMessageD0:
-            IOLog("%s::%s found YMC notify id 0x%x for %s\n", getName(), name, id, cname);
+            AlwaysLog("found YMC notify id 0x%x for %s\n", id, cname);
             break;
             
         default:
-            IOLog("%s::%s found unknown notify id 0x%x for %s\n", getName(), name, id, cname);
+            AlwaysLog("found unknown notify id 0x%x for %s\n", id, cname);
             break;
     }
 }
