@@ -56,7 +56,7 @@ bool ThinkVPC::setConservation(const char * method, UInt32 value) {
     }
 
     DebugLog(updateSuccess, method, result);
-    updateBattery(batnum);
+    updateBattery();
 
     return true;
 }
@@ -255,30 +255,27 @@ bool ThinkVPC::updateAdaptiveKBD(int arg) {
     return true;
 }
 
-void ThinkVPC::updateBattery(int battery) {
-    switch (battery) {
+void ThinkVPC::updateBattery(bool update) {
+    switch (batnum) {
         case BAT_ANY:
-            batnum = BAT_ANY;
-            break;
         case BAT_PRIMARY:
-            batnum = BAT_PRIMARY;
-            break;
         case BAT_SECONDARY:
-            batnum = BAT_SECONDARY;
             break;
-            
+
         default:
+            batnum = BAT_PRIMARY;
             AlwaysLog(valueInvalid, batteryPrompt);
             return;
     }
 
-    DebugLog(updateSuccess, batteryPrompt, batnum);
-
-    updateConservation(getCMstart);
-    updateConservation(getCMstop);
-    updateConservation(getCMInhibitCharge);
-    updateConservation(getCMForceDischarge);
-    updateConservation(getCMPeakShiftState);
+    if (updateConservation(getCMstart) &&
+        updateConservation(getCMstop) &&
+        updateConservation(getCMInhibitCharge) &&
+        updateConservation(getCMForceDischarge) &&
+        updateConservation(getCMPeakShiftState))
+        DebugLog(updateSuccess, batteryPrompt, batnum);
+    else
+        AlwaysLog(updateFailure, batteryPrompt);
 }
 
 void ThinkVPC::setPropertiesGated(OSObject *props) {
@@ -304,6 +301,18 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 OSNumber * value;
                 getPropertyNumber("setCMstop");
                 setConservation(setCMstop, value->unsigned8BitValue());
+            } else if (key->isEqualTo("setCMInhibitCharge")) {
+                OSNumber * value;
+                getPropertyNumber("setCMInhibitCharge");
+                setConservation(setCMInhibitCharge, value->unsigned8BitValue());
+            } else if (key->isEqualTo("setCMForceDischarge")) {
+                OSNumber * value;
+                getPropertyNumber("setCMForceDischarge");
+                setConservation(setCMForceDischarge, value->unsigned8BitValue());
+            } else if (key->isEqualTo("setCMPeakShiftState")) {
+                OSNumber * value;
+                getPropertyNumber("setCMPeakShiftState");
+                setConservation(setCMPeakShiftState, value->unsigned8BitValue());
             } else if (key->isEqualTo(mutePrompt)) {
                 OSNumber * value;
                 getPropertyNumber(mutePrompt);

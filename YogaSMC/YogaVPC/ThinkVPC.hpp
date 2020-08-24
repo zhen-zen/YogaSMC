@@ -334,9 +334,9 @@ private:
     /**
      *  Update battery status
      *
-     *  @param battery battery number     BAT_ANY = 0, BAT_PRIMARY = 1, BAT_SECONDARY = 2
+     *  @param update only update internal status when false
      */
-    void updateBattery(int battery);
+    void updateBattery(bool update=true);
 
     /**
      *  Set Fan control status
