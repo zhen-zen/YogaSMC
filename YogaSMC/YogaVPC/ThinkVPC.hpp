@@ -136,9 +136,16 @@ private:
     static constexpr const char *getHKEYAdaptive       = "MHKA";
     static constexpr const char *getHKEYevent          = "MHKP";
 //    static constexpr const char *getHKEYstatus         = "DHKC"; // Actually a NameObj, not a method
-    static constexpr const char *setHKEYstatus         = "MHKC";
+    static constexpr const char *setHKEYenable         = "MHKE"; // DHKB, higher layer, _PTS/_OWAK
+    static constexpr const char *setHKEYstatus         = "MHKC"; // DHKC
     static constexpr const char *getHKEYmask           = "MHKN";
     static constexpr const char *setHKEYmask           = "MHKM";
+    static constexpr const char *setHKEYBeep           = "MHKB";
+    static constexpr const char *setHKEYsleep          = "MHKS"; // Trigger sleep button
+    static constexpr const char *setHKEYlid            = "MHKD"; // Force lid close?
+
+    static constexpr const char *setBeep               = "BEEP"; // EC
+    static constexpr const char *setLED                = "LED"; // EC
 
     static constexpr const char *getCMstart            = "BCTG";
     static constexpr const char *setCMstart            = "BCCS";
@@ -154,10 +161,6 @@ private:
     static constexpr const char *getKBDBacklightLevel  = "MLCG";
     static constexpr const char *setKBDBacklightLevel  = "MLCS";
 
-    static constexpr const char *setHKEYBeep           = "MHKB";
-    static constexpr const char *setBeep               = "BEEP"; // EC
-    static constexpr const char *setLED                = "LED"; // EC
-
     static constexpr const char *getAudioMutestatus    = "HAUM"; // EC
     static constexpr const char *setAudioMutestatus    = "SAUM";
     static constexpr const char *getAudioMuteLED       = "GSMS";
@@ -168,6 +171,27 @@ private:
 
     static constexpr const char *getThermalControl     = "MHGT";
     static constexpr const char *setThermalControl     = "MHAT";
+
+    //    DSSG
+    //    DSSS
+    //    SBSG
+    //    SBSS
+    //    PBLG
+    //    PBLS
+    //    PMSG
+    //    PMSS
+    //    ISSG
+    //    ISSS
+    //    INSG
+    //    INSS
+    //
+    //    Call FNSC:
+    //    GMKS
+    //    SMKS
+    //    GSKL
+    //    SSKL
+    //    GHSL
+    //    SHSL
 
     /**
      * All events supported by DHKN

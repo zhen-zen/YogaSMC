@@ -313,6 +313,12 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 OSNumber * value;
                 getPropertyNumber("setCMPeakShiftState");
                 setConservation(setCMPeakShiftState, value->unsigned8BitValue());
+            } else if (key->isEqualTo("GMKS") || key->isEqualTo("GSKL") || key->isEqualTo("GHSL")) {
+                UInt32 result;
+                if (vpc->evaluateInteger(key->getCStringNoCopy(), &result))
+                    AlwaysLog(updateSuccess, key->getCStringNoCopy(), result);
+                else
+                    AlwaysLog(updateFailure, key->getCStringNoCopy());
             } else if (key->isEqualTo(mutePrompt)) {
                 OSNumber * value;
                 getPropertyNumber(mutePrompt);
