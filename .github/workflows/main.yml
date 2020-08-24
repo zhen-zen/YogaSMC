@@ -78,4 +78,10 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: YogaSMC-Release
-        path: build/Release
+        path: 
+          build/Release/
+          !build/Release/*.dSYM
+    - uses: actions/upload-artifact@v2
+      with:
+        name: YogaSMC-Release-with-dSYM
+        path: build/Release/
