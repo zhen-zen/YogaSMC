@@ -25,7 +25,7 @@ jobs:
       run: curl -L https://github.com/alexey-lysiuk/macos-sdk/releases/download/10.12/MacOSX10.12.tar.bz2 -o /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.tar.bz2 && tar -xjf /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.tar.bz2 -C /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/
     - name: Download Lilu / VirtualSMC SDK (script from hieplpvip/AsusSMC (Acidanthera/Lilu))
       run: src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/hieplpvip/AsusSMC/master/Scripts/bootstrap.sh) && eval "$src" || exit 1
-    - name: Xcodebuild Action
+    - name: Xcodebuild Debug
       uses: sersoft-gmbh/xcodebuild-action@v1.1
       with:
         # The path to the xcworkspace to build. Mutually exclusive with `project`.
@@ -37,7 +37,30 @@ jobs:
         # The destination specifier to build.
         # destination: # optional
         # The configuration to build.
-        configuration: [ Debug, Release ]
+        configuration: Debug
+        # The SDK to use for building.
+        sdk: macosx10.12 # optional
+        # A list of tests to skip.
+        #skip-testing: # optional
+        # Arbitrary, space separated build settings (e.g. PLATFORM_NAME=iphonesimulator).
+        build-settings: -target BuildAll
+        # The action to perform (e.g. build, test, ...).
+        action: build # default is test
+        # Whether the output of xcodebuild should be forwarded to xcpretty.
+        #use-xcpretty: # default is true
+    - name: Xcodebuild Release
+      uses: sersoft-gmbh/xcodebuild-action@v1.1
+      with:
+        # The path to the xcworkspace to build. Mutually exclusive with `project`.
+        #workspace: # optional
+        # The path to the xcodeproj to build. Mutually exclusive with `workspace`.
+        project: YogaSMC.xcodeproj # optional
+        # The scheme to build. Required when using a workspace.
+        #scheme: # optional
+        # The destination specifier to build.
+        # destination: # optional
+        # The configuration to build.
+        configuration: Release
         # The SDK to use for building.
         sdk: macosx10.12 # optional
         # A list of tests to skip.
