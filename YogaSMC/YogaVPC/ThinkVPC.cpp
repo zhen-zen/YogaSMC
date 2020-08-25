@@ -315,30 +315,33 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 setConservation(setCMPeakShiftState, value->unsigned8BitValue());
             } else if (key->isEqualTo("GMKS")) {
                 UInt32 result;
-                if (vpc->evaluateInteger("GMKS", &result))
+                IOReturn ret = vpc->evaluateInteger("GMKS", &result);
+                if (ret == kIOReturnSuccess)
                     AlwaysLog(updateSuccess, "GMKS", result);
                 else
-                    AlwaysLog(updateFailure, "GMKS");
+                    AlwaysLog("%s evaluation failed 0x%x\n", "GMKS", ret);
             } else if (key->isEqualTo("GSKL")) {
                 OSNumber * value;
-                getPropertyNumber("setCMForceDischarge");
+                getPropertyNumber("GSKL");
                 UInt32 result;
                 OSObject* params[1] = {
                     value
                 };
-                if (vpc->evaluateInteger("GSKL", &result, params, 1))
+                IOReturn ret = vpc->evaluateInteger("GSKL", &result, params, 1);
+                if (ret == kIOReturnSuccess)
                     AlwaysLog(updateSuccess, "GSKL", result);
                 else
-                    AlwaysLog(updateFailure, "GSKL");
+                    AlwaysLog("%s evaluation failed 0x%x\n", "GSKL", ret);
             } else if (key->isEqualTo("GHSL")) {
                 UInt32 result;
                 OSObject* params[1] = {
                     OSNumber::withNumber(0ULL, 32)
                 };
-                if (vpc->evaluateInteger("GHSL", &result, params, 1))
+                IOReturn ret = vpc->evaluateInteger("GHKL", &result, params, 1);
+                if (ret == kIOReturnSuccess)
                     AlwaysLog(updateSuccess, "GHSL", result);
                 else
-                    AlwaysLog(updateFailure, "GHSL");
+                    AlwaysLog("%s evaluation failed 0x%x\n", "GHSL", ret);
                 params[0]->release();
             } else if (key->isEqualTo(mutePrompt)) {
                 OSNumber * value;
