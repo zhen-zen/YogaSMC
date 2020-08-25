@@ -20,7 +20,7 @@ SMC_RESULT BDVT::update(const SMC_DATA *src) {
     bool newValue = *(reinterpret_cast<const bool *>(src));
     bool *oldValue = reinterpret_cast<bool *>(data);
     YogaSMC *drv = OSDynamicCast(YogaSMC, dst);
-    DBGLOG("vpckey", "%d: BDVT update %d -> %d", ++counteru, *oldValue, newValue);
+    DBGLOG("vpckey", "BDVT update %d -> %d", *oldValue, newValue);
     if (drv)
         drv->dispatchMessage(kSMC_setConservation, &newValue);
     *oldValue = newValue;
@@ -33,7 +33,7 @@ SMC_RESULT CH0B::writeAccess() {
 }
 
 SMC_RESULT CH0B::update(const SMC_DATA *src) {
-    DBGLOG("vpckey", "%d: CH0B update 0x%x -> 0x%x", ++counteru, data[0], src[0]);
+    DBGLOG("vpckey", "CH0B update 0x%x -> 0x%x", data[0], src[0]);
     lilu_os_memcpy(data, src, 1);
     return SmcSuccess;
 }

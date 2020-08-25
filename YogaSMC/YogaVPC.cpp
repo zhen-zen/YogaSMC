@@ -63,8 +63,9 @@ bool YogaVPC::start(IOService *provider) {
         return false;
 
     updateAll();
+#ifndef ALTER
     smc->start(this);
-
+#endif
     PMinit();
     provider->joinPMtree(this);
     registerPowerDriver(this, IOPMPowerStates, kIOPMNumberPowerStates);
