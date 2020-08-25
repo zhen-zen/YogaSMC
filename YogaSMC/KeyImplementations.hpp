@@ -22,7 +22,7 @@ public:
     ECKey(IOService *src=nullptr) : dst(src) {};
 };
 
-class BDVT : public ECKey { using ECKey::ECKey; protected: SMC_RESULT readAccess() override; SMC_RESULT writeAccess() override; bool status {true};};
-class CH0B : public VirtualSMCValue { protected: SMC_RESULT readAccess() override; SMC_RESULT writeAccess() override; SMC_DATA value {0};};
+class BDVT : public ECKey { using ECKey::ECKey; protected: SMC_RESULT writeAccess() override; SMC_RESULT update(const SMC_DATA *src) override; int counteru {0}; int counterw {0};};
+class CH0B : public VirtualSMCValue { protected: SMC_RESULT writeAccess() override; SMC_RESULT update(const SMC_DATA *src) override; int counteru {0}; int counterw {0};};
 
 #endif /* KeyImplementations_hpp */

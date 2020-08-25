@@ -74,8 +74,8 @@ bool YogaSMC::start(IOService *provider) {
 
     }
 
-    VirtualSMCAPI::addKey(KeyBDVT, vsmcPlugin.data, VirtualSMCAPI::valueWithFlag(false, new BDVT(this), SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_WRITE));
-    VirtualSMCAPI::addKey(KeyCH0B, vsmcPlugin.data, VirtualSMCAPI::valueWithFlag(false, new CH0B, SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_WRITE));
+    VirtualSMCAPI::addKey(KeyBDVT, vsmcPlugin.data, VirtualSMCAPI::valueWithFlag(true, new BDVT(this), SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_WRITE));
+    VirtualSMCAPI::addKey(KeyCH0B, vsmcPlugin.data, VirtualSMCAPI::valueWithData(nullptr, 1, SmcKeyTypeHex, new CH0B, SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_WRITE));
     vsmcNotifier = VirtualSMCAPI::registerHandler(vsmcNotificationHandler, this);
 
     registerService();
@@ -170,8 +170,7 @@ YogaSMC* YogaSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) 
     dev->ec = device;
 
     if (!dev->init(dictionary) ||
-        !dev->attach(provider) ||
-        !dev->start(provider)) {
+        !dev->attach(provider)) {
         OSSafeReleaseNULL(dev);
     }
 

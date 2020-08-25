@@ -9,50 +9,32 @@
 #include "KeyImplementations.hpp"
 #include "YogaSMC.hpp"
 
-SMC_RESULT BDVT::readAccess() {
-    bool *ptr = reinterpret_cast<bool *>(data);
-    YogaSMC *drv = OSDynamicCast(YogaSMC, dst);
-    if (drv) {
-        drv->dispatchMessage(kSMC_getConservation, ptr);
-        DBGLOG("vpckey", "BDVT read %d -> %d", status, *ptr);
-        status = *ptr;
-    } else {
-        *ptr = status;
-        DBGLOG("vpckey", "BDVT read %d (no drv)", status);
-    }
-    return SmcSuccess;
-}
-
 SMC_RESULT BDVT::writeAccess() {
-    bool *ptr = reinterpret_cast<bool *>(data);
     YogaSMC *drv = OSDynamicCast(YogaSMC, dst);
-    // update internal status first
-    if (drv) {
-        drv->dispatchMessage(kSMC_getConservation, &status);
-        DBGLOG("vpckey", "BDVT update %d", status);
-    }
-    DBGLOG("vpckey", "BDVT write %d -> %d", *ptr, status);
-    if (status != *ptr) {
-        if (drv) {
-            drv->dispatchMessage(kSMC_setConservation, ptr);
-            drv->dispatchMessage(kSMC_getConservation, &status);
-            DBGLOG("vpckey", "BDVT update %d", status);
-            *ptr = status;
-        } else {
-            status = *ptr;
-        }
-    }
+    if (!drv)
+        return SmcNotWritable;
     return SmcSuccess;
 }
 
-SMC_RESULT CH0B::readAccess() {
-    data[0] = value;
-    DBGLOG("vpckey", "CH0B read %d", value);
+SMC_RESULT BDVT::update(const SMC_DATA *src) {
+    bool newValue = *(reinterpret_cast<const bool *>(src));
+    bool *oldValue = reinterpret_cast<bool *>(data);
+    YogaSMC *drv = OSDynamicCast(YogaSMC, dst);
+    DBGLOG("vpckey", "%d: BDVT update %d -> %d", ++counteru, *oldValue, newValue);
+    if (drv)
+        drv->dispatchMessage(kSMC_setConservation, &newValue);
+    *oldValue = newValue;
     return SmcSuccess;
 }
 
 SMC_RESULT CH0B::writeAccess() {
-    value = data[0];
-    DBGLOG("vpckey", "CH0B write %d", data[0]);
+    // TODO: determine whether charger control is supported
     return SmcSuccess;
 }
+
+SMC_RESULT CH0B::update(const SMC_DATA *src) {
+    DBGLOG("vpckey", "%d: CH0B update 0x%x -> 0x%x", ++counteru, data[0], src[0]);
+    lilu_os_memcpy(data, src, 1);
+    return SmcSuccess;
+}
+

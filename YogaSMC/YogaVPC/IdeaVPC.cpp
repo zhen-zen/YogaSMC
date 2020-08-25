@@ -88,7 +88,7 @@ IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
             break;
 
         case kSMC_YogaEvent:
-            AlwaysLog("message: %s Yoga mode 0x%x\n", provider->getName(), *((UInt32 *) argument));
+            DebugLog("message: %s Yoga mode 0x%x\n", provider->getName(), *((UInt32 *) argument));
             if (backlightCap && automaticBacklightMode & BIT(1)) {
                 updateKeyboard();
                 if (*((UInt32 *) argument) != 1) {
@@ -103,7 +103,7 @@ IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
             break;
 
         case kSMC_FnlockEvent:
-            AlwaysLog("message: %s Fnlock event\n", provider->getName());
+            DebugLog("message: %s Fnlock event\n", provider->getName());
             updateKeyboard();
             toggleFnlock();
             break;
@@ -111,7 +111,7 @@ IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
         case kSMC_getConservation:
             *(bool *)argument = conservationMode;
 //            conservationModeLock = false;
-            AlwaysLog("message: %s get conservation mode %d\n", provider->getName(), conservationMode);
+            DebugLog("message: %s get conservation mode %d\n", provider->getName(), conservationMode);
             break;
 
         case kSMC_setConservation:

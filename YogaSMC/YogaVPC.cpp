@@ -63,6 +63,7 @@ bool YogaVPC::start(IOService *provider) {
         return false;
 
     updateAll();
+    smc->start(this);
 
     PMinit();
     provider->joinPMtree(this);
