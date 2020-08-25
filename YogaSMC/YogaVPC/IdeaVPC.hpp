@@ -174,20 +174,27 @@ private:
      *      }
      *  })
      *
-     *  @param update only update internal status when false
+     *  @param bat0 OSdictionary for battery 0
+     *  @param bat1 OSdictionary for battery 1
      *
      *  @return true if success
      */
-    bool updateBatteryID(bool update=true);
+    bool updateBatteryID(OSDictionary *bat0, OSDictionary *bat1);
 
     /**
      *  Update battery information
      *
      *  @param update only update internal status when false
      *
-     *  @return true if success
+     *  @param bat0 OSdictionary for battery 0
+     *  @param bat1 OSdictionary for battery 1
      */
-    bool updateBatteryInfo(bool update=true);
+    bool updateBatteryInfo(OSDictionary *bat0, OSDictionary *bat1);
+
+    /**
+     *  Rapid charge mode status
+     */
+    void updateBatteryStats();
 
     /**
      *  Update battery conservation mode status
@@ -232,6 +239,7 @@ private:
      *  @return true if success
      */
     bool toggleRapidCharge();
+
     /**
      *  Toggle Fn lock mode
      *
@@ -280,22 +288,6 @@ private:
      *  @return true if success
      */
     bool method_vpcr(UInt32 cmd, UInt32 *result);
-
-    /**
-     *  Read raw date format
-     *
-     *  @param data date seperate by bit 9/5
-     *  @param batnum battery number
-     */
-    void parseRawDate(UInt16 data, int batnum);
-
-    /**
-     *  Read raw temperature format
-     *
-     *  @param data temperature
-     *  @param desc description (used in setProperty)
-     */
-    void parseTemperature(UInt16 data, const char * desc);
 
 public:
     IOReturn message(UInt32 type, IOService *provider, void *argument) APPLE_KEXT_OVERRIDE;

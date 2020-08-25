@@ -213,8 +213,7 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                 else
                     AlwaysLog("%s 0x%x 0x%x failed %d\n", writeECPrompt, command, data, retries);
             } else if (key->isEqualTo(batteryPrompt)) {
-                updateBatteryID();
-                updateBatteryInfo();
+                updateBatteryStats();
             } else if (key->isEqualTo(updatePrompt)) {
                 updateAll();
                 super::updateAll();
@@ -265,12 +264,24 @@ bool IdeaVPC::initEC() {
     else
         setProperty("PrimeKeyType", "FnKey");
 
-    updateBatteryID();
-    updateBatteryInfo();
+    updateBatteryStats();
     return true;
 }
 
-bool IdeaVPC::updateBatteryID(bool update) {
+void IdeaVPC::updateBatteryStats() {
+    OSDictionary *bat0 = OSDictionary::withCapacity(4);
+    OSDictionary *bat1 = OSDictionary::withCapacity(4);
+    if (updateBatteryID(bat0, bat1) && updateBatteryInfo(bat0, bat1)) {
+        if (bat0->getCount())
+            setProperty("Battery 0", bat0);
+        if (bat1->getCount())
+            setProperty("Battery 1", bat1);
+    }
+    bat0->release();
+    bat1->release();
+}
+
+bool IdeaVPC::updateBatteryID(OSDictionary *bat0, OSDictionary *bat1) {
     OSObject *result;
 
     if (vpc->evaluateObject(getBatteryID, &result) != kIOReturnSuccess) {
@@ -286,24 +297,29 @@ bool IdeaVPC::updateBatteryID(bool update) {
         return false;
     }
 
+    OSString *value;
     OSData *cycle0 = OSDynamicCast(OSData, data->getObject(0));
     if (!cycle0) {
         AlwaysLog("Battery 0 cycle not exist\n");
     } else {
         UInt16 *cycleCount0 = (UInt16 *)cycle0->getBytesNoCopy();
         if (cycleCount0[0] != 0xffff) {
-            setProperty("BAT0 CycleCount", cycleCount0[0], 16);
+            char cycle0String[5];
+            snprintf(cycle0String, 5, "%d", cycleCount0[0]);
+            setPropertyString(bat0, "Cycle count", cycle0String);
             AlwaysLog("Battery 0 cycle count %d\n", cycleCount0[0]);
         }
     }
 
     OSData *cycle1 = OSDynamicCast(OSData, data->getObject(1));
     if (!cycle1) {
-        AlwaysLog("Battery 1 cycle not exist\n");
+        DebugLog("Battery 1 cycle not exist\n");
     } else {
         UInt16 *cycleCount1 = (UInt16 *)cycle1->getBytesNoCopy();
         if (cycleCount1[0] != 0xffff) {
-            setProperty("BAT1 CycleCount", cycleCount1[0], 16);
+            char cycle1String[5];
+            snprintf(cycle1String, 5, "%d", cycleCount1[0]);
+            setPropertyString(bat1, "Cycle count", cycle1String);
             AlwaysLog("Battery 1 cycle count %d\n", cycleCount1[0]);
         }
     }
@@ -313,23 +329,31 @@ bool IdeaVPC::updateBatteryID(bool update) {
         AlwaysLog("Battery 0 ID not exist\n");
     } else {
         UInt16 *batteryID0 = (UInt16 *)ID0->getBytesNoCopy();
-        if (batteryID0[0] != 0xffff)
-            AlwaysLog("Battery 0 ID %04x %04x %04x %04x\n", batteryID0[0], batteryID0[1], batteryID0[2], batteryID0[3]);
+        if (batteryID0[0] != 0xffff) {
+            char ID0String[20];
+            snprintf(ID0String, 20, "%04x %04x %04x %04x", batteryID0[0], batteryID0[1], batteryID0[2], batteryID0[3]);
+            setPropertyString(bat0, "ID", ID0String);
+            AlwaysLog("Battery 0 ID %s\n", ID0String);
+        }
     }
 
     OSData *ID1 = OSDynamicCast(OSData, data->getObject(3));
     if (!ID1) {
-        AlwaysLog("Battery 1 ID not exist\n");
+        DebugLog("Battery 1 ID not exist\n");
     } else {
         UInt16 *batteryID1 = (UInt16 *)ID1->getBytesNoCopy();
-        if (batteryID1[0] != 0xffff)
-            AlwaysLog("Battery 1 ID %04x %04x %04x %04x\n", batteryID1[0], batteryID1[1], batteryID1[2], batteryID1[3]);
+        if (batteryID1[0] != 0xffff) {
+            char ID1String[20];
+            snprintf(ID1String, 20, "%04x %04x %04x %04x", batteryID1[0], batteryID1[1], batteryID1[2], batteryID1[3]);
+            setPropertyString(bat1, "ID", ID1String);
+            AlwaysLog("Battery 1 ID %s\n", ID1String);
+        }
     }
     data->release();
     return true;
 }
 
-bool IdeaVPC::updateBatteryInfo(bool update) {
+bool IdeaVPC::updateBatteryInfo(OSDictionary *bat0, OSDictionary *bat1) {
     OSData *data;
     OSObject *result;
     
@@ -348,16 +372,33 @@ bool IdeaVPC::updateBatteryInfo(bool update) {
         result->release();
         return false;
     }
+
+    OSString *value;
     UInt16 * bdata = (UInt16 *)(data->getBytesNoCopy());
     // B1TM
-    if (bdata[7] != 0)
-        parseTemperature(bdata[7], "BAT0 Temperature");
+    if (bdata[7] != 0) {
+        SInt16 celsius = bdata[7] - 2731;
+        if (celsius < 0 || celsius > 600)
+            AlwaysLog("Battery 0 temperature critical! %d\n", celsius);
+        char temperature0[9];
+        snprintf(temperature0, 9, "%d.%d℃", celsius / 10, celsius % 10);
+        setPropertyString(bat0, "Temperature", temperature0);
+//        UInt16 fahrenheit = celsius * 9 / 5 + 320;
+//        snprintf(temperature0, 9, "%d.%d℉", fahrenheit / 10, fahrenheit % 10);
+//        setPropertyString(bat0, "Fahrenheit", temperature0);
+    }
     // B1DT
-    if (bdata[8] != 0)
-        parseRawDate(bdata[8], 0);
+    if (bdata[8] != 0) {
+        char date0[11];
+        snprintf(date0, 11, "%4d/%02d/%02d", (bdata[8] >> 9) + 1980, (bdata[8] >> 5) & 0x0f, bdata[8] & 0x1f);
+        setPropertyString(bat0, "Manufacture date", date0);
+    }
     // B2DT
-    if (bdata[9] != 0)
-        parseRawDate(bdata[9], 1);
+    if (bdata[9] != 0) {
+        char date1[11];
+        snprintf(date1, 11, "%4d/%02d/%02d", (bdata[9] >> 9) + 1980, (bdata[9] >> 5) & 0x0f, bdata[9] & 0x1f);
+        setPropertyString(bat0, "Manufacture date", date1);
+    }
     data->release();
     return true;
 }
@@ -652,31 +693,4 @@ bool IdeaVPC::method_vpcw(UInt32 cmd, UInt32 data) {
     };
 
     return (vpc->evaluateInteger(writeVPCStatus, &result, params, 2) == kIOReturnSuccess);
-}
-
-void IdeaVPC::parseRawDate(UInt16 data, int batnum) {
-    UInt16 year, month, day;
-    year = (data >> 9) + 1980;
-    month = (data >> 5) & 0x0f;
-    day = data & 0x1f;
-    char date[11];
-    snprintf(date, 11, "%4d/%02d/%02d", year, month, day);
-    char prompt[21];
-    snprintf(prompt, 21, "BAT%1d ManufactureDate", batnum);
-    setProperty(prompt, date);
-}
-
-void IdeaVPC::parseTemperature(UInt16 data, const char * desc) {
-    if ((data - 2731) < 0 || (data - 2731) > 600) {
-        setProperty(desc, data - 2731, 16);
-        AlwaysLog("%s critical! %d\n", desc, data - 2731);
-    }
-    // ℃ DEGREE CELSIUS UTF-8: E2 84 83
-    // ℉ DEGREE FAHRENHEIT UTF-8: E2 84 89
-    char temperature[9];
-    UInt16 celsius = data - 2731;
-    snprintf(temperature, 9, "%d.%d℃", celsius / 10, celsius % 10);
-    // UInt16 fahrenheit = (data - 2731) * 9 / 5 + 320;
-    // snprintf(temperature, 9, "%d.%d℉", fahrenheit / 10, fahrenheit % 10);
-    setProperty(desc, temperature);
 }
