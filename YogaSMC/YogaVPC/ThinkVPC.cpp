@@ -513,7 +513,6 @@ bool ThinkVPC::setLEDStatus(UInt8 status) {
     }
 
     DebugLog(toggleSuccess, LEDPrompt, status, (status ? "on" : "off"));
-    setProperty(LEDPrompt, status);
     return true;
 }
 
@@ -833,19 +832,66 @@ bool ThinkVPC::setBacklight(UInt32 level) {
 }
 
 bool ThinkVPC::setSSTStatus(UInt32 value) {
-    OSObject* params[] = {
-        OSNumber::withNumber(value, 32)
-    };
-    
-    if (vpc->evaluateObject("CSSI", nullptr, params, 1) != kIOReturnSuccess) {
-        AlwaysLog(toggleFailure, SSTPrompt);
-        return false;
+    char const *property[5] = {"Indicator off", "Working", "Waking", "Sleeping", "Hibernating"};
+    if (vpc->validateObject("CSSI") == kIOReturnSuccess) {
+        OSObject* params[] = {
+            OSNumber::withNumber(value, 32)
+        };
+        
+        if (vpc->evaluateObject("CSSI", nullptr, params, 1) != kIOReturnSuccess) {
+            AlwaysLog(toggleFailure, SSTPrompt);
+            return false;
+        }
+
+        DebugLog(toggleSuccess, SSTPrompt, value, property[value]);
+        return true;
+    }
+    // Replicate of _SI._SST
+    bool status = true;
+    switch (value) {
+        case 0:
+            status = setLEDStatus(0x00) && setLEDStatus(0x0A) && setLEDStatus(0x07);
+            break;
+
+        case 1:
+//            if (SPS || WNTF)
+//                setBeepStatus(0x05);
+            status = setLEDStatus(0x80) && setLEDStatus(0x8A) && setLEDStatus(0x07);
+            break;
+
+        case 2:
+            status = setLEDStatus(0xC0) && setLEDStatus(0xCA) && setLEDStatus(0xC7);
+            break;
+
+        case 3:
+//            if (SPS == 3) {
+//                setBeepStatus(0x03);
+//            } else {
+//                if (SPS > 3)
+//                    setBeepStatus(0x07);
+//                else
+//                    setBeepStatus(0x04);
+//                setLEDStatus(0x80);
+//                setLEDStatus(0x8A);
+//            }
+            status = setLEDStatus(0xC7) && setLEDStatus(0xC0) && setLEDStatus(0xCA);
+            break;
+
+        case 4:
+//            setBeepStatus(0x03);
+            status = setLEDStatus(0xC7) && setLEDStatus(0xC0) && setLEDStatus(0xCA);
+            break;
+
+        default:
+            AlwaysLog(valueInvalid, SSTPrompt);
+            return false;
     }
 
-    char const *property[5] = {"Indicator off", "Working", "Waking", "Sleeping", "Sleeping (S4)"};
-    
-    DebugLog(toggleSuccess, SSTPrompt, value, property[value]);
-    return true;
+    if (status)
+        DebugLog(toggleSuccess, SSTPrompt, value, property[value]);
+    else
+        AlwaysLog(toggleFailure, SSTPrompt);
+    return status;
 }
 
 IOReturn ThinkVPC::setPowerState(unsigned long powerState, IOService *whatDevice){
@@ -867,7 +913,7 @@ IOReturn ThinkVPC::setPowerState(unsigned long powerState, IOService *whatDevice
         }
     } else {
         if (automaticBacklightMode & BIT(2))
-            setSSTStatus(0);
+            setSSTStatus(1);
         if ((automaticBacklightMode & BIT(3)) && muteLEDstateSaved)
             setMuteLEDStatus(true);
         if ((automaticBacklightMode & BIT(4)) && micMuteLEDstateSaved)
