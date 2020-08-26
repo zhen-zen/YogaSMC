@@ -123,6 +123,20 @@ private:
      */
     bool dumpECOffset(UInt32 value);
 
+    
+    /**
+     *  Set DYTC mode
+     *
+     *  @param command  see DYTC_command
+     *  @param result result
+     *  @param ICFunc
+     *  @param ICMode
+     *  @param ValidF
+     *
+     *  @return true if success
+     */
+    bool DYTCCommand(UInt32 command, UInt64* result, UInt8 ICFunc=0, UInt8 ICMode=0, bool ValidF=false);
+
 protected:
     const char* name;
 
@@ -222,41 +236,25 @@ protected:
     bool DYTCCap {false};
 
     /**
-     *  DYTC mode
+     *  DYTC Version
      */
-    UInt64 DYTCMode {0};
-    
-    /**
-     *  DYTC Revision
-     */
-    int DYTCRevision {0};
+    OSDictionary *DYTCVersion {nullptr};
 
     /**
-     *  DYTC Subversion
-     */
-    int DYTCSubRevision {0};
-
-    /**
-     *  Set DYTC mode
+     *  Parse DYTC status
      *
-     *  @param command  see DYTC_command
-     *  @param result result
-     *  @param ICFunc
-     *  @param ICMode
-     *  @param ValidF
+     *  @param mode result from DYTC command
      *
      *  @return true if success
      */
-    bool DYTCCommand(UInt32 command, UInt64* result, UInt8 ICFunc=0, UInt8 ICMode=0, bool ValidF=false);
-
+    bool parseDYTC(UInt64 mode);
+    
     /**
      *  Update DYTC status
      *
-     *  @param update only update internal status when false
-     *
      *  @return true if success
      */
-    bool updateDYTC(bool update=true);
+    bool updateDYTC();
 
     /**
      *  Set DYTC status

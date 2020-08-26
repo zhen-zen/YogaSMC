@@ -695,13 +695,10 @@ void ThinkVPC::updateVPC() {
 
                 case TP_HKEY_EV_THM_CSM_COMPLETED:
                     AlwaysLog("Thermal Control Command set completed (DYTC)\n");
-                    UInt64 output;
-                    if (DYTCCap && DYTCCommand(DYTC_CMD_GET, &output)) {
-                        DYTCMode = output;
-                        setProperty("DYTCMode", output, 64);
-                        setProperty("lapmode", output & BIT(DYTC_GET_LAPMODE_BIT));
-                        AlwaysLog("DYTC lapmode 0x%llx %s\n", output, (output & BIT(DYTC_GET_LAPMODE_BIT) ? "on" : "off"));
-                    }
+                    if (DYTCCap)
+                        updateDYTC();
+                    else
+                        AlwaysLog("DYTC method not available\n");
                     break;
 
                 case TP_HKEY_EV_THM_TRANSFM_CHANGED:

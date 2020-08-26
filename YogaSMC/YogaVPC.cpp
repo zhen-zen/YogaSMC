@@ -89,14 +89,10 @@ bool YogaVPC::initVPC() {
         if (DYTCCommand(DYTC_CMD_QUERY, &result)) {
             DYTCCap = (result >> DYTC_QUERY_ENABLE_BIT) & 0x1;
             if (DYTCCap) {
-                DYTCRevision = (result >> DYTC_QUERY_REV_BIT) & 0xF;
-                DYTCSubRevision = (result >> DYTC_QUERY_SUBREV_BIT) & 0xF;
-                OSDictionary *status = OSDictionary::withCapacity(4);
+                DYTCVersion = OSDictionary::withCapacity(2);
                 OSObject *value;
-                setPropertyNumber(status, "Revision", DYTCRevision, 4);
-                setPropertyNumber(status, "SubRevision", DYTCSubRevision, 4);
-                setProperty("DYTC", status);
-                status->release();
+                setPropertyNumber(DYTCVersion, "Revision", (result >> DYTC_QUERY_REV_BIT) & 0xF, 4);
+                setPropertyNumber(DYTCVersion, "SubRevision", (result >> DYTC_QUERY_SUBREV_BIT) & 0xF, 4);
             } else {
                 setProperty("DYTC", false);
             }
@@ -141,7 +137,8 @@ void YogaVPC::stop(IOService *provider) {
 void YogaVPC::updateAll() {
     updateBacklight();
     updateClamshell();
-    updateDYTC();
+    if (!updateDYTC())
+        AlwaysLog("Update DYTC failed\n");
 }
 
 void YogaVPC::setPropertiesGated(OSObject* props) {
@@ -343,37 +340,31 @@ bool YogaVPC::DYTCCommand(UInt32 command, UInt64* result, UInt8 ICFunc, UInt8 IC
         AlwaysLog(toggleFailure, DYTCPrompt);
         return false;
     }
-#ifdef DEBUG
-    AlwaysLog("%s 0x%llx 0x%llx\n", DYTCPrompt, cmd, *result);
-#endif
+
+    if ((*result & 0x0F) != 1) {
+        AlwaysLog("%s command 0x%llx 0x%llx failed\n", DYTCPrompt, cmd, *result);
+        return false;
+    }
+
+    DebugLog("%s command 0x%llx 0x%llx\n", DYTCPrompt, cmd, *result);
     return true;
 }
 
-bool YogaVPC::updateDYTC(bool update) {
-    if (!DYTCCap)
-        return true;
-
-    UInt64 result;
-    if (!DYTCCommand(DYTC_CMD_GET, &result))
-        return false;
-
-    DYTCMode = result;
-//    setProperty(DYTCPrompt, result, 64);
-    OSDictionary *status = OSDictionary::withCapacity(4);
+bool YogaVPC::parseDYTC(UInt64 mode) {
+    UInt64 result = mode;
+    OSDictionary *status = OSDictionary::withDictionary(DYTCVersion);
     OSObject *value;
-    setPropertyNumber(status, "Revision", DYTCRevision, 4);
-    setPropertyNumber(status, "SubRevision", DYTCSubRevision, 4);
 
-    int funcmode = (result >> DYTC_GET_FUNCTION_BIT) & 0xF;
-    switch (funcmode) {
+    int DYTCFuncMode = (result >> DYTC_GET_FUNCTION_BIT) & 0xF;
+    switch (DYTCFuncMode) {
         case DYTC_FUNCTION_STD:
             setPropertyString(status, "FuncMode", "Standard");
             break;
 
         case DYTC_FUNCTION_CQL:
-           /* We can't get the mode when in CQL mode - so we disable CQL
-            * mode retrieve the mode and then enable it again.
-            */
+            /* We can't get the mode when in CQL mode - so we disable CQL
+             * mode retrieve the mode and then enable it again.
+             */
             UInt64 dummy;
             if (!DYTCCommand(DYTC_CMD_SET, &dummy, DYTC_FUNCTION_CQL, 0xf, false) ||
                 !DYTCCommand(DYTC_CMD_GET, &result) ||
@@ -389,17 +380,17 @@ bool YogaVPC::updateDYTC(bool update) {
             break;
 
         default:
-            AlwaysLog(valueUnknown, DYTCFuncPrompt, funcmode);
+            AlwaysLog(valueUnknown, DYTCFuncPrompt, DYTCFuncMode);
             char Unknown[10];
-            snprintf(Unknown, 10, "Unknown:%1x", funcmode);
+            snprintf(Unknown, 10, "Unknown:%1x", DYTCFuncMode);
             setPropertyString(status, "FuncMode", Unknown);
             break;
     }
 
-    int perfmode = (result >> DYTC_GET_MODE_BIT) & 0xF;
-    switch (perfmode) {
+    int DYTCPerfMode = (result >> DYTC_GET_MODE_BIT) & 0xF;
+    switch (DYTCPerfMode) {
         case DYTC_MODE_PERFORM:
-            if (funcmode == DYTC_FUNCTION_CQL)
+            if (DYTCFuncMode == DYTC_FUNCTION_CQL)
                 setPropertyString(status, "PerfMode", "Performance (Reduced as lapmode active)");
             else
                 setPropertyString(status, "PerfMode", "Performance");
@@ -414,18 +405,27 @@ bool YogaVPC::updateDYTC(bool update) {
             break;
 
         default:
-            AlwaysLog(valueUnknown, DYTCPerfPrompt, perfmode);
+            AlwaysLog(valueUnknown, DYTCPerfPrompt, DYTCPerfMode);
             char Unknown[10];
-            snprintf(Unknown, 10, "Unknown:%1x", perfmode);
+            snprintf(Unknown, 10, "Unknown:%1x", DYTCPerfMode);
             setPropertyString(status, "PerfMode", Unknown);
             break;
     }
+    setPropertyBoolean(status, "lapmode", (result >> DYTC_GET_LAPMODE_BIT) & 0x1);
     setProperty("DYTC", status);
     status->release();
-
-    if (update)
-        AlwaysLog("%s 0x%llx\n", DYTCPrompt, result);
     return true;
+}
+
+bool YogaVPC::updateDYTC() {
+    if (!DYTCCap)
+        return true;
+
+    UInt64 result;
+    if (!DYTCCommand(DYTC_CMD_GET, &result))
+        return false;
+
+    return parseDYTC(result);
 }
 
 bool YogaVPC::setDYTC(int perfmode) {
@@ -437,19 +437,19 @@ bool YogaVPC::setDYTC(int perfmode) {
         if (!DYTCCommand(DYTC_CMD_RESET, &result))
             return false;
     } else {
-        updateDYTC(false);
-        bool cql = (((DYTCMode >> DYTC_GET_FUNCTION_BIT) & 0xF) == DYTC_FUNCTION_CQL);
-        if (cql) {
+        if (!DYTCCommand(DYTC_CMD_GET, &result))
+            return false;
+        if (((result >> DYTC_GET_FUNCTION_BIT) & 0xF) == DYTC_FUNCTION_CQL) {
             if (!DYTCCommand(DYTC_CMD_SET, &result, DYTC_FUNCTION_CQL, 0xf, false) ||
-                !DYTCCommand(DYTC_CMD_SET, &result, perfmode, DYTC_FUNCTION_MMC, false) ||
+                !DYTCCommand(DYTC_CMD_SET, &result, DYTC_FUNCTION_MMC, perfmode, true) ||
                 !DYTCCommand(DYTC_CMD_SET, &result, DYTC_FUNCTION_CQL, 0xf, true))
                 return false;
         } else {
-            if (!DYTCCommand(DYTC_CMD_SET, &result, perfmode, DYTC_FUNCTION_MMC, false))
+            if (!DYTCCommand(DYTC_CMD_SET, &result, DYTC_FUNCTION_MMC, perfmode, true))
                 return false;
         }
     }
-    return updateDYTC(true);
+    return parseDYTC(result);
 }
 
 bool YogaVPC::findPNP(const char *id, IOACPIPlatformDevice **dev) {
