@@ -14,46 +14,12 @@
 #include <IOKit/IOService.h>
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
 #include "common.h"
+#include "DYTC.h"
 #include "message.h"
 
 #ifndef ALTER
 #include "YogaSMC.hpp"
 #endif
-
-enum DYTC_command {
-    DYTC_CMD_QUERY = 0,    /* Get DYTC Version */
-    DYTC_CMD_SET   = 1,    /* Set current IC function and mode */
-    DYTC_CMD_GET   = 2,    /* Get current IC function and mode */
-    /* 3-7, 0x0100 unknown yet, capability? */
-    DYTC_CMD_RESET = 0x1ff,    /* Reset current IC function and mode */
-};
-
-struct __attribute__((packed)) DYTC_ARG {
-    UInt32 command;
-    UInt8 ICFunc;
-    UInt8 ICMode;
-    UInt8 validF;
-};
-
-#define DYTC_QUERY_ENABLE_BIT 8  /* Bit 8 - 0 = disabled, 1 = enabled */
-#define DYTC_QUERY_SUBREV_BIT 16 /* Bits 16 - 27 - sub revisision */
-#define DYTC_QUERY_REV_BIT    28 /* Bits 28 - 31 - revision */
-
-#define DYTC_GET_FUNCTION_BIT 8  /* Bits 8-11 - function setting */
-#define DYTC_GET_MODE_BIT     12 /* Bits 12-15 - mode setting */
-#define DYTC_GET_LAPMODE_BIT  17 /* Bit 17 - lapmode. Set when on lap */
-
-#define DYTC_SET_FUNCTION_BIT 12 /* Bits 12-15 - funct setting */
-#define DYTC_SET_MODE_BIT     16 /* Bits 16-19 - mode setting */
-#define DYTC_SET_VALID_BIT    20 /* Bit 20 - 1 = on, 0 = off */
-
-#define DYTC_FUNCTION_STD     0  /* Function = 0, standard mode */
-#define DYTC_FUNCTION_CQL     1  /* Function = 1, lap mode */
-#define DYTC_FUNCTION_MMC     11 /* Function = 11, desk mode */
-
-#define DYTC_MODE_PERFORM     2  /* High power mode aka performance */
-#define DYTC_MODE_QUIET       3  /* low power mode aka quiet */
-#define DYTC_MODE_BALANCE   0xF  /* default mode aka balance */
 
 class YogaVPC : public IOService
 {
@@ -135,7 +101,21 @@ private:
      *
      *  @return true if success
      */
-    bool DYTCCommand(UInt32 command, UInt64* result, UInt8 ICFunc=0, UInt8 ICMode=0, bool ValidF=false);
+    bool DYTCCommand(DYTC_CMD command, DYTC_RESULT* result, UInt8 ICFunc=0, UInt8 ICMode=0, bool ValidF=false);
+
+    /**
+     *  Parse DYTC status
+     *
+     *  @param result result from DYTC command
+     *
+     *  @return true if success
+     */
+    bool parseDYTC(DYTC_RESULT result);
+    
+    /**
+     *  DYTC Version
+     */
+    OSDictionary *DYTCVersion {nullptr};
 
 protected:
     const char* name;
@@ -236,19 +216,10 @@ protected:
     bool DYTCCap {false};
 
     /**
-     *  DYTC Version
+     *  Simple lock to prevent DYTC update when user setting is in progress
      */
-    OSDictionary *DYTCVersion {nullptr};
+    bool DYTCLock {false};
 
-    /**
-     *  Parse DYTC status
-     *
-     *  @param mode result from DYTC command
-     *
-     *  @return true if success
-     */
-    bool parseDYTC(UInt64 mode);
-    
     /**
      *  Update DYTC status
      *

@@ -693,11 +693,10 @@ void ThinkVPC::updateVPC() {
                     break;
 
                 case TP_HKEY_EV_THM_CSM_COMPLETED:
-                    AlwaysLog("Thermal Control Command set completed (DYTC)\n");
-                    if (DYTCCap)
+                    if (!DYTCLock) {
+                        AlwaysLog("Thermal Control Command set completed (DYTC)\n");
                         updateDYTC();
-                    else
-                        AlwaysLog("DYTC method not available\n");
+                    }
                     break;
 
                 case TP_HKEY_EV_THM_TRANSFM_CHANGED:

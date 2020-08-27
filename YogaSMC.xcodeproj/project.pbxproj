@@ -116,6 +116,7 @@
 		6FD2BB47247721040018EA36 /* bmfdec.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = bmfdec.c; sourceTree = "<group>"; };
 		6FD2BB8B247B37A20018EA36 /* bmfparser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = bmfparser.cpp; sourceTree = "<group>"; };
 		6FD2BB8C247B37A20018EA36 /* bmfparser.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = bmfparser.hpp; sourceTree = "<group>"; };
+		6FE3698824F76A5D008B29E4 /* DYTC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DYTC.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -224,6 +225,7 @@
 		6F9553BC24BA516100215EBB /* YogaVPC */ = {
 			isa = PBXGroup;
 			children = (
+				6FE3698824F76A5D008B29E4 /* DYTC.h */,
 				6F9553B924BA515B00215EBB /* IdeaVPC.hpp */,
 				6F9553B824BA515B00215EBB /* IdeaVPC.cpp */,
 				6F6CEDA324BC14C2004D553F /* ThinkVPC.hpp */,
