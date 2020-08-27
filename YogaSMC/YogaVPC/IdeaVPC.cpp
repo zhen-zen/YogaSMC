@@ -140,7 +140,7 @@ IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
 }
 
 void IdeaVPC::setPropertiesGated(OSObject *props) {
-    OSDictionary* dict = OSDynamicCast(OSDictionary, props);
+    OSDictionary *dict = OSDynamicCast(OSDictionary, props);
     if (!dict)
         return;
 
@@ -150,7 +150,7 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
     if (i) {
         while (OSString* key = OSDynamicCast(OSString, i->getNextObject())) {
             if (key->isEqualTo(conservationPrompt)) {
-                OSBoolean * value;
+                OSBoolean *value;
                 getPropertyBoolean(conservationPrompt);
                 updateBattery(false);
 
@@ -159,7 +159,7 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                 else
                     toggleConservation();
             } else if (key->isEqualTo(rapidChargePrompt)) {
-                OSBoolean * value;
+                OSBoolean *value;
                 getPropertyBoolean(rapidChargePrompt);
                 updateBattery(false);
 
@@ -168,7 +168,7 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                 else
                     toggleRapidCharge();
             } else if (key->isEqualTo(FnKeyPrompt)) {
-                OSBoolean * value;
+                OSBoolean *value;
                 getPropertyBoolean(FnKeyPrompt);
                 updateKeyboard(false);
 
@@ -177,7 +177,7 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                 else
                     toggleFnlock();
             } else if (key->isEqualTo(ECLockPrompt)) {
-                OSBoolean * value;
+                OSBoolean *value;
                 getPropertyBoolean(ECLockPrompt);
                 if (value->getValue())
                     continue;
@@ -187,7 +187,7 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
             } else if (key->isEqualTo(readECPrompt)) {
                 if (ECLock)
                     continue;
-                OSNumber * value;
+                OSNumber *value;
                 getPropertyNumber(readECPrompt);
 
                 UInt32 result;
@@ -200,7 +200,7 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
             } else if (key->isEqualTo(writeECPrompt)) {
                 if (ECLock)
                     continue;
-                OSNumber * value;
+                OSNumber *value;
                 getPropertyNumber(writeECPrompt);
 
                 UInt32 command, data;
@@ -221,7 +221,7 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                 conservationModeLock = false;
                 initEC();
             } else {
-                OSDictionary* entry = OSDictionary::withCapacity(1);
+                OSDictionary *entry = OSDictionary::withCapacity(1);
                 entry->setObject(key, dict->getObject(key));
                 super::setPropertiesGated(entry);
                 entry->release();

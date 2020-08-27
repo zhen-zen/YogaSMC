@@ -166,7 +166,7 @@ protected:
      *  Restore VPC EC status
      */
     virtual bool exitVPC();
-    
+
     virtual void setPropertiesGated(OSObject* props);
 
     /**

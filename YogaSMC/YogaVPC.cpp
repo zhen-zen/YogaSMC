@@ -152,7 +152,7 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
     if (i) {
         while (OSString* key = OSDynamicCast(OSString, i->getNextObject())) {
             if (key->isEqualTo(clamshellPrompt)) {
-                OSBoolean * value;
+                OSBoolean *value;
                 getPropertyBoolean(clamshellPrompt);
                 updateClamshell(false);
                 if (value->getValue() == clamshellMode) {
@@ -161,7 +161,7 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
                     toggleClamshell();
                 }
             } else if (key->isEqualTo(backlightPrompt)) {
-                OSNumber * value;
+                OSNumber *value;
                 getPropertyNumber(backlightPrompt);
                 updateBacklight(false);
                 if (value->unsigned32BitValue() == backlightLevel)
@@ -169,7 +169,7 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
                 else
                     setBacklight(value->unsigned32BitValue());
             } else if (key->isEqualTo(autoBacklightPrompt)) {
-                OSNumber * value;
+                OSNumber *value;
                 getPropertyNumber(autoBacklightPrompt);
                 if (value->unsigned8BitValue() > 3) {
                     AlwaysLog(valueInvalid, autoBacklightPrompt);
@@ -184,7 +184,7 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
                     AlwaysLog("%s not supported\n", "EC Read");
                     continue;
                 }
-                OSNumber * value;
+                OSNumber *value;
                 getPropertyNumber("ReadECOffset");
                 dumpECOffset(value->unsigned32BitValue());
             } else if (key->isEqualTo("ReadECName")) {
@@ -445,7 +445,7 @@ bool YogaVPC::parseDYTC(DYTC_RESULT result) {
                     break;
 
                 default:
-                    AlwaysLog("Unknown DYTC mode %x\n", func_bit);
+                    AlwaysLog("Unknown DYTC function %x\n", func_bit);
                     break;
             }
         }

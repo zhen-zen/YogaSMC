@@ -279,7 +279,7 @@ void ThinkVPC::updateBattery(bool update) {
 }
 
 void ThinkVPC::setPropertiesGated(OSObject *props) {
-    OSDictionary* dict = OSDynamicCast(OSDictionary, props);
+    OSDictionary *dict = OSDynamicCast(OSDictionary, props);
     if (!dict)
         return;
 
@@ -289,28 +289,28 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
     if (i) {
         while (OSString* key = OSDynamicCast(OSString, i->getNextObject())) {
             if (key->isEqualTo(batteryPrompt)) {
-                OSNumber * value;
+                OSNumber *value;
                 getPropertyNumber(batteryPrompt);
                 batnum = value->unsigned8BitValue();
                 updateBattery(value->unsigned8BitValue());
             } else if (key->isEqualTo("setCMstart")) {
-                OSNumber * value;
+                OSNumber *value;
                 getPropertyNumber("setCMstart");
                 setConservation(setCMstart, value->unsigned8BitValue());
             } else if (key->isEqualTo("setCMstop")) {
-                OSNumber * value;
+                OSNumber *value;
                 getPropertyNumber("setCMstop");
                 setConservation(setCMstop, value->unsigned8BitValue());
             } else if (key->isEqualTo("setCMInhibitCharge")) {
-                OSNumber * value;
+                OSNumber *value;
                 getPropertyNumber("setCMInhibitCharge");
                 setConservation(setCMInhibitCharge, value->unsigned8BitValue());
             } else if (key->isEqualTo("setCMForceDischarge")) {
-                OSNumber * value;
+                OSNumber *value;
                 getPropertyNumber("setCMForceDischarge");
                 setConservation(setCMForceDischarge, value->unsigned8BitValue());
             } else if (key->isEqualTo("setCMPeakShiftState")) {
-                OSNumber * value;
+                OSNumber *value;
                 getPropertyNumber("setCMPeakShiftState");
                 setConservation(setCMPeakShiftState, value->unsigned8BitValue());
             } else if (key->isEqualTo("GMKS")) {
@@ -321,7 +321,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 else
                     AlwaysLog("%s evaluation failed 0x%x\n", "GMKS", ret);
             } else if (key->isEqualTo("GSKL")) {
-                OSNumber * value;
+                OSNumber *value;
                 getPropertyNumber("GSKL");
                 UInt32 result;
                 OSObject* params[1] = {
@@ -344,19 +344,19 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                     AlwaysLog("%s evaluation failed 0x%x\n", "GHSL", ret);
                 params[0]->release();
             } else if (key->isEqualTo(mutePrompt)) {
-                OSNumber * value;
+                OSNumber *value;
                 getPropertyNumber(mutePrompt);
                 setMutestatus(value->unsigned32BitValue());
             } else if (key->isEqualTo(muteLEDPrompt)) {
-                OSBoolean * value;
+                OSBoolean *value;
                 getPropertyBoolean(muteLEDPrompt);
                 setMuteLEDStatus(value->getValue());
             } else if (key->isEqualTo(micMuteLEDPrompt)) {
-                OSNumber * value;
+                OSNumber *value;
                 getPropertyNumber(micMuteLEDPrompt);
                 setMicMuteLEDStatus(value->unsigned32BitValue());
             } else if (key->isEqualTo(muteSupportPrompt)) {
-                OSBoolean * value;
+                OSBoolean *value;
                 getPropertyBoolean(muteSupportPrompt);
                 setMuteSupport(value->getValue());
             } else if (key->isEqualTo(beepPrompt)) {
@@ -365,15 +365,15 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                     enableBeep(status->getValue());
                     continue;
                 }
-                OSNumber * value;
+                OSNumber *value;
                 getPropertyNumber(beepPrompt);
                 setBeepStatus(value->unsigned8BitValue());
             } else if (key->isEqualTo(SSTPrompt)) {
-                OSNumber * value;
+                OSNumber *value;
                 getPropertyNumber(SSTPrompt);
                 setSSTStatus(value->unsigned32BitValue());
             } else if (key->isEqualTo(LEDPrompt)) {
-                OSNumber * value;
+                OSNumber *value;
                 getPropertyNumber(LEDPrompt);
                 if (value->unsigned32BitValue() > 0xff) {
                     AlwaysLog(valueInvalid, LEDPrompt);
@@ -382,12 +382,12 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                     setLEDStatus(value->unsigned8BitValue());
                 }
             } else if (key->isEqualTo(fanControlPrompt)) {
-                OSNumber * value;
+                OSNumber *value;
                 getPropertyNumber(fanControlPrompt);
 //                setFanControl(value->unsigned32BitValue());
                 updateFanControl(value->unsigned32BitValue());
             } else {
-                OSDictionary* entry = OSDictionary::withCapacity(1);
+                OSDictionary *entry = OSDictionary::withCapacity(1);
                 entry->setObject(key, dict->getObject(key));
                 super::setPropertiesGated(entry);
                 entry->release();
