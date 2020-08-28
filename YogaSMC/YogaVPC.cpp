@@ -30,16 +30,15 @@ IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
     name = provider->getName();
     DebugLog("Probing\n");
 
-    if (!(vpc = OSDynamicCast(IOACPIPlatformDevice, provider)))
-        return nullptr;
+    if ((vpc = OSDynamicCast(IOACPIPlatformDevice, provider))) {
+        IORegistryEntry* parent = vpc->getParentEntry(gIOACPIPlane);
+        auto pnp = OSString::withCString(PnpDeviceIdEC);
+        if (parent->compareName(pnp))
+            ec = OSDynamicCast(IOACPIPlatformDevice, parent);
+        pnp->release();
+    }
 
-    IORegistryEntry* parent = vpc->getParentEntry(gIOACPIPlane);
-    auto pnp = OSString::withCString(PnpDeviceIdEC);
-    if (parent->compareName(pnp))
-        ec = OSDynamicCast(IOACPIPlatformDevice, parent);
-    pnp->release();
-
-    if (!ec)
+    if (!ec && !findPNP(PnpDeviceIdEC, &ec))
         return nullptr;
 #ifndef ALTER
     initSMC();
@@ -202,6 +201,16 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
                     AlwaysLog("%s not supported\n", DYTCPrompt);
                     continue;
                 }
+                OSNumber *raw = OSDynamicCast(OSNumber, dict->getObject(DYTCPrompt));
+                if (raw != nullptr) {
+                    DYTC_CMD cmd = {.raw = raw->unsigned32BitValue()};
+                    DYTC_RESULT res;
+                    if (DYTCCommand(cmd, &res) && parseDYTC(res))
+                        AlwaysLog(toggleSuccess, DYTCPrompt, raw->unsigned32BitValue(), "see ioreg");
+                    else
+                        AlwaysLog(toggleFailure, DYTCPrompt);
+                    continue;
+                }
                 OSString *value;
                 getPropertyString(DYTCPrompt);
                 int mode;
@@ -329,8 +338,8 @@ IOReturn YogaVPC::setPowerState(unsigned long powerState, IOService *whatDevice)
 }
 
 bool YogaVPC::DYTCCommand(DYTC_CMD command, DYTC_RESULT* result, UInt8 ICFunc, UInt8 ICMode, bool ValidF) {
-    if (command.command == DYTC_CMD_SET) {
-        DYTCLock = true;
+    DYTCLock = true;
+    if (command.raw == DYTC_CMD_SET) {
         command.ICFunc = ICFunc;
         command.ICMode = ICMode;
         command.validF = ValidF;
@@ -442,6 +451,10 @@ bool YogaVPC::parseDYTC(DYTC_RESULT result) {
 
                 case DYTC_FUNCTION_MMC:
                     DebugLog("Found DYTC_FUNCTION_MMC\n");
+                    break;
+
+                case DYTC_FUNCTION_STP:
+                    DebugLog("Found DYTC_FUNCTION_STP\n");
                     break;
 
                 default:
