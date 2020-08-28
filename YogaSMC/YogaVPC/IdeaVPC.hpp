@@ -11,6 +11,9 @@
 #define IdeaVPC_hpp
 
 #include "YogaVPC.hpp"
+#ifndef ALTER
+#include "IdeaSMC.hpp"
+#endif
 
 // from linux/drivers/platform/x86/ideapad-laptop.c
 
@@ -138,7 +141,16 @@ private:
      *  @return true if success
      */
     bool initEC();
-    
+
+#ifndef ALTER
+    /**
+     *  Initialize SMC
+     *
+     *  @return true if success
+     */
+    inline void initSMC() override {smc = IdeaSMC::withDevice(this, ec);};
+#endif
+
     /**
      *  Update battery ID
      *
@@ -174,8 +186,8 @@ private:
      *      }
      *  })
      *
-     *  @param bat0 OSdictionary for battery 0
-     *  @param bat1 OSdictionary for battery 1
+     *  @param bat0 Dictionary for Battery 0
+     *  @param bat1 Dictionary for Battery 1
      *
      *  @return true if success
      */
@@ -186,8 +198,8 @@ private:
      *
      *  @param update only update internal status when false
      *
-     *  @param bat0 OSdictionary for battery 0
-     *  @param bat1 OSdictionary for battery 1
+     *  @param bat0 Dictionary for Battery 0
+     *  @param bat1 Dictionary for Battery 1
      */
     bool updateBatteryInfo(OSDictionary *bat0, OSDictionary *bat1);
 

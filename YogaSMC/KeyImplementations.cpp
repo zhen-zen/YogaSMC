@@ -38,3 +38,14 @@ SMC_RESULT CH0B::update(const SMC_DATA *src) {
     return SmcSuccess;
 }
 
+SMC_RESULT simpleECKey::readAccess() {
+    uint16_t *ptr = reinterpret_cast<uint16_t *>(data);
+    UInt32 result;
+    if (ec->evaluateInteger(method, &result) != kIOReturnSuccess) {
+        SYSLOG("vpckey", "%s update failed", method);
+        return SmcNotReadable;
+    }
+    *ptr = VirtualSMCAPI::encodeSp(SmcKeyTypeSp78, result);
+    DBGLOG("vpckey", "%s update 0x%x", method, result);
+    return SmcSuccess;
+}

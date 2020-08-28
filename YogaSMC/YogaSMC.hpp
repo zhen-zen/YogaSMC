@@ -33,11 +33,6 @@ private:
     OSSet* _notificationServices {nullptr};
     const OSSymbol* _deliverNotification {nullptr};
 
-    /**
-     *  EC device
-     */
-    IOACPIPlatformDevice *ec {nullptr};
-
 protected:
     const char* name;
 
@@ -60,6 +55,16 @@ protected:
         VirtualSMCAPI::Version,
     };
 
+    /**
+     *  EC device
+     */
+    IOACPIPlatformDevice *ec {nullptr};
+
+    /**
+     *  Add available SMC keys
+     */
+    virtual void addVSMCKey();
+    
 public:
     virtual bool init(OSDictionary *dictionary) APPLE_KEXT_OVERRIDE;
 
