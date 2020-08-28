@@ -64,6 +64,12 @@ protected:
      *  Add available SMC keys
      */
     virtual void addVSMCKey();
+
+    /**
+     *  Sensors configuration
+     */
+    OSDictionary* sensors;
+
     
 public:
     virtual bool init(OSDictionary *dictionary) APPLE_KEXT_OVERRIDE;

@@ -28,11 +28,4 @@ IdeaSMC* IdeaSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) 
 
 void IdeaSMC::addVSMCKey() {
     super::addVSMCKey();
-    if (ec) {
-        addECKeySp(KeyTPCD, "CTMP");
-        addECKeySp(KeyTaLC, "CPEC");
-        addECKeySp(KeyTaRC, "RSEN");
-    } else {
-        setProperty("EC", false);
-    }
 }

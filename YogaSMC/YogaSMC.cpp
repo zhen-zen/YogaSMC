@@ -34,8 +34,32 @@ bool YogaSMC::init(OSDictionary *dictionary)
 }
 
 void YogaSMC::addVSMCKey() {
+    // Message-based
     VirtualSMCAPI::addKey(KeyBDVT, vsmcPlugin.data, VirtualSMCAPI::valueWithFlag(true, new BDVT(this), SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_WRITE));
     VirtualSMCAPI::addKey(KeyCH0B, vsmcPlugin.data, VirtualSMCAPI::valueWithData(nullptr, 1, SmcKeyTypeHex, new CH0B, SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_WRITE));
+
+    // ACPI-based
+    if (!sensors || !ec)
+        return;
+
+    OSDictionary *status = OSDictionary::withCapacity(8);
+    OSString *method;
+
+    addECKeySp(KeyTPCD, "Platform Controller Hub Die");
+    addECKeySp(KeyTaLC, "Airflow Left");
+    addECKeySp(KeyTaRC, "Airflow Right");
+
+    // Laptops only have 1 key for both channel
+    addECKeySp(KeyTM0P, "Memory Proximity");
+
+    // Desktops
+    addECKeySp(KeyTM0p(0), "SO-DIMM 1 Proximity");
+    addECKeySp(KeyTM0p(1), "SO-DIMM 2 Proximity");
+    addECKeySp(KeyTM0p(2), "SO-DIMM 3 Proximity");
+    addECKeySp(KeyTM0p(3), "SO-DIMM 4 Proximity");
+
+    setProperty("SimpleECKey", status);
+    status->release();
 }
 
 bool YogaSMC::start(IOService *provider) {
@@ -79,6 +103,7 @@ bool YogaSMC::start(IOService *provider) {
 
     }
 
+    sensors = OSDynamicCast(OSDictionary, provider->getProperty("Sensors"));
     addVSMCKey();
     vsmcNotifier = VirtualSMCAPI::registerHandler(vsmcNotificationHandler, this);
 

@@ -22,6 +22,25 @@
 	<dict>
 		<key>IdeaVPC</key>
 		<dict>
+			<key>Sensors</key>
+			<dict>
+				<key>Platform Controller Hub Die</key>
+				<string>CTMP</string>
+				<key>Airflow Left</key>
+				<string>CPEC</string>
+				<key>Airflow Right</key>
+				<string>RSEN</string>
+				<key>Memory Proximity</key>
+				<string>MEM1</string>
+				<key>SO-DIMM 1 Proximity</key>
+				<string>MEM1</string>
+				<key>SO-DIMM 2 Proximity</key>
+				<string>MEM2</string>
+				<key>SO-DIMM 3 Proximity</key>
+				<false/>
+				<key>SO-DIMM 4 Proximity</key>
+				<false/>
+			</dict>
 			<key>CFBundleIdentifier</key>
 			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 			<key>IOClass</key>

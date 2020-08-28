@@ -13,15 +13,19 @@
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
 #include <VirtualSMCSDK/kern_vsmcapi.hpp>
 
-#define addECKeySp(key, method) \
+#define addECKeySp(key, name) \
     do { \
-        if (ec->validateObject(method) == kIOReturnSuccess) { \
-            setProperty(method, true); \
-            VirtualSMCAPI::addKey(key, vsmcPlugin.data, VirtualSMCAPI::valueWithSp(0, SmcKeyTypeSp78, new simpleECKey(ec, method))); \
-        } else { \
-            setProperty(method, false); \
+        if ((method = OSDynamicCast(OSString, sensors->getObject(name))) && (method->getLength() == 4)) { \
+            if (ec->validateObject(method->getCStringNoCopy()) == kIOReturnSuccess) { \
+                VirtualSMCAPI::addKey(key, vsmcPlugin.data, VirtualSMCAPI::valueWithSp(0, SmcKeyTypeSp78, new simpleECKey(ec, method->getCStringNoCopy()))); \
+                status->setObject(name, kOSBooleanTrue); \
+            } else { \
+                status->setObject(name, kOSBooleanFalse); \
+            } \
         } \
     } while (0)
+
+static constexpr const char *KeyIndexes = "0123456789ABCDEF";
 
 static constexpr SMC_KEY KeyBDVT = SMC_MAKE_IDENTIFIER('B','D','V','T');
 static constexpr SMC_KEY KeyCH0B = SMC_MAKE_IDENTIFIER('C','H','0','B');
@@ -29,6 +33,8 @@ static constexpr SMC_KEY KeyCH0B = SMC_MAKE_IDENTIFIER('C','H','0','B');
 static constexpr SMC_KEY KeyTPCD = SMC_MAKE_IDENTIFIER('T','P','C','D');
 static constexpr SMC_KEY KeyTaLC = SMC_MAKE_IDENTIFIER('T','a','L','C');
 static constexpr SMC_KEY KeyTaRC = SMC_MAKE_IDENTIFIER('T','a','R','C');
+static constexpr SMC_KEY KeyTM0P = SMC_MAKE_IDENTIFIER('T','M','0','P');
+static constexpr SMC_KEY KeyTM0p(size_t i) { return SMC_MAKE_IDENTIFIER('T','M',KeyIndexes[i],'p'); }
 
 class simpleECKey : public VirtualSMCValue {
 protected:
