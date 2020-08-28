@@ -39,7 +39,6 @@ protected:
     IOWorkLoop *workLoop {nullptr};
     IOCommandGate *commandGate {nullptr};
 
-    void dispatchMessage(int message, void* data);
 
     /**
      *  VirtualSMC service registration notifier
@@ -89,7 +88,7 @@ public:
      */
     static bool vsmcNotificationHandler(void *sensors, void *refCon, IOService *vsmc, IONotifier *notifier);
 
-    friend BDVT;
+    void dispatchMessage(int message, void* data);
 };
 
 #endif /* YogaSMC_hpp */
