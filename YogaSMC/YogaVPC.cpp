@@ -92,8 +92,6 @@ bool YogaVPC::initVPC() {
                 OSObject *value;
                 setPropertyNumber(DYTCVersion, "Revision", result.query.rev, 4);
                 setPropertyNumber(DYTCVersion, "SubRevision", (result.query.subrev_hi << 8) + result.query.subrev_lo, 12);
-            } else {
-                setProperty("DYTC", false);
             }
             DebugLog(updateSuccess, DYTCPrompt, DYTCCap);
         } else {
@@ -351,6 +349,7 @@ bool YogaVPC::DYTCCommand(DYTC_CMD command, DYTC_RESULT* result, UInt8 ICFunc, U
     if (vpc->evaluateInteger(setThermalControl, &(result->raw), params, 1) != kIOReturnSuccess) {
         AlwaysLog(toggleFailure, DYTCPrompt);
         DYTCCap = false;
+        setProperty("DYTC", false);
     } else {
         switch (result->errorcode) {
             case DYTC_SUCCESS:
@@ -361,6 +360,7 @@ bool YogaVPC::DYTCCommand(DYTC_CMD command, DYTC_RESULT* result, UInt8 ICFunc, U
             case DYTC_DPTF_UNAVAILABLE:
                 AlwaysLog("%s command 0x%x result 0x%08x (unsuppported)\n", DYTCPrompt, command.raw, result->raw);
                 DYTCCap = false;
+                setProperty("DYTC", false);
                 break;
 
             case DYTC_FUNC_INVALID:

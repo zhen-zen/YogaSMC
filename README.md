@@ -10,6 +10,7 @@ The driver will update the result in ioreg, while details can be monitored using
 
 ## YogaSMC (WIP)
 Allow syncing SMC keys like sensors reading and battery conservation mode.
+Based on [acidanthera/VirtualSMC](https://github.com/acidanthera/VirtualSMC/)
 
 ### EC reading:
 When [Rehabman's](https://www.tonymacx86.com/threads/guide-how-to-patch-dsdt-for-working-battery-status.116102/) battery patching method `RE1B` `RECB` present, desired EC fields can be read using following commands:
@@ -39,7 +40,7 @@ Intercepting events on vendor-specific Virtual Power Controller (VPC) devices an
 
 Currently available functions:
 - EC reading (see above)
-- DYTC setting (available for idea/think)
+- DYTC setting (available for idea/think, might need appropriate OS version for XOSI)
 - Keyboard backlight: support automatic on / off on sleep (bit 0) and yoga mode (bit 1)
 
 ### IdeaVPC
