@@ -117,7 +117,6 @@ bool YogaSMC::start(IOService *provider) {
 
     }
 
-    conf = OSDynamicCast(OSDictionary, provider->getProperty("Sensors"));
     addVSMCKey();
     vsmcNotifier = VirtualSMCAPI::registerHandler(vsmcNotificationHandler, this);
 

@@ -38,6 +38,5 @@ SMC_RESULT atomicECKey::readAccess() {
     uint16_t *ptr = reinterpret_cast<uint16_t *>(data);
     uint32_t data = atomic_load_explicit(currentSensor, memory_order_acquire);
     *ptr = VirtualSMCAPI::encodeSp(SmcKeyTypeSp78, data);
-    DBGLOG("vpckey", "update 0x%x", data);
     return SmcSuccess;
 }

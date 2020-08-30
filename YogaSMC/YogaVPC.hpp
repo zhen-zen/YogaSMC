@@ -143,7 +143,7 @@ protected:
      *
      *  @return true if success
      */
-    inline virtual void initSMC() {smc = YogaSMC::withDevice(this, ec);};
+    inline virtual void initSMC() {smc = YogaSMC::withDevice(this, ec); smc->conf = OSDynamicCast(OSDictionary, getProperty("Sensors"));};
 #endif
     /**
      *  Initialize VPC EC, get config and update status

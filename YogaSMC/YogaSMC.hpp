@@ -75,11 +75,6 @@ protected:
     virtual void addVSMCKey();
 
     /**
-     *  Sensors configuration
-     */
-    OSDictionary* conf {nullptr};
-
-    /**
      *  ACPI method for sensors
      */
     const char *sensorMethod[MAX_SENSOR];
@@ -113,6 +108,11 @@ public:
     static bool vsmcNotificationHandler(void *sensors, void *refCon, IOService *vsmc, IONotifier *notifier);
 
     void dispatchMessage(int message, void* data);
+
+    /**
+     *  Sensors configuration
+     */
+    OSDictionary* conf {nullptr};
 };
 
 #endif /* YogaSMC_hpp */

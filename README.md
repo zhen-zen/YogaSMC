@@ -20,6 +20,9 @@ When [Rehabman's](https://www.tonymacx86.com/threads/guide-how-to-patch-dsdt-for
 - Dump whole EC area: `ioio -s YogaSMC ReadECOffset 0x10000` (Dangerous, avoid using it frequently)
 - Known EC field name (no larger than 1 byte): `ioio -s YogaSMC ReadECName B1CY`
 
+### Customized sensor reading
+The EC field name for corresponding SMC key is read from Info.plist. If there's no `Fieldunit` object at desired offset, you can add an `OperationRegion` like the battery patching guide above.
+
 ## YogaWMI
 Support for parsing WMI devices and properties.
 
