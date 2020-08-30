@@ -39,16 +39,13 @@ void YogaSMC::addVSMCKey() {
     VirtualSMCAPI::addKey(KeyCH0B, vsmcPlugin.data, VirtualSMCAPI::valueWithData(nullptr, 1, SmcKeyTypeHex, new CH0B, SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_WRITE));
 
     // ACPI-based
-    if (!sensors || !ec)
+    if (!conf || !ec)
         return;
 
     OSDictionary *status = OSDictionary::withCapacity(8);
     OSString *method;
 
-    addECKeySp(KeyTPCD, "Platform Controller Hub Die");
-    addECKeySp(KeyTaLC, "Airflow Left");
-    addECKeySp(KeyTaRC, "Airflow Right");
-
+    // WARNING: watch out, key addition is sorted here!
     // Laptops only have 1 key for both channel
     addECKeySp(KeyTM0P, "Memory Proximity");
 
@@ -58,7 +55,17 @@ void YogaSMC::addVSMCKey() {
     addECKeySp(KeyTM0p(2), "SO-DIMM 3 Proximity");
     addECKeySp(KeyTM0p(3), "SO-DIMM 4 Proximity");
 
+    addECKeySp(KeyTPCD, "Platform Controller Hub Die");
+    addECKeySp(KeyTW0P, "Airport Proximity");
+    addECKeySp(KeyTaLC, "Airflow Left");
+    addECKeySp(KeyTaRC, "Airflow Right");
+    addECKeySp(KeyTh0H(1), "Fin Stack Proximity Right");
+    addECKeySp(KeyTh0H(2), "Fin Stack Proximity Left");
+    addECKeySp(KeyTs0p(0), "Palm Rest");
+    addECKeySp(KeyTs0p(1), "Trackpad Actuator");
+
     setProperty("SimpleECKey", status);
+    setProperty("Status", vsmcPlugin.data.size(), 32);
     status->release();
 }
 
@@ -75,8 +82,15 @@ bool YogaSMC::start(IOService *provider) {
 
     workLoop = IOWorkLoop::workLoop();
     commandGate = IOCommandGate::commandGate(this);
-    if (!workLoop || !commandGate || (workLoop->addEventSource(commandGate) != kIOReturnSuccess)) {
-        AlwaysLog("Failed to add commandGate\n");
+    poller = IOTimerEventSource::timerEventSource(this, [](OSObject *object, IOTimerEventSource *sender) {
+        auto smc = OSDynamicCast(YogaSMC, object);
+        if (smc) smc->updateEC();
+    });
+
+    if (!workLoop || !commandGate || !poller ||
+        (workLoop->addEventSource(commandGate) != kIOReturnSuccess) ||
+        (workLoop->addEventSource(poller) != kIOReturnSuccess)) {
+        AlwaysLog("Failed to add commandGate and poller\n");
         return false;
     }
 
@@ -103,10 +117,12 @@ bool YogaSMC::start(IOService *provider) {
 
     }
 
-    sensors = OSDynamicCast(OSDictionary, provider->getProperty("Sensors"));
+    conf = OSDynamicCast(OSDictionary, provider->getProperty("Sensors"));
     addVSMCKey();
     vsmcNotifier = VirtualSMCAPI::registerHandler(vsmcNotificationHandler, this);
 
+    poller->setTimeoutMS(POLLING_INTERVAL);
+    poller->enable();
     registerService();
     return true;
 }
@@ -122,7 +138,10 @@ void YogaSMC::stop(IOService *provider)
     OSSafeReleaseNULL(_deliverNotification);
 
     workLoop->removeEventSource(commandGate);
+    poller->disable();
+    workLoop->removeEventSource(poller);
     OSSafeReleaseNULL(commandGate);
+    OSSafeReleaseNULL(poller);
     OSSafeReleaseNULL(workLoop);
 
     terminate();
@@ -205,6 +224,15 @@ YogaSMC* YogaSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) 
 
     dictionary->release();
     return dev;
+}
+
+void YogaSMC::updateEC() {
+    UInt32 result = 0;
+    for (int i = 0; i < sensorCount; i++) {
+        if (ec->evaluateInteger(sensorMethod[i], &result) == kIOReturnSuccess && result != 0)
+            atomic_store_explicit(&currentSensor[i], result, memory_order_release);
+    }
+    poller->setTimeoutMS(POLLING_INTERVAL);
 }
 
 EXPORT extern "C" kern_return_t ADDPR(kern_start)(kmod_info_t *, void *) {

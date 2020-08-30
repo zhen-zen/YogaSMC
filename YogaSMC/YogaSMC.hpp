@@ -11,11 +11,15 @@
 
 #include <IOKit/IOCommandGate.h>
 #include <IOKit/IOService.h>
+#include <IOKit/IOTimerEventSource.h>
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
 #include <VirtualSMCSDK/kern_vsmcapi.hpp>
 #include "KeyImplementations.hpp"
 #include "common.h"
 #include "message.h"
+
+#define MAX_SENSOR 0x10
+#define POLLING_INTERVAL 1000
 
 class YogaSMC : public IOService
 {
@@ -33,12 +37,18 @@ private:
     OSSet* _notificationServices {nullptr};
     const OSSymbol* _deliverNotification {nullptr};
 
+    /**
+     *  Current sensor reading obtained from ACPI
+     */
+    _Atomic(uint32_t) currentSensor[MAX_SENSOR];
+     
+
 protected:
     const char* name;
 
     IOWorkLoop *workLoop {nullptr};
     IOCommandGate *commandGate {nullptr};
-
+    IOTimerEventSource* poller {nullptr};
 
     /**
      *  VirtualSMC service registration notifier
@@ -67,9 +77,23 @@ protected:
     /**
      *  Sensors configuration
      */
-    OSDictionary* sensors;
+    OSDictionary* conf {nullptr};
 
-    
+    /**
+     *  ACPI method for sensors
+     */
+    const char *sensorMethod[MAX_SENSOR];
+
+    /**
+     *  Enabled sensor count
+     */
+    UInt sensorCount {0};
+
+    /**
+     *  Poll EC field for sensor data
+     */
+    void updateEC();
+
 public:
     virtual bool init(OSDictionary *dictionary) APPLE_KEXT_OVERRIDE;
 
