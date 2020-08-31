@@ -46,6 +46,10 @@ void YogaSMC::addVSMCKey() {
     OSString *method;
 
     // WARNING: watch out, key addition is sorted here!
+
+    addECKeySp(KeyTCSA, "CPU System Agent Core");
+    addECKeySp(KeyTCXC, "CPU Core PECI");
+
     // Laptops only have 1 key for both channel
     addECKeySp(KeyTM0P, "Memory Proximity");
 

@@ -33,6 +33,8 @@ static constexpr const char *KeyIndexes = "0123456789ABCDEF";
 
 static constexpr SMC_KEY KeyBDVT = SMC_MAKE_IDENTIFIER('B','D','V','T');
 static constexpr SMC_KEY KeyCH0B = SMC_MAKE_IDENTIFIER('C','H','0','B');
+static constexpr SMC_KEY KeyTCSA = SMC_MAKE_IDENTIFIER('T','C','S','A');
+static constexpr SMC_KEY KeyTCXC = SMC_MAKE_IDENTIFIER('T','C','X','C');
 static constexpr SMC_KEY KeyTM0P = SMC_MAKE_IDENTIFIER('T','M','0','P');
 static constexpr SMC_KEY KeyTM0p(size_t i) { return SMC_MAKE_IDENTIFIER('T','M',KeyIndexes[i],'p'); }
 static constexpr SMC_KEY KeyTPCD = SMC_MAKE_IDENTIFIER('T','P','C','D');
