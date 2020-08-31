@@ -4,7 +4,7 @@
  */
 DefinitionBlock ("", "SSDT", 2, "hack", "ECRW", 0x00000000)
 {
-    External (_SB_.PCI0.LPCB.H_EC, DeviceObj)
+    External (_SB_.PCI0.LPCB.H_EC, DeviceObj)    // EC path
 
     Scope (_SB.PCI0.LPCB.H_EC)
     {
