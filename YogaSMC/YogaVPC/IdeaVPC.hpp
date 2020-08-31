@@ -18,6 +18,8 @@
 // from linux/drivers/platform/x86/ideapad-laptop.c
 
 #define BM_RAPIDCHARGE_BIT   (2)
+#define BM_BATTERY0BAD_BIT   (3)
+#define BM_BATTERY1BAD_BIT   (4)
 #define BM_CONSERVATION_BIT  (5)
 #define HA_BACKLIGHT_CAP_BIT (4)
 #define HA_BACKLIGHT_BIT     (5)
@@ -134,7 +136,7 @@ private:
      *  Rapid charge mode status
      */
     bool rapidChargeMode {false};
-    
+
     /**
      *  Initialize VPC EC status
      *
@@ -204,10 +206,18 @@ private:
     bool updateBatteryInfo(OSDictionary *bat0, OSDictionary *bat1);
 
     /**
-     *  Rapid charge mode status
+     *  Update battery stats
+     *
+     *  @param batState battery state from GBMD
      */
-    void updateBatteryStats();
+    void updateBatteryStats(UInt32 batState);
 
+    /**
+     *  Update keyboard stats
+     *
+     *  @param kbdState keyboard state from HALS
+     */
+    void updateKeyboardStats(UInt32 kbdState);
     /**
      *  Update battery conservation mode status
      *

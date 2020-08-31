@@ -213,7 +213,11 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                 else
                     AlwaysLog("%s 0x%x 0x%x failed %d\n", writeECPrompt, command, data, retries);
             } else if (key->isEqualTo(batteryPrompt)) {
-                updateBatteryStats();
+                UInt32 state;
+                if (vpc->evaluateInteger(getBatteryMode, &state) == kIOReturnSuccess)
+                    updateBatteryStats(state);
+                else
+                    AlwaysLog(updateFailure, batteryPrompt);
             } else if (key->isEqualTo(updatePrompt)) {
                 updateAll();
                 super::updateAll();
@@ -234,9 +238,10 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
 }
 
 bool IdeaVPC::initEC() {
-    UInt32 state, attempts = 0;
+    UInt32 kbdState, batState, attempts = 0;
     do {
-        if (vpc->evaluateInteger(getKeyboardMode, &state) == kIOReturnSuccess)
+        if (vpc->evaluateInteger(getKeyboardMode, &kbdState) == kIOReturnSuccess &&
+            vpc->evaluateInteger(getBatteryMode, &batState) == kIOReturnSuccess)
             break;
         if (++attempts > 5) {
             AlwaysLog(updateFailure, getKeyboardMode);
@@ -249,28 +254,45 @@ bool IdeaVPC::initEC() {
     if (attempts)
         setProperty("EC Access", attempts + 1, 8);
 
-    backlightCap = BIT(HA_BACKLIGHT_CAP_BIT) & state;
+    updateKeyboardStats(kbdState);
+    updateBatteryStats(batState);
+    return true;
+}
+
+void IdeaVPC::updateKeyboardStats(UInt32 kbdState) {
+    backlightCap = BIT(HA_BACKLIGHT_CAP_BIT) & kbdState;
     if (!backlightCap)
         setProperty(backlightPrompt, "unsupported");
     else
         setProperty(autoBacklightPrompt, automaticBacklightMode, 8);
 
-    FnlockCap = BIT(HA_FNLOCK_CAP_BIT) & state;
+    FnlockCap = BIT(HA_FNLOCK_CAP_BIT) & kbdState;
     if (!FnlockCap)
         setProperty(FnKeyPrompt, "unsupported");
 
-    if (BIT(HA_PRIMEKEY_BIT) & state)
+    if (BIT(HA_PRIMEKEY_BIT) & kbdState)
         setProperty("PrimeKeyType", "HotKey");
     else
         setProperty("PrimeKeyType", "FnKey");
-
-    updateBatteryStats();
-    return true;
 }
 
-void IdeaVPC::updateBatteryStats() {
-    OSDictionary *bat0 = OSDictionary::withCapacity(4);
-    OSDictionary *bat1 = OSDictionary::withCapacity(4);
+void IdeaVPC::updateBatteryStats(UInt32 batState) {
+    OSDictionary *bat0 = OSDictionary::withCapacity(5);
+    OSDictionary *bat1 = OSDictionary::withCapacity(5);
+    if (BIT(BM_BATTERY0BAD_BIT) & batState) {
+        bat0->setObject("Critical", kOSBooleanTrue);
+        setProperty("Battery", "Critical");
+        AlwaysLog("Battery 0 critical!\n");
+        conservationModeLock = true;
+    }
+
+    if (BIT(BM_BATTERY1BAD_BIT) & batState) {
+        bat1->setObject("Critical", kOSBooleanTrue);
+        setProperty("Battery", "Critical");
+        AlwaysLog("Battery 1 critical!\n");
+        conservationModeLock = true;
+    }
+
     if (updateBatteryID(bat0, bat1) && updateBatteryInfo(bat0, bat1)) {
         if (bat0->getCount())
             setProperty("Battery 0", bat0);
@@ -473,6 +495,9 @@ bool IdeaVPC::toggleConservation() {
 }
 
 bool IdeaVPC::toggleRapidCharge() {
+    if (conservationModeLock)
+        return false;
+
     UInt32 result;
 
     OSObject* params[1] = {
