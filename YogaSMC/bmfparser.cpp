@@ -155,6 +155,10 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
             setPropertyString(dict, "type", "UINT32");
             break;
 
+        case MOF_UINT64:
+            setPropertyString(dict, "type", "UINT64");
+            break;
+
         default:
             setPropertyNumber(dict, "type", type[0], 8);
             error("unknown type");
