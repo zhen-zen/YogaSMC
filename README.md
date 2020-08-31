@@ -12,16 +12,8 @@ The driver will update the result in ioreg, while details can be monitored using
 Allow syncing SMC keys like sensors reading and battery conservation mode.
 Based on [acidanthera/VirtualSMC](https://github.com/acidanthera/VirtualSMC/)
 
-### EC reading:
-When [Rehabman's](https://www.tonymacx86.com/threads/guide-how-to-patch-dsdt-for-working-battery-status.116102/) battery patching method `RE1B` `RECB` present, desired EC fields can be read using following commands:
-
-- One byte at specific offset: `ioio -s YogaSMC ReadECOffset 0xA4` for field at offset `0xA4`
-- Bulk reading: `ioio -s YogaSMC ReadECOffset 0x1006` for `0x10` bytes at offset `0x06` (add total bytes to read before offset)
-- Dump whole EC area: `ioio -s YogaSMC ReadECOffset 0x10000` (Dangerous, avoid using it frequently)
-- Known EC field name (no larger than 1 byte): `ioio -s YogaSMC ReadECName B1CY`
-
 ### Customized sensor reading
-The EC field name for corresponding SMC key is read from Info.plist. If there's no `Fieldunit` object at desired offset, you can add an `OperationRegion` like the battery patching guide above.
+The EC field name for corresponding SMC key is read from Info.plist. If there's no `FieldUnit` object at desired offset, you can add an `OperationRegion` like `SSDT-THINK.dsl` in `SSDTSample`.
 
 ## YogaWMI
 Support for parsing WMI devices and properties.
@@ -42,9 +34,18 @@ Based on [lenovo/thinklmi](https://github.com/lenovo/thinklmi) ([iksaif/thinkpad
 Intercepting events on vendor-specific Virtual Power Controller (VPC) devices and sync states, some instructions are on [project boards](https://github.com/zhen-zen/YogaSMC/projects/).
 
 Currently available functions:
-- EC reading (see above)
+- EC reading
 - DYTC setting (available for idea/think, might need appropriate OS version for XOSI)
 - Keyboard backlight: support automatic on / off on sleep (bit 0) and yoga mode (bit 1)
+- Clamshell mode (need additional patch on `_LID` like  `SSDT-RCSM.dsl` in `SSDTSample`)
+
+### EC reading:
+When [Rehabman's](https://www.tonymacx86.com/threads/guide-how-to-patch-dsdt-for-working-battery-status.116102/) battery patching method `RE1B` `RECB` present (or  `SSDT-ECRW.dsl` in `SSDTSample`), desired EC fields can be read using following commands:
+
+- One byte at specific offset: `ioio -s YogaVPC ReadECOffset 0xA4` for field at offset `0xA4`
+- Bulk reading: `ioio -s YogaVPC ReadECOffset 0x1006` for `0x10` bytes at offset `0x06` (add total bytes to read before offset)
+- Dump whole EC area: `ioio -s YogaVPC ReadECOffset 0x10000`
+- Known EC field name: `ioio -s YogaVPC ReadECName B1CY`  (no larger than 1 byte due to OS constraint)
 
 ### IdeaVPC
 Based on [linux/drivers/platform/x86/ideapad-laptop.c](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/ideapad-laptop.c), targets `VPC0` using `_HID` `VPC2004`.

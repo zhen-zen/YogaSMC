@@ -4,8 +4,8 @@
 DefinitionBlock ("", "SSDT", 2, "hack", "RCSM", 0x00000000)
 {
     External (_SB_.PCI0.LPCB.H_EC, DeviceObj)
-    External (_SB_.PCI0.LPCB.H_EC.VPC0, DeviceObj)    // Your laptop's VPC path
-    External (_SB_.PCI0.LPCB.H_EC.XQ0D, MethodObj)    // Use ACPIDebug to find your lid open EC query
+    External (_SB_.PCI0.LPCB.H_EC.VPC0, DeviceObj)    // VPC path
+    External (_SB_.PCI0.LPCB.H_EC.XQ0D, MethodObj)    // Use ACPIDebug to find your lid open EC query and rename that
     External (RMDT.XLID, IntObj)
 
     Scope (_SB.PCI0.LPCB.H_EC)
@@ -33,11 +33,11 @@ DefinitionBlock ("", "SSDT", 2, "hack", "RCSM", 0x00000000)
             }
         }
 
-        Method (_Q0D, 0, NotSerialized)
+        Method (_Q0D, 0, NotSerialized)    // _QXX method for lid open
         {
             If ((RCSM == Zero))
             {
-                XQ0D ()
+                XQ0D ()                    // Renamed _QXX method for lid open
             }
         }
     }
