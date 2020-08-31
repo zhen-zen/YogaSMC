@@ -148,7 +148,7 @@ private:
      *
      *  @return true if success
      */
-    inline void initSMC() APPLE_KEXT_OVERRIDE {smc = IdeaSMC::withDevice(this, ec); smc->conf = OSDynamicCast(OSDictionary, getProperty("Sensors"));};
+    inline void initSMC() APPLE_KEXT_OVERRIDE {smc = IdeaSMC::withDevice(this, ec);};
 #endif
 
     /**

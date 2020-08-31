@@ -221,6 +221,7 @@ YogaSMC* YogaSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) 
         OSSafeReleaseNULL(dev);
     }
 
+    dev->conf = OSDynamicCast(OSDictionary, provider->getProperty("Sensors"));
     dictionary->release();
     return dev;
 }
