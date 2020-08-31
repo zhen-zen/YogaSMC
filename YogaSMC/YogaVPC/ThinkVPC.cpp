@@ -12,9 +12,12 @@
 OSDefineMetaClassAndStructors(ThinkVPC, YogaVPC);
 
 void ThinkVPC::updateAll() {
-    getNotificationMask(1);
-    getNotificationMask(2);
-    getNotificationMask(3);
+    OSDictionary *KBDPresent = OSDictionary::withCapacity(3);
+    getNotificationMask(1, KBDPresent);
+    getNotificationMask(2, KBDPresent);
+    getNotificationMask(3, KBDPresent);
+    setProperty("HKEY Setting", KBDPresent);
+    KBDPresent->release();
     updateBattery(BAT_ANY);
     updateMutestatus();
     updateMuteLEDStatus();
@@ -23,7 +26,7 @@ void ThinkVPC::updateAll() {
     setMicMuteLEDStatus(0);
 }
 
-bool ThinkVPC::updateConservation(const char * method, bool update) {
+bool ThinkVPC::updateConservation(const char * method, OSDictionary *bat, bool update) {
     UInt32 result;
 
     OSObject* params[] = {
@@ -35,10 +38,11 @@ bool ThinkVPC::updateConservation(const char * method, bool update) {
         return false;
     }
 
-    if (update) {
+    if (update)
         DebugLog(updateSuccess, method, result);
-        setProperty(method, result, 32);
-    }
+
+    OSNumber *value;
+    setPropertyNumber(bat, method, result, 32);
 
     return true;
 }
@@ -97,7 +101,7 @@ bool ThinkVPC::setMutestatus(UInt32 value) {
     return true;
 }
 
-void ThinkVPC::getNotificationMask(UInt32 index) {
+void ThinkVPC::getNotificationMask(UInt32 index, OSDictionary *KBDPresent) {
     UInt32 result;
 
     OSObject* params[] = {
@@ -109,17 +113,18 @@ void ThinkVPC::getNotificationMask(UInt32 index) {
         return;
     }
 
+    OSNumber *value;
     switch (index) {
         case 1:
-            setProperty("DHKN", result, 32);
+            setPropertyNumber(KBDPresent, "DHKN", result, 32);
             break;
 
         case 2:
-            setProperty("DHKE", result, 32);
+            setPropertyNumber(KBDPresent, "DHKE", result, 32);
             break;
 
         case 3:
-            setProperty("DHKF", result, 32);
+            setPropertyNumber(KBDPresent, "DHKF", result, 32);
             break;
 
         default:
@@ -152,10 +157,10 @@ bool ThinkVPC::initVPC() {
         return false;
     }
 
+    OSObject *value;
+    KBDProperty = OSDictionary::withCapacity(1);
     AlwaysLog("HKEY interface version %x\n", version);
-#ifdef DEBUG
-    setProperty("HKEY version", version, 32);
-#endif
+    setPropertyNumber(KBDProperty, "Version", version, 32);
     switch (version >> 8) {
         case 1:
             AlwaysLog("HKEY version 0x100 not implemented\n");
@@ -181,6 +186,8 @@ bool ThinkVPC::initVPC() {
     } else {
         AlwaysLog("Failed to acquire hotkey_all_mask\n");
     }
+    setProperty("HKEY Property", KBDProperty);
+    KBDProperty->release();
 
     updateAll();
 
@@ -229,23 +236,24 @@ bool ThinkVPC::updateAdaptiveKBD(int arg) {
     }
 
     AlwaysLog("%s %d %x\n", __func__, arg, result);
+    OSObject *value;
     switch (arg) {
         case 0:
         case 1:
             hotkey_all_mask = result;
-            setProperty("hotkey_all_mask", result, 32);
+            setPropertyNumber(KBDProperty, "hotkey_all_mask", result, 32);
             break;
 
         case 2:
             if (result) {
                 hotkey_adaptive_all_mask = result;
-                setProperty("hotkey_adaptive_all_mask", result, 32);
+                setPropertyNumber(KBDProperty, "hotkey_adaptive_all_mask", result, 32);
             }
             break;
 
         case 3:
             hotkey_alter_all_mask = result;
-            setProperty("hotkey_alter_all_mask", result, 32);
+            setPropertyNumber(KBDProperty, "hotkey_alter_all_mask", result, 32);
             break;
 
         default:
@@ -268,14 +276,30 @@ void ThinkVPC::updateBattery(bool update) {
             return;
     }
 
-    if (updateConservation(getCMstart) &&
-        updateConservation(getCMstop) &&
-        updateConservation(getCMInhibitCharge) &&
-        updateConservation(getCMForceDischarge) &&
-        updateConservation(getCMPeakShiftState))
+    OSDictionary *bat = OSDictionary::withCapacity(5);
+    if (updateConservation(getCMstart, bat) &&
+        updateConservation(getCMstop, bat) &&
+        updateConservation(getCMInhibitCharge, bat) &&
+        updateConservation(getCMForceDischarge, bat) &&
+        updateConservation(getCMPeakShiftState, bat))
         DebugLog(updateSuccess, batteryPrompt, batnum);
     else
         AlwaysLog(updateFailure, batteryPrompt);
+
+    switch (batnum) {
+        case BAT_ANY:
+            setProperty("BAT_ANY", bat);
+            break;
+
+        case BAT_PRIMARY:
+            setProperty("BAT_PRIMARY", bat);
+            break;
+
+        case BAT_SECONDARY:
+            setProperty("BAT_SECONDARY", bat);
+            break;
+    }
+    bat->release();
 }
 
 void ThinkVPC::setPropertiesGated(OSObject *props) {

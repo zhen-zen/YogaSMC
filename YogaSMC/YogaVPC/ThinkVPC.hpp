@@ -226,6 +226,7 @@ private:
 
     bool ConservationMode {false};
 
+    OSDictionary *KBDProperty {nullptr};
     /**
      *  Set single notification mask
      *
@@ -242,8 +243,9 @@ private:
      *  Get notification mask
      *
      *  @param index
+     *  @param KBDPresent dictionary for current settings
      */
-    void getNotificationMask(UInt32 index);
+    void getNotificationMask(UInt32 index, OSDictionary *KBDPresent);
 
     bool initVPC() APPLE_KEXT_OVERRIDE;
     void setPropertiesGated(OSObject* props) APPLE_KEXT_OVERRIDE;
@@ -263,7 +265,16 @@ private:
     bool updateBacklight(bool update=true) APPLE_KEXT_OVERRIDE;
     bool setBacklight(UInt32 level) APPLE_KEXT_OVERRIDE;
 
-    bool updateConservation(const char* method, bool update=true);
+    /**
+     *  Update battery conservation related setting
+     *
+     *  @param method method name to be executed
+     *  @param bat dictionary for status
+     *  @param update only update internal status when false
+     *
+     *  @return true if success
+     */
+    bool updateConservation(const char* method, OSDictionary *bat, bool update=true);
     
     bool setConservation(const char* method, UInt32 value);
 
