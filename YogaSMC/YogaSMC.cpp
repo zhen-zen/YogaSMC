@@ -68,7 +68,9 @@ void YogaSMC::addVSMCKey() {
     addECKeySp(KeyTs0p(0), "Palm Rest");
     addECKeySp(KeyTs0p(1), "Trackpad Actuator");
 
-    setProperty("SimpleECKey", status);
+    qsort(const_cast<VirtualSMCKeyValue *>(vsmcPlugin.data.data()), vsmcPlugin.data.size(), sizeof(VirtualSMCKeyValue), VirtualSMCKeyValue::compare);
+
+    setProperty("DirectECKey", status);
     setProperty("Status", vsmcPlugin.data.size(), 32);
     status->release();
 }
