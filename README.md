@@ -10,6 +10,7 @@ The driver will update the result in ioreg, while details can be monitored using
 
 ## YogaSMC (WIP)
 Allow syncing SMC keys like sensors reading and battery conservation mode.
+
 Based on [acidanthera/VirtualSMC](https://github.com/acidanthera/VirtualSMC/)
 
 ### Customized sensor reading
@@ -36,7 +37,12 @@ Intercepting events on vendor-specific Virtual Power Controller (VPC) devices an
 Currently available functions:
 - EC reading
 - DYTC setting (available for idea/think, might need appropriate OS version for XOSI)
-- Keyboard backlight: support automatic on / off on sleep (bit 0) and yoga mode (bit 1)
+- Automatic Keyboard backlight: 
+  -  BIT 0: Triggered by sleep/wake
+  -  BIT 1: Triggered by yoga mode change
+  -  BIT 2: _SI._SST
+  -  BIT 3: Mute LED
+  -  BIT 4: Mic Mute LED
 - Clamshell mode (need additional patch on `_LID` like  `SSDT-RCSM.dsl` in `SSDTSample`)
 
 ### EC reading:
