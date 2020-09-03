@@ -1,9 +1,10 @@
+//  SPDX-License-Identifier: GPL-2.0-only
 //
 //  ThinkSMC.cpp
 //  YogaSMC
 //
-//  Created by Zhen Gong on 8/30/20.
-//  Copyright © 2020 zhen. All rights reserved.
+//  Created by Zhen on 8/30/20.
+//  Copyright © 2020 Zhen. All rights reserved.
 //
 
 #include "ThinkSMC.hpp"
