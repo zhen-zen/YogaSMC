@@ -855,7 +855,9 @@ bool ThinkVPC::setBacklight(UInt32 level) {
 }
 
 bool ThinkVPC::setSSTStatus(UInt32 value) {
+#ifdef DEBUG
     char const *property[5] = {"Indicator off", "Working", "Waking", "Sleeping", "Hibernating"};
+#endif
     if (vpc->validateObject("CSSI") == kIOReturnSuccess) {
         OSObject* params[] = {
             OSNumber::withNumber(value, 32)
