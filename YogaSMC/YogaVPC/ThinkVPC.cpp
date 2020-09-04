@@ -717,7 +717,7 @@ void ThinkVPC::updateVPC() {
                     break;
 
                 case TP_HKEY_EV_THM_CSM_COMPLETED:
-                    if (!DYTCLock) {
+                    if (DYTCLapmodeCap && !DYTCLock) {
                         AlwaysLog("Thermal Control Command set completed (DYTC)\n");
                         updateDYTC();
                     }

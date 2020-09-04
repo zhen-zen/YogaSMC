@@ -216,6 +216,11 @@ protected:
     bool DYTCCap {false};
 
     /**
+     *  DYTC lapmode capability, will be update on init
+     */
+    bool DYTCLapmodeCap {false};
+
+    /**
      *  Simple lock to prevent DYTC update when user setting is in progress
      */
     bool DYTCLock {false};

@@ -92,6 +92,8 @@ bool YogaVPC::initVPC() {
                 OSObject *value;
                 setPropertyNumber(DYTCVersion, "Revision", result.query.rev, 4);
                 setPropertyNumber(DYTCVersion, "SubRevision", (result.query.subrev_hi << 8) + result.query.subrev_lo, 12);
+                if (result.query.rev >= 5)
+                    DYTCLapmodeCap = true;
             }
             DebugLog(updateSuccess, DYTCPrompt, DYTCCap);
         } else {
@@ -464,7 +466,8 @@ bool YogaVPC::parseDYTC(DYTC_RESULT result) {
         }
     }
 
-    setPropertyBoolean(status, "lapmode", BIT(DYTC_FUNCTION_CQL) & result.get.vmode);
+    if (DYTCLapmodeCap)
+        setPropertyBoolean(status, "lapmode", BIT(DYTC_FUNCTION_CQL) & result.get.vmode);
 
     setProperty("DYTC", status);
     status->release();
