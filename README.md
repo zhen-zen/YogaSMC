@@ -2,19 +2,21 @@
 
 This driver consists of YogaSMC (WIP), YogaWMI and YogaVPC.
 
-Each component can be derived for different targets. Support for Yoga series (IdeaPad) is functional. ThinkPad support is read-only, awaiting further testing.
+Each component can be derived for different targets. Currently IdeaPad and ThinkPad series are supported.
 
-Currently it's possible to interact with the driver using [ioio](https://github.com/RehabMan/OS-X-ioio), e.g. `ioio -s IdeaVPC ConservationMode true`.
+Command to driver can be sent with [ioio](https://github.com/RehabMan/OS-X-ioio), e.g. `ioio -s IdeaVPC ConservationMode true`.
 
-The driver will update the result in ioreg, while details can be monitored using `log stream --predicate 'processID=0 && senderImagePath contains "YogaSMC"`. 
+The driver will update the status in ioreg, while details are available in system log, e.g. `log stream --predicate 'senderImagePath contains "YogaSMC"'`. 
 
-## YogaSMC (WIP)
+## YogaSMC
 Allow syncing SMC keys like sensors reading and battery conservation mode.
 
 Based on [acidanthera/VirtualSMC](https://github.com/acidanthera/VirtualSMC/)
 
 ### Customized sensor reading
 The EC field name for corresponding SMC key is read from Info.plist. If there's no `FieldUnit` object at desired offset, you can add an `OperationRegion` like `SSDT-THINK.dsl` in `SSDTSample`.
+
+### Fan control (WIP)
 
 ## YogaWMI
 Support for parsing WMI devices and properties.
@@ -24,9 +26,10 @@ Support for parsing WMI devices and properties.
 Based on [the-darkvoid/macOS-IOElectrify](https://github.com/the-darkvoid/macOS-IOElectrify/) ([Dolnor/IOWMIFamily](https://github.com/Dolnor/IOWMIFamily/)) and [bmfparser](https://github.com/zhen-zen/bmfparser) ([pali/bmfdec](https://github.com/pali/bmfdec))
 
 ### IdeaWMI
-Support Yoga Mode detection, extra battery information and disabling keyboard/touchpad when flipped.
-
-Fn+esc (obsolete paper looking function) currently assigned to Fn mode switch.
+Currently available functions:
+- Yoga Mode detection and disabling keyboard/touchpad when flipped
+- Extra battery information (require same battery patch to related methods)
+- Fn+esc (obsolete paper looking function), currently assigned to Fn mode switch.
 
 ### ThinkWMI (WIP)
 Based on [lenovo/thinklmi](https://github.com/lenovo/thinklmi) ([iksaif/thinkpad-wmi](https://github.com/iksaif/thinkpad-wmi))
@@ -51,7 +54,7 @@ When [Rehabman's](https://www.tonymacx86.com/threads/guide-how-to-patch-dsdt-for
 - One byte at specific offset: `ioio -s YogaVPC ReadECOffset 0xA4` for field at offset `0xA4`
 - Bulk reading: `ioio -s YogaVPC ReadECOffset 0x1006` for `0x10` bytes at offset `0x06` (add total bytes to read before offset)
 - Dump whole EC area: `ioio -s YogaVPC ReadECOffset 0x10000`
-- Known EC field name: `ioio -s YogaVPC ReadECName B1CY`  (no larger than 1 byte due to OS constraint)
+- Known EC field name: `ioio -s YogaVPC ReadECName B1CY` (no larger than 1 byte due to OS constraint)
 
 ### IdeaVPC
 Based on [linux/drivers/platform/x86/ideapad-laptop.c](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/ideapad-laptop.c), targets `VPC0` using `_HID` `VPC2004`.
