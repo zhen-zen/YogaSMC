@@ -19,7 +19,7 @@
 #include "message.h"
 
 #define MAX_SENSOR 0x10
-#define POLLING_INTERVAL 1000
+#define POLLING_INTERVAL 2000
 
 class YogaSMC : public IOService
 {
