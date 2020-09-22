@@ -34,7 +34,7 @@ jobs:
         # The destination specifier to build.
         # destination: # optional
         configuration: Debug
-        sdk: macosx10.12
+        # sdk: macosx10.12
         # Arbitrary, space separated build settings (e.g. PLATFORM_NAME=iphonesimulator).
         build-settings: -target BuildAll
         # The action to perform (e.g. build, test, ...).
@@ -47,7 +47,7 @@ jobs:
         # destination: # optional
         # The configuration to build.
         configuration: Release
-        sdk: macosx10.12
+        # sdk: macosx10.12
         # Arbitrary, space separated build settings (e.g. PLATFORM_NAME=iphonesimulator).
         build-settings: -target BuildAll
         # The action to perform (e.g. build, test, ...).
