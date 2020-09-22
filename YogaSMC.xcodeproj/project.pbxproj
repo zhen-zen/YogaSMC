@@ -772,7 +772,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = org.zhen.YogaSMCPane;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
+				SDKROOT = macosx10.15;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				WRAPPER_EXTENSION = prefPane;
@@ -796,7 +796,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = org.zhen.YogaSMCPane;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
+				SDKROOT = macosx10.15;
 				SWIFT_VERSION = 5.0;
 				WRAPPER_EXTENSION = prefPane;
 			};
