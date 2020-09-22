@@ -39,6 +39,7 @@ jobs:
         build-settings: -target BuildAll
         # The action to perform (e.g. build, test, ...).
         action: build # default is test
+        use-xcpretty: false
     - name: Xcodebuild Release
       uses: sersoft-gmbh/xcodebuild-action@v1.1
       with:
