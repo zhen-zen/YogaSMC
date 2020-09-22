@@ -11,13 +11,12 @@ import Foundation
 import IOKit
 import PreferencePanes
 
-func getBoolean(key: String, value: inout Bool, io_service: io_service_t) -> Bool {
+func getBoolean(_ key: String, _ io_service: io_service_t) -> Bool {
     let rkey:CFString = key as NSString
     guard let rvalue = IORegistryEntryCreateCFProperty(io_service, rkey, kCFAllocatorDefault, 0).takeRetainedValue() as? Bool else {
         return false
     }
-    value = rvalue
-    return true
+    return rvalue
 }
 
 func getString(_ key: String, _ io_service: io_service_t) -> String? {
@@ -31,9 +30,12 @@ func getString(_ key: String, _ io_service: io_service_t) -> String? {
 class YogaSMCPane : NSPreferencePane {
     var io_service : io_service_t = 0
 
+    var unsupported = false
+
     @IBOutlet weak var vVersion: NSTextField!
     @IBOutlet weak var vBuild: NSTextField!
     @IBOutlet weak var vClass: NSTextField!
+    @IBOutlet weak var vECRead: NSTextField!
     
     @IBOutlet weak var TabView: NSTabView!
     @IBOutlet weak var IdeaViewItem: NSTabViewItem!
@@ -54,37 +56,42 @@ class YogaSMCPane : NSPreferencePane {
             return
         }
 
-        if let rclass = IOObjectCopyClass(io_service).takeRetainedValue() as? NSString {
-            switch rclass {
-            case "IdeaSMC":
-                vClass.stringValue = "Idea"
-                TabView.removeTabViewItem(ThinkViewItem)
-            case "ThinkSMC":
-                vClass.stringValue = "Think"
-                TabView.removeTabViewItem(IdeaViewItem)
-            case "YogaSMC":
-                vClass.stringValue = "Unknown"
-            default:
-                vClass.stringValue = "Unsupported"
-                return
-            }
+        switch IOObjectCopyClass(io_service).takeRetainedValue() as NSString {
+        case "IdeaSMC":
+            vClass.stringValue = "Idea"
+            TabView.removeTabViewItem(ThinkViewItem)
+        case "ThinkSMC":
+            vClass.stringValue = "Think"
+            TabView.removeTabViewItem(IdeaViewItem)
+        case "YogaSMC":
+            vClass.stringValue = "Unknown"
+        default:
+            vClass.stringValue = "Unsupported"
+            unsupported = true
         }
 
         if let rbuild = getString("YogaSMC,Build", io_service) {
             vBuild.stringValue = rbuild
         } else {
             vBuild.stringValue = "Unknown"
+            unsupported = true
         }
 
         if let rversion = getString("YogaSMC,Version", io_service) {
             vVersion.stringValue = rversion
         } else {
             vVersion.stringValue = "Unknown"
+            unsupported = true
         }
 
-//        var tabFlower = new TabViewItem { "Flower" };
-        if vClass.stringValue == "Idea" {
-            TabView.removeTabViewItem(ThinkViewItem)
+        if unsupported {
+            return
         }
+
+//        if getBoolean("ReadEC", io_service) {
+//            vECRead.stringValue = "Available"
+//        } else {
+//            vECRead.stringValue = "Unavailable"
+//        }
     }
 }
