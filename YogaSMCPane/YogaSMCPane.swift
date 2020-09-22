@@ -11,20 +11,28 @@ import Foundation
 import IOKit
 import PreferencePanes
 
+// FIXME
 func getBoolean(_ key: String, _ io_service: io_service_t) -> Bool {
-    let rkey:CFString = key as NSString
-    guard let rvalue = IORegistryEntryCreateCFProperty(io_service, rkey, kCFAllocatorDefault, 0).takeRetainedValue() as? Bool else {
+    let rvalue = IORegistryEntryCreateCFProperty(io_service, key as CFString, kCFAllocatorDefault, 0)
+    if rvalue == nil {
         return false
     }
-    return rvalue
+    return rvalue?.takeRetainedValue() as! Bool
+}
+
+// FIXME
+func getNumber(_ key: String, _ io_service: io_service_t) -> Int {
+    if let rvalue = IORegistryEntryCreateCFProperty(io_service, key as CFString, kCFAllocatorDefault, 0) {
+        return rvalue.takeRetainedValue() as! Int
+    }
+    return -1
 }
 
 func getString(_ key: String, _ io_service: io_service_t) -> String? {
-    let rkey:CFString = key as NSString
-    guard let rvalue = IORegistryEntryCreateCFProperty(io_service, rkey, kCFAllocatorDefault, 0).takeRetainedValue() as? NSString else {
-        return nil
+    if let rvalue = IORegistryEntryCreateCFProperty(io_service, key as CFString, kCFAllocatorDefault, 0) {
+        return rvalue.takeRetainedValue() as! NSString as String
     }
-    return rvalue as String
+    return nil
 }
 
 class YogaSMCPane : NSPreferencePane {
@@ -41,12 +49,64 @@ class YogaSMCPane : NSPreferencePane {
     @IBOutlet weak var IdeaViewItem: NSTabViewItem!
     @IBOutlet weak var ThinkViewItem: NSTabViewItem!
     
+    @IBOutlet weak var backlightSlider: NSSlider!
+
+    @IBOutlet weak var autoSleepCheck: NSButton!
+    @IBOutlet weak var yogaModeCheck: NSButton!
+    @IBOutlet weak var indicatorCheck: NSButton!
+    @IBOutlet weak var muteCheck: NSButton!
+    @IBOutlet weak var micMuteCheck: NSButton!
+
     override func mainViewDidLoad() {
 //        UserDefaults.standard.set("value", forKey: "testKey")
 //        let rvalue = UserDefaults.standard.string(forKey: "testKey")
 
         super.mainViewDidLoad()
         // nothing
+    }
+
+    func updateIdea() {
+        return
+    }
+
+    func updateThink() {
+        return
+    }
+
+    func update() {
+        let autoBacklight = getNumber("AutoBacklight", io_service)
+        if (autoBacklight != -1) {
+            autoSleepCheck.state = ((autoBacklight & (1 << 0)) != 0) ? NSControl.StateValue.on : NSControl.StateValue.off
+            yogaModeCheck.state =  ((autoBacklight & (1 << 1)) != 0) ? NSControl.StateValue.on : NSControl.StateValue.off
+            indicatorCheck.state =  ((autoBacklight & (1 << 2)) != 0) ? NSControl.StateValue.on : NSControl.StateValue.off
+            muteCheck.state =  ((autoBacklight & (1 << 3)) != 0) ? NSControl.StateValue.on : NSControl.StateValue.off
+            micMuteCheck.state =  ((autoBacklight & (1 << 4)) != 0) ? NSControl.StateValue.on : NSControl.StateValue.off
+        } else {
+            autoSleepCheck.isEnabled = false
+            yogaModeCheck.isEnabled = false
+            indicatorCheck.isEnabled = false
+            muteCheck.isEnabled = false
+            micMuteCheck.isEnabled = false
+        }
+
+        let backlightLevel = getNumber("BacklightLevel", io_service)
+        if (backlightLevel != -1) {
+            backlightSlider.integerValue = backlightLevel
+        } else {
+            backlightSlider.isEnabled = false
+        }
+
+        if getBoolean("FnlockMode", io_service) {
+            vECRead.stringValue = "Available"
+        } else {
+            vECRead.stringValue = "Unavailable"
+        }
+
+        if vClass.stringValue == "Idea" {
+            updateIdea()
+        } else if vClass.stringValue == "Think" {
+            updateThink()
+        }
     }
 
     override func awakeFromNib() {
@@ -60,11 +120,16 @@ class YogaSMCPane : NSPreferencePane {
         case "IdeaSMC":
             vClass.stringValue = "Idea"
             TabView.removeTabViewItem(ThinkViewItem)
+            indicatorCheck.isHidden = true
+            muteCheck.isHidden = true
+            micMuteCheck.isHidden = true
         case "ThinkSMC":
             vClass.stringValue = "Think"
             TabView.removeTabViewItem(IdeaViewItem)
         case "YogaSMC":
             vClass.stringValue = "Unknown"
+            TabView.removeTabViewItem(IdeaViewItem)
+            TabView.removeTabViewItem(ThinkViewItem)
         default:
             vClass.stringValue = "Unsupported"
             unsupported = true
@@ -88,10 +153,6 @@ class YogaSMCPane : NSPreferencePane {
             return
         }
 
-//        if getBoolean("ReadEC", io_service) {
-//            vECRead.stringValue = "Available"
-//        } else {
-//            vECRead.stringValue = "Unavailable"
-//        }
+        update()
     }
 }
