@@ -13,24 +13,27 @@ import PreferencePanes
 
 
 func getBoolean(_ key: String, _ io_service: io_service_t) -> Bool {
-    if let rvalue = IORegistryEntryCreateCFProperty(io_service, key as CFString, kCFAllocatorDefault, 0) {
-        return rvalue.takeRetainedValue() as! Bool
+    guard let rvalue = IORegistryEntryCreateCFProperty(io_service, key as CFString, kCFAllocatorDefault, 0) else {
+        return false
     }
-    return false
+
+    return rvalue.takeRetainedValue() as! Bool
 }
 
 func getNumber(_ key: String, _ io_service: io_service_t) -> Int {
-    if let rvalue = IORegistryEntryCreateCFProperty(io_service, key as CFString, kCFAllocatorDefault, 0) {
-        return rvalue.takeRetainedValue() as! Int
+    guard let rvalue = IORegistryEntryCreateCFProperty(io_service, key as CFString, kCFAllocatorDefault, 0) else {
+        return -1
     }
-    return -1
+
+    return rvalue.takeRetainedValue() as! Int
 }
 
 func getString(_ key: String, _ io_service: io_service_t) -> String? {
-    if let rvalue = IORegistryEntryCreateCFProperty(io_service, key as CFString, kCFAllocatorDefault, 0) {
-        return rvalue.takeRetainedValue() as! NSString as String
+    guard let rvalue = IORegistryEntryCreateCFProperty(io_service, key as CFString, kCFAllocatorDefault, 0) else {
+        return nil
     }
-    return nil
+
+    return rvalue.takeRetainedValue() as! NSString as String
 }
 
 func sendBoolean(_ key: String, _ value: Bool, _ io_service: io_service_t) -> kern_return_t {
@@ -45,7 +48,6 @@ func sendString(_ key: String, _ value: String, _ io_service: io_service_t) -> k
     return IORegistryEntrySetCFProperty(io_service, key as CFString, value as CFString)
 }
 
-@available(OSX 10.15, *)
 class YogaSMCPane : NSPreferencePane {
     var io_service : io_service_t = 0
 
@@ -57,12 +59,28 @@ class YogaSMCPane : NSPreferencePane {
     @IBOutlet weak var vECRead: NSTextField!
 
     // Idea
-    @IBOutlet weak var vFnKeyCheck: NSButton!
-    @IBAction func FnKeySet(_ sender: NSButton) {
-        if kIOReturnSuccess != sendBoolean("FnlockMode", vFnKeyCheck.state == .on, io_service) {
-            vFnKeyCheck.state = getBoolean("FnlockMode", io_service) ? .on : .off
+    @IBOutlet weak var vFnKeyRadio: NSButton!
+    @IBOutlet weak var vFxKeyRadio: NSButton!
+    @IBAction func vFnKeySet(_ sender: NSButton) {
+        if kIOReturnSuccess == sendBoolean("FnlockMode", vFnKeyRadio.state == .on, io_service) {
+            return
         }
+        vFnKeyRadio.state = getBoolean("FnlockMode", io_service) ? .on : .off
     }
+    @IBOutlet weak var vConservationMode: NSButton!
+    @IBOutlet weak var vRapidChargeMode: NSButton!
+    @IBOutlet weak var vBatteryID: NSTextField!
+    @IBOutlet weak var vBatteryTemperature: NSTextField!
+    @IBOutlet weak var vCycleCount: NSTextField!
+    @IBOutlet weak var vMfgDate: NSTextField!
+
+    @IBAction func vConservationModeSet(_ sender: NSButton) {
+        if kIOReturnSuccess == sendBoolean("ConservationMode", vConservationMode.state == .on, io_service) {
+            return
+        }
+        vConservationMode.state = getBoolean("ConservationMode", io_service) ? .on : .off
+    }
+    
     @IBOutlet weak var vCamera: NSTextField!
     @IBOutlet weak var vBluetooth: NSTextField!
     @IBOutlet weak var vWireless: NSTextField!
@@ -107,19 +125,53 @@ class YogaSMCPane : NSPreferencePane {
 
     func updateIdea() {
         if let rPrimeKey = getString("PrimeKeyType", io_service) {
-            vFnKeyCheck.title = rPrimeKey
-            vFnKeyCheck.state = getBoolean("FnlockMode", io_service) ? .on : .off
+            vFnKeyRadio.title = rPrimeKey
+            vFnKeyRadio.state = getBoolean("FnlockMode", io_service) ? .on : .off
         } else {
-            vFnKeyCheck.isHidden = true
+            vFnKeyRadio.title = "Unknown"
+            vFnKeyRadio.isEnabled = false
+            vFxKeyRadio.isEnabled = false
+            vFxKeyRadio.state = .on
+        }
+
+        vConservationMode.state = getBoolean("ConservationMode", io_service) ? .on : .off
+
+        vRapidChargeMode.state = getBoolean("RapidChargeMode", io_service) ? .on : .off
+
+        if let rvalue = IORegistryEntryCreateCFProperty(io_service, "Battery 0" as CFString, kCFAllocatorDefault, 0) {
+            if let dict = rvalue.takeRetainedValue() as? NSDictionary {
+                if let ID = dict.value(forKey: "ID") as? String {
+                    vBatteryID.stringValue = ID
+                } else {
+                    vBatteryID.stringValue = "Unknown"
+                }
+                if let count = dict.value(forKey: "Cycle count") as? String {
+                    vCycleCount.stringValue = count
+                } else {
+                    vCycleCount.stringValue = "Unknown"
+                }
+                if let temp = dict.value(forKey: "Temperature") as? String {
+                    vBatteryTemperature.stringValue = temp
+                } else {
+                    vBatteryTemperature.stringValue = "Unknown"
+                }
+                if let mfgDate = dict.value(forKey: "Manufacture date") as? String {
+                    vBatteryTemperature.stringValue = mfgDate
+                } else {
+                    vBatteryTemperature.stringValue = "Unknown"
+                }
+        }
+//            Manufacture date
         }
 
         if let rvalue = IORegistryEntryCreateCFProperty(io_service, "Capability" as CFString, kCFAllocatorDefault, 0) {
-            let dict = rvalue.takeRetainedValue() as! NSDictionary
-            vCamera.stringValue = dict.value(forKey: "Camera") as! Bool ? "Yes" : "No"
-            vBluetooth.stringValue = dict.value(forKey: "Bluetooth") as! Bool ? "Yes" : "No"
-            vWireless.stringValue = dict.value(forKey: "Wireless") as! Bool ? "Yes" : "No"
-            vWWAN.stringValue = dict.value(forKey: "3G") as! Bool ? "Yes" : "No"
-            vGraphics.stringValue = dict.value(forKey: "Graphics") as! NSString as String
+            if let dict = rvalue.takeRetainedValue() as? NSDictionary {
+                vCamera.stringValue = dict.value(forKey: "Camera") as! Bool ? "Yes" : "No"
+                vBluetooth.stringValue = dict.value(forKey: "Bluetooth") as! Bool ? "Yes" : "No"
+                vWireless.stringValue = dict.value(forKey: "Wireless") as! Bool ? "Yes" : "No"
+                vWWAN.stringValue = dict.value(forKey: "3G") as! Bool ? "Yes" : "No"
+                vGraphics.stringValue = dict.value(forKey: "Graphics") as! NSString as String
+            }
         }
         return
     }
@@ -140,11 +192,11 @@ class YogaSMCPane : NSPreferencePane {
     func updateAutoBacklight() {
         let autoBacklight = getNumber("AutoBacklight", io_service)
         if (autoBacklight != -1) {
-            autoSleepCheck.state = ((autoBacklight & (1 << 0)) != 0) ? NSControl.StateValue.on : NSControl.StateValue.off
-            yogaModeCheck.state =  ((autoBacklight & (1 << 1)) != 0) ? NSControl.StateValue.on : NSControl.StateValue.off
-            indicatorCheck.state =  ((autoBacklight & (1 << 2)) != 0) ? NSControl.StateValue.on : NSControl.StateValue.off
-            muteCheck.state =  ((autoBacklight & (1 << 3)) != 0) ? NSControl.StateValue.on : NSControl.StateValue.off
-            micMuteCheck.state =  ((autoBacklight & (1 << 4)) != 0) ? NSControl.StateValue.on : NSControl.StateValue.off
+            autoSleepCheck.state = ((autoBacklight & (1 << 0)) != 0) ? .on : .off
+            yogaModeCheck.state =  ((autoBacklight & (1 << 1)) != 0) ? .on : .off
+            indicatorCheck.state =  ((autoBacklight & (1 << 2)) != 0) ? .on : .off
+            muteCheck.state =  ((autoBacklight & (1 << 3)) != 0) ? .on : .off
+            micMuteCheck.state =  ((autoBacklight & (1 << 4)) != 0) ? .on : .off
         } else {
             autoSleepCheck.isEnabled = false
             yogaModeCheck.isEnabled = false
@@ -191,23 +243,19 @@ class YogaSMCPane : NSPreferencePane {
             unsupported = true
         }
 
-        if let rbuild = getString("YogaSMC,Build", io_service) {
-            vBuild.stringValue = rbuild
-        } else {
+        guard let rbuild = getString("YogaSMC,Build", io_service)  else {
             vBuild.stringValue = "Unknown"
-            unsupported = true
-        }
-
-        if let rversion = getString("YogaSMC,Version", io_service) {
-            vVersion.stringValue = rversion
-        } else {
-            vVersion.stringValue = "Unknown"
-            unsupported = true
-        }
-
-        if unsupported {
             return
         }
+
+        vBuild.stringValue = rbuild
+
+        guard let rversion = getString("YogaSMC,Version", io_service) else {
+            vVersion.stringValue = "Unknown"
+            return
+        }
+
+        vVersion.stringValue = rversion
 
         if let rECCap = getString("EC Capability", io_service) {
             vECRead.stringValue = rECCap
