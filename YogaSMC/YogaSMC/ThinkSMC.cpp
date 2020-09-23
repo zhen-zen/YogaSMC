@@ -14,9 +14,10 @@ OSDefineMetaClassAndStructors(ThinkSMC, YogaSMC);
 ThinkSMC* ThinkSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) {
     ThinkSMC* dev = OSTypeAlloc(ThinkSMC);
 
+    dev->conf = OSDictionary::withDictionary(OSDynamicCast(OSDictionary, provider->getProperty("Sensors")));
+
     OSDictionary *dictionary = OSDictionary::withCapacity(1);
-    OSDictionary *sensors = OSDictionary::withDictionary(OSDynamicCast(OSDictionary, provider->getProperty("Sensors")));
-    dictionary->setObject("Sensors", sensors);
+    dictionary->setObject("Sensors", dev->conf);
 
     dev->ec = device;
 
@@ -25,8 +26,6 @@ ThinkSMC* ThinkSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device
         OSSafeReleaseNULL(dev);
     }
 
-    dev->conf = sensors;
-    sensors->release();
     dictionary->release();
     return dev;
 }
