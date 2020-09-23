@@ -82,9 +82,12 @@ bool YogaVPC::initVPC() {
     if (ec->validateObject(readECOneByte) == kIOReturnSuccess &&
         ec->validateObject(readECBytes) == kIOReturnSuccess) {
         ECReadCap = true;
-        setProperty(readECPrompt, kOSBooleanTrue);
+        if (ec->validateObject(writeECOneByte) == kIOReturnSuccess)
+            setProperty("EC Capability", "RW");
+        else
+            setProperty("EC Capability", "RO");
     } else {
-        setProperty(readECPrompt, kOSBooleanFalse);
+        setProperty("EC Capability", "False");
     }
 
     if (vpc->validateObject(setThermalControl) == kIOReturnSuccess) {

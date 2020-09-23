@@ -45,6 +45,7 @@ func sendString(_ key: String, _ value: String, _ io_service: io_service_t) -> k
     return IORegistryEntrySetCFProperty(io_service, key as CFString, value as CFString)
 }
 
+@available(OSX 10.15, *)
 class YogaSMCPane : NSPreferencePane {
     var io_service : io_service_t = 0
 
@@ -54,6 +55,19 @@ class YogaSMCPane : NSPreferencePane {
     @IBOutlet weak var vBuild: NSTextField!
     @IBOutlet weak var vClass: NSTextField!
     @IBOutlet weak var vECRead: NSTextField!
+
+    // Idea
+    @IBOutlet weak var vFnKeyCheck: NSButton!
+    @IBAction func FnKeySet(_ sender: NSButton) {
+        if kIOReturnSuccess != sendBoolean("FnlockMode", vFnKeyCheck.state == .on, io_service) {
+            vFnKeyCheck.state = getBoolean("FnlockMode", io_service) ? .on : .off
+        }
+    }
+    @IBOutlet weak var vCamera: NSTextField!
+    @IBOutlet weak var vBluetooth: NSTextField!
+    @IBOutlet weak var vWireless: NSTextField!
+    @IBOutlet weak var vWWAN: NSTextField!
+    @IBOutlet weak var vGraphics: NSTextField!
     
     @IBOutlet weak var TabView: NSTabView!
     @IBOutlet weak var IdeaViewItem: NSTabViewItem!
@@ -73,11 +87,11 @@ class YogaSMCPane : NSPreferencePane {
     @IBOutlet weak var micMuteCheck: NSButton!
 
     @IBAction func autoBacklightSet(_ sender: NSButton) {
-        let val = ((autoSleepCheck.intValue != 0) ? 1 << 0 : 0) +
-                ((yogaModeCheck.intValue != 0) ? 1 << 1 : 0) +
-                ((indicatorCheck.intValue != 0) ? 1 << 2 : 0) +
-                ((muteCheck.intValue != 0) ? 1 << 3 : 0) +
-                ((micMuteCheck.intValue != 0) ? 1 << 3 : 0)
+        let val = ((autoSleepCheck.state == .on) ? 1 << 0 : 0) +
+                ((yogaModeCheck.state == .on) ? 1 << 1 : 0) +
+                ((indicatorCheck.state == .on) ? 1 << 2 : 0) +
+                ((muteCheck.state == .on) ? 1 << 3 : 0) +
+                ((micMuteCheck.state == .on) ? 1 << 3 : 0)
         if (sendNumber("AutoBacklight", val, io_service) != kIOReturnSuccess) {
             updateAutoBacklight()
         }
@@ -92,6 +106,21 @@ class YogaSMCPane : NSPreferencePane {
     }
 
     func updateIdea() {
+        if let rPrimeKey = getString("PrimeKeyType", io_service) {
+            vFnKeyCheck.title = rPrimeKey
+            vFnKeyCheck.state = getBoolean("FnlockMode", io_service) ? .on : .off
+        } else {
+            vFnKeyCheck.isHidden = true
+        }
+
+        if let rvalue = IORegistryEntryCreateCFProperty(io_service, "Capability" as CFString, kCFAllocatorDefault, 0) {
+            let dict = rvalue.takeRetainedValue() as! NSDictionary
+            vCamera.stringValue = dict.value(forKey: "Camera") as! Bool ? "Yes" : "No"
+            vBluetooth.stringValue = dict.value(forKey: "Bluetooth") as! Bool ? "Yes" : "No"
+            vWireless.stringValue = dict.value(forKey: "Wireless") as! Bool ? "Yes" : "No"
+            vWWAN.stringValue = dict.value(forKey: "3G") as! Bool ? "Yes" : "No"
+            vGraphics.stringValue = dict.value(forKey: "Graphics") as! NSString as String
+        }
         return
     }
 
@@ -180,8 +209,8 @@ class YogaSMCPane : NSPreferencePane {
             return
         }
 
-        if getBoolean("ReadEC", io_service) {
-            vECRead.stringValue = "Available"
+        if let rECCap = getString("EC Capability", io_service) {
+            vECRead.stringValue = rECCap
         } else {
             vECRead.stringValue = "Unavailable"
         }
