@@ -80,8 +80,12 @@ bool YogaVPC::initVPC() {
         clamshellCap = true;
 
     if (ec->validateObject(readECOneByte) == kIOReturnSuccess &&
-        ec->validateObject(readECBytes) == kIOReturnSuccess)
+        ec->validateObject(readECBytes) == kIOReturnSuccess) {
         ECReadCap = true;
+        setProperty(readECPrompt, kOSBooleanTrue);
+    } else {
+        setProperty(readECPrompt, kOSBooleanFalse);
+    }
 
     if (vpc->validateObject(setThermalControl) == kIOReturnSuccess) {
         DYTC_RESULT result;
@@ -170,7 +174,7 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
             } else if (key->isEqualTo(autoBacklightPrompt)) {
                 OSNumber *value;
                 getPropertyNumber(autoBacklightPrompt);
-                if (value->unsigned8BitValue() > 3) {
+                if (value->unsigned8BitValue() > 0x1f) {
                     AlwaysLog(valueInvalid, autoBacklightPrompt);
                 } else if (value->unsigned8BitValue() == automaticBacklightMode) {
                     DebugLog(valueMatched, autoBacklightPrompt, automaticBacklightMode);
