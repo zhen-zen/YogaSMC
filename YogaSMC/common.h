@@ -11,11 +11,11 @@
 #define common_h
 
 #ifdef DEBUG
-#define DebugLog(str, ...) do { IOLog("%s::%s " str, getName(), name, ## __VA_ARGS__); } while (0)
+#define DebugLog(str, ...) do { IOLog("YSMC - Debug: %s::%s " str "\n", getName(), name, ## __VA_ARGS__); } while (0)
 #else
 #define DebugLog(str, ...) do { } while (0)
 #endif
-#define AlwaysLog(str, ...) do { IOLog("%s::%s " str, getName(), name, ## __VA_ARGS__); } while (0)
+#define AlwaysLog(str, ...) do { IOLog("YSMC - Info: %s::%s " str "\n", getName(), name, ## __VA_ARGS__); } while (0)
 
 #define BIT(nr) (1U << (nr))
 

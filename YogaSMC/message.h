@@ -54,17 +54,17 @@ static IOPMPowerState IOPMPowerStates[kIOPMNumberPowerStates] = {
 #define writeECPrompt "WriteEC"
 #define updatePrompt "Update"
 
-#define initFailure "%s evaluation failed, exiting\n"
-#define updateFailure "%s evaluation failed\n"
-#define updateSuccess "%s 0x%x\n"
-#define toggleFailure "%s toggle failed\n"
-#define toggleSuccess "%s set to 0x%x: %s\n"
+#define initFailure "%s evaluation failed, exiting"
+#define updateFailure "%s evaluation failed"
+#define updateSuccess "%s 0x%x"
+#define toggleFailure "%s toggle failed"
+#define toggleSuccess "%s set to 0x%x: %s"
 
-#define valueMatched "%s already %x\n"
-#define valueInvalid "Invalid value for %s\n"
-#define valueUnknown "Unknown value for %s: %d\n"
+#define valueMatched "%s already %x"
+#define valueInvalid "Invalid value for %s"
+#define valueUnknown "Unknown value for %s: %d"
 
-#define timeoutPrompt "%s timeout 0x%x\n"
+#define timeoutPrompt "%s timeout 0x%x"
 
 enum
 {

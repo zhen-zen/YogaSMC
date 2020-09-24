@@ -88,7 +88,7 @@ IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
             break;
 
         case kSMC_YogaEvent:
-            DebugLog("message: %s Yoga mode 0x%x\n", provider->getName(), *((UInt32 *) argument));
+            DebugLog("message: %s Yoga mode 0x%x", provider->getName(), *((UInt32 *) argument));
             if (backlightCap && automaticBacklightMode & BIT(1)) {
                 updateKeyboard();
                 if (*((UInt32 *) argument) != 1) {
@@ -103,7 +103,7 @@ IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
             break;
 
         case kSMC_FnlockEvent:
-            DebugLog("message: %s Fnlock event\n", provider->getName());
+            DebugLog("message: %s Fnlock event", provider->getName());
             updateKeyboard();
             toggleFnlock();
             break;
@@ -111,7 +111,7 @@ IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
         case kSMC_getConservation:
             *(bool *)argument = conservationMode;
 //            conservationModeLock = false;
-            DebugLog("message: %s get conservation mode %d\n", provider->getName(), conservationMode);
+            DebugLog("message: %s get conservation mode %d", provider->getName(), conservationMode);
             break;
 
         case kSMC_setConservation:
@@ -122,18 +122,18 @@ IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
 
         case kIOACPIMessageDeviceNotification:
             if (!argument)
-                AlwaysLog("message: Unknown ACPI notification\n");
+                AlwaysLog("message: Unknown ACPI notification");
             else if (*((UInt32 *) argument) == kIOACPIMessageReserved)
                 updateVPC();
             else
-                AlwaysLog("message: Unknown ACPI notification 0x%04x\n", *((UInt32 *) argument));
+                AlwaysLog("message: Unknown ACPI notification 0x%04x", *((UInt32 *) argument));
             break;
 
         default:
             if (argument)
-                AlwaysLog("message: type=%x, provider=%s, argument=0x%04x\n", type, provider->getName(), *((UInt32 *) argument));
+                AlwaysLog("message: type=%x, provider=%s, argument=0x%04x", type, provider->getName(), *((UInt32 *) argument));
             else
-                AlwaysLog("message: type=%x, provider=%s\n", type, provider->getName());
+                AlwaysLog("message: type=%x, provider=%s", type, provider->getName());
     }
 
     return kIOReturnSuccess;
@@ -144,7 +144,7 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
     if (!dict)
         return;
 
-//    AlwaysLog("%d objects in properties\n", dict->getCount());
+//    AlwaysLog("%d objects in properties", dict->getCount());
     OSCollectionIterator* i = OSCollectionIterator::withCollection(dict);
 
     if (i) {
@@ -183,7 +183,7 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                     continue;
                 
                 ECLock = false;
-                AlwaysLog("direct VPC EC manipulation is unlocked\n");
+                AlwaysLog("direct VPC EC manipulation is unlocked");
             } else if (key->isEqualTo(readECPrompt)) {
                 if (ECLock)
                     continue;
@@ -194,9 +194,9 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                 UInt8 retries = 0;
 
                 if (read_ec_data(value->unsigned32BitValue(), &result, &retries))
-                    AlwaysLog("%s 0x%x result: 0x%x %d\n", readECPrompt, value->unsigned32BitValue(), result, retries);
+                    AlwaysLog("%s 0x%x result: 0x%x %d", readECPrompt, value->unsigned32BitValue(), result, retries);
                 else
-                    AlwaysLog("%s failed 0x%x %d\n", readECPrompt, value->unsigned32BitValue(), retries);
+                    AlwaysLog("%s failed 0x%x %d", readECPrompt, value->unsigned32BitValue(), retries);
             } else if (key->isEqualTo(writeECPrompt)) {
                 if (ECLock)
                     continue;
@@ -209,9 +209,9 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                 data = value->unsigned32BitValue() & 0xff;
 
                 if (write_ec_data(command, data, &retries))
-                    AlwaysLog("%s 0x%x 0x%x success %d\n", writeECPrompt, command, data, retries);
+                    AlwaysLog("%s 0x%x 0x%x success %d", writeECPrompt, command, data, retries);
                 else
-                    AlwaysLog("%s 0x%x 0x%x failed %d\n", writeECPrompt, command, data, retries);
+                    AlwaysLog("%s 0x%x 0x%x failed %d", writeECPrompt, command, data, retries);
             } else if (key->isEqualTo(batteryPrompt)) {
                 UInt32 state;
                 if (vpc->evaluateInteger(getBatteryMode, &state) == kIOReturnSuccess)
@@ -282,14 +282,14 @@ void IdeaVPC::updateBatteryStats(UInt32 batState) {
     if (BIT(BM_BATTERY0BAD_BIT) & batState) {
         bat0->setObject("Critical", kOSBooleanTrue);
         setProperty("Battery", "Critical");
-        AlwaysLog("Battery 0 critical!\n");
+        AlwaysLog("Battery 0 critical!");
         conservationModeLock = true;
     }
 
     if (BIT(BM_BATTERY1BAD_BIT) & batState) {
         bat1->setObject("Critical", kOSBooleanTrue);
         setProperty("Battery", "Critical");
-        AlwaysLog("Battery 1 critical!\n");
+        AlwaysLog("Battery 1 critical!");
         conservationModeLock = true;
     }
 
@@ -314,7 +314,7 @@ bool IdeaVPC::updateBatteryID(OSDictionary *bat0, OSDictionary *bat1) {
     OSArray *data;
     data = OSDynamicCast(OSArray, result);
     if (!data) {
-        AlwaysLog("Battery ID not OSArray\n");
+        AlwaysLog("Battery ID not OSArray");
         result->release();
         return false;
     }
@@ -322,53 +322,53 @@ bool IdeaVPC::updateBatteryID(OSDictionary *bat0, OSDictionary *bat1) {
     OSString *value;
     OSData *cycle0 = OSDynamicCast(OSData, data->getObject(0));
     if (!cycle0) {
-        AlwaysLog("Battery 0 cycle not exist\n");
+        AlwaysLog("Battery 0 cycle not exist");
     } else {
         UInt16 *cycleCount0 = (UInt16 *)cycle0->getBytesNoCopy();
         if (cycleCount0[0] != 0xffff) {
             char cycle0String[5];
             snprintf(cycle0String, 5, "%d", cycleCount0[0]);
             setPropertyString(bat0, "Cycle count", cycle0String);
-            AlwaysLog("Battery 0 cycle count %d\n", cycleCount0[0]);
+            AlwaysLog("Battery 0 cycle count %d", cycleCount0[0]);
         }
     }
 
     OSData *cycle1 = OSDynamicCast(OSData, data->getObject(1));
     if (!cycle1) {
-        DebugLog("Battery 1 cycle not exist\n");
+        DebugLog("Battery 1 cycle not exist");
     } else {
         UInt16 *cycleCount1 = (UInt16 *)cycle1->getBytesNoCopy();
         if (cycleCount1[0] != 0xffff) {
             char cycle1String[5];
             snprintf(cycle1String, 5, "%d", cycleCount1[0]);
             setPropertyString(bat1, "Cycle count", cycle1String);
-            AlwaysLog("Battery 1 cycle count %d\n", cycleCount1[0]);
+            AlwaysLog("Battery 1 cycle count %d", cycleCount1[0]);
         }
     }
 
     OSData *ID0 = OSDynamicCast(OSData, data->getObject(2));
     if (!ID0) {
-        AlwaysLog("Battery 0 ID not exist\n");
+        AlwaysLog("Battery 0 ID not exist");
     } else {
         UInt16 *batteryID0 = (UInt16 *)ID0->getBytesNoCopy();
         if (batteryID0[0] != 0xffff) {
             char ID0String[20];
             snprintf(ID0String, 20, "%04x %04x %04x %04x", batteryID0[0], batteryID0[1], batteryID0[2], batteryID0[3]);
             setPropertyString(bat0, "ID", ID0String);
-            AlwaysLog("Battery 0 ID %s\n", ID0String);
+            AlwaysLog("Battery 0 ID %s", ID0String);
         }
     }
 
     OSData *ID1 = OSDynamicCast(OSData, data->getObject(3));
     if (!ID1) {
-        DebugLog("Battery 1 ID not exist\n");
+        DebugLog("Battery 1 ID not exist");
     } else {
         UInt16 *batteryID1 = (UInt16 *)ID1->getBytesNoCopy();
         if (batteryID1[0] != 0xffff) {
             char ID1String[20];
             snprintf(ID1String, 20, "%04x %04x %04x %04x", batteryID1[0], batteryID1[1], batteryID1[2], batteryID1[3]);
             setPropertyString(bat1, "ID", ID1String);
-            AlwaysLog("Battery 1 ID %s\n", ID1String);
+            AlwaysLog("Battery 1 ID %s", ID1String);
         }
     }
     data->release();
@@ -390,7 +390,7 @@ bool IdeaVPC::updateBatteryInfo(OSDictionary *bat0, OSDictionary *bat1) {
 
     data = OSDynamicCast(OSData, result);
     if (!data) {
-        AlwaysLog("Battery Info not OSData\n");
+        AlwaysLog("Battery Info not OSData");
         result->release();
         return false;
     }
@@ -401,7 +401,7 @@ bool IdeaVPC::updateBatteryInfo(OSDictionary *bat0, OSDictionary *bat1) {
     if (bdata[7] != 0) {
         SInt16 celsius = bdata[7] - 2731;
         if (celsius < 0 || celsius > 600)
-            AlwaysLog("Battery 0 temperature critical! %d\n", celsius);
+            AlwaysLog("Battery 0 temperature critical! %d", celsius);
         char temperature0[9];
         snprintf(temperature0, 9, "%d.%d℃", celsius / 10, celsius % 10);
         setPropertyString(bat0, "Temperature", temperature0);
@@ -565,13 +565,13 @@ void IdeaVPC::updateVPC() {
     UInt8 retries = 0;
 
     if (!read_ec_data(VPCCMD_R_VPC1, &vpc1, &retries) || !read_ec_data(VPCCMD_R_VPC2, &vpc2, &retries)) {
-        AlwaysLog("Failed to read VPC %d\n", retries);
+        AlwaysLog("Failed to read VPC %d", retries);
         return;
     }
 
     vpc1 = (vpc2 << 8) | vpc1;
 #ifdef DEBUG
-    AlwaysLog("read VPC EC result: 0x%x %d\n", vpc1, retries);
+    AlwaysLog("read VPC EC result: 0x%x %d", vpc1, retries);
     setProperty("VPCstatus", vpc1, 32);
 #endif
     for (int vpc_bit = 0; vpc_bit < 16; vpc_bit++) {
@@ -579,69 +579,69 @@ void IdeaVPC::updateVPC() {
             switch (vpc_bit) {
                 case 0:
                     if (!read_ec_data(VPCCMD_R_SPECIAL_BUTTONS, &result, &retries)) {
-                        AlwaysLog("Failed to read VPCCMD_R_SPECIAL_BUTTONS %d\n", retries);
+                        AlwaysLog("Failed to read VPCCMD_R_SPECIAL_BUTTONS %d", retries);
                     } else {
                         switch (result) {
                             case 0x40:
-                                AlwaysLog("Fn+Q cooling\n");
+                                AlwaysLog("Fn+Q cooling");
                                 // TODO: fan status switch
                                 break;
 
                             default:
-                                AlwaysLog("Special button 0x%x\n", result);
+                                AlwaysLog("Special button 0x%x", result);
                                 break;
                         }
                     }
                     break;
 
                 case 1: // ENERGY_EVENT_GENERAL / ENERGY_EVENT_KEYBDLED_OLD
-                    AlwaysLog("Fn+Space keyboard backlight?\n");
+                    AlwaysLog("Fn+Space keyboard backlight?");
                     updateKeyboard();
                     // also on AC connect / disconnect
                     break;
 
                 case 2:
                     if (!read_ec_data(VPCCMD_R_BL_POWER, &result, &retries))
-                        AlwaysLog("Failed to read VPCCMD_R_BL_POWER %d\n", retries);
+                        AlwaysLog("Failed to read VPCCMD_R_BL_POWER %d", retries);
                     else
-                        AlwaysLog("Open lid? 0x%x %s\n", result, result ? "on" : "off");
+                        AlwaysLog("Open lid? 0x%x %s", result, result ? "on" : "off");
                     // functional, TODO: turn off screen on demand
                     break;
 
                 case 5:
                     if (!read_ec_data(VPCCMD_R_TOUCHPAD, &result, &retries))
-                        AlwaysLog("Failed to read VPCCMD_R_TOUCHPAD %d\n", retries);
+                        AlwaysLog("Failed to read VPCCMD_R_TOUCHPAD %d", retries);
                     else
-                        AlwaysLog("Fn+F6 touchpad 0x%x %s\n", result, result ? "on" : "off");
+                        AlwaysLog("Fn+F6 touchpad 0x%x %s", result, result ? "on" : "off");
                     // functional, TODO: manually toggle
                     break;
 
                 case 7:
-                    AlwaysLog("Fn+F8 camera\n");
+                    AlwaysLog("Fn+F8 camera");
                     // TODO: camera status switch
                     break;
 
                 case 8: // ENERGY_EVENT_MIC
-                    AlwaysLog("Fn+F4 mic\n");
+                    AlwaysLog("Fn+F4 mic");
                     // TODO: mic status switch
                     break;
 
                 case 10:
-                    AlwaysLog("Fn+F6 touchpad on\n");
+                    AlwaysLog("Fn+F6 touchpad on");
                     // functional, identical to case 5?
                     break;
 
                 case 12: // ENERGY_EVENT_KEYBDLED
-                    AlwaysLog("Fn+Space keyboard backlight?\n");
+                    AlwaysLog("Fn+Space keyboard backlight?");
                     break;
 
                 case 13:
-                    AlwaysLog("Fn+F7 airplane mode\n");
+                    AlwaysLog("Fn+F7 airplane mode");
                     // TODO: airplane mode switch
                     break;
 
                 default:
-                    AlwaysLog("Unknown VPC event %d\n", vpc_bit);
+                    AlwaysLog("Unknown VPC event %d", vpc_bit);
                     break;
             }
         }

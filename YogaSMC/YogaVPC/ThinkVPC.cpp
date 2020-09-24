@@ -140,7 +140,7 @@ IOReturn ThinkVPC::setNotificationMask(UInt32 i, UInt32 all_mask, UInt32 offset,
     };
     if (all_mask & BIT(i)) {
         ret = vpc->evaluateObject(setHKEYmask, nullptr, params, 2);
-        AlwaysLog("setting HKEY mask BIT %x\n", i);
+        AlwaysLog("setting HKEY mask BIT %x", i);
     }
     params[0]->release();
     params[1]->release();
@@ -159,11 +159,11 @@ bool ThinkVPC::initVPC() {
 
     OSObject *value;
     KBDProperty = OSDictionary::withCapacity(1);
-    AlwaysLog("HKEY interface version %x\n", version);
+    AlwaysLog("HKEY interface version %x", version);
     setPropertyNumber(KBDProperty, "Version", version, 32);
     switch (version >> 8) {
         case 1:
-            AlwaysLog("HKEY version 0x100 not implemented\n");
+            AlwaysLog("HKEY version 0x100 not implemented");
             updateAdaptiveKBD(0);
             break;
 
@@ -174,7 +174,7 @@ bool ThinkVPC::initVPC() {
             break;
 
         default:
-            AlwaysLog("Unknown HKEY version\n");
+            AlwaysLog("Unknown HKEY version");
             break;
     }
 
@@ -184,7 +184,7 @@ bool ThinkVPC::initVPC() {
                 break;
         }
     } else {
-        AlwaysLog("Failed to acquire hotkey_all_mask\n");
+        AlwaysLog("Failed to acquire hotkey_all_mask");
     }
     setProperty("HKEY Property", KBDProperty);
     KBDProperty->release();
@@ -192,7 +192,7 @@ bool ThinkVPC::initVPC() {
     updateAll();
 
     mutestate_orig = mutestate;
-    AlwaysLog("Initial HAUM setting was %d\n", mutestate_orig);
+    AlwaysLog("Initial HAUM setting was %d", mutestate_orig);
     setMutestatus(TP_EC_MUTE_BTN_NONE);
     setHotkeyStatus(true);
 
@@ -235,7 +235,7 @@ bool ThinkVPC::updateAdaptiveKBD(int arg) {
         }
     }
 
-    AlwaysLog("%s %d %x\n", __func__, arg, result);
+    AlwaysLog("%s %d %x", __func__, arg, result);
     OSObject *value;
     switch (arg) {
         case 0:
@@ -257,7 +257,7 @@ bool ThinkVPC::updateAdaptiveKBD(int arg) {
             break;
 
         default:
-            AlwaysLog("Unknown MHKA command\n");
+            AlwaysLog("Unknown MHKA command");
             break;
     }
     return true;
@@ -307,7 +307,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
     if (!dict)
         return;
 
-    //    AlwaysLog("%d objects in properties\n", dict->getCount());
+    //    AlwaysLog("%d objects in properties", dict->getCount());
     OSCollectionIterator* i = OSCollectionIterator::withCollection(dict);
 
     if (i) {
@@ -343,7 +343,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 if (ret == kIOReturnSuccess)
                     AlwaysLog(updateSuccess, "GMKS", result);
                 else
-                    AlwaysLog("%s evaluation failed 0x%x\n", "GMKS", ret);
+                    AlwaysLog("%s evaluation failed 0x%x", "GMKS", ret);
             } else if (key->isEqualTo("GSKL")) {
                 OSNumber *value;
                 getPropertyNumber("GSKL");
@@ -355,7 +355,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 if (ret == kIOReturnSuccess)
                     AlwaysLog(updateSuccess, "GSKL", result);
                 else
-                    AlwaysLog("%s evaluation failed 0x%x\n", "GSKL", ret);
+                    AlwaysLog("%s evaluation failed 0x%x", "GSKL", ret);
             } else if (key->isEqualTo("GHSL")) {
                 UInt32 result;
                 OSObject* params[1] = {
@@ -365,7 +365,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 if (ret == kIOReturnSuccess)
                     AlwaysLog(updateSuccess, "GHSL", result);
                 else
-                    AlwaysLog("%s evaluation failed 0x%x\n", "GHSL", ret);
+                    AlwaysLog("%s evaluation failed 0x%x", "GHSL", ret);
                 params[0]->release();
             } else if (key->isEqualTo(mutePrompt)) {
                 OSNumber *value;
@@ -613,18 +613,18 @@ IOReturn ThinkVPC::message(UInt32 type, IOService *provider, void *argument) {
 
         case kIOACPIMessageDeviceNotification:
             if (!argument)
-                AlwaysLog("message: Unknown ACPI notification\n");
+                AlwaysLog("message: Unknown ACPI notification");
             else if (*((UInt32 *) argument) == kIOACPIMessageReserved)
                 updateVPC();
             else
-                AlwaysLog("message: Unknown ACPI notification 0x%04x\n", *((UInt32 *) argument));
+                AlwaysLog("message: Unknown ACPI notification 0x%04x", *((UInt32 *) argument));
             break;
 
         default:
             if (argument)
-                AlwaysLog("message: type=%x, provider=%s, argument=0x%04x\n", type, provider->getName(), *((UInt32 *) argument));
+                AlwaysLog("message: type=%x, provider=%s, argument=0x%04x", type, provider->getName(), *((UInt32 *) argument));
             else
-                AlwaysLog("message: type=%x, provider=%s\n", type, provider->getName());
+                AlwaysLog("message: type=%x, provider=%s", type, provider->getName());
     }
 
     return kIOReturnSuccess;
@@ -638,7 +638,7 @@ void ThinkVPC::updateVPC() {
     }
 
     if (!result) {
-        AlwaysLog("empty HKEY event");
+        DebugLog("empty HKEY event");
         return;
     }
 
@@ -657,55 +657,55 @@ void ThinkVPC::updateVPC() {
                     break;
                     
                 default:
-                    AlwaysLog("Hotkey(MHKP) key presses event: 0x%x \n", result);
+                    AlwaysLog("Hotkey(MHKP) key presses event: 0x%x", result);
                     break;
             }
             break;
 
         case 2:
-            AlwaysLog("Hotkey(MHKP) wakeup reason event: 0x%x \n", result);
+            AlwaysLog("Hotkey(MHKP) wakeup reason event: 0x%x", result);
             break;
 
         case 3:
-            AlwaysLog("Hotkey(MHKP) bay-related wakeup event: 0x%x \n", result);
+            AlwaysLog("Hotkey(MHKP) bay-related wakeup event: 0x%x", result);
             break;
 
         case 4:
-            AlwaysLog("Hotkey(MHKP) dock-related event: 0x%x \n", result);
+            AlwaysLog("Hotkey(MHKP) dock-related event: 0x%x", result);
             break;
 
         case 5:
             switch (result) {
                 case TP_HKEY_EV_PEN_INSERTED:
-                    AlwaysLog("tablet pen inserted into bay\n");
+                    AlwaysLog("tablet pen inserted into bay");
                     break;
 
                 case TP_HKEY_EV_PEN_REMOVED:
-                    AlwaysLog("tablet pen removed from bay\n");
+                    AlwaysLog("tablet pen removed from bay");
                     break;
 
                 case TP_HKEY_EV_TABLET_TABLET:
-                    AlwaysLog("tablet mode\n");
+                    AlwaysLog("tablet mode");
                     break;
 
                 case TP_HKEY_EV_TABLET_NOTEBOOK:
-                    AlwaysLog("normal mode\n");
+                    AlwaysLog("normal mode");
                     break;
 
                 case TP_HKEY_EV_LID_CLOSE:
-                    AlwaysLog("Lid closed\n");
+                    AlwaysLog("Lid closed");
                     break;
 
                 case TP_HKEY_EV_LID_OPEN:
-                    AlwaysLog("Lid opened\n");
+                    AlwaysLog("Lid opened");
                     break;
 
                 case TP_HKEY_EV_BRGHT_CHANGED:
-                    AlwaysLog("brightness changed\n");
+                    AlwaysLog("brightness changed");
                     break;
 
                 default:
-                    AlwaysLog("Hotkey(MHKP) unknown human interface event: 0x%x \n", result);
+                    AlwaysLog("Hotkey(MHKP) unknown human interface event: 0x%x", result);
                     break;
             }
             break;
@@ -713,79 +713,79 @@ void ThinkVPC::updateVPC() {
         case 6:
             switch (result) {
                 case TP_HKEY_EV_THM_TABLE_CHANGED:
-                    AlwaysLog("Thermal Table has changed\n");
+                    AlwaysLog("Thermal Table has changed");
                     break;
 
                 case TP_HKEY_EV_THM_CSM_COMPLETED:
                     if (DYTCLapmodeCap && !DYTCLock) {
-                        AlwaysLog("Thermal Control Command set completed (DYTC)\n");
+                        AlwaysLog("Thermal Control Command set completed (DYTC)");
                         updateDYTC();
                     }
                     break;
 
                 case TP_HKEY_EV_THM_TRANSFM_CHANGED:
-                    AlwaysLog("Thermal Transformation changed (GMTS)\n");
+                    AlwaysLog("Thermal Transformation changed (GMTS)");
                     break;
 
                 case TP_HKEY_EV_ALARM_BAT_HOT:
-                    AlwaysLog("THERMAL ALARM: battery is too hot!\n");
+                    AlwaysLog("THERMAL ALARM: battery is too hot!");
                     break;
 
                 case TP_HKEY_EV_ALARM_BAT_XHOT:
-                    AlwaysLog("THERMAL EMERGENCY: battery is extremely hot!\n");
+                    AlwaysLog("THERMAL EMERGENCY: battery is extremely hot!");
                     break;
 
                 case TP_HKEY_EV_ALARM_SENSOR_HOT:
-                    AlwaysLog("THERMAL ALARM: a sensor reports something is too hot!\n");
+                    AlwaysLog("THERMAL ALARM: a sensor reports something is too hot!");
                     break;
 
                 case TP_HKEY_EV_ALARM_SENSOR_XHOT:
-                    AlwaysLog("THERMAL EMERGENCY: a sensor reports something is extremely hot!\n");
+                    AlwaysLog("THERMAL EMERGENCY: a sensor reports something is extremely hot!");
                     break;
 
                 case TP_HKEY_EV_AC_CHANGED:
-                    AlwaysLog("AC status changed\n");
+                    AlwaysLog("AC status changed");
                     break;
 
                 case TP_HKEY_EV_KEY_NUMLOCK:
-                    AlwaysLog("Numlock\n");
+                    AlwaysLog("Numlock");
                     break;
 
                 case TP_HKEY_EV_KEY_FN:
-                    AlwaysLog("Fn\n");
+                    AlwaysLog("Fn");
                     break;
 
                 case TP_HKEY_EV_KEY_FN_ESC:
-                    AlwaysLog("Fn+Esc\n");
+                    AlwaysLog("Fn+Esc");
                     break;
 
                 case TP_HKEY_EV_LID_STATUS_CHANGED:
                     break;
 
                 case TP_HKEY_EV_TABLET_CHANGED:
-                    AlwaysLog("tablet mode has changed\n");
+                    AlwaysLog("tablet mode has changed");
                     break;
 
                 case TP_HKEY_EV_PALM_DETECTED:
-                    AlwaysLog("palm detected hovering the keyboard\n");
+                    AlwaysLog("palm detected hovering the keyboard");
                     break;
 
                 case TP_HKEY_EV_PALM_UNDETECTED:
-                    AlwaysLog("palm undetected hovering the keyboard\n");
+                    AlwaysLog("palm undetected hovering the keyboard");
                     break;
 
                 default:
-                    AlwaysLog("Hotkey(MHKP) unknown thermal alarms/notices and keyboard event: 0x%x \n", result);
+                    AlwaysLog("Hotkey(MHKP) unknown thermal alarms/notices and keyboard event: 0x%x", result);
                     break;
             }
             break;
 
         case 7:
-            AlwaysLog("Hotkey(MHKP) misc event: 0x%x \n", result);
+            AlwaysLog("Hotkey(MHKP) misc event: 0x%x", result);
             break;
 
         default:
-            AlwaysLog("Hotkey(MHKP) unknown event: 0x%x \n", result);
+            AlwaysLog("Hotkey(MHKP) unknown event: 0x%x", result);
             break;
     }
 }

@@ -16,7 +16,7 @@ bool YogaWMI::init(OSDictionary *dictionary)
     if(!super::init(dictionary))
         return false;
     name = "";
-    DebugLog("Initializing\n");
+    DebugLog("Initializing");
 
     _deliverNotification = OSSymbol::withCString(kDeliverNotifications);
      if (!_deliverNotification)
@@ -36,21 +36,21 @@ IOService *YogaWMI::probe(IOService *provider, SInt32 *score)
     name = provider->getName();
 
     if (strncmp(name, "WTBT", 4) == 0) {
-        DebugLog("Exit on Thunderbolt interface\n");
+        DebugLog("Exit on Thunderbolt interface");
         return nullptr;
     }
 
     if (provider->getClient() != this) {
-        DebugLog("Already loaded, exiting\n");
+        DebugLog("Already loaded, exiting");
         return nullptr;
     }
 
-    DebugLog("Probing\n");
+    DebugLog("Probing");
 
     IOACPIPlatformDevice *vpc {nullptr};
 
     if(getVPCName() && !findPNP(getVPCName(), &vpc)) {
-        AlwaysLog("Failed to find VPC\n");
+        AlwaysLog("Failed to find VPC");
         return nullptr;
     }
 
@@ -59,36 +59,36 @@ IOService *YogaWMI::probe(IOService *provider, SInt32 *score)
 
 void YogaWMI::checkEvent(const char *cname, UInt32 id) {
     if (id == kIOACPIMessageReserved)
-        AlwaysLog("found reserved notify id 0x%x for %s\n", id, cname);
+        AlwaysLog("found reserved notify id 0x%x for %s", id, cname);
     else
-        AlwaysLog("found unknown notify id 0x%x for %s\n", id, cname);
+        AlwaysLog("found unknown notify id 0x%x for %s", id, cname);
 }
 
 void YogaWMI::getNotifyID(OSString *key) {
     OSDictionary *item = OSDynamicCast(OSDictionary, Event->getObject(key));
     if (!item) {
-        AlwaysLog("found unparsed notify id %s\n", key->getCStringNoCopy());
+        AlwaysLog("found unparsed notify id %s", key->getCStringNoCopy());
         return;
     }
     OSNumber *id = OSDynamicCast(OSNumber, item->getObject(kWMINotifyId));
     if (id != nullptr) {
-        AlwaysLog("found invalid notify id %s\n", key->getCStringNoCopy());
+        AlwaysLog("found invalid notify id %s", key->getCStringNoCopy());
         return;
     }
     char notify_id_string[3];
     snprintf(notify_id_string, 3, "%2x", id->unsigned8BitValue());
     if (strncmp(key->getCStringNoCopy(), notify_id_string, 2) != 0) {
-        AlwaysLog("notify id %s mismatch %x\n", key->getCStringNoCopy(), id->unsigned8BitValue());
+        AlwaysLog("notify id %s mismatch %x", key->getCStringNoCopy(), id->unsigned8BitValue());
     }
 
     OSDictionary *mof = OSDynamicCast(OSDictionary, item->getObject("MOF"));
     if (!mof) {
-        AlwaysLog("found notify id 0x%x with no description\n", id->unsigned8BitValue());
+        AlwaysLog("found notify id 0x%x with no description", id->unsigned8BitValue());
         return;
     }
     OSString *cname = OSDynamicCast(OSString, mof->getObject("__CLASS"));
     if (!cname) {
-        AlwaysLog("found notify id 0x%x with no __CLASS\n", id->unsigned8BitValue());
+        AlwaysLog("found notify id 0x%x with no __CLASS", id->unsigned8BitValue());
         return;
     }
     checkEvent(cname->getCStringNoCopy(), id->unsigned8BitValue());
@@ -98,7 +98,7 @@ void YogaWMI::getNotifyID(OSString *key) {
 bool YogaWMI::start(IOService *provider)
 {
     bool res = super::start(provider);
-    AlwaysLog("Starting\n");
+    AlwaysLog("Starting");
 
     YWMI = new WMI(provider);
     YWMI->initialize();
@@ -121,7 +121,7 @@ bool YogaWMI::start(IOService *provider)
     workLoop = IOWorkLoop::workLoop();
     commandGate = IOCommandGate::commandGate(this);
     if (!workLoop || !commandGate || (workLoop->addEventSource(commandGate) != kIOReturnSuccess)) {
-        AlwaysLog("Failed to add commandGate\n");
+        AlwaysLog("Failed to add commandGate");
         return false;
     }
 
@@ -156,7 +156,7 @@ bool YogaWMI::start(IOService *provider)
 
 void YogaWMI::stop(IOService *provider)
 {
-    AlwaysLog("Stopping\n");
+    AlwaysLog("Stopping");
 
     if (YWMI) {
         delete YWMI;
@@ -178,7 +178,7 @@ void YogaWMI::stop(IOService *provider)
 }
 
 void YogaWMI::ACPIEvent(UInt32 argument) {
-    AlwaysLog("message: Unknown ACPI Notification 0x%x\n", argument);
+    AlwaysLog("message: Unknown ACPI Notification 0x%x", argument);
 }
 
 IOReturn YogaWMI::message(UInt32 type, IOService *provider, void *argument) {
@@ -188,14 +188,14 @@ IOReturn YogaWMI::message(UInt32 type, IOService *provider, void *argument) {
             if (argument)
                 ACPIEvent(*(UInt32 *) argument);
             else
-                AlwaysLog("message: ACPI provider=%s, unknown argument\n", provider->getName());
+                AlwaysLog("message: ACPI provider=%s, unknown argument", provider->getName());
             break;
 
         default:
             if (argument)
-                AlwaysLog("message: type=%x, provider=%s, argument=0x%04x\n", type, provider->getName(), *((UInt32 *) argument));
+                AlwaysLog("message: type=%x, provider=%s, argument=0x%04x", type, provider->getName(), *((UInt32 *) argument));
             else
-                AlwaysLog("message: type=%x, provider=%s, unknown argument\n", type, provider->getName());
+                AlwaysLog("message: type=%x, provider=%s, unknown argument", type, provider->getName());
     }
     return kIOReturnSuccess;
 }
@@ -215,7 +215,7 @@ void YogaWMI::dispatchMessageGated(int* message, void* data)
 void YogaWMI::dispatchMessage(int message, void* data)
 {
     if (_notificationServices->getCount() == 0) {
-        AlwaysLog("No available notification consumer\n");
+        AlwaysLog("No available notification consumer");
         return;
     }
     commandGate->runAction(OSMemberFunctionCast(IOCommandGate::Action, this, &YogaWMI::dispatchMessageGated), &message, data);
@@ -224,12 +224,12 @@ void YogaWMI::dispatchMessage(int message, void* data)
 void YogaWMI::notificationHandlerGated(IOService *newService, IONotifier *notifier)
 {
     if (notifier == _publishNotify) {
-        DebugLog("Notification consumer published: %s\n", newService->getName());
+        DebugLog("Notification consumer published: %s", newService->getName());
         _notificationServices->setObject(newService);
     }
 
     if (notifier == _terminateNotify) {
-        DebugLog("Notification consumer terminated: %s\n", newService->getName());
+        DebugLog("Notification consumer terminated: %s", newService->getName());
         _notificationServices->removeObject(newService);
     }
 }
@@ -243,7 +243,7 @@ bool YogaWMI::notificationHandler(void *refCon, IOService *newService, IONotifie
 bool YogaWMI::findPNP(const char *id, IOACPIPlatformDevice **dev) {
     auto iterator = IORegistryIterator::iterateOver(gIOACPIPlane, kIORegistryIterateRecursively);
     if (!iterator) {
-        AlwaysLog("findPNP failed\n");
+        AlwaysLog("findPNP failed");
         return false;
     }
     auto pnp = OSString::withCString(id);
@@ -252,7 +252,7 @@ bool YogaWMI::findPNP(const char *id, IOACPIPlatformDevice **dev) {
         if (entry->compareName(pnp)) {
             *dev = OSDynamicCast(IOACPIPlatformDevice, entry);
             if (*dev) {
-                DebugLog("%s available at %s\n", id, (*dev)->getName());
+                DebugLog("%s available at %s", id, (*dev)->getName());
                 break;
             }
         }
@@ -267,7 +267,7 @@ void YogaWMI::toggleTouchpad() {
     dispatchMessage(kSMC_getDisableTouchpad, &TouchPadenabled);
     TouchPadenabled = !TouchPadenabled;
     dispatchMessage(kSMC_setDisableTouchpad, &TouchPadenabled);
-    DebugLog("TouchPad Input %s\n", TouchPadenabled ? "enabled" : "disabled");
+    DebugLog("TouchPad Input %s", TouchPadenabled ? "enabled" : "disabled");
     setProperty("TouchPadEnabled", TouchPadenabled);
 }
 
@@ -275,14 +275,14 @@ void YogaWMI::toggleKeyboard() {
     dispatchMessage(kSMC_getKeyboardStatus, &Keyboardenabled);
     Keyboardenabled = !Keyboardenabled;
     dispatchMessage(kSMC_setKeyboardStatus, &Keyboardenabled);
-    DebugLog("Keyboard Input %s\n", Keyboardenabled ? "enabled" : "disabled");
+    DebugLog("Keyboard Input %s", Keyboardenabled ? "enabled" : "disabled");
     setProperty("KeyboardEnabled", Keyboardenabled);
 }
 
 void YogaWMI::setTopCase(bool enable) {
     dispatchMessage(kSMC_setKeyboardStatus, &enable);
     dispatchMessage(kSMC_setDisableTouchpad, &enable);
-    DebugLog("TopCase Input %s\n", enable ? "enabled" : "disabled");
+    DebugLog("TopCase Input %s", enable ? "enabled" : "disabled");
     setProperty("TopCaseEnabled", enable);
 }
 
@@ -290,7 +290,7 @@ bool YogaWMI::updateTopCase() {
     dispatchMessage(kSMC_getKeyboardStatus, &Keyboardenabled);
     dispatchMessage(kSMC_getDisableTouchpad, &TouchPadenabled);
     if (Keyboardenabled != TouchPadenabled) {
-        AlwaysLog("status mismatch: %d, %d\n", Keyboardenabled, TouchPadenabled);
+        AlwaysLog("status mismatch: %d, %d", Keyboardenabled, TouchPadenabled);
         return false;
     }
     return true;

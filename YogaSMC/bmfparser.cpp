@@ -493,7 +493,7 @@ OSDictionary* MOF::parse_class(uint32_t *buf) {
                         if (entry)
                             entry->setObject("MOF", dict);
                         else
-                            IOLog("%d: GUID 36 not found %s", indent, guid_string);
+                            IOLog("%d: GUID 36 not found %s\n", indent, guid_string);
                         setPropertyString(dict, "WDG", guid_string);
                         break;
                     }
@@ -507,7 +507,7 @@ OSDictionary* MOF::parse_class(uint32_t *buf) {
                         if (entry)
                             entry->setObject("MOF", dict);
                         else
-                            IOLog("%d: GUID 38 not found %s", indent, guid_string);
+                            IOLog("%d: GUID 38 not found %s\n", indent, guid_string);
                         setPropertyString(dict, "WDG", guid_string);
                         break;
                     }
@@ -636,7 +636,7 @@ OSObject* MOF::parse_bmf(char * bmf_guid_string) {
     if (entry)
         setPropertyString(dict, "MOF", "Base");
     else
-        IOLog("%d: MOF GUID not found %s", indent, bmf_guid_string);
+        IOLog("%d: MOF GUID not found %s\n", indent, bmf_guid_string);
     setPropertyString(dict, "WDG", bmf_guid_string);
 
 #ifdef DEBUG

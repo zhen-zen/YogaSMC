@@ -3,3 +3,4 @@
 *.kext
 xcuserdata/
 xcshareddata/
+build/

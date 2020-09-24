@@ -54,7 +54,7 @@ private:
     /**
      *  Parse Battery Info
      */
-    OSString * getBatteryInfo (UInt32 index);
+    const char *getBatteryInfo (UInt32 index);
 
     void processWMI() APPLE_KEXT_OVERRIDE;
     void ACPIEvent(UInt32 argument) APPLE_KEXT_OVERRIDE;

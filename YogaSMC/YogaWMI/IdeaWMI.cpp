@@ -13,7 +13,7 @@ OSDefineMetaClassAndStructors(IdeaWMI, YogaWMI);
 void IdeaWMI::ACPIEvent(UInt32 argument) {
     switch (argument) {
         case kIOACPIMessageReserved:
-            AlwaysLog("message: ACPI notification 80\n");
+            AlwaysLog("message: ACPI notification 80");
             // force enable keyboard and touchpad
             setTopCase(true);
             dispatchMessage(kSMC_FnlockEvent, NULL);
@@ -21,7 +21,7 @@ void IdeaWMI::ACPIEvent(UInt32 argument) {
 
         case kIOACPIMessageD0:
             if (isYMC) {
-                AlwaysLog("message: ACPI notification D0\n");
+                AlwaysLog("message: ACPI notification D0");
                 updateYogaMode();
             } else {
                 AlwaysLog("message: ACPI notification D0, unknown YMC");
@@ -29,7 +29,7 @@ void IdeaWMI::ACPIEvent(UInt32 argument) {
             break;
 
         default:
-            AlwaysLog("message: Unknown ACPI notification 0x%x\n", argument);
+            AlwaysLog("message: Unknown ACPI notification 0x%x", argument);
             break;
     }
     return;
@@ -44,7 +44,7 @@ IOReturn IdeaWMI::setPowerState(unsigned long powerState, IOService *whatDevice)
     if (isYMC) {
         if (powerState == 0) {
             if (YogaMode != kYogaMode_laptop) {
-                AlwaysLog("Re-enabling top case\n");
+                AlwaysLog("Re-enabling top case");
                 setTopCase(true);
             }
         } else {
@@ -60,7 +60,7 @@ void IdeaWMI::processWMI() {
             setProperty("Feature", "Yoga Mode Control");
             isYMC = true;
         } else {
-            AlwaysLog("YMC method not found\n");
+            AlwaysLog("YMC method not found");
         }
     }
 
@@ -71,9 +71,16 @@ void IdeaWMI::processWMI() {
         setProperty("Feature", "WBAT");
         OSArray *BatteryInfo = OSArray::withCapacity(3);
         // only execute once for WMI_EXPENSIVE
-        BatteryInfo->setObject(getBatteryInfo(WBAT_BAT0_BatMaker));
-        BatteryInfo->setObject(getBatteryInfo(WBAT_BAT0_HwId));
-        BatteryInfo->setObject(getBatteryInfo(WBAT_BAT0_MfgDate));
+        OSObject *value;
+        value = OSString::withCString(getBatteryInfo(WBAT_BAT0_BatMaker));
+        BatteryInfo->setObject(value);
+        value->release();
+        value = OSString::withCString(getBatteryInfo(WBAT_BAT0_HwId));
+        BatteryInfo->setObject(value);
+        value->release();
+        value = OSString::withCString(getBatteryInfo(WBAT_BAT0_MfgDate));
+        BatteryInfo->setObject(value);
+        value->release();
         setProperty("BatteryInfo", BatteryInfo);
         BatteryInfo->release();
     }
@@ -90,11 +97,11 @@ void IdeaWMI::updateYogaMode() {
     
     if (!YWMI->executeInteger(GSENSOR_DATA_WMI_METHOD, &value, params, 3)) {
         setProperty("YogaMode", false);
-        AlwaysLog("YogaMode: detection failed\n");
+        AlwaysLog("YogaMode: detection failed");
         return;
     }
 
-    AlwaysLog("YogaMode: %d\n", value);
+    AlwaysLog("YogaMode: %d", value);
     bool sync = updateTopCase();
     if (YogaMode == value && sync)
         return;
@@ -124,7 +131,7 @@ void IdeaWMI::updateYogaMode() {
             break;
 
         default:
-            AlwaysLog("Unknown yoga mode: %d\n", value);
+            AlwaysLog("Unknown yoga mode: %d", value);
             setProperty("YogaMode", value, 32);
             return;
     }
@@ -134,13 +141,13 @@ void IdeaWMI::updateYogaMode() {
 
 void IdeaWMI::stop(IOService *provider) {
     if (YogaMode != kYogaMode_laptop) {
-        AlwaysLog("Re-enabling top case\n");
+        AlwaysLog("Re-enabling top case");
         setTopCase(true);
     }
     super::stop(provider);
 }
 
-OSString * IdeaWMI::getBatteryInfo(UInt32 index) {
+const char *IdeaWMI::getBatteryInfo(UInt32 index) {
     OSObject* result;
 
     OSObject* params[1] = {
@@ -148,32 +155,32 @@ OSString * IdeaWMI::getBatteryInfo(UInt32 index) {
     };
 
     if (!YWMI->executeMethod(BAT_INFO_WMI_STRING, &result, params, 1)) {
-        AlwaysLog("WBAT evaluation failed\n");
-        return OSString::withCString("evaluation failed");
+        AlwaysLog("WBAT evaluation failed");
+        return "evaluation failed";
     }
 
     OSString *info = OSDynamicCast(OSString, result);
 
     if (!info) {
-        AlwaysLog("WBAT result not a string\n");
-        return OSString::withCString("result not a string");
+        AlwaysLog("WBAT result not a string");
+        return "result not a string";
     }
     AlwaysLog("WBAT %s", info->getCStringNoCopy());
-    return info;
+    return info->getCStringNoCopy();
 }
 
 void IdeaWMI::checkEvent(const char *cname, UInt32 id) {
     switch (id) {
         case kIOACPIMessageReserved:
-            AlwaysLog("found reserved notify id 0x%x for %s\n", id, cname);
+            AlwaysLog("found reserved notify id 0x%x for %s", id, cname);
             break;
             
         case kIOACPIMessageD0:
-            AlwaysLog("found YMC notify id 0x%x for %s\n", id, cname);
+            AlwaysLog("found YMC notify id 0x%x for %s", id, cname);
             break;
             
         default:
-            AlwaysLog("found unknown notify id 0x%x for %s\n", id, cname);
+            AlwaysLog("found unknown notify id 0x%x for %s", id, cname);
             break;
     }
 }
