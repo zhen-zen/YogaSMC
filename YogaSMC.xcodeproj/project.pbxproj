@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -54,6 +54,8 @@
 		6F9553BB24BA515B00215EBB /* IdeaVPC.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F9553B924BA515B00215EBB /* IdeaVPC.hpp */; };
 		6F96A30C24B93D25006562EC /* YogaVPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F96A30A24B93D25006562EC /* YogaVPC.cpp */; };
 		6F96A30D24B93D25006562EC /* YogaVPC.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F96A30B24B93D25006562EC /* YogaVPC.hpp */; };
+		6F970B52252002E7003A65E6 /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = 6F970B51252002E7003A65E6 /* Logging */; };
+		6F970B6125200804003A65E6 /* LoggingSyslog in Frameworks */ = {isa = PBXBuildFile; productRef = 6F970B6025200804003A65E6 /* LoggingSyslog */; };
 		6FCF7F592474B74800A82B13 /* WMI.h in Headers */ = {isa = PBXBuildFile; fileRef = 6FCF7F572474B74800A82B13 /* WMI.h */; };
 		6FCF7F5A2474B74800A82B13 /* WMI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6FCF7F582474B74800A82B13 /* WMI.cpp */; };
 		6FCF7F5C2474B89000A82B13 /* common.h in Headers */ = {isa = PBXBuildFile; fileRef = 6FCF7F5B2474B89000A82B13 /* common.h */; };
@@ -163,9 +165,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				6F1C70A4251473E7007D1DFC /* AppKit.framework in Frameworks */,
+				6F970B6125200804003A65E6 /* LoggingSyslog in Frameworks */,
 				6F1C70A2251473DF007D1DFC /* CoreFoundation.framework in Frameworks */,
 				6F1C70A0251473CD007D1DFC /* IOKit.framework in Frameworks */,
 				6F1C70B2251475BA007D1DFC /* PreferencePanes.framework in Frameworks */,
+				6F970B52252002E7003A65E6 /* Logging in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -408,6 +412,10 @@
 			dependencies = (
 			);
 			name = YogaSMCPane;
+			packageProductDependencies = (
+				6F970B51252002E7003A65E6 /* Logging */,
+				6F970B6025200804003A65E6 /* LoggingSyslog */,
+			);
 			productName = YogaSMCPane;
 			productReference = 6F1C708C251473BB007D1DFC /* YogaSMCPane.prefPane */;
 			productType = "com.apple.product-type.bundle";
@@ -459,6 +467,10 @@
 				Base,
 			);
 			mainGroup = 6F08ACDA24746B8B00681A63;
+			packageReferences = (
+				6F970B50252002E7003A65E6 /* XCRemoteSwiftPackageReference "swift-log" */,
+				6F970B5F25200804003A65E6 /* XCRemoteSwiftPackageReference "swift-log-syslog" */,
+			);
 			productRefGroup = 6F08ACE524746B8B00681A63 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -948,6 +960,38 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		6F970B50252002E7003A65E6 /* XCRemoteSwiftPackageReference "swift-log" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-log.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.4.0;
+			};
+		};
+		6F970B5F25200804003A65E6 /* XCRemoteSwiftPackageReference "swift-log-syslog" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ianpartridge/swift-log-syslog.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		6F970B51252002E7003A65E6 /* Logging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6F970B50252002E7003A65E6 /* XCRemoteSwiftPackageReference "swift-log" */;
+			productName = Logging;
+		};
+		6F970B6025200804003A65E6 /* LoggingSyslog */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6F970B5F25200804003A65E6 /* XCRemoteSwiftPackageReference "swift-log-syslog" */;
+			productName = LoggingSyslog;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 6F08ACDB24746B8B00681A63 /* Project object */;
 }

@@ -9,6 +9,8 @@
 import AppKit
 import Foundation
 import IOKit
+import Logging
+import LoggingSyslog
 import PreferencePanes
 
 // from https://ffried.codes/2018/01/20/the-internals-of-the-macos-hud/
@@ -99,8 +101,6 @@ func sendString(_ key: String, _ value: String, _ io_service: io_service_t) -> k
 
 class YogaSMCPane : NSPreferencePane {
     var io_service : io_service_t = 0
-
-    var unsupported = false
 
     @IBOutlet weak var vVersion: NSTextField!
     @IBOutlet weak var vBuild: NSTextField!
@@ -203,6 +203,7 @@ class YogaSMCPane : NSPreferencePane {
     }
 
     func updateIdea() {
+//        logger.info("Updating IdeaVPC info")
         if let rPrimeKey = getString("PrimeKeyType", io_service) {
             vFnKeyRadio.title = rPrimeKey
             vFnKeyRadio.state = getBoolean("FnlockMode", io_service) ? .on : .off
@@ -260,15 +261,19 @@ class YogaSMCPane : NSPreferencePane {
         conn.remoteObjectInterface = NSXPCInterface(with: OSDUIHelperProtocol.self)
         conn.interruptionHandler = { print("Interrupted!") }
         conn.invalidationHandler = { print("Invalidated!") }
+//        conn.interruptionHandler = { self.logger.info("Interrupted!") }
+//        conn.invalidationHandler = { self.logger.error("Invalidated!") }
         conn.resume()
 
         let target = conn.remoteObjectProxyWithErrorHandler { print("Failed: \($0)") }
+//        let target = conn.remoteObjectProxyWithErrorHandler { self.logger.error("Failed: \($0)") }
         guard let helper = target as? OSDUIHelperProtocol else { return } //fatalError("Wrong type: \(target)") }
 
         helper.showImageAtPath("/System/Library/CoreServices/OSDUIHelper.app/Contents/Resources/kBright.pdf", onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 2000, withText: prompt as NSString)
     }
 
     func updateThink() {
+//        logger.info("Updating ThinkVPC info")
         return
     }
 
@@ -310,9 +315,13 @@ class YogaSMCPane : NSPreferencePane {
     }
 
     override func awakeFromNib() {
+        LoggingSystem.bootstrap(SyslogLogHandler.init)
+        let logger = Logger(label: "org.zhen.YogaSMCPane")
+
         io_service = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("YogaVPC"))
 
         if (io_service == 0) {
+            logger.critical("YogaVPC not found!")
             return
         }
 
@@ -332,22 +341,24 @@ class YogaSMCPane : NSPreferencePane {
             TabView.removeTabViewItem(ThinkViewItem)
         default:
             vClass.stringValue = "Unsupported"
-            unsupported = true
+            TabView.removeTabViewItem(IdeaViewItem)
+            TabView.removeTabViewItem(ThinkViewItem)
+            logger.critical("Unsupported variant!")
         }
 
-        guard let rbuild = getString("YogaSMC,Build", io_service)  else {
+        if let rbuild = getString("YogaSMC,Build", io_service) {
+            vBuild.stringValue = rbuild
+        } else {
             vBuild.stringValue = "Unknown"
-            return
+            logger.critical("Build not found!")
         }
 
-        vBuild.stringValue = rbuild
-
-        guard let rversion = getString("YogaSMC,Version", io_service) else {
+        if let rversion = getString("YogaSMC,Version", io_service) {
+            vVersion.stringValue = rversion
+        } else {
             vVersion.stringValue = "Unknown"
-            return
+            logger.critical("Version not found!")
         }
-
-        vVersion.stringValue = rversion
 
         if let rECCap = getString("EC Capability", io_service) {
             vECRead.stringValue = rECCap
@@ -355,6 +366,10 @@ class YogaSMCPane : NSPreferencePane {
             vECRead.stringValue = "Unavailable"
         }
 
-        update()
+        if vClass.stringValue != "Unsupported" {
+            // TODO: figure out log level and make logger access global
+            logger.critical("Updating info")
+            update()
+        }
     }
 }
