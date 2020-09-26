@@ -6,6 +6,8 @@ Each component can be derived for different targets. Currently IdeaPad and Think
 
 Command to driver can be sent with [ioio](https://github.com/RehabMan/OS-X-ioio), e.g. `ioio -s IdeaVPC ConservationMode true`.
 
+A preference pane is in beta, which provides graphical interface to information and settings.
+
 The driver will update the status in ioreg, while details are available in system log, e.g. `log stream --predicate 'senderImagePath contains "YogaSMC"'`. 
 
 ## YogaSMC
