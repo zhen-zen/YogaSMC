@@ -160,8 +160,7 @@ class YogaSMCPane : NSPreferencePane {
     }
     @IBAction func vCustomLEDSet(_ sender: NSSlider) {
         let value = vCustomLEDSlider.integerValue * 0x40 + vCustomLEDList.indexOfSelectedItem
-        let hex = String(format:"0x%02X", value)
-        let prompt = "LED \(hex)"
+        let prompt = String(format:"LED 0x%02X", value)
         OSD(prompt)
         if (!sendNumber("LED", value, io_service)) {
             return
@@ -320,7 +319,7 @@ class YogaSMCPane : NSPreferencePane {
         switch IOObjectCopyClass(io_service).takeRetainedValue() as NSString {
         case "IdeaVPC":
             vClass.stringValue = "Idea"
-//            TabView.removeTabViewItem(ThinkViewItem)
+            TabView.removeTabViewItem(ThinkViewItem)
             indicatorCheck.isHidden = true
             muteCheck.isHidden = true
             micMuteCheck.isHidden = true
