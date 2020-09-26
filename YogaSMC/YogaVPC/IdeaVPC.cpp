@@ -115,8 +115,9 @@ IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
             break;
 
         case kSMC_setConservation:
-            AlwaysLog("message: %s set conservation mode %d -> %d\n", provider->getName(), conservationMode, *((bool *) argument));
-            if (*((bool *) argument) != conservationMode)
+            AlwaysLog("message: %s set conservation mode %d -> %d", provider->getName(), conservationMode, *((bool *) argument));
+            if (*((bool *) argument) != conservationMode &&
+                !conservationModeLock)
                 toggleConservation();
             break;
 
@@ -473,9 +474,6 @@ bool IdeaVPC::updateKeyboard(bool update) {
 }
 
 bool IdeaVPC::toggleConservation() {
-    if (conservationModeLock)
-        return false;
-
     UInt32 result;
 
     OSObject* params[1] = {
@@ -495,6 +493,7 @@ bool IdeaVPC::toggleConservation() {
 }
 
 bool IdeaVPC::toggleRapidCharge() {
+    // experimental, reset required
     if (conservationModeLock)
         return false;
 
