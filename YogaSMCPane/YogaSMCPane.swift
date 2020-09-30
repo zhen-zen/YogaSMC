@@ -245,11 +245,31 @@ class YogaSMCPane : NSPreferencePane {
 
         if let rvalue = IORegistryEntryCreateCFProperty(io_service, "Capability" as CFString, kCFAllocatorDefault, 0) {
             if let dict = rvalue.takeRetainedValue() as? NSDictionary {
-                vCamera.stringValue = dict.value(forKey: "Camera") as! Bool ? "Yes" : "No"
-                vBluetooth.stringValue = dict.value(forKey: "Bluetooth") as! Bool ? "Yes" : "No"
-                vWireless.stringValue = dict.value(forKey: "Wireless") as! Bool ? "Yes" : "No"
-                vWWAN.stringValue = dict.value(forKey: "3G") as! Bool ? "Yes" : "No"
-                vGraphics.stringValue = dict.value(forKey: "Graphics") as! NSString as String
+                if let val = dict.value(forKey: "Camera") as? Bool {
+                    vCamera.stringValue = val ? "Yes" : "No"
+                } else {
+                    vCamera.stringValue = "?"
+                }
+                if let val = dict.value(forKey: "Bluetooth") as? Bool {
+                    vBluetooth.stringValue = val ? "Yes" : "No"
+                } else {
+                    vBluetooth.stringValue = "?"
+                }
+                if let val = dict.value(forKey: "Wireless") as? Bool {
+                    vWireless.stringValue = val ? "Yes" : "No"
+                } else {
+                    vWireless.stringValue = "?"
+                }
+                if let val = dict.value(forKey: "3G") as? Bool {
+                    vWWAN.stringValue = val ? "Yes" : "No"
+                } else {
+                    vWWAN.stringValue = "?"
+                }
+                if let val = dict.value(forKey: "Graphics") as? NSString {
+                    vGraphics.stringValue = val as String
+                } else {
+                    vGraphics.stringValue = "?"
+                }
             }
         }
     }
