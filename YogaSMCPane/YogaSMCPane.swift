@@ -100,8 +100,6 @@ func sendString(_ key: String, _ value: String, _ io_service: io_service_t) -> k
 class YogaSMCPane : NSPreferencePane {
     var io_service : io_service_t = 0
 
-    var unsupported = false
-
     @IBOutlet weak var vVersion: NSTextField!
     @IBOutlet weak var vBuild: NSTextField!
     @IBOutlet weak var vClass: NSTextField!
@@ -202,10 +200,12 @@ class YogaSMCPane : NSPreferencePane {
         // nothing
     }
 
-    func updateIdea() {
-        if let rPrimeKey = getString("PrimeKeyType", io_service) {
-            vFnKeyRadio.title = rPrimeKey
-            vFnKeyRadio.state = getBoolean("FnlockMode", io_service) ? .on : .off
+    func awakeIdea(_ props: NSDictionary) {
+        if let val = props["PrimeKeyType"] as? NSString {
+            vFnKeyRadio.title = val as String
+            if let val = props["FnlockMode"] as? Bool {
+                vFnKeyRadio.state = val ? .on : .off
+            }
         } else {
             vFnKeyRadio.title = "Unknown"
             vFnKeyRadio.isEnabled = false
@@ -213,63 +213,66 @@ class YogaSMCPane : NSPreferencePane {
             vFxKeyRadio.state = .on
         }
 
-        vConservationMode.state = getBoolean("ConservationMode", io_service) ? .on : .off
-
-        vRapidChargeMode.state = getBoolean("RapidChargeMode", io_service) ? .on : .off
-
-        if let rvalue = IORegistryEntryCreateCFProperty(io_service, "Battery 0" as CFString, kCFAllocatorDefault, 0) {
-            if let dict = rvalue.takeRetainedValue() as? NSDictionary {
-                if let ID = dict.value(forKey: "ID") as? String {
-                    vBatteryID.stringValue = ID
-                } else {
-                    vBatteryID.stringValue = "Unknown"
-                }
-                if let count = dict.value(forKey: "Cycle count") as? String {
-                    vCycleCount.stringValue = count
-                } else {
-                    vCycleCount.stringValue = "Unknown"
-                }
-                if let temp = dict.value(forKey: "Temperature") as? String {
-                    vBatteryTemperature.stringValue = temp
-                } else {
-                    vBatteryTemperature.stringValue = "Unknown"
-                }
-                if let mfgDate = dict.value(forKey: "Manufacture date") as? String {
-                    vBatteryTemperature.stringValue = mfgDate
-                } else {
-                    vBatteryTemperature.stringValue = "Unknown"
-                }
-        }
-//            Manufacture date
+        if let val = props["ConservationMode"] as? Bool {
+            vConservationMode.state = val ? .on : .off
+        } else {
+            vConservationMode.isEnabled = false
         }
 
-        if let rvalue = IORegistryEntryCreateCFProperty(io_service, "Capability" as CFString, kCFAllocatorDefault, 0) {
-            if let dict = rvalue.takeRetainedValue() as? NSDictionary {
-                if let val = dict.value(forKey: "Camera") as? Bool {
-                    vCamera.stringValue = val ? "Yes" : "No"
-                } else {
-                    vCamera.stringValue = "?"
-                }
-                if let val = dict.value(forKey: "Bluetooth") as? Bool {
-                    vBluetooth.stringValue = val ? "Yes" : "No"
-                } else {
-                    vBluetooth.stringValue = "?"
-                }
-                if let val = dict.value(forKey: "Wireless") as? Bool {
-                    vWireless.stringValue = val ? "Yes" : "No"
-                } else {
-                    vWireless.stringValue = "?"
-                }
-                if let val = dict.value(forKey: "3G") as? Bool {
-                    vWWAN.stringValue = val ? "Yes" : "No"
-                } else {
-                    vWWAN.stringValue = "?"
-                }
-                if let val = dict.value(forKey: "Graphics") as? NSString {
-                    vGraphics.stringValue = val as String
-                } else {
-                    vGraphics.stringValue = "?"
-                }
+        if let val = props["RapidChargeMode"] as? Bool {
+            vRapidChargeMode.state = val ? .on : .off
+        } else {
+            vRapidChargeMode.isEnabled = false
+        }
+
+        if let dict = props["Battery 0"]  as? NSDictionary {
+            if let ID = dict.value(forKey: "ID") as? String {
+                vBatteryID.stringValue = ID
+            } else {
+                vBatteryID.stringValue = "Unknown"
+            }
+            if let count = dict.value(forKey: "Cycle count") as? String {
+                vCycleCount.stringValue = count
+            } else {
+                vCycleCount.stringValue = "Unknown"
+            }
+            if let temp = dict.value(forKey: "Temperature") as? String {
+                vBatteryTemperature.stringValue = temp
+            } else {
+                vBatteryTemperature.stringValue = "Unknown"
+            }
+            if let mfgDate = dict.value(forKey: "Manufacture date") as? String {
+                vBatteryTemperature.stringValue = mfgDate
+            } else {
+                vBatteryTemperature.stringValue = "Unknown"
+            }
+        }
+
+        if let dict = props["Capability"]  as? NSDictionary {
+            if let val = dict.value(forKey: "Camera") as? Bool {
+                vCamera.stringValue = val ? "Yes" : "No"
+            } else {
+                vCamera.stringValue = "?"
+            }
+            if let val = dict.value(forKey: "Bluetooth") as? Bool {
+                vBluetooth.stringValue = val ? "Yes" : "No"
+            } else {
+                vBluetooth.stringValue = "?"
+            }
+            if let val = dict.value(forKey: "Wireless") as? Bool {
+                vWireless.stringValue = val ? "Yes" : "No"
+            } else {
+                vWireless.stringValue = "?"
+            }
+            if let val = dict.value(forKey: "3G") as? Bool {
+                vWWAN.stringValue = val ? "Yes" : "No"
+            } else {
+                vWWAN.stringValue = "?"
+            }
+            if let val = dict.value(forKey: "Graphics") as? NSString {
+                vGraphics.stringValue = val as String
+            } else {
+                vGraphics.stringValue = "?"
             }
         }
     }
@@ -288,7 +291,7 @@ class YogaSMCPane : NSPreferencePane {
         helper.showImageAtPath("/System/Library/CoreServices/OSDUIHelper.app/Contents/Resources/kBright.pdf", onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 2000, withText: prompt as NSString)
     }
 
-    func updateThink() {
+    func awakeThink(_ props: NSDictionary) {
         return
     }
 
@@ -318,17 +321,6 @@ class YogaSMCPane : NSPreferencePane {
         }
     }
     
-    func update() {
-        updateAutoBacklight()
-        updateBacklight()
-
-        if vClass.stringValue == "Idea" {
-            updateIdea()
-        } else if vClass.stringValue == "Think" {
-            updateThink()
-        }
-    }
-
     override func awakeFromNib() {
         io_service = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("YogaVPC"))
 
@@ -336,45 +328,77 @@ class YogaSMCPane : NSPreferencePane {
             return
         }
 
-        switch IOObjectCopyClass(io_service).takeRetainedValue() as NSString {
+        var CFProps : Unmanaged<CFMutableDictionary>? = nil
+        guard (kIOReturnSuccess == IORegistryEntryCreateCFProperties(io_service, &CFProps, kCFAllocatorDefault, 0) && CFProps != nil) else {
+            return
+        }
+
+        guard let props = CFProps?.takeRetainedValue() as NSDictionary? else {
+            return
+        }
+
+        if let val = props["YogaSMC,Build"] as? NSString {
+            vBuild.stringValue = val as String
+        } else {
+            vBuild.stringValue = "Unknown"
+            return
+        }
+
+        if let val = props["YogaSMC,Version"] as? NSString {
+            vVersion.stringValue = val as String
+        } else {
+            vVersion.stringValue = "Unknown"
+            return
+        }
+
+        if let val = props["EC Capability"] as? NSString {
+            vECRead.stringValue = val as String
+        } else {
+            vECRead.stringValue = "Unknown"
+            return
+        }
+
+        if let val = props["AutoBacklight"] as? NSNumber {
+            let autoBacklight = val as! Int
+            autoSleepCheck.state = ((autoBacklight & (1 << 0)) != 0) ? .on : .off
+            yogaModeCheck.state =  ((autoBacklight & (1 << 1)) != 0) ? .on : .off
+            indicatorCheck.state =  ((autoBacklight & (1 << 2)) != 0) ? .on : .off
+            muteCheck.state =  ((autoBacklight & (1 << 3)) != 0) ? .on : .off
+            micMuteCheck.state =  ((autoBacklight & (1 << 4)) != 0) ? .on : .off
+        } else {
+            autoSleepCheck.isEnabled = false
+            yogaModeCheck.isEnabled = false
+            indicatorCheck.isEnabled = false
+            muteCheck.isEnabled = false
+            micMuteCheck.isEnabled = false
+        }
+
+        if let val = props["BacklightLevel"] as? NSNumber {
+            backlightSlider.integerValue = val as! Int
+        } else {
+            backlightSlider.isEnabled = false
+        }
+
+        switch props["IOClass"] as? NSString {
         case "IdeaVPC":
             vClass.stringValue = "Idea"
             TabView.removeTabViewItem(ThinkViewItem)
             indicatorCheck.isHidden = true
             muteCheck.isHidden = true
             micMuteCheck.isHidden = true
+            awakeIdea(props)
         case "ThinkVPC":
             vClass.stringValue = "Think"
             TabView.removeTabViewItem(IdeaViewItem)
+            awakeThink(props)
         case "YogaVPC":
             vClass.stringValue = "Generic"
             TabView.removeTabViewItem(IdeaViewItem)
             TabView.removeTabViewItem(ThinkViewItem)
         default:
             vClass.stringValue = "Unsupported"
-            unsupported = true
+            TabView.removeTabViewItem(IdeaViewItem)
+            TabView.removeTabViewItem(ThinkViewItem)
         }
-
-        guard let rbuild = getString("YogaSMC,Build", io_service)  else {
-            vBuild.stringValue = "Unknown"
-            return
-        }
-
-        vBuild.stringValue = rbuild
-
-        guard let rversion = getString("YogaSMC,Version", io_service) else {
-            vVersion.stringValue = "Unknown"
-            return
-        }
-
-        vVersion.stringValue = rversion
-
-        if let rECCap = getString("EC Capability", io_service) {
-            vECRead.stringValue = rECCap
-        } else {
-            vECRead.stringValue = "Unavailable"
-        }
-
-        update()
     }
 }
