@@ -258,9 +258,9 @@ class YogaSMCPane : NSPreferencePane {
                 vBatteryTemperature.stringValue = "Unknown"
             }
             if let mfgDate = dict.value(forKey: "Manufacture date") as? String {
-                vBatteryTemperature.stringValue = mfgDate
+                vMfgDate.stringValue = mfgDate
             } else {
-                vBatteryTemperature.stringValue = "Unknown"
+                vMfgDate.stringValue = "Unknown"
             }
         }
 

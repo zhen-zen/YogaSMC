@@ -95,9 +95,9 @@ private:
      *
      *  @param command  see DYTC_command
      *  @param result result
-     *  @param ICFunc
-     *  @param ICMode
-     *  @param ValidF
+     *  @param ICFunc function
+     *  @param ICMode mode
+     *  @param ValidF on / off
      *
      *  @return true if success
      */
@@ -271,7 +271,7 @@ protected:
      *  Wrapper for WE1B
      *
      *  @param offset EC field offset
-     *  @param value EC field value
+     *  @param result EC field value
      *
      *  @return kIOReturnSuccess on success
      */

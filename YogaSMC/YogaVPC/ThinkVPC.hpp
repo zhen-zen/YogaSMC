@@ -242,7 +242,7 @@ private:
     /**
      *  Get notification mask
      *
-     *  @param index
+     *  @param index index of notification group
      *  @param KBDPresent dictionary for current settings
      */
     void getNotificationMask(UInt32 index, OSDictionary *KBDPresent);

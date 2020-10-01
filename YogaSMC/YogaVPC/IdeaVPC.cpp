@@ -24,16 +24,13 @@ bool IdeaVPC::initVPC() {
     }
 
     DebugLog(updateSuccess, VPCPrompt, config);
-#ifdef DEBUG
     setProperty(VPCPrompt, config, 32);
-#endif
     cap_graphics = config >> CFG_GRAPHICS_BIT & 0x7;
     cap_bt       = config >> CFG_BT_BIT & 0x1;
     cap_3g       = config >> CFG_3G_BIT & 0x1;
     cap_wifi     = config >> CFG_WIFI_BIT & 0x1;
     cap_camera   = config >> CFG_CAMERA_BIT & 0x1;
 
-#ifdef DEBUG
     OSDictionary *capabilities = OSDictionary::withCapacity(5);
     OSString *value;
 
@@ -70,7 +67,7 @@ bool IdeaVPC::initVPC() {
     setPropertyBoolean(capabilities, "Camera", cap_camera);
     setProperty("Capability", capabilities);
     capabilities->release();
-#endif
+
     initEC();
     return true;
 }

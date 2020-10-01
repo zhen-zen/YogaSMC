@@ -198,8 +198,6 @@ private:
     /**
      *  Update battery information
      *
-     *  @param update only update internal status when false
-     *
      *  @param bat0 Dictionary for Battery 0
      *  @param bat1 Dictionary for Battery 1
      */
