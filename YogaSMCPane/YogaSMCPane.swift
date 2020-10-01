@@ -11,6 +11,8 @@ import Foundation
 import IOKit
 import PreferencePanes
 
+let thinkLEDCommand = [0, 0x80, 0xA0, 0xC0]
+
 // from https://ffried.codes/2018/01/20/the-internals-of-the-macos-hud/
 @objc enum OSDImage: CLongLong {
     case kBrightness = 1
@@ -140,22 +142,22 @@ class YogaSMCPane : NSPreferencePane {
     @IBOutlet weak var vCustomLEDSlider: NSSlider!
     @IBOutlet weak var vCustomLEDList: NSPopUpButton!
     @IBAction func vPowerLEDSet(_ sender: NSSlider) {
-        if (!sendNumber("LED", vPowerLEDSlider.integerValue * 0x40 + 0x00, io_service)) {
+        if (!sendNumber("LED", thinkLEDCommand[vPowerLEDSlider.integerValue] + 0x00, io_service)) {
             return
         }
     }
     @IBAction func vStandbyLEDSet(_ sender: NSSlider) {
-        if (!sendNumber("LED", vStandbyLEDSlider.integerValue * 0x40 + 0x07, io_service)) {
+        if (!sendNumber("LED", thinkLEDCommand[vStandbyLEDSlider.integerValue] + 0x07, io_service)) {
             return
         }
     }
     @IBAction func vThinkDotSet(_ sender: NSSlider) {
-        if (!sendNumber("LED", vThinkDotSlider.integerValue * 0x40 + 0x0A, io_service)) {
+        if (!sendNumber("LED", thinkLEDCommand[vThinkDotSlider.integerValue] + 0x0A, io_service)) {
             return
         }
     }
     @IBAction func vCustomLEDSet(_ sender: NSSlider) {
-        let value = vCustomLEDSlider.integerValue * 0x40 + vCustomLEDList.indexOfSelectedItem
+        let value = thinkLEDCommand[vCustomLEDSlider.integerValue] + vCustomLEDList.indexOfSelectedItem
         let prompt = String(format:"LED 0x%02X", value)
         OSD(prompt)
         if (!sendNumber("LED", value, io_service)) {
