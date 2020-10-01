@@ -85,16 +85,16 @@ func getString(_ key: String, _ io_service: io_service_t) -> String? {
     return rvalue.takeRetainedValue() as! NSString as String
 }
 
-func sendBoolean(_ key: String, _ value: Bool, _ io_service: io_service_t) -> kern_return_t {
-    return IORegistryEntrySetCFProperty(io_service, key as CFString, value as CFBoolean)
+func sendBoolean(_ key: String, _ value: Bool, _ io_service: io_service_t) -> Bool {
+    return (kIOReturnSuccess == IORegistryEntrySetCFProperty(io_service, key as CFString, value as CFBoolean))
 }
 
 func sendNumber(_ key: String, _ value: Int, _ io_service: io_service_t) -> Bool {
     return (kIOReturnSuccess == IORegistryEntrySetCFProperty(io_service, key as CFString, value as CFNumber))
 }
 
-func sendString(_ key: String, _ value: String, _ io_service: io_service_t) -> kern_return_t {
-    return IORegistryEntrySetCFProperty(io_service, key as CFString, value as CFString)
+func sendString(_ key: String, _ value: String, _ io_service: io_service_t) -> Bool {
+    return (kIOReturnSuccess == IORegistryEntrySetCFProperty(io_service, key as CFString, value as CFString))
 }
 
 class YogaSMCPane : NSPreferencePane {
@@ -109,10 +109,9 @@ class YogaSMCPane : NSPreferencePane {
     @IBOutlet weak var vFnKeyRadio: NSButton!
     @IBOutlet weak var vFxKeyRadio: NSButton!
     @IBAction func vFnKeySet(_ sender: NSButton) {
-        if kIOReturnSuccess == sendBoolean("FnlockMode", vFnKeyRadio.state == .on, io_service) {
-            return
+        if !sendBoolean("FnlockMode", vFnKeyRadio.state == .on, io_service) {
+            vFnKeyRadio.state = getBoolean("FnlockMode", io_service) ? .on : .off
         }
-        vFnKeyRadio.state = getBoolean("FnlockMode", io_service) ? .on : .off
     }
     @IBOutlet weak var vConservationMode: NSButton!
     @IBOutlet weak var vRapidChargeMode: NSButton!
@@ -122,10 +121,9 @@ class YogaSMCPane : NSPreferencePane {
     @IBOutlet weak var vMfgDate: NSTextField!
 
     @IBAction func vConservationModeSet(_ sender: NSButton) {
-        if kIOReturnSuccess == sendBoolean("ConservationMode", vConservationMode.state == .on, io_service) {
-            return
+        if !sendBoolean("ConservationMode", vConservationMode.state == .on, io_service) {
+            vConservationMode.state = getBoolean("ConservationMode", io_service) ? .on : .off
         }
-        vConservationMode.state = getBoolean("ConservationMode", io_service) ? .on : .off
     }
     
     @IBOutlet weak var vCamera: NSTextField!
@@ -171,7 +169,12 @@ class YogaSMCPane : NSPreferencePane {
     @IBOutlet weak var backlightSlider: NSSlider!
     @IBAction func backlightSet(_ sender: NSSlider) {
         if !sendNumber("BacklightLevel", backlightSlider.integerValue, io_service) {
-            updateBacklight()
+            let backlightLevel = getNumber("BacklightLevel", io_service)
+            if (backlightLevel != -1) {
+                backlightSlider.integerValue = backlightLevel
+            } else {
+                backlightSlider.isEnabled = false
+            }
         }
     }
 
@@ -188,7 +191,20 @@ class YogaSMCPane : NSPreferencePane {
                 ((muteCheck.state == .on) ? 1 << 3 : 0) +
                 ((micMuteCheck.state == .on) ? 1 << 3 : 0)
         if (!sendNumber("AutoBacklight", val, io_service)) {
-            updateAutoBacklight()
+            let autoBacklight = getNumber("AutoBacklight", io_service)
+            if (autoBacklight != -1) {
+                autoSleepCheck.state = ((autoBacklight & (1 << 0)) != 0) ? .on : .off
+                yogaModeCheck.state =  ((autoBacklight & (1 << 1)) != 0) ? .on : .off
+                indicatorCheck.state =  ((autoBacklight & (1 << 2)) != 0) ? .on : .off
+                muteCheck.state =  ((autoBacklight & (1 << 3)) != 0) ? .on : .off
+                micMuteCheck.state =  ((autoBacklight & (1 << 4)) != 0) ? .on : .off
+            } else {
+                autoSleepCheck.isEnabled = false
+                yogaModeCheck.isEnabled = false
+                indicatorCheck.isEnabled = false
+                muteCheck.isEnabled = false
+                micMuteCheck.isEnabled = false
+            }
         }
     }
 
@@ -295,32 +311,6 @@ class YogaSMCPane : NSPreferencePane {
         return
     }
 
-    func updateBacklight() {
-        let backlightLevel = getNumber("BacklightLevel", io_service)
-        if (backlightLevel != -1) {
-            backlightSlider.integerValue = backlightLevel
-        } else {
-            backlightSlider.isEnabled = false
-        }
-    }
-
-    func updateAutoBacklight() {
-        let autoBacklight = getNumber("AutoBacklight", io_service)
-        if (autoBacklight != -1) {
-            autoSleepCheck.state = ((autoBacklight & (1 << 0)) != 0) ? .on : .off
-            yogaModeCheck.state =  ((autoBacklight & (1 << 1)) != 0) ? .on : .off
-            indicatorCheck.state =  ((autoBacklight & (1 << 2)) != 0) ? .on : .off
-            muteCheck.state =  ((autoBacklight & (1 << 3)) != 0) ? .on : .off
-            micMuteCheck.state =  ((autoBacklight & (1 << 4)) != 0) ? .on : .off
-        } else {
-            autoSleepCheck.isEnabled = false
-            yogaModeCheck.isEnabled = false
-            indicatorCheck.isEnabled = false
-            muteCheck.isEnabled = false
-            micMuteCheck.isEnabled = false
-        }
-    }
-    
     override func awakeFromNib() {
         io_service = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("YogaVPC"))
 
