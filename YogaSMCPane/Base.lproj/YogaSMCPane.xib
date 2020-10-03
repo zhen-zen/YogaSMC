@@ -8,6 +8,8 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="YogaSMCPane" customModule="YogaSMCPane" customModuleProvider="target">
             <connections>
+                <outlet property="DYTCBlock" destination="HEo-Km-sIk" id="dHh-ZK-LNd"/>
+                <outlet property="DYTCSlider" destination="H87-Ly-sql" id="haV-1t-2Re"/>
                 <outlet property="IdeaViewItem" destination="GmU-Sc-yjc" id="MJK-Vb-NCw"/>
                 <outlet property="TabView" destination="Fe4-fM-T79" id="zQh-TM-B9f"/>
                 <outlet property="ThinkViewItem" destination="eaw-hp-JIE" id="sTD-qn-Tzl"/>
@@ -27,6 +29,9 @@
                 <outlet property="vCustomLEDList" destination="8Wg-LT-AId" id="aAp-oR-Nad"/>
                 <outlet property="vCustomLEDSlider" destination="5gQ-az-9US" id="nY3-qK-vvb"/>
                 <outlet property="vCycleCount" destination="cFi-NC-K0C" id="axy-Rg-jnS"/>
+                <outlet property="vDYTCFuncMode" destination="D2S-ch-g8I" id="ZTJ-pT-IBm"/>
+                <outlet property="vDYTCPerfMode" destination="6sm-HY-Hdh" id="8wb-EY-Erg"/>
+                <outlet property="vDYTCRevision" destination="W8B-pr-Ckq" id="JAI-9h-llK"/>
                 <outlet property="vECRead" destination="w0X-ID-3TJ" id="8MX-ad-Owg"/>
                 <outlet property="vFnKeyRadio" destination="So0-Nv-cHB" id="SOX-xb-H38"/>
                 <outlet property="vFxKeyRadio" destination="TKw-8Y-61F" id="GaD-1g-5iH"/>
@@ -49,7 +54,7 @@
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="176" y="715" width="668" height="368"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1920" height="1055"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="1920" height="1057"/>
             <view key="contentView" id="se5-gp-TjO">
                 <rect key="frame" x="0.0" y="0.0" width="668" height="368"/>
                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -83,7 +88,7 @@
                                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4hU-9e-sdI" userLabel="vVersion">
                                                         <rect key="frame" x="72" y="252" width="81" height="16"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                        <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" id="lrX-uD-Bd1">
+                                                        <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" placeholderString="Unknown" id="lrX-uD-Bd1">
                                                             <font key="font" usesAppearanceFont="YES"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -101,7 +106,7 @@
                                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="AXm-L5-4AS" userLabel="vClass">
                                                         <rect key="frame" x="72" y="192" width="81" height="16"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                        <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" id="Rsa-C2-fKy">
+                                                        <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" placeholderString="Unknown" id="Rsa-C2-fKy">
                                                             <font key="font" usesAppearanceFont="YES"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -119,7 +124,7 @@
                                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="QJj-HE-a6h" userLabel="vBuild">
                                                         <rect key="frame" x="72" y="222" width="81" height="16"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                        <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" id="a3A-xj-neU">
+                                                        <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" placeholderString="Unknown" id="a3A-xj-neU">
                                                             <font key="font" usesAppearanceFont="YES"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -135,9 +140,9 @@
                                                         </textFieldCell>
                                                     </textField>
                                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="w0X-ID-3TJ" userLabel="vECRead">
-                                                        <rect key="frame" x="100" y="162" width="53" height="16"/>
+                                                        <rect key="frame" x="92" y="162" width="61" height="16"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                        <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" id="F3D-KE-mo5">
+                                                        <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" placeholderString="Unknown" id="F3D-KE-mo5">
                                                             <font key="font" usesAppearanceFont="YES"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -258,6 +263,78 @@
                                                 </subviews>
                                             </view>
                                         </box>
+                                        <box fixedFrame="YES" title="DYTC" translatesAutoresizingMaskIntoConstraints="NO" id="HEo-Km-sIk">
+                                            <rect key="frame" x="410" y="128" width="206" height="174"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <view key="contentView" id="e7e-mz-ddl">
+                                                <rect key="frame" x="3" y="3" width="200" height="156"/>
+                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                <subviews>
+                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="C1M-Yq-I7l">
+                                                        <rect key="frame" x="18" y="120" width="55" height="16"/>
+                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                        <textFieldCell key="cell" lineBreakMode="clipping" title="Revision" id="g3T-NA-bGm">
+                                                            <font key="font" usesAppearanceFont="YES"/>
+                                                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                        </textFieldCell>
+                                                    </textField>
+                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="W8B-pr-Ckq" userLabel="vRevision">
+                                                        <rect key="frame" x="92" y="120" width="90" height="16"/>
+                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                        <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" placeholderString="Unknown" id="g2V-RT-VTa">
+                                                            <font key="font" usesAppearanceFont="YES"/>
+                                                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                        </textFieldCell>
+                                                    </textField>
+                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ncg-8s-DaT">
+                                                        <rect key="frame" x="18" y="90" width="68" height="16"/>
+                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                        <textFieldCell key="cell" lineBreakMode="clipping" title="FuncMode" id="8sU-Sz-fXZ">
+                                                            <font key="font" usesAppearanceFont="YES"/>
+                                                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                        </textFieldCell>
+                                                    </textField>
+                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="D2S-ch-g8I" userLabel="vFuncMode">
+                                                        <rect key="frame" x="92" y="90" width="90" height="16"/>
+                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                        <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" placeholderString="Unknown" id="tSR-vf-Jg6">
+                                                            <font key="font" usesAppearanceFont="YES"/>
+                                                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                        </textFieldCell>
+                                                    </textField>
+                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="FOI-Vt-pek">
+                                                        <rect key="frame" x="18" y="60" width="64" height="16"/>
+                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                        <textFieldCell key="cell" lineBreakMode="clipping" title="PerfMode" id="3kx-Xi-ad5">
+                                                            <font key="font" usesAppearanceFont="YES"/>
+                                                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                        </textFieldCell>
+                                                    </textField>
+                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="6sm-HY-Hdh" userLabel="vPerfMode">
+                                                        <rect key="frame" x="92" y="60" width="90" height="16"/>
+                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                        <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" placeholderString="Unknown" id="oce-6s-aII">
+                                                            <font key="font" usesAppearanceFont="YES"/>
+                                                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                        </textFieldCell>
+                                                    </textField>
+                                                    <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="H87-Ly-sql">
+                                                        <rect key="frame" x="44" y="19" width="112" height="31"/>
+                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                        <sliderCell key="cell" state="on" alignment="left" maxValue="2" doubleValue="1" tickMarkPosition="below" numberOfTickMarks="3" allowsTickMarkValuesOnly="YES" sliderType="linear" id="qvo-5v-hS7"/>
+                                                        <connections>
+                                                            <action selector="DYTCset:" target="-2" id="Nwh-cW-Bdz"/>
+                                                        </connections>
+                                                    </slider>
+                                                </subviews>
+                                            </view>
+                                        </box>
                                     </subviews>
                                 </view>
                             </tabViewItem>
@@ -283,9 +360,9 @@
                                                         </textFieldCell>
                                                     </textField>
                                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1Qx-EF-xrn" userLabel="vCamera">
-                                                        <rect key="frame" x="102" y="238" width="51" height="16"/>
+                                                        <rect key="frame" x="90" y="238" width="63" height="16"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                        <textFieldCell key="cell" lineBreakMode="clipping" id="FZW-Z2-fmW">
+                                                        <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" placeholderString="Unknown" id="FZW-Z2-fmW">
                                                             <font key="font" metaFont="system"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -301,9 +378,9 @@
                                                         </textFieldCell>
                                                     </textField>
                                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="t9J-6C-LMZ" userLabel="vBluetooth">
-                                                        <rect key="frame" x="102" y="208" width="51" height="16"/>
+                                                        <rect key="frame" x="90" y="208" width="63" height="16"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                        <textFieldCell key="cell" lineBreakMode="clipping" id="eEy-Aa-Wyq">
+                                                        <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" placeholderString="Unknown" id="eEy-Aa-Wyq">
                                                             <font key="font" metaFont="system"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -328,9 +405,9 @@
                                                         </textFieldCell>
                                                     </textField>
                                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="DK8-uT-T5t" userLabel="vWWAN">
-                                                        <rect key="frame" x="102" y="148" width="51" height="16"/>
+                                                        <rect key="frame" x="90" y="148" width="63" height="16"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                        <textFieldCell key="cell" lineBreakMode="clipping" id="M93-E9-Gu1">
+                                                        <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" placeholderString="Unknown" id="M93-E9-Gu1">
                                                             <font key="font" metaFont="system"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -348,16 +425,16 @@
                                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Er7-U8-VNG" userLabel="vGraphics">
                                                         <rect key="frame" x="18" y="88" width="135" height="16"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                        <textFieldCell key="cell" lineBreakMode="clipping" id="sWA-kZ-GJ2">
+                                                        <textFieldCell key="cell" lineBreakMode="clipping" placeholderString="Unknown" id="sWA-kZ-GJ2">
                                                             <font key="font" metaFont="system"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                         </textFieldCell>
                                                     </textField>
                                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hiY-Df-ajx" userLabel="vWireless">
-                                                        <rect key="frame" x="102" y="178" width="51" height="16"/>
+                                                        <rect key="frame" x="90" y="178" width="63" height="16"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                        <textFieldCell key="cell" lineBreakMode="clipping" id="fmf-ot-LjN">
+                                                        <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" placeholderString="Unknown" id="fmf-ot-LjN">
                                                             <font key="font" metaFont="system"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -435,7 +512,7 @@
                                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="rTr-ll-Qx5" userLabel="vID">
                                                         <rect key="frame" x="18" y="88" width="150" height="16"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                        <textFieldCell key="cell" lineBreakMode="clipping" id="xX7-Jm-ZQs">
+                                                        <textFieldCell key="cell" lineBreakMode="clipping" placeholderString="Unknown" id="xX7-Jm-ZQs">
                                                             <font key="font" metaFont="system"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -444,7 +521,7 @@
                                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="cFi-NC-K0C" userLabel="vCycle">
                                                         <rect key="frame" x="103" y="178" width="65" height="16"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                        <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" id="FLQ-ZT-rEL">
+                                                        <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" placeholderString="Unknown" id="FLQ-ZT-rEL">
                                                             <font key="font" metaFont="system"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -474,7 +551,7 @@
                                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="0xn-Ly-yhc" userLabel="vTemperature">
                                                         <rect key="frame" x="103" y="148" width="65" height="16"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                        <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" id="f1D-93-A8X">
+                                                        <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" placeholderString="Unknown" id="f1D-93-A8X">
                                                             <font key="font" metaFont="system"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -495,7 +572,7 @@
                                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="q5f-L2-yxr" userLabel="vMfgDate">
                                                         <rect key="frame" x="18" y="28" width="150" height="16"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                        <textFieldCell key="cell" lineBreakMode="clipping" id="UKM-cd-rez">
+                                                        <textFieldCell key="cell" lineBreakMode="clipping" placeholderString="Unknown" id="UKM-cd-rez">
                                                             <font key="font" metaFont="system"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>

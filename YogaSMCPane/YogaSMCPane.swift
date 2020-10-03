@@ -11,6 +11,7 @@ import Foundation
 import IOKit
 import PreferencePanes
 
+let DYTCCommand = ["L", "M", "H"]
 let thinkLEDCommand = [0, 0x80, 0xA0, 0xC0]
 
 // from https://ffried.codes/2018/01/20/the-internals-of-the-macos-hud/
@@ -168,6 +169,21 @@ class YogaSMCPane : NSPreferencePane {
     @IBOutlet weak var IdeaViewItem: NSTabViewItem!
     @IBOutlet weak var ThinkViewItem: NSTabViewItem!
 
+    // Main
+    @IBOutlet weak var DYTCBlock: NSBox!
+    @IBOutlet weak var vDYTCRevision: NSTextField!
+    @IBOutlet weak var vDYTCFuncMode: NSTextField!
+    @IBOutlet weak var vDYTCPerfMode: NSTextField!
+    @IBOutlet weak var DYTCSlider: NSSlider!
+    @IBAction func DYTCset(_ sender: NSSlider) {
+        _ = sendString("DYTCMode", DYTCCommand[DYTCSlider.integerValue], io_service)
+        if let rvalue = IORegistryEntryCreateCFProperty(io_service, "DYTC" as CFString, kCFAllocatorDefault, 0) {
+            if let dict = rvalue.takeRetainedValue() as? NSDictionary {
+                updateDYTC(dict)
+            }
+        }
+    }
+    
     @IBOutlet weak var backlightSlider: NSSlider!
     @IBAction func backlightSet(_ sender: NSSlider) {
         if !sendNumber("BacklightLevel", backlightSlider.integerValue, io_service) {
@@ -218,6 +234,37 @@ class YogaSMCPane : NSPreferencePane {
         // nothing
     }
 
+    func updateDYTC(_ dict: NSDictionary) {
+        if let ver = dict["Revision"] as? NSNumber,
+           let subver = dict["SubRevision"] as? NSNumber {
+            vDYTCRevision.stringValue = "\(ver as! Int).\(subver as! Int)"
+        } else {
+            vDYTCRevision.stringValue = "Unknown"
+        }
+        if let funcMode = dict["FuncMode"] as? String {
+            vDYTCFuncMode.stringValue = funcMode
+        } else {
+            vDYTCFuncMode.stringValue = "Unknown"
+        }
+        if let perfMode = dict["PerfMode"] as? String {
+            vDYTCPerfMode.stringValue = perfMode
+        } else {
+            vDYTCPerfMode.stringValue = "Unknown"
+        }
+        if vDYTCFuncMode.stringValue == "Desk",
+           vDYTCPerfMode.stringValue == "Quiet" {
+            DYTCSlider.integerValue = 0
+        } else if vDYTCFuncMode.stringValue == "Standard",
+                  vDYTCPerfMode.stringValue == "Balance" {
+            DYTCSlider.integerValue = 1
+        } else if vDYTCFuncMode.stringValue == "Desk",
+                  vDYTCPerfMode.stringValue == "Performance" {
+            DYTCSlider.integerValue = 2
+        } else {
+            DYTCSlider.isEnabled = false
+        }
+    }
+
     func awakeIdea(_ props: NSDictionary) {
         if let val = props["PrimeKeyType"] as? NSString {
             vFnKeyRadio.title = val as String
@@ -244,22 +291,22 @@ class YogaSMCPane : NSPreferencePane {
         }
 
         if let dict = props["Battery 0"]  as? NSDictionary {
-            if let ID = dict.value(forKey: "ID") as? String {
+            if let ID = dict["ID"] as? String {
                 vBatteryID.stringValue = ID
             } else {
                 vBatteryID.stringValue = "Unknown"
             }
-            if let count = dict.value(forKey: "Cycle count") as? String {
+            if let count = dict["Cycle count"] as? String {
                 vCycleCount.stringValue = count
             } else {
                 vCycleCount.stringValue = "Unknown"
             }
-            if let temp = dict.value(forKey: "Temperature") as? String {
+            if let temp = dict["Temperature"] as? String {
                 vBatteryTemperature.stringValue = temp
             } else {
                 vBatteryTemperature.stringValue = "Unknown"
             }
-            if let mfgDate = dict.value(forKey: "Manufacture date") as? String {
+            if let mfgDate = dict["Manufacture date"] as? String {
                 vMfgDate.stringValue = mfgDate
             } else {
                 vMfgDate.stringValue = "Unknown"
@@ -267,27 +314,27 @@ class YogaSMCPane : NSPreferencePane {
         }
 
         if let dict = props["Capability"]  as? NSDictionary {
-            if let val = dict.value(forKey: "Camera") as? Bool {
+            if let val = dict["Camera"] as? Bool {
                 vCamera.stringValue = val ? "Yes" : "No"
             } else {
                 vCamera.stringValue = "?"
             }
-            if let val = dict.value(forKey: "Bluetooth") as? Bool {
+            if let val = dict["Bluetooth"] as? Bool {
                 vBluetooth.stringValue = val ? "Yes" : "No"
             } else {
                 vBluetooth.stringValue = "?"
             }
-            if let val = dict.value(forKey: "Wireless") as? Bool {
+            if let val = dict["Wireless"] as? Bool {
                 vWireless.stringValue = val ? "Yes" : "No"
             } else {
                 vWireless.stringValue = "?"
             }
-            if let val = dict.value(forKey: "3G") as? Bool {
+            if let val = dict["3G"] as? Bool {
                 vWWAN.stringValue = val ? "Yes" : "No"
             } else {
                 vWWAN.stringValue = "?"
             }
-            if let val = dict.value(forKey: "Graphics") as? NSString {
+            if let val = dict["Graphics"] as? NSString {
                 vGraphics.stringValue = val as String
             } else {
                 vGraphics.stringValue = "?"
@@ -316,7 +363,7 @@ class YogaSMCPane : NSPreferencePane {
     override func awakeFromNib() {
         io_service = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("YogaVPC"))
 
-        if (io_service == 0) {
+        if (io_service == 0 || !sendBoolean("Update", true, io_service)) {
             return
         }
 
@@ -369,6 +416,12 @@ class YogaSMCPane : NSPreferencePane {
             backlightSlider.integerValue = val as! Int
         } else {
             backlightSlider.isEnabled = false
+        }
+
+        if let dict = props["DYTC"]  as? NSDictionary {
+            updateDYTC(dict)
+        } else {
+            DYTCBlock.isHidden = true
         }
 
         switch props["IOClass"] as? NSString {
