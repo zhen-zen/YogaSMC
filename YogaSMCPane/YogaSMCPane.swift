@@ -109,6 +109,7 @@ class YogaSMCPane : NSPreferencePane {
     @IBOutlet weak var vECRead: NSTextField!
 
     // Idea
+    @IBOutlet weak var FunctionKey: NSStackView!
     @IBOutlet weak var vFnKeyRadio: NSButton!
     @IBOutlet weak var vFxKeyRadio: NSButton!
     @IBAction func vFnKeySet(_ sender: NSButton) {
@@ -170,10 +171,8 @@ class YogaSMCPane : NSPreferencePane {
     @IBOutlet weak var ThinkViewItem: NSTabViewItem!
 
     // Main
-    @IBOutlet weak var DYTCBlock: NSBox!
     @IBOutlet weak var vDYTCRevision: NSTextField!
     @IBOutlet weak var vDYTCFuncMode: NSTextField!
-    @IBOutlet weak var vDYTCPerfMode: NSTextField!
     @IBOutlet weak var DYTCSlider: NSSlider!
     @IBAction func DYTCset(_ sender: NSSlider) {
         _ = sendString("DYTCMode", DYTCCommand[DYTCSlider.integerValue], io_service)
@@ -247,19 +246,17 @@ class YogaSMCPane : NSPreferencePane {
             vDYTCFuncMode.stringValue = "Unknown"
         }
         if let perfMode = dict["PerfMode"] as? String {
-            vDYTCPerfMode.stringValue = perfMode
-        } else {
-            vDYTCPerfMode.stringValue = "Unknown"
-        }
-        if vDYTCFuncMode.stringValue == "Desk",
-           vDYTCPerfMode.stringValue == "Quiet" {
-            DYTCSlider.integerValue = 0
-        } else if vDYTCFuncMode.stringValue == "Standard",
-                  vDYTCPerfMode.stringValue == "Balance" {
-            DYTCSlider.integerValue = 1
-        } else if vDYTCFuncMode.stringValue == "Desk",
-                  vDYTCPerfMode.stringValue == "Performance" {
-            DYTCSlider.integerValue = 2
+            if perfMode == "Quiet" {
+                DYTCSlider.integerValue = 0
+            } else if perfMode == "Balance" {
+                DYTCSlider.integerValue = 1
+            } else if perfMode == "Performance" {
+                DYTCSlider.integerValue = 2
+            } else if perfMode == "Performance (Reduced as lapmode active)" {
+                DYTCSlider.integerValue = 2
+            } else {
+                DYTCSlider.isEnabled = false
+            }
         } else {
             DYTCSlider.isEnabled = false
         }
@@ -315,29 +312,32 @@ class YogaSMCPane : NSPreferencePane {
 
         if let dict = props["Capability"]  as? NSDictionary {
             if let val = dict["Camera"] as? Bool {
-                vCamera.stringValue = val ? "Yes" : "No"
-            } else {
-                vCamera.stringValue = "?"
+                vCamera.textColor = val ? NSColor.green : NSColor.red
             }
             if let val = dict["Bluetooth"] as? Bool {
-                vBluetooth.stringValue = val ? "Yes" : "No"
-            } else {
-                vBluetooth.stringValue = "?"
+                vBluetooth.textColor = val ? NSColor.green : NSColor.red
             }
             if let val = dict["Wireless"] as? Bool {
-                vWireless.stringValue = val ? "Yes" : "No"
-            } else {
-                vWireless.stringValue = "?"
+                vWireless.textColor = val ? NSColor.green : NSColor.red
             }
             if let val = dict["3G"] as? Bool {
-                vWWAN.stringValue = val ? "Yes" : "No"
-            } else {
-                vWWAN.stringValue = "?"
+                vWWAN.textColor = val ? NSColor.green : NSColor.red
             }
             if let val = dict["Graphics"] as? NSString {
-                vGraphics.stringValue = val as String
-            } else {
-                vGraphics.stringValue = "?"
+                vGraphics.toolTip = val as String
+                switch val {
+                case "Intel":
+                    vGraphics.textColor = NSColor(red: 0/0xff, green: 0x71/0xff, blue: 0xc5/0xff, alpha: 1)
+                case "ATI":
+                    vGraphics.textColor = NSColor(red: 0x97/0xff, green: 0x0a/0xff, blue: 0x1b/0xff, alpha: 1)
+                case "Nvidia":
+                    vGraphics.textColor = NSColor(red: 0x76/0xff, green: 0xb9/0xff, blue: 0/0xff, alpha: 1)
+                case "Intel and ATI":
+                    vGraphics.textColor = NSColor(red: 0x97/0xff, green: 0x0a/0xff, blue: 0x1b/0xff, alpha: 1)
+                case "Intel and Nvidia":
+                    vGraphics.textColor = NSColor(red: 0x76/0xff, green: 0xb9/0xff, blue: 0/0xff, alpha: 1)
+                default: break
+                }
             }
         }
     }
@@ -421,16 +421,16 @@ class YogaSMCPane : NSPreferencePane {
         if let dict = props["DYTC"]  as? NSDictionary {
             updateDYTC(dict)
         } else {
-            DYTCBlock.isHidden = true
+            vDYTCRevision.stringValue = "Unsupported"
+            vDYTCFuncMode.isHidden = true
+            DYTCSlider.isHidden = true
         }
 
         switch props["IOClass"] as? NSString {
         case "IdeaVPC":
             vClass.stringValue = "Idea"
             TabView.removeTabViewItem(ThinkViewItem)
-            indicatorCheck.isHidden = true
-            muteCheck.isHidden = true
-            micMuteCheck.isHidden = true
+            FunctionKey.isHidden = false
             awakeIdea(props)
         case "ThinkVPC":
             vClass.stringValue = "Think"
