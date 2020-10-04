@@ -312,16 +312,16 @@ class YogaSMCPane : NSPreferencePane {
 
         if let dict = props["Capability"]  as? NSDictionary {
             if let val = dict["Camera"] as? Bool {
-                vCamera.textColor = val ? NSColor.green : NSColor.red
+                vCamera.textColor = val ? NSColor.systemGreen : NSColor.systemRed
             }
             if let val = dict["Bluetooth"] as? Bool {
-                vBluetooth.textColor = val ? NSColor.green : NSColor.red
+                vBluetooth.textColor = val ? NSColor.systemGreen : NSColor.systemRed
             }
             if let val = dict["Wireless"] as? Bool {
-                vWireless.textColor = val ? NSColor.green : NSColor.red
+                vWireless.textColor = val ? NSColor.systemGreen : NSColor.systemRed
             }
             if let val = dict["3G"] as? Bool {
-                vWWAN.textColor = val ? NSColor.green : NSColor.red
+                vWWAN.textColor = val ? NSColor.systemGreen : NSColor.systemRed
             }
             if let val = dict["Graphics"] as? NSString {
                 vGraphics.toolTip = val as String

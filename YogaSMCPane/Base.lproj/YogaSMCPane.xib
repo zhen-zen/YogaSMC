@@ -543,11 +543,11 @@
                                             <rect key="frame" x="6" y="10" width="266" height="286"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <view key="contentView" id="f73-AA-bxL">
-                                                <rect key="frame" x="3" y="3" width="260" height="268"/>
+                                                <rect key="frame" x="3" y="3" width="260" height="266"/>
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                 <subviews>
                                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="mbv-Zh-Ml2">
-                                                        <rect key="frame" x="61" y="230" width="42" height="16"/>
+                                                        <rect key="frame" x="61" y="228" width="42" height="16"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                         <textFieldCell key="cell" lineBreakMode="clipping" title="Power" id="OU1-a6-deb">
                                                             <font key="font" usesAppearanceFont="YES"/>
@@ -556,7 +556,7 @@
                                                         </textFieldCell>
                                                     </textField>
                                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="rV2-Ai-ryT">
-                                                        <rect key="frame" x="48" y="170" width="55" height="16"/>
+                                                        <rect key="frame" x="48" y="168" width="55" height="16"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                         <textFieldCell key="cell" lineBreakMode="clipping" title="Standby" id="Qg4-uk-pbx">
                                                             <font key="font" usesAppearanceFont="YES"/>
@@ -565,7 +565,7 @@
                                                         </textFieldCell>
                                                     </textField>
                                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="NsM-Q0-NaU">
-                                                        <rect key="frame" x="44" y="110" width="59" height="16"/>
+                                                        <rect key="frame" x="44" y="108" width="59" height="16"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                         <textFieldCell key="cell" lineBreakMode="clipping" title="ThinkDot" id="qw7-xb-51C">
                                                             <font key="font" usesAppearanceFont="YES"/>
@@ -574,7 +574,7 @@
                                                         </textFieldCell>
                                                     </textField>
                                                     <stackView distribution="equalCentering" orientation="horizontal" alignment="top" spacing="5" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" fixedFrame="YES" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="io5-Gb-nnj">
-                                                        <rect key="frame" x="105" y="202" width="135" height="16"/>
+                                                        <rect key="frame" x="105" y="200" width="135" height="16"/>
                                                         <subviews>
                                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="d7f-F4-3Ub">
                                                                 <rect key="frame" x="-2" y="0.0" width="24" height="16"/>
@@ -623,7 +623,7 @@
                                                         </customSpacing>
                                                     </stackView>
                                                     <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="waU-W1-TYS">
-                                                        <rect key="frame" x="104" y="222" width="132" height="28"/>
+                                                        <rect key="frame" x="104" y="220" width="132" height="28"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                         <sliderCell key="cell" alignment="left" maxValue="3" tickMarkPosition="below" numberOfTickMarks="4" allowsTickMarkValuesOnly="YES" sliderType="linear" id="v4y-UK-MkJ"/>
                                                         <connections>
@@ -631,7 +631,7 @@
                                                         </connections>
                                                     </slider>
                                                     <stackView distribution="equalCentering" orientation="horizontal" alignment="top" spacing="5" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" fixedFrame="YES" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Mro-Fx-S6O">
-                                                        <rect key="frame" x="105" y="142" width="135" height="16"/>
+                                                        <rect key="frame" x="105" y="140" width="135" height="16"/>
                                                         <subviews>
                                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="0QS-b9-gBb">
                                                                 <rect key="frame" x="-2" y="0.0" width="24" height="16"/>
@@ -680,7 +680,7 @@
                                                         </customSpacing>
                                                     </stackView>
                                                     <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="96M-Na-T3c">
-                                                        <rect key="frame" x="104" y="162" width="132" height="28"/>
+                                                        <rect key="frame" x="104" y="160" width="132" height="28"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                         <sliderCell key="cell" alignment="left" maxValue="3" tickMarkPosition="below" numberOfTickMarks="4" allowsTickMarkValuesOnly="YES" sliderType="linear" id="t9r-7x-hVj"/>
                                                         <connections>
@@ -688,7 +688,7 @@
                                                         </connections>
                                                     </slider>
                                                     <stackView distribution="equalCentering" orientation="horizontal" alignment="top" spacing="5" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" fixedFrame="YES" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="HJz-yA-LS6">
-                                                        <rect key="frame" x="105" y="82" width="135" height="16"/>
+                                                        <rect key="frame" x="105" y="80" width="135" height="16"/>
                                                         <subviews>
                                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="MLI-gy-dCc">
                                                                 <rect key="frame" x="-2" y="0.0" width="24" height="16"/>
@@ -737,7 +737,7 @@
                                                         </customSpacing>
                                                     </stackView>
                                                     <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ANf-1P-ZLt">
-                                                        <rect key="frame" x="104" y="102" width="132" height="28"/>
+                                                        <rect key="frame" x="104" y="100" width="132" height="28"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                         <sliderCell key="cell" alignment="left" maxValue="3" tickMarkPosition="below" numberOfTickMarks="4" allowsTickMarkValuesOnly="YES" sliderType="linear" id="IMC-QI-01L"/>
                                                         <connections>
@@ -745,7 +745,7 @@
                                                         </connections>
                                                     </slider>
                                                     <stackView distribution="equalCentering" orientation="horizontal" alignment="top" spacing="5" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" fixedFrame="YES" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="mpW-Fr-EMN">
-                                                        <rect key="frame" x="105" y="32" width="135" height="16"/>
+                                                        <rect key="frame" x="105" y="30" width="135" height="16"/>
                                                         <subviews>
                                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="zvh-nC-JD9">
                                                                 <rect key="frame" x="-2" y="0.0" width="24" height="16"/>
@@ -794,7 +794,7 @@
                                                         </customSpacing>
                                                     </stackView>
                                                     <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5gQ-az-9US">
-                                                        <rect key="frame" x="104" y="52" width="132" height="28"/>
+                                                        <rect key="frame" x="104" y="50" width="132" height="28"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                         <sliderCell key="cell" alignment="left" maxValue="3" tickMarkPosition="below" numberOfTickMarks="4" allowsTickMarkValuesOnly="YES" sliderType="linear" id="M4M-Od-9Mh"/>
                                                         <connections>
@@ -802,7 +802,7 @@
                                                         </connections>
                                                     </slider>
                                                     <popUpButton verticalHuggingPriority="750" id="8Wg-LT-AId" userLabel="CustomLED">
-                                                        <rect key="frame" x="17" y="54" width="88" height="26"/>
+                                                        <rect key="frame" x="17" y="52" width="88" height="26"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                         <popUpButtonCell key="cell" type="push" title="power" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="bTj-Mt-lsM" id="U1O-2v-zw3" userLabel="CustomLED">
                                                             <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
@@ -828,6 +828,7 @@
                                                     </popUpButton>
                                                 </subviews>
                                             </view>
+                                            <font key="titleFont" metaFont="system"/>
                                         </box>
                                         <stackView distribution="fill" orientation="vertical" alignment="leading" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" id="vYE-A0-ZNX">
                                             <rect key="frame" x="495" y="215" width="110" height="88"/>
