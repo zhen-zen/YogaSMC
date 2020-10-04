@@ -55,14 +55,19 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: YogaSMC-Debug
-        path: build/Debug
+        path: |
+          build/Debug/
+          !build/Debug/*.swiftmodule
     - uses: actions/upload-artifact@v2
       with:
         name: YogaSMC-Release
         path: |
           build/Release/
           !build/Release/*.dSYM
+          !build/Release/*.swiftmodule
     - uses: actions/upload-artifact@v2
       with:
         name: YogaSMC-Release-with-dSYM
-        path: build/Release/
+        path: |
+          build/Release/
+          !build/Release/*.swiftmodule
