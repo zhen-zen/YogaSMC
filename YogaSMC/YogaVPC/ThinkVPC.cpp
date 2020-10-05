@@ -410,6 +410,9 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 getPropertyNumber(fanControlPrompt);
 //                setFanControl(value->unsigned32BitValue());
                 updateFanControl(value->unsigned32BitValue());
+            } else if (key->isEqualTo(updatePrompt)) {
+                updateAll();
+                super::updateAll();
             } else {
                 OSDictionary *entry = OSDictionary::withCapacity(1);
                 entry->setObject(key, dict->getObject(key));
