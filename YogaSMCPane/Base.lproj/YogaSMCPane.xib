@@ -824,8 +824,9 @@
                                                                     <menuItem title="thinkdot" id="Bet-v9-f3S"/>
                                                                     <menuItem title="unknown_led3" id="2xp-Mf-z7g"/>
                                                                     <menuItem title="thinkvantage" id="rXT-n6-5kw"/>
-                                                                    <menuItem title="unknown_led4" id="sCA-wV-9o7"/>
-                                                                    <menuItem title="unknown_led5" id="8ZG-3j-g0g"/>
+                                                                    <menuItem title="caps_lock" id="sCA-wV-9o7"/>
+                                                                    <menuItem title="mic_mute" id="8ZG-3j-g0g"/>
+                                                                    <menuItem title="unknown_led6" id="2vQ-Tk-yzT"/>
                                                                 </items>
                                                             </menu>
                                                         </popUpButtonCell>
@@ -900,7 +901,7 @@
                                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
                                             <connections>
-                                                <action selector="cVhargeThresholdStopSet:" target="-2" id="zIM-ub-3D3"/>
+                                                <action selector="vChargeThresholdStopSet:" target="-2" id="zIM-ub-3D3"/>
                                             </connections>
                                         </textField>
                                         <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="TYs-Hl-oRb" userLabel="End">

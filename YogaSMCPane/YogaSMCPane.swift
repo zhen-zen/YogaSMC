@@ -13,6 +13,7 @@ import PreferencePanes
 
 let DYTCCommand = ["L", "M", "H"]
 let thinkLEDCommand = [0, 0x80, 0xA0, 0xC0]
+let thinkBatteryName = ["BAT_ANY", "BAT_PRIMARY", "BAT_SECONDARY"]
 
 // from https://ffried.codes/2018/01/20/the-internals-of-the-macos-hud/
 @objc enum OSDImage: CLongLong {
@@ -102,6 +103,7 @@ func sendString(_ key: String, _ value: String, _ io_service: io_service_t) -> B
 
 class YogaSMCPane : NSPreferencePane {
     var io_service : io_service_t = 0
+    var thinkBatteryNumber = 0
 
     @IBOutlet weak var vVersion: NSTextField!
     @IBOutlet weak var vBuild: NSTextField!
@@ -141,28 +143,40 @@ class YogaSMCPane : NSPreferencePane {
     @IBOutlet weak var vChargeThresholdStart: NSTextField!
     @IBOutlet weak var vChargeThresholdStop: NSTextField!
     @IBAction func vChargeThresholdStartSet(_ sender: NSTextFieldCell) {
-        let old = getNumber("BCTG", io_service)
-        if (old < 0 || old > 99) {
-            vChargeThresholdStart.isEnabled = false
-            return
-        } else if old == vChargeThresholdStart.integerValue {
-            return
+        if let rvalue = IORegistryEntryCreateCFProperty(io_service, thinkBatteryName[thinkBatteryNumber] as CFString, kCFAllocatorDefault, 0) {
+            if let dict = rvalue.takeRetainedValue() as? NSDictionary {
+                if let vStart = dict["BCTG"] as? NSNumber {
+                    let old = vStart as! Int
+                    if (old < 0 || old > 99) {
+                        vChargeThresholdStart.isEnabled = false
+                        return
+                    } else if old == vChargeThresholdStart.integerValue {
+                        return
+                    }
+                    let prompt = String(format:"Start %d", vChargeThresholdStart.integerValue)
+                    OSD(prompt)
+                    _ = sendNumber("setCMstart", vChargeThresholdStart.integerValue, io_service)
+                }
+            }
         }
-        let prompt = String(format:"Start %d", vChargeThresholdStart.integerValue)
-        OSD(prompt)
-        _ = sendNumber("setCMstart", vChargeThresholdStart.integerValue, io_service)
     }
-    @IBAction func cVhargeThresholdStopSet(_ sender: NSTextField) {
-        let old = getNumber("BCSG", io_service)
-        if (old < 1 || old > 100) {
-            vChargeThresholdStop.isEnabled = false
-            return
-        } else if old == vChargeThresholdStop.integerValue {
-            return
+    @IBAction func vChargeThresholdStopSet(_ sender: NSTextField) {
+        if let rvalue = IORegistryEntryCreateCFProperty(io_service, thinkBatteryName[thinkBatteryNumber] as CFString, kCFAllocatorDefault, 0) {
+            if let dict = rvalue.takeRetainedValue() as? NSDictionary {
+                if let vStop = dict["BCSG"] as? NSNumber {
+                    let old = vStop as! Int
+                    if (old < 1 || old > 100) {
+                        vChargeThresholdStop.isEnabled = false
+                        return
+                    } else if old == vChargeThresholdStop.integerValue {
+                        return
+                    }
+                    let prompt = String(format:"Stop %d", vChargeThresholdStop.integerValue)
+                    OSD(prompt)
+                    _ = sendNumber("setCMstop", vChargeThresholdStop.integerValue == 100 ? 0 : vChargeThresholdStart.integerValue, io_service)
+                }
+            }
         }
-        let prompt = String(format:"Stop %d", vChargeThresholdStop.integerValue)
-        OSD(prompt)
-        _ = sendNumber("setCMstop", vChargeThresholdStop.integerValue == 100 ? 0 : vChargeThresholdStart.integerValue, io_service)
     }
     @IBOutlet weak var vPowerLEDSlider: NSSlider!
     @IBOutlet weak var vStandbyLEDSlider: NSSlider!
@@ -382,13 +396,32 @@ class YogaSMCPane : NSPreferencePane {
         helper.showImageAtPath("/System/Library/CoreServices/OSDUIHelper.app/Contents/Resources/kBright.pdf", onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 2000, withText: prompt as NSString)
     }
 
+    func updateThinkBattery() -> Bool {
+        if !sendNumber("Battery", thinkBatteryNumber, io_service) {
+            if let rvalue = IORegistryEntryCreateCFProperty(io_service, thinkBatteryName[thinkBatteryNumber] as CFString, kCFAllocatorDefault, 0) {
+                if let dict = rvalue.takeRetainedValue() as? NSDictionary {
+                    if let vStart = dict["BCTG"] as? NSNumber,
+                       let vStop = dict["BCSG"] as? NSNumber {
+                        if ((vStart as! UInt) & (1 << 31)) == 0 {
+                            vChargeThresholdStart.isEnabled = true
+                            vChargeThresholdStop.isEnabled = true
+                            vChargeThresholdStart.integerValue = vStart as! Int
+                            vChargeThresholdStop.integerValue = vStop as! Int
+                            return true
+                        }
+                    }
+                }
+            }
+        }
+        thinkBatteryNumber += 1
+        return false
+    }
+    
     func awakeThink(_ props: NSDictionary) {
-        if let vStart = props["BCTG"] as? NSNumber,
-           let vStop = props["BCSG"] as? NSNumber {
-            vChargeThresholdStart.isEnabled = true
-            vChargeThresholdStop.isEnabled = true
-            vChargeThresholdStart.integerValue = vStart as! Int
-            vChargeThresholdStop.integerValue = vStop as! Int
+        while thinkBatteryNumber <= 2 {
+            if updateThinkBattery() {
+                break
+            }
         }
     }
 
