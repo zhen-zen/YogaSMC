@@ -397,7 +397,7 @@ class YogaSMCPane : NSPreferencePane {
     }
 
     func updateThinkBattery() -> Bool {
-        if !sendNumber("Battery", thinkBatteryNumber, io_service) {
+        if sendNumber("Battery", thinkBatteryNumber, io_service) {
             if let rvalue = IORegistryEntryCreateCFProperty(io_service, thinkBatteryName[thinkBatteryNumber] as CFString, kCFAllocatorDefault, 0) {
                 if let dict = rvalue.takeRetainedValue() as? NSDictionary {
                     if let vStart = dict["BCTG"] as? NSNumber,
@@ -495,7 +495,6 @@ class YogaSMCPane : NSPreferencePane {
         case "IdeaVPC":
             vClass.stringValue = "Idea"
             TabView.removeTabViewItem(ThinkViewItem)
-            awakeThink(props)
             FunctionKey.isHidden = false
             awakeIdea(props)
         case "ThinkVPC":
