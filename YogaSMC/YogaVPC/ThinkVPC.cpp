@@ -47,11 +47,11 @@ bool ThinkVPC::updateConservation(const char * method, OSDictionary *bat, bool u
     return true;
 }
 
-bool ThinkVPC::setConservation(const char * method, UInt32 value) {
+bool ThinkVPC::setConservation(const char * method, UInt8 value) {
     UInt32 result;
 
     OSObject* params[] = {
-        OSNumber::withNumber(value, 32)
+        OSNumber::withNumber((batnum << 8) + value, 32)
     };
 
     if (vpc->evaluateInteger(method, &result, params, 1) != kIOReturnSuccess) {

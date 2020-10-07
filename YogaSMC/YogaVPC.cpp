@@ -245,7 +245,7 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
 
                     default:
                         AlwaysLog(valueInvalid, DYTCPrompt);
-                        continue;;
+                        continue;
                 }
                 if (!setDYTC(mode)) {
                     AlwaysLog(toggleFailure, DYTCPrompt);

@@ -138,6 +138,32 @@ class YogaSMCPane : NSPreferencePane {
 
     // Think
 
+    @IBOutlet weak var vChargeThresholdStart: NSTextField!
+    @IBOutlet weak var vChargeThresholdStop: NSTextField!
+    @IBAction func vChargeThresholdStartSet(_ sender: NSTextFieldCell) {
+        let old = getNumber("BCTG", io_service)
+        if (old < 0 || old > 99) {
+            vChargeThresholdStart.isEnabled = false
+            return
+        } else if old == vChargeThresholdStart.integerValue {
+            return
+        }
+        let prompt = String(format:"Start %d", vChargeThresholdStart.integerValue)
+        OSD(prompt)
+        _ = sendNumber("setCMstart", vChargeThresholdStart.integerValue, io_service)
+    }
+    @IBAction func cVhargeThresholdStopSet(_ sender: NSTextField) {
+        let old = getNumber("BCSG", io_service)
+        if (old < 1 || old > 100) {
+            vChargeThresholdStop.isEnabled = false
+            return
+        } else if old == vChargeThresholdStop.integerValue {
+            return
+        }
+        let prompt = String(format:"Stop %d", vChargeThresholdStop.integerValue)
+        OSD(prompt)
+        _ = sendNumber("setCMstop", vChargeThresholdStop.integerValue == 100 ? 0 : vChargeThresholdStart.integerValue, io_service)
+    }
     @IBOutlet weak var vPowerLEDSlider: NSSlider!
     @IBOutlet weak var vStandbyLEDSlider: NSSlider!
     @IBOutlet weak var vThinkDotSlider: NSSliderCell!
@@ -357,7 +383,16 @@ class YogaSMCPane : NSPreferencePane {
     }
 
     func awakeThink(_ props: NSDictionary) {
-        return
+        if let vStart = props["BCTG"] as? NSNumber,
+           let vStop = props["BCSG"] as? NSNumber {
+            vChargeThresholdStart.isEnabled = true
+            vChargeThresholdStop.isEnabled = true
+            vChargeThresholdStart.integerValue = vStart as! Int
+            vChargeThresholdStop.integerValue = vStop as! Int
+        } else {
+            vChargeThresholdStart.isEnabled = true
+            vChargeThresholdStop.isEnabled = true
+        }
     }
 
     override func awakeFromNib() {
@@ -429,7 +464,8 @@ class YogaSMCPane : NSPreferencePane {
         switch props["IOClass"] as? NSString {
         case "IdeaVPC":
             vClass.stringValue = "Idea"
-            TabView.removeTabViewItem(ThinkViewItem)
+//            TabView.removeTabViewItem(ThinkViewItem)
+            awakeThink(props)
             FunctionKey.isHidden = false
             awakeIdea(props)
         case "ThinkVPC":

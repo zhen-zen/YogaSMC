@@ -276,7 +276,15 @@ private:
      */
     bool updateConservation(const char* method, OSDictionary *bat, bool update=true);
     
-    bool setConservation(const char* method, UInt32 value);
+    /**
+     *  Set battery conservation related setting
+     *
+     *  @param method method name to be executed
+     *  @param value method argument (excluding battery number)
+     *
+     *  @return true if success
+     */
+    bool setConservation(const char* method, UInt8 value);
 
     bool updateAdaptiveKBD(int arg);
 
