@@ -389,9 +389,6 @@ class YogaSMCPane : NSPreferencePane {
             vChargeThresholdStop.isEnabled = true
             vChargeThresholdStart.integerValue = vStart as! Int
             vChargeThresholdStop.integerValue = vStop as! Int
-        } else {
-            vChargeThresholdStart.isEnabled = true
-            vChargeThresholdStop.isEnabled = true
         }
     }
 
@@ -464,7 +461,7 @@ class YogaSMCPane : NSPreferencePane {
         switch props["IOClass"] as? NSString {
         case "IdeaVPC":
             vClass.stringValue = "Idea"
-//            TabView.removeTabViewItem(ThinkViewItem)
+            TabView.removeTabViewItem(ThinkViewItem)
             awakeThink(props)
             FunctionKey.isHidden = false
             awakeIdea(props)
