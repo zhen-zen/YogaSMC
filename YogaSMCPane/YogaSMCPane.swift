@@ -146,7 +146,7 @@ class YogaSMCPane : NSPreferencePane {
         if let rvalue = IORegistryEntryCreateCFProperty(io_service, thinkBatteryName[thinkBatteryNumber] as CFString, kCFAllocatorDefault, 0) {
             if let dict = rvalue.takeRetainedValue() as? NSDictionary {
                 if let vStart = dict["BCTG"] as? NSNumber {
-                    let old = vStart as! Int
+                    let old = (vStart as! Int32) & 0xff
                     if (old < 0 || old > 99) {
                         vChargeThresholdStart.isEnabled = false
                         return
@@ -164,7 +164,7 @@ class YogaSMCPane : NSPreferencePane {
         if let rvalue = IORegistryEntryCreateCFProperty(io_service, thinkBatteryName[thinkBatteryNumber] as CFString, kCFAllocatorDefault, 0) {
             if let dict = rvalue.takeRetainedValue() as? NSDictionary {
                 if let vStop = dict["BCSG"] as? NSNumber {
-                    let old = vStop as! Int
+                    let old = (vStop as! Int32) & 0xff
                     if (old < 1 || old > 100) {
                         vChargeThresholdStop.isEnabled = false
                         return
@@ -397,19 +397,20 @@ class YogaSMCPane : NSPreferencePane {
     }
 
     func updateThinkBattery() -> Bool {
-        if sendNumber("Battery", thinkBatteryNumber, io_service) {
-            if let rvalue = IORegistryEntryCreateCFProperty(io_service, thinkBatteryName[thinkBatteryNumber] as CFString, kCFAllocatorDefault, 0) {
-                if let dict = rvalue.takeRetainedValue() as? NSDictionary {
-                    if let vStart = dict["BCTG"] as? NSNumber,
-                       let vStop = dict["BCSG"] as? NSNumber {
-                        if ((vStart as! UInt) & (1 << 31)) == 0 {
-                            vChargeThresholdStart.isEnabled = true
-                            vChargeThresholdStop.isEnabled = true
-                            vChargeThresholdStart.integerValue = vStart as! Int
-                            vChargeThresholdStop.integerValue = vStop as! Int
-                            return true
-                        }
-                    }
+        if sendNumber("Battery", thinkBatteryNumber, io_service),
+           let rvalue = IORegistryEntryCreateCFProperty(io_service, thinkBatteryName[thinkBatteryNumber] as CFString, kCFAllocatorDefault, 0) {
+            if let dict = rvalue.takeRetainedValue() as? NSDictionary,
+               let vStart = dict["BCTG"] as? NSNumber,
+               let vStop = dict["BCSG"] as? NSNumber {
+                let rStart = vStart as! Int32
+                let rStop = vStop as! Int32
+                if rStart < 0,
+                   rStop < 0 {
+                    vChargeThresholdStart.isEnabled = true
+                    vChargeThresholdStop.isEnabled = true
+                    vChargeThresholdStart.intValue = rStart & 0xff
+                    vChargeThresholdStop.intValue = rStop & 0xff
+                    return true
                 }
             }
         }
