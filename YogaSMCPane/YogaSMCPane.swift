@@ -173,7 +173,7 @@ class YogaSMCPane : NSPreferencePane {
                     }
                     let prompt = String(format:"Stop %d", vChargeThresholdStop.integerValue)
                     OSD(prompt)
-                    _ = sendNumber("setCMstop", vChargeThresholdStop.integerValue == 100 ? 0 : vChargeThresholdStart.integerValue, io_service)
+                    _ = sendNumber("setCMstop", vChargeThresholdStop.integerValue == 100 ? 0 : vChargeThresholdStop.integerValue, io_service)
                 }
             }
         }
@@ -404,8 +404,8 @@ class YogaSMCPane : NSPreferencePane {
                let vStop = dict["BCSG"] as? NSNumber {
                 let rStart = vStart as! Int32
                 let rStop = vStop as! Int32
-                if rStart < 0,
-                   rStop < 0 {
+                if rStart >= 0,
+                   rStop >= 0 {
                     vChargeThresholdStart.isEnabled = true
                     vChargeThresholdStop.isEnabled = true
                     vChargeThresholdStart.intValue = rStart & 0xff
@@ -495,7 +495,8 @@ class YogaSMCPane : NSPreferencePane {
         switch props["IOClass"] as? NSString {
         case "IdeaVPC":
             vClass.stringValue = "Idea"
-            TabView.removeTabViewItem(ThinkViewItem)
+//            TabView.removeTabViewItem(ThinkViewItem)
+            awakeThink(props)
             FunctionKey.isHidden = false
             awakeIdea(props)
         case "ThinkVPC":
