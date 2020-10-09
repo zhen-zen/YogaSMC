@@ -623,7 +623,7 @@
 					"$(OTHER_CFLAGS)",
 					"-Wno-inconsistent-missing-override",
 				);
-				SDKROOT = macosx10.12;
+				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
@@ -681,7 +681,7 @@
 					"$(OTHER_CFLAGS)",
 					"-Wno-inconsistent-missing-override",
 				);
-				SDKROOT = macosx10.12;
+				SDKROOT = macosx;
 			};
 			name = Release;
 		};
