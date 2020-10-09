@@ -89,6 +89,14 @@ func getString(_ key: String, _ io_service: io_service_t) -> String? {
     return rvalue.takeRetainedValue() as! NSString as String
 }
 
+func getDictionary(_ key: String, _ io_service: io_service_t) -> NSDictionary? {
+    guard let rvalue = IORegistryEntryCreateCFProperty(io_service, key as CFString, kCFAllocatorDefault, 0) else {
+        return nil
+    }
+
+    return rvalue.takeRetainedValue() as? NSDictionary
+}
+
 func sendBoolean(_ key: String, _ value: Bool, _ io_service: io_service_t) -> Bool {
     return (kIOReturnSuccess == IORegistryEntrySetCFProperty(io_service, key as CFString, value as CFBoolean))
 }
@@ -144,43 +152,39 @@ class YogaSMCPane : NSPreferencePane {
     @IBOutlet weak var vChargeThresholdStart: NSTextField!
     @IBOutlet weak var vChargeThresholdStop: NSTextField!
     @IBAction func vChargeThresholdStartSet(_ sender: NSTextFieldCell) {
-        if let rvalue = IORegistryEntryCreateCFProperty(io_service, thinkBatteryName[thinkBatteryNumber] as CFString, kCFAllocatorDefault, 0) {
-            if let dict = rvalue.takeRetainedValue() as? NSDictionary {
-                if let vStart = dict["BCTG"] as? NSNumber {
-                    let old = (vStart as! Int32) & 0xff
-                    if (old < 0 || old > 99) {
-                        vChargeThresholdStart.isEnabled = false
-                        return
-                    } else if old == vChargeThresholdStart.integerValue {
-                        return
-                    }
-                    #if DEBUG
-                    let prompt = String(format:"Start %d", vChargeThresholdStart.integerValue)
-                    OSD(prompt)
-                    #endif
-                    _ = sendNumber("setCMstart", vChargeThresholdStart.integerValue, io_service)
+        if let dict = getDictionary(thinkBatteryName[thinkBatteryNumber], io_service) {
+            if let vStart = dict["BCTG"] as? NSNumber {
+                let old = (vStart as! Int32) & 0xff
+                if (old < 0 || old > 99) {
+                    vChargeThresholdStart.isEnabled = false
+                    return
+                } else if old == vChargeThresholdStart.integerValue {
+                    return
                 }
+                #if DEBUG
+                let prompt = String(format:"Start %d", vChargeThresholdStart.integerValue)
+                OSD(prompt)
+                #endif
+                _ = sendNumber("setCMstart", vChargeThresholdStart.integerValue, io_service)
             }
         }
     }
 
     @IBAction func vChargeThresholdStopSet(_ sender: NSTextField) {
-        if let rvalue = IORegistryEntryCreateCFProperty(io_service, thinkBatteryName[thinkBatteryNumber] as CFString, kCFAllocatorDefault, 0) {
-            if let dict = rvalue.takeRetainedValue() as? NSDictionary {
-                if let vStop = dict["BCSG"] as? NSNumber {
-                    let old = (vStop as! Int32) & 0xff
-                    if (old < 1 || old > 100) {
-                        vChargeThresholdStop.isEnabled = false
-                        return
-                    } else if old == vChargeThresholdStop.integerValue {
-                        return
-                    }
-                    #if DEBUG
-                    let prompt = String(format:"Stop %d", vChargeThresholdStop.integerValue)
-                    OSD(prompt)
-                    #endif
-                    _ = sendNumber("setCMstop", vChargeThresholdStop.integerValue == 100 ? 0 : vChargeThresholdStop.integerValue, io_service)
+        if let dict = getDictionary(thinkBatteryName[thinkBatteryNumber], io_service) {
+            if let vStop = dict["BCSG"] as? NSNumber {
+                let old = (vStop as! Int32) & 0xff
+                if (old < 1 || old > 100) {
+                    vChargeThresholdStop.isEnabled = false
+                    return
+                } else if old == vChargeThresholdStop.integerValue {
+                    return
                 }
+                #if DEBUG
+                let prompt = String(format:"Stop %d", vChargeThresholdStop.integerValue)
+                OSD(prompt)
+                #endif
+                _ = sendNumber("setCMstop", vChargeThresholdStop.integerValue == 100 ? 0 : vChargeThresholdStop.integerValue, io_service)
             }
         }
     }
@@ -230,10 +234,8 @@ class YogaSMCPane : NSPreferencePane {
     @IBOutlet weak var DYTCSlider: NSSlider!
     @IBAction func DYTCset(_ sender: NSSlider) {
         _ = sendString("DYTCMode", DYTCCommand[DYTCSlider.integerValue], io_service)
-        if let rvalue = IORegistryEntryCreateCFProperty(io_service, "DYTC" as CFString, kCFAllocatorDefault, 0) {
-            if let dict = rvalue.takeRetainedValue() as? NSDictionary {
-                updateDYTC(dict)
-            }
+        if let dict = getDictionary("DYTC", io_service) {
+            updateDYTC(dict)
         }
     }
 
@@ -316,8 +318,36 @@ class YogaSMCPane : NSPreferencePane {
         }
     }
 
+    func updateIdeaBattery() {
+        _ = sendBoolean("Battery", true, io_service)
+        if let dict = getDictionary("Battery 0", io_service) {
+            if let ID = dict["ID"] as? String {
+                vBatteryID.stringValue = ID
+            } else {
+                vBatteryID.stringValue = "Unknown"
+            }
+            if let count = dict["Cycle count"] as? String {
+                vCycleCount.stringValue = count
+            } else {
+                vCycleCount.stringValue = "Unknown"
+            }
+            if let temp = dict["Temperature"] as? String {
+                vBatteryTemperature.stringValue = temp
+            } else {
+                vBatteryTemperature.stringValue = "Unknown"
+            }
+            if let mfgDate = dict["Manufacture date"] as? String {
+                vMfgDate.stringValue = mfgDate
+            } else {
+                vMfgDate.stringValue = "Unknown"
+            }
+        }
+    }
+    
     func awakeIdea(_ props: NSDictionary) {
         FunctionKey.isHidden = false
+        updateIdeaBattery()
+
         if let val = props["PrimeKeyType"] as? NSString {
             vFnKeyRadio.title = val as String
             if let val = props["FnlockMode"] as? Bool {
@@ -340,29 +370,6 @@ class YogaSMCPane : NSPreferencePane {
             vRapidChargeMode.state = val ? .on : .off
         } else {
             vRapidChargeMode.isEnabled = false
-        }
-
-        if let dict = props["Battery 0"]  as? NSDictionary {
-            if let ID = dict["ID"] as? String {
-                vBatteryID.stringValue = ID
-            } else {
-                vBatteryID.stringValue = "Unknown"
-            }
-            if let count = dict["Cycle count"] as? String {
-                vCycleCount.stringValue = count
-            } else {
-                vCycleCount.stringValue = "Unknown"
-            }
-            if let temp = dict["Temperature"] as? String {
-                vBatteryTemperature.stringValue = temp
-            } else {
-                vBatteryTemperature.stringValue = "Unknown"
-            }
-            if let mfgDate = dict["Manufacture date"] as? String {
-                vMfgDate.stringValue = mfgDate
-            } else {
-                vMfgDate.stringValue = "Unknown"
-            }
         }
 
         if let dict = props["Capability"]  as? NSDictionary {
@@ -412,10 +419,9 @@ class YogaSMCPane : NSPreferencePane {
     }
 
     func updateThinkBattery() -> Bool {
-        if sendNumber("Battery", thinkBatteryNumber, io_service),
-           let rvalue = IORegistryEntryCreateCFProperty(io_service, thinkBatteryName[thinkBatteryNumber] as CFString, kCFAllocatorDefault, 0) {
-            if let dict = rvalue.takeRetainedValue() as? NSDictionary,
-               let vStart = dict["BCTG"] as? NSNumber,
+        _ = sendNumber("Battery", thinkBatteryNumber, io_service)
+        if let dict = getDictionary(thinkBatteryName[thinkBatteryNumber], io_service) {
+            if let vStart = dict["BCTG"] as? NSNumber,
                let vStop = dict["BCSG"] as? NSNumber {
                 let rStart = vStart as! Int32
                 let rStop = vStop as! Int32
