@@ -128,19 +128,20 @@ class YogaSMCPane : NSPreferencePane {
         }
     }
 
-    @IBOutlet weak var vConservationMode: NSButton!
-    @IBOutlet weak var vRapidChargeMode: NSButton!
     @IBOutlet weak var vBatteryID: NSTextField!
     @IBOutlet weak var vBatteryTemperature: NSTextField!
     @IBOutlet weak var vCycleCount: NSTextField!
     @IBOutlet weak var vMfgDate: NSTextField!
 
+    @IBOutlet weak var vConservationMode: NSButton!
     @IBAction func vConservationModeSet(_ sender: NSButton) {
         if !sendBoolean("ConservationMode", vConservationMode.state == .on, io_service) {
             vConservationMode.state = getBoolean("ConservationMode", io_service) ? .on : .off
         }
     }
-    
+
+    @IBOutlet weak var vRapidChargeMode: NSButton!
+
     @IBOutlet weak var vCamera: NSTextField!
     @IBOutlet weak var vBluetooth: NSTextField!
     @IBOutlet weak var vWireless: NSTextField!
@@ -190,28 +191,28 @@ class YogaSMCPane : NSPreferencePane {
     }
 
     @IBOutlet weak var vPowerLEDSlider: NSSlider!
-    @IBOutlet weak var vStandbyLEDSlider: NSSlider!
-    @IBOutlet weak var vThinkDotSlider: NSSliderCell!
-    @IBOutlet weak var vCustomLEDSlider: NSSlider!
-    @IBOutlet weak var vCustomLEDList: NSPopUpButton!
     @IBAction func vPowerLEDSet(_ sender: NSSlider) {
         if (!sendNumber("LED", thinkLEDCommand[vPowerLEDSlider.integerValue] + 0x00, io_service)) {
             return
         }
     }
 
+    @IBOutlet weak var vStandbyLEDSlider: NSSlider!
     @IBAction func vStandbyLEDSet(_ sender: NSSlider) {
         if (!sendNumber("LED", thinkLEDCommand[vStandbyLEDSlider.integerValue] + 0x07, io_service)) {
             return
         }
     }
 
+    @IBOutlet weak var vThinkDotSlider: NSSliderCell!
     @IBAction func vThinkDotSet(_ sender: NSSlider) {
         if (!sendNumber("LED", thinkLEDCommand[vThinkDotSlider.integerValue] + 0x0A, io_service)) {
             return
         }
     }
 
+    @IBOutlet weak var vCustomLEDSlider: NSSlider!
+    @IBOutlet weak var vCustomLEDList: NSPopUpButton!
     @IBAction func vCustomLEDSet(_ sender: NSSlider) {
         let value = thinkLEDCommand[vCustomLEDSlider.integerValue] + vCustomLEDList.indexOfSelectedItem
         #if DEBUG
@@ -256,7 +257,6 @@ class YogaSMCPane : NSPreferencePane {
     @IBOutlet weak var indicatorCheck: NSButton!
     @IBOutlet weak var muteCheck: NSButton!
     @IBOutlet weak var micMuteCheck: NSButton!
-
     @IBAction func autoBacklightSet(_ sender: NSButton) {
         let val = ((autoSleepCheck.state == .on) ? 1 << 0 : 0) +
                 ((yogaModeCheck.state == .on) ? 1 << 1 : 0) +
@@ -343,7 +343,7 @@ class YogaSMCPane : NSPreferencePane {
             }
         }
     }
-    
+
     func awakeIdea(_ props: NSDictionary) {
         FunctionKey.isHidden = false
         updateIdeaBattery()
@@ -438,7 +438,7 @@ class YogaSMCPane : NSPreferencePane {
         thinkBatteryNumber += 1
         return false
     }
-    
+
     func awakeThink(_ props: NSDictionary) {
         while thinkBatteryNumber <= 2 {
             if updateThinkBattery() {

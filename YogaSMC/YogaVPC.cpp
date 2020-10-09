@@ -15,7 +15,7 @@ bool YogaVPC::init(OSDictionary *dictionary)
 {
     if (!super::init(dictionary))
         return false;;
-    name = "";
+
     DebugLog("Initializing");
 
     extern kmod_info_t kmod_info;
@@ -28,6 +28,7 @@ bool YogaVPC::init(OSDictionary *dictionary)
 IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
 {
     name = provider->getName();
+ 
     DebugLog("Probing");
 
     if ((vpc = OSDynamicCast(IOACPIPlatformDevice, provider))) {

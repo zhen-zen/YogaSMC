@@ -17,7 +17,7 @@ bool YogaSMC::init(OSDictionary *dictionary)
 {
     if (!super::init(dictionary))
         return false;
-    name = "";
+
     DebugLog("Initializing");
 
     _deliverNotification = OSSymbol::withCString(kDeliverNotifications);
@@ -81,8 +81,6 @@ bool YogaSMC::start(IOService *provider) {
 
     if (ec)
         name = ec->getName();
-    else
-        name = "";
 
     DebugLog("Starting");
 

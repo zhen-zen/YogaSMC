@@ -10,12 +10,18 @@
 #ifndef common_h
 #define common_h
 
+#include <Availability.h>
+
+#ifndef __ACIDANTHERA_MAC_SDK
+#error "This kext SDK is unsupported. Download from https://github.com/acidanthera/MacKernelSDK"
+#endif
+
 #ifdef DEBUG
-#define DebugLog(str, ...) do { IOLog("YSMC - Debug: %s::%s " str "\n", getName(), name, ## __VA_ARGS__); } while (0)
+#define DebugLog(str, ...) do { IOLog("YSMC - Debug: %s::%s " str "\n", getName(), name ? name : "(null)", ## __VA_ARGS__); } while (0)
 #else
 #define DebugLog(str, ...) do { } while (0)
 #endif
-#define AlwaysLog(str, ...) do { IOLog("YSMC - Info: %s::%s " str "\n", getName(), name, ## __VA_ARGS__); } while (0)
+#define AlwaysLog(str, ...) do { IOLog("YSMC - Info: %s::%s " str "\n", getName(), name ? name : "(null)", ## __VA_ARGS__); } while (0)
 
 #define BIT(nr) (1U << (nr))
 
