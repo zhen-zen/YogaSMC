@@ -119,6 +119,7 @@ class YogaSMCPane : NSPreferencePane {
             vFnKeyRadio.state = getBoolean("FnlockMode", io_service) ? .on : .off
         }
     }
+
     @IBOutlet weak var vConservationMode: NSButton!
     @IBOutlet weak var vRapidChargeMode: NSButton!
     @IBOutlet weak var vBatteryID: NSTextField!
@@ -153,13 +154,16 @@ class YogaSMCPane : NSPreferencePane {
                     } else if old == vChargeThresholdStart.integerValue {
                         return
                     }
+                    #if DEBUG
                     let prompt = String(format:"Start %d", vChargeThresholdStart.integerValue)
                     OSD(prompt)
+                    #endif
                     _ = sendNumber("setCMstart", vChargeThresholdStart.integerValue, io_service)
                 }
             }
         }
     }
+
     @IBAction func vChargeThresholdStopSet(_ sender: NSTextField) {
         if let rvalue = IORegistryEntryCreateCFProperty(io_service, thinkBatteryName[thinkBatteryNumber] as CFString, kCFAllocatorDefault, 0) {
             if let dict = rvalue.takeRetainedValue() as? NSDictionary {
@@ -171,13 +175,16 @@ class YogaSMCPane : NSPreferencePane {
                     } else if old == vChargeThresholdStop.integerValue {
                         return
                     }
+                    #if DEBUG
                     let prompt = String(format:"Stop %d", vChargeThresholdStop.integerValue)
                     OSD(prompt)
+                    #endif
                     _ = sendNumber("setCMstop", vChargeThresholdStop.integerValue == 100 ? 0 : vChargeThresholdStop.integerValue, io_service)
                 }
             }
         }
     }
+
     @IBOutlet weak var vPowerLEDSlider: NSSlider!
     @IBOutlet weak var vStandbyLEDSlider: NSSlider!
     @IBOutlet weak var vThinkDotSlider: NSSliderCell!
@@ -188,29 +195,36 @@ class YogaSMCPane : NSPreferencePane {
             return
         }
     }
+
     @IBAction func vStandbyLEDSet(_ sender: NSSlider) {
         if (!sendNumber("LED", thinkLEDCommand[vStandbyLEDSlider.integerValue] + 0x07, io_service)) {
             return
         }
     }
+
     @IBAction func vThinkDotSet(_ sender: NSSlider) {
         if (!sendNumber("LED", thinkLEDCommand[vThinkDotSlider.integerValue] + 0x0A, io_service)) {
             return
         }
     }
+
     @IBAction func vCustomLEDSet(_ sender: NSSlider) {
         let value = thinkLEDCommand[vCustomLEDSlider.integerValue] + vCustomLEDList.indexOfSelectedItem
+        #if DEBUG
         let prompt = String(format:"LED 0x%02X", value)
         OSD(prompt)
+        #endif
         if (!sendNumber("LED", value, io_service)) {
             return
         }
     }
+
+    // Main
+
     @IBOutlet weak var TabView: NSTabView!
     @IBOutlet weak var IdeaViewItem: NSTabViewItem!
     @IBOutlet weak var ThinkViewItem: NSTabViewItem!
 
-    // Main
     @IBOutlet weak var vDYTCRevision: NSTextField!
     @IBOutlet weak var vDYTCFuncMode: NSTextField!
     @IBOutlet weak var DYTCSlider: NSSlider!
@@ -222,7 +236,7 @@ class YogaSMCPane : NSPreferencePane {
             }
         }
     }
-    
+
     @IBOutlet weak var backlightSlider: NSSlider!
     @IBAction func backlightSet(_ sender: NSSlider) {
         if !sendNumber("BacklightLevel", backlightSlider.integerValue, io_service) {
@@ -497,18 +511,14 @@ class YogaSMCPane : NSPreferencePane {
         case "IdeaVPC":
             vClass.stringValue = "Idea"
             awakeIdea(props)
-            #if DEBUG
-                awakeThink(props)
-            #else
-                TabView.removeTabViewItem(ThinkViewItem)
+            #if !DEBUG
+            TabView.removeTabViewItem(ThinkViewItem)
             #endif
         case "ThinkVPC":
             vClass.stringValue = "Think"
             awakeThink(props)
-            #if DEBUG
-                awakeIdea(props)
-            #else
-                TabView.removeTabViewItem(IdeaViewItem)
+            #if !DEBUG
+            TabView.removeTabViewItem(IdeaViewItem)
             #endif
         case "YogaVPC":
             vClass.stringValue = "Generic"
