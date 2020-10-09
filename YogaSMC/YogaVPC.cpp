@@ -14,7 +14,7 @@ OSDefineMetaClassAndStructors(YogaVPC, IOService);
 bool YogaVPC::init(OSDictionary *dictionary)
 {
     if (!super::init(dictionary))
-        return false;;
+        return false;
 
     DebugLog("Initializing");
 

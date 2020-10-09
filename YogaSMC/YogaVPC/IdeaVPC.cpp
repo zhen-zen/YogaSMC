@@ -327,7 +327,7 @@ bool IdeaVPC::updateBatteryID(OSDictionary *bat0, OSDictionary *bat1) {
             char cycle0String[5];
             snprintf(cycle0String, 5, "%d", cycleCount0[0]);
             setPropertyString(bat0, "Cycle count", cycle0String);
-            AlwaysLog("Battery 0 cycle count %d", cycleCount0[0]);
+            DebugLog("Battery 0 cycle count %d", cycleCount0[0]);
         }
     }
 
@@ -340,7 +340,7 @@ bool IdeaVPC::updateBatteryID(OSDictionary *bat0, OSDictionary *bat1) {
             char cycle1String[5];
             snprintf(cycle1String, 5, "%d", cycleCount1[0]);
             setPropertyString(bat1, "Cycle count", cycle1String);
-            AlwaysLog("Battery 1 cycle count %d", cycleCount1[0]);
+            DebugLog("Battery 1 cycle count %d", cycleCount1[0]);
         }
     }
 
@@ -353,7 +353,7 @@ bool IdeaVPC::updateBatteryID(OSDictionary *bat0, OSDictionary *bat1) {
             char ID0String[20];
             snprintf(ID0String, 20, "%04x %04x %04x %04x", batteryID0[0], batteryID0[1], batteryID0[2], batteryID0[3]);
             setPropertyString(bat0, "ID", ID0String);
-            AlwaysLog("Battery 0 ID %s", ID0String);
+            DebugLog("Battery 0 ID %s", ID0String);
         }
     }
 
@@ -366,7 +366,7 @@ bool IdeaVPC::updateBatteryID(OSDictionary *bat0, OSDictionary *bat1) {
             char ID1String[20];
             snprintf(ID1String, 20, "%04x %04x %04x %04x", batteryID1[0], batteryID1[1], batteryID1[2], batteryID1[3]);
             setPropertyString(bat1, "ID", ID1String);
-            AlwaysLog("Battery 1 ID %s", ID1String);
+            DebugLog("Battery 1 ID %s", ID1String);
         }
     }
     data->release();
@@ -403,6 +403,7 @@ bool IdeaVPC::updateBatteryInfo(OSDictionary *bat0, OSDictionary *bat1) {
         char temperature0[9];
         snprintf(temperature0, 9, "%d.%d℃", celsius / 10, celsius % 10);
         setPropertyString(bat0, "Temperature", temperature0);
+        DebugLog("Battery 0 temperature %s", temperature0);
 //        UInt16 fahrenheit = celsius * 9 / 5 + 320;
 //        snprintf(temperature0, 9, "%d.%d℉", fahrenheit / 10, fahrenheit % 10);
 //        setPropertyString(bat0, "Fahrenheit", temperature0);
@@ -412,12 +413,14 @@ bool IdeaVPC::updateBatteryInfo(OSDictionary *bat0, OSDictionary *bat1) {
         char date0[11];
         snprintf(date0, 11, "%4d/%02d/%02d", (bdata[8] >> 9) + 1980, (bdata[8] >> 5) & 0x0f, bdata[8] & 0x1f);
         setPropertyString(bat0, "Manufacture date", date0);
+        DebugLog("Battery 0 manufacture date %s", date0);
     }
     // B2DT
     if (bdata[9] != 0) {
         char date1[11];
         snprintf(date1, 11, "%4d/%02d/%02d", (bdata[9] >> 9) + 1980, (bdata[9] >> 5) & 0x0f, bdata[9] & 0x1f);
-        setPropertyString(bat0, "Manufacture date", date1);
+        setPropertyString(bat1, "Manufacture date", date1);
+        DebugLog("Battery 1 manufacture date %s", date1);
     }
     data->release();
     return true;
