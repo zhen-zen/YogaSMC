@@ -303,6 +303,7 @@ class YogaSMCPane : NSPreferencePane {
     }
 
     func awakeIdea(_ props: NSDictionary) {
+        FunctionKey.isHidden = false
         if let val = props["PrimeKeyType"] as? NSString {
             vFnKeyRadio.title = val as String
             if let val = props["FnlockMode"] as? Bool {
@@ -495,14 +496,20 @@ class YogaSMCPane : NSPreferencePane {
         switch props["IOClass"] as? NSString {
         case "IdeaVPC":
             vClass.stringValue = "Idea"
-//            TabView.removeTabViewItem(ThinkViewItem)
-            awakeThink(props)
-            FunctionKey.isHidden = false
             awakeIdea(props)
+            #if DEBUG
+                awakeThink(props)
+            #else
+                TabView.removeTabViewItem(ThinkViewItem)
+            #endif
         case "ThinkVPC":
             vClass.stringValue = "Think"
-            TabView.removeTabViewItem(IdeaViewItem)
             awakeThink(props)
+            #if DEBUG
+                awakeIdea(props)
+            #else
+                TabView.removeTabViewItem(IdeaViewItem)
+            #endif
         case "YogaVPC":
             vClass.stringValue = "Generic"
             TabView.removeTabViewItem(IdeaViewItem)
