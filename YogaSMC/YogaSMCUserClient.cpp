@@ -7,15 +7,14 @@
 //
 
 #include <IOKit/IOLib.h>
-#include "YogaSMCUserClient.hpp"
+#include "YogaSMCUserClient.h"
+#include "YogaSMCUserClientPrivate.hpp"
 
 OSDefineMetaClassAndStructors(YogaSMCUserClient, IOUserClient)
 // https://github.com/HelmutJ/CocoaSampleCode/blob/master/SimpleUserClient/SimpleUserClient.cpp
 IOExternalMethod *
 YogaSMCUserClient::getTargetAndMethodForIndex(IOService **target, UInt32 index)
 {
-    DebugLog("getTargetAndMethodForIndex (index=%u)", index);
-
     static const IOExternalMethod sMethods[kYSMCUCNumMethods] =
     {
         {    // kYSMCUCOpen
@@ -55,13 +54,12 @@ YogaSMCUserClient::getTargetAndMethodForIndex(IOService **target, UInt32 index)
 //        }
     };
 
-    if (index < (UInt32)kYSMCUCWrite)
-    {
+    if (index < (UInt32)kYSMCUCWrite) {
+        DebugLog("%s (index=%u)", __FUNCTION__, index);
         *target = this;
         return((IOExternalMethod *) &sMethods[index]);
-    }
-    else
-    {
+    } else {
+        AlwaysLog("%s not found (index=%u)", __FUNCTION__, index);
         *target = NULL;
         return(NULL);
     }
@@ -108,8 +106,7 @@ IOReturn YogaSMCUserClient::read(void *inStruct, void *outStruct, void *inCount,
     if (!(fProvider && input && inputSize && output && outputSizeP) ||
         (inputSize != sizeof(VPCReadInput)) ||
         (*outputSizeP != sizeof(VPCReadOutput)) ||
-        (input->count > kVPCUCBufSize))
-    {
+        (input->count > kVPCUCBufSize)) {
         AlwaysLog("%s invalid arguments", __FUNCTION__);
         return kIOReturnBadArgument;
     }

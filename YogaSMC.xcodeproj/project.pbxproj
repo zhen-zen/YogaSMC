@@ -8,8 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		6F05D7E2252E35A000471F57 /* YogaSMCUserClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F05D7E0252E35A000471F57 /* YogaSMCUserClient.cpp */; };
-		6F05D7E3252E35A000471F57 /* YogaSMCUserClient.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F05D7E1252E35A000471F57 /* YogaSMCUserClient.hpp */; };
-		6F05D7E7252E362600471F57 /* YogaSMCUserClient.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F05D7E1252E35A000471F57 /* YogaSMCUserClient.hpp */; };
+		6F05D7E3252E35A000471F57 /* YogaSMCUserClientPrivate.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F05D7E1252E35A000471F57 /* YogaSMCUserClientPrivate.hpp */; };
+		6F05D7E7252E362600471F57 /* YogaSMCUserClientPrivate.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F05D7E1252E35A000471F57 /* YogaSMCUserClientPrivate.hpp */; };
 		6F05D7EB252E362A00471F57 /* YogaSMCUserClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F05D7E0252E35A000471F57 /* YogaSMCUserClient.cpp */; };
 		6F08ACE824746B8B00681A63 /* YogaWMI.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F08ACE724746B8B00681A63 /* YogaWMI.hpp */; };
 		6F08ACEA24746B8B00681A63 /* YogaWMI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F08ACE924746B8B00681A63 /* YogaWMI.cpp */; };
@@ -31,6 +31,9 @@
 		6F7B0EEA25303D87001616D6 /* libkmod.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F05D7F125300CDE00471F57 /* libkmod.a */; };
 		6F7B5CFF24FBC3CC00AA80FF /* ThinkSMC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F7B5CFD24FBC3CC00AA80FF /* ThinkSMC.cpp */; };
 		6F7B5D0024FBC3CC00AA80FF /* ThinkSMC.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F7B5CFE24FBC3CC00AA80FF /* ThinkSMC.hpp */; };
+		6F81FC4425317B1200CFEDF5 /* YogaSMCUserClient.h in Headers */ = {isa = PBXBuildFile; fileRef = 6F81FC4025317AE100CFEDF5 /* YogaSMCUserClient.h */; };
+		6F81FC4825317B1300CFEDF5 /* YogaSMCUserClient.h in Headers */ = {isa = PBXBuildFile; fileRef = 6F81FC4025317AE100CFEDF5 /* YogaSMCUserClient.h */; };
+		6F81FC4C25317B2400CFEDF5 /* YogaSMCUserClient.h in Headers */ = {isa = PBXBuildFile; fileRef = 6F81FC4025317AE100CFEDF5 /* YogaSMCUserClient.h */; };
 		6F83587324D0C2B50031512F /* KeyImplementations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F83587124D0C2B50031512F /* KeyImplementations.cpp */; };
 		6F83587424D0C2B50031512F /* KeyImplementations.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F83587224D0C2B50031512F /* KeyImplementations.hpp */; };
 		6F8674CD24A876E000DC2FDF /* ThinkWMI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F8674CB24A876E000DC2FDF /* ThinkWMI.cpp */; };
@@ -108,7 +111,7 @@
 
 /* Begin PBXFileReference section */
 		6F05D7E0252E35A000471F57 /* YogaSMCUserClient.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = YogaSMCUserClient.cpp; sourceTree = "<group>"; };
-		6F05D7E1252E35A000471F57 /* YogaSMCUserClient.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = YogaSMCUserClient.hpp; sourceTree = "<group>"; };
+		6F05D7E1252E35A000471F57 /* YogaSMCUserClientPrivate.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = YogaSMCUserClientPrivate.hpp; sourceTree = "<group>"; };
 		6F05D7F125300CDE00471F57 /* libkmod.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libkmod.a; path = MacKernelSDK/Library/x86_64/libkmod.a; sourceTree = "<group>"; };
 		6F08ACE424746B8B00681A63 /* YogaSMC.kext */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = YogaSMC.kext; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F08ACE724746B8B00681A63 /* YogaWMI.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = YogaWMI.hpp; sourceTree = "<group>"; };
@@ -133,6 +136,7 @@
 		6F77A23724F4FE59007A127B /* IdeaSMC.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IdeaSMC.hpp; sourceTree = "<group>"; };
 		6F7B5CFD24FBC3CC00AA80FF /* ThinkSMC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ThinkSMC.cpp; sourceTree = "<group>"; };
 		6F7B5CFE24FBC3CC00AA80FF /* ThinkSMC.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ThinkSMC.hpp; sourceTree = "<group>"; };
+		6F81FC4025317AE100CFEDF5 /* YogaSMCUserClient.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = YogaSMCUserClient.h; sourceTree = "<group>"; };
 		6F83586424D0BFFD0031512F /* Headers */ = {isa = PBXFileReference; lastKnownFileType = text; name = Headers; path = Lilu.kext/Contents/Resources/Headers; sourceTree = SOURCE_ROOT; };
 		6F83586F24D0C0C90031512F /* VirtualSMCSDK */ = {isa = PBXFileReference; lastKnownFileType = text; name = VirtualSMCSDK; path = VirtualSMC.kext/Contents/Resources/VirtualSMCSDK; sourceTree = SOURCE_ROOT; };
 		6F83587124D0C2B50031512F /* KeyImplementations.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = KeyImplementations.cpp; sourceTree = "<group>"; };
@@ -222,7 +226,8 @@
 				6FCF7F582474B74800A82B13 /* WMI.cpp */,
 				6FD2BB46247721040018EA36 /* bmfdec.h */,
 				6FD2BB47247721040018EA36 /* bmfdec.c */,
-				6F05D7E1252E35A000471F57 /* YogaSMCUserClient.hpp */,
+				6F05D7E1252E35A000471F57 /* YogaSMCUserClientPrivate.hpp */,
+				6F81FC4025317AE100CFEDF5 /* YogaSMCUserClient.h */,
 				6F05D7E0252E35A000471F57 /* YogaSMCUserClient.cpp */,
 				6FD2BB8C247B37A20018EA36 /* bmfparser.hpp */,
 				6FD2BB8B247B37A20018EA36 /* bmfparser.cpp */,
@@ -327,7 +332,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6F8674CE24A876E000DC2FDF /* ThinkWMI.hpp in Headers */,
-				6F05D7E3252E35A000471F57 /* YogaSMCUserClient.hpp in Headers */,
+				6F05D7E3252E35A000471F57 /* YogaSMCUserClientPrivate.hpp in Headers */,
 				6FCF7F592474B74800A82B13 /* WMI.h in Headers */,
 				6F96A30D24B93D25006562EC /* YogaVPC.hpp in Headers */,
 				6FD2BB8E247B37A20018EA36 /* bmfparser.hpp in Headers */,
@@ -336,6 +341,7 @@
 				6F08ACE824746B8B00681A63 /* YogaWMI.hpp in Headers */,
 				6F6CEDA524BC14C2004D553F /* ThinkVPC.hpp in Headers */,
 				6F87BF8124D26A5D00D64375 /* YogaSMC.hpp in Headers */,
+				6F81FC4425317B1200CFEDF5 /* YogaSMCUserClient.h in Headers */,
 				6F48676424A293A0003AD4CA /* IdeaWMI.hpp in Headers */,
 				6F77A23924F4FE59007A127B /* IdeaSMC.hpp in Headers */,
 				6F7B5D0024FBC3CC00AA80FF /* ThinkSMC.hpp in Headers */,
@@ -348,6 +354,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6F81FC4C25317B2400CFEDF5 /* YogaSMCUserClient.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -356,7 +363,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				6F88067824EB575F00ACD6C8 /* ThinkWMI.hpp in Headers */,
-				6F05D7E7252E362600471F57 /* YogaSMCUserClient.hpp in Headers */,
+				6F05D7E7252E362600471F57 /* YogaSMCUserClientPrivate.hpp in Headers */,
+				6F81FC4825317B1300CFEDF5 /* YogaSMCUserClient.h in Headers */,
 				6F88067924EB575F00ACD6C8 /* WMI.h in Headers */,
 				6F88067A24EB575F00ACD6C8 /* YogaVPC.hpp in Headers */,
 				6F88067B24EB575F00ACD6C8 /* bmfparser.hpp in Headers */,
@@ -803,7 +811,7 @@
 				OTHER_SWIFT_FLAGS = "-D DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = org.zhen.YogaSMCPane;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx10.15;
+				SWIFT_OBJC_BRIDGING_HEADER = YogaSMC/YogaSMCUserClient.h;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				WRAPPER_EXTENSION = prefPane;
@@ -828,7 +836,7 @@
 				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = org.zhen.YogaSMCPane;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx10.15;
+				SWIFT_OBJC_BRIDGING_HEADER = YogaSMC/YogaSMCUserClient.h;
 				SWIFT_VERSION = 5.0;
 				WRAPPER_EXTENSION = prefPane;
 			};
