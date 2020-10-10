@@ -106,6 +106,8 @@
 			<integer>100</integer>
 			<key>IOProviderClass</key>
 			<string>IOACPIPlatformDevice</string>
+			<key>IOUserClientClass</key>
+			<string>YogaSMCUserClient</string>
 		</dict>
 		<key>ThinkWMI</key>
 		<dict>

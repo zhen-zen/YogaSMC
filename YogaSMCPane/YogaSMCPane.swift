@@ -289,6 +289,25 @@ class YogaSMCPane : NSPreferencePane {
         // nothing
     }
 
+    func connectUserClientDemo() {
+        var connect : io_connect_t = 0;
+        if kIOReturnSuccess == IOServiceOpen(io_service, mach_task_self_, 0, &connect),
+           connect != 0{
+            if kIOReturnSuccess == IOConnectCallScalarMethod(connect, UInt32(kYSMCUCOpen), nil, 0, nil, nil) {
+                var input = VPCReadInput(mode: UInt8(kVPCUCRECB), addr: 0x60, count: 4)
+                var output = VPCReadOutput()
+                var outputCount = MemoryLayout<VPCReadOutput>.size
+                _ = IOConnectCallStructMethod(connect, UInt32(kYSMCUCRead), &input, MemoryLayout<VPCReadInput>.size, &output, &outputCount)
+                _ = IOConnectCallScalarMethod(connect, UInt32(kYSMCUCClose), nil, 0, nil, nil)
+                if outputCount == MemoryLayout<VPCReadOutput>.size && output.count == 4 {
+                    let prompt = String(format:"RE1B @ 0x60 %02x %02x %02x %02x", output.buf.0, output.buf.1, output.buf.2, output.buf.3)
+                    OSD(prompt)
+                }
+                _ = IOServiceClose(connect)
+            }
+        }
+    }
+
     func updateDYTC(_ dict: NSDictionary) {
         if let ver = dict["Revision"] as? NSNumber,
            let subver = dict["SubRevision"] as? NSNumber {
@@ -535,5 +554,6 @@ class YogaSMCPane : NSPreferencePane {
             TabView.removeTabViewItem(IdeaViewItem)
             TabView.removeTabViewItem(ThinkViewItem)
         }
+//        connectUserClientDemo()
     }
 }
