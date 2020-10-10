@@ -10,6 +10,7 @@ import AppKit
 import Foundation
 import IOKit
 import PreferencePanes
+import os.log
 
 let DYTCCommand = ["L", "M", "H"]
 let thinkLEDCommand = [0, 0x80, 0xA0, 0xC0]
@@ -286,6 +287,7 @@ class YogaSMCPane : NSPreferencePane {
 //        let rvalue = UserDefaults.standard.string(forKey: "testKey")
 
         super.mainViewDidLoad()
+        os_log("mainViewDidLoad", type: .info)
         // nothing
     }
 
@@ -427,12 +429,12 @@ class YogaSMCPane : NSPreferencePane {
         // from https://ffried.codes/2018/01/20/the-internals-of-the-macos-hud/
         let conn = NSXPCConnection(machServiceName: "com.apple.OSDUIHelper", options: [])
         conn.remoteObjectInterface = NSXPCInterface(with: OSDUIHelperProtocol.self)
-        conn.interruptionHandler = { print("Interrupted!") }
-        conn.invalidationHandler = { print("Invalidated!") }
+        conn.interruptionHandler = { os_log("Interrupted!", type: .debug) }
+        conn.invalidationHandler = { os_log("Invalidated!", type: .error) }
         conn.resume()
 
-        let target = conn.remoteObjectProxyWithErrorHandler { print("Failed: \($0)") }
-        guard let helper = target as? OSDUIHelperProtocol else { return } //fatalError("Wrong type: \(target)") }
+        let target = conn.remoteObjectProxyWithErrorHandler { os_log("Failed: %@", type: .error, $0 as CVarArg) }
+        guard let helper = target as? OSDUIHelperProtocol else { os_log("Wrong type %@", type: .fault, target as! CVarArg); return }
 
         helper.showImageAtPath("/System/Library/CoreServices/OSDUIHelper.app/Contents/Resources/kBright.pdf", onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 2000, withText: prompt as NSString)
     }
