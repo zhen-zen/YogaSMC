@@ -21,6 +21,7 @@
 #include "YogaSMC.hpp"
 #endif
 
+class YogaSMCUserClient;
 class YogaVPC : public IOService
 {
   typedef IOService super;
@@ -271,11 +272,11 @@ protected:
      *  Wrapper for WE1B
      *
      *  @param offset EC field offset
-     *  @param result EC field value
+     *  @param value EC field value
      *
      *  @return kIOReturnSuccess on success
      */
-    IOReturn method_we1b(UInt32 offset, UInt32 result);
+    IOReturn method_we1b(UInt32 offset, UInt32 value);
 
     /**
      *  Read custom field
@@ -297,6 +298,7 @@ public:
     virtual IOReturn setProperties(OSObject* props) APPLE_KEXT_OVERRIDE;
     virtual IOReturn message(UInt32 type, IOService *provider, void *argument) APPLE_KEXT_OVERRIDE;
     virtual IOReturn setPowerState(unsigned long powerState, IOService * whatDevice) APPLE_KEXT_OVERRIDE;
+    friend class YogaSMCUserClient;
 };
 
 #endif /* YogaVPC_hpp */
