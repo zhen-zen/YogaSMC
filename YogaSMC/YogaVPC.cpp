@@ -83,7 +83,6 @@ bool YogaVPC::initVPC() {
     if (ec->validateObject(readECOneByte) == kIOReturnSuccess &&
         ec->validateObject(readECBytes) == kIOReturnSuccess) {
         ECAccessCap |= BIT(0);
-        ECAccessLock = IOSimpleLockAlloc();
         if (ec->validateObject(writeECOneByte) == kIOReturnSuccess) {
             setProperty("EC Capability", "RW");
             ECAccessCap |= BIT(1);
@@ -121,8 +120,6 @@ bool YogaVPC::exitVPC() {
         AlwaysLog("Disabling clamshell mode");
         toggleClamshell();
     }
-    if (ECAccessLock)
-        IOSimpleLockFree(ECAccessLock);
     return true;
 }
 
@@ -571,9 +568,7 @@ IOReturn YogaVPC::method_re1b(UInt32 offset, UInt32 *result) {
         OSNumber::withNumber(offset, 32)
     };
 
-    IOSimpleLockLock(ECAccessLock);
     IOReturn ret = ec->evaluateInteger(readECOneByte, result, params, 1);
-    IOSimpleLockUnlock(ECAccessLock);
     if (ret != kIOReturnSuccess)
         AlwaysLog("read 0x%02x failed", offset);
 
@@ -592,9 +587,7 @@ IOReturn YogaVPC::method_recb(UInt32 offset, UInt32 size, OSData **data) {
     };
     OSObject* result;
 
-    IOSimpleLockLock(ECAccessLock);
     IOReturn ret = ec->evaluateObject(readECBytes, &result, params, 2);
-    IOSimpleLockUnlock(ECAccessLock);
     if (ret != kIOReturnSuccess || !(*data = OSDynamicCast(OSData, result))) {
         AlwaysLog("read %d bytes @ 0x%02x failed", size, offset);
         OSSafeReleaseNULL(result);
@@ -620,9 +613,7 @@ IOReturn YogaVPC::method_we1b(UInt32 offset, UInt32 value) {
     };
     UInt32 result;
 
-    IOSimpleLockLock(ECAccessLock);
     IOReturn ret = ec->evaluateInteger(writeECOneByte, &result, params, 2);
-    IOSimpleLockUnlock(ECAccessLock);
     if (ret != kIOReturnSuccess)
         AlwaysLog("write 0x%02x @ 0x%02x failed", value, offset);
 

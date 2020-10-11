@@ -248,11 +248,6 @@ protected:
     UInt8 ECAccessCap {0};
 
     /**
-     *  EC access lock
-     */
-    IOSimpleLock *ECAccessLock {nullptr};
-
-    /**
      *  Wrapper for RE1B
      *
      *  @param offset EC field offset
