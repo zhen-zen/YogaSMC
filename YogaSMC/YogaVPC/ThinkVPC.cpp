@@ -207,6 +207,7 @@ bool ThinkVPC::initVPC() {
     if (!backlightCap)
         setProperty(backlightPrompt, "unsupported");
 
+    setProperty(autoBacklightPrompt, automaticBacklightMode, 8);
     return true;
 }
 
