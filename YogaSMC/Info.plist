@@ -100,8 +100,17 @@
 			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 			<key>IOClass</key>
 			<string>ThinkVPC</string>
-			<key>IONameMatch</key>
-			<string>LEN0268</string>
+			<key>IOPropertyMatch</key>
+			<array>
+				<dict>
+					<key>name</key>
+					<string>LEN0268</string>
+				</dict>
+				<dict>
+					<key>name</key>
+					<string>LEN0068</string>
+				</dict>
+			</array>
 			<key>IOProbeScore</key>
 			<integer>100</integer>
 			<key>IOProviderClass</key>
