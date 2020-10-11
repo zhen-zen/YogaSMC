@@ -451,12 +451,11 @@ class YogaSMCPane : NSPreferencePane {
                 var input : UInt64 = 0x84
                 var outputSize = 2;
                 var output : [UInt8] = Array(repeating: 0, count: 2)
-                _ = IOConnectCallMethod(connect, UInt32(kYSMCUCReadEC), &input, 1, nil, 0, nil, nil, &output, &outputSize)
-                _ = IOConnectCallScalarMethod(connect, UInt32(kYSMCUCClose), nil, 0, nil, nil)
-                if outputSize == 2 {
+                if kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadEC), &input, 1, nil, 0, nil, nil, &output, &outputSize),
+                   outputSize == 2 {
                     vFanSpeed.intValue = Int32(output[0]) | Int32(output[1]) << 8
                 }
-                _ = IOServiceClose(connect)
+                IOServiceClose(connect)
             }
         }
     }

@@ -98,59 +98,7 @@ IOReturn YogaSMCUserClient::userClientClose(void) {
 }
 
 IOReturn YogaSMCUserClient::read(void *inStruct, void *outStruct, void *inCount, void *outCount, void *p5, void *p6) {
-    IOByteCount inputSize, *outputSizeP;
-    VPCReadInput *input;
-    VPCReadOutput *output;
-
-    if (!fProvider->isOpen(this))
-        return kIOReturnNotReady;
-
-    input        = (VPCReadInput *)inStruct;
-    inputSize    = (IOByteCount)inCount;
-    output       = (VPCReadOutput *)outStruct;
-    outputSizeP  = (IOByteCount *)outCount;
-
-    if (!(fProvider && input && inputSize && output && outputSizeP) ||
-        (inputSize != sizeof(VPCReadInput)) ||
-        (*outputSizeP != sizeof(VPCReadOutput)) ||
-        (input->count > kVPCUCBufSize)) {
-        AlwaysLog("%s invalid arguments", __FUNCTION__);
-        return kIOReturnBadArgument;
-    }
-
-    switch (input->mode) {
-        case kVPCUCDumbMode:
-            DebugLog("%s kVPCUCDumbMode", __FUNCTION__);
-            break;
-        case kVPCUCRE1B:
-            DebugLog("%s kVPCUCRE1B", __FUNCTION__);
-            if (input->count != 1)
-                return kIOReturnBadArgument;
-            if (fProvider->method_re1b(input->addr, (UInt32 *)(output->buf)) != kIOReturnSuccess)
-                return kIOReturnIOError;
-            output->count = 1;
-            break;
-
-        case kVPCUCRECB:
-            DebugLog("%s kVPCUCRECB", __FUNCTION__);
-            if (input->count > kVPCUCBufSize)
-                return kIOReturnBadArgument;
-            OSData *result;
-            if (fProvider->method_recb(input->addr, input->count, &result) != kIOReturnSuccess)
-                return kIOReturnIOError;
-            if (result->getLength() == input->count) {
-                const UInt8* data = reinterpret_cast<const UInt8 *>(result->getBytesNoCopy());
-                memcpy(output->buf, data, result->getLength());
-            }
-            output->count = result->getLength();
-            result->release();
-            break;
-
-        default:
-            AlwaysLog("%s invalid mode", __FUNCTION__);
-            return kIOReturnBadArgument;
-            break;
-    }
+    AlwaysLog("%s temporary deprecated", __FUNCTION__);
     return kIOReturnSuccess;
 }
 
