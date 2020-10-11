@@ -243,9 +243,14 @@ protected:
     bool setDYTC(int perfmode);
 
     /**
-     *  EC read capability, will be update on init
+     *  EC access capability, will be update on init
      */
-    bool ECReadCap {false};
+    UInt8 ECAccessCap {0};
+
+    /**
+     *  EC access lock
+     */
+    IOSimpleLock *ECAccessLock {nullptr};
 
     /**
      *  Wrapper for RE1B

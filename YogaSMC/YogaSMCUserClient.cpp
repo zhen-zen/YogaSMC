@@ -82,7 +82,7 @@ IOReturn YogaSMCUserClient::userClientClose(void) {
         AlwaysLog("%s kIOReturnNotAttached", __FUNCTION__);
         return kIOReturnNotAttached;
     } else if (!fProvider->isOpen(this)) {
-        AlwaysLog("%s kIOReturnNotOpen", __FUNCTION__);
+        DebugLog("%s kIOReturnNotOpen", __FUNCTION__);
         return kIOReturnNotOpen;
     }
     fProvider->close(this);

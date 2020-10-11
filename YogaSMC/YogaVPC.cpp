@@ -82,11 +82,14 @@ bool YogaVPC::initVPC() {
 
     if (ec->validateObject(readECOneByte) == kIOReturnSuccess &&
         ec->validateObject(readECBytes) == kIOReturnSuccess) {
-        ECReadCap = true;
-        if (ec->validateObject(writeECOneByte) == kIOReturnSuccess)
+        ECAccessCap |= BIT(0);
+        ECAccessLock = IOSimpleLockAlloc();
+        if (ec->validateObject(writeECOneByte) == kIOReturnSuccess) {
             setProperty("EC Capability", "RW");
-        else
+            ECAccessCap |= BIT(1);
+        } else {
             setProperty("EC Capability", "RO");
+        }
     } else {
         setProperty("EC Capability", "False");
     }
@@ -118,6 +121,8 @@ bool YogaVPC::exitVPC() {
         AlwaysLog("Disabling clamshell mode");
         toggleClamshell();
     }
+    if (ECAccessLock)
+        IOSimpleLockFree(ECAccessLock);
     return true;
 }
 
@@ -187,7 +192,7 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
                     setProperty(autoBacklightPrompt, automaticBacklightMode, 8);
                 }
             } else if (key->isEqualTo("ReadECOffset")) {
-                if (!ECReadCap) {
+                if (!(ECAccessCap & BIT(0))) {
                     AlwaysLog("%s not supported", "EC Read");
                     continue;
                 }
@@ -559,11 +564,16 @@ IOReturn YogaVPC::readECName(const char* name, UInt32 *result) {
 }
 
 IOReturn YogaVPC::method_re1b(UInt32 offset, UInt32 *result) {
+    if (!(ECAccessCap & BIT(0)))
+        return kIOReturnUnsupported;
+
     OSObject* params[1] = {
         OSNumber::withNumber(offset, 32)
     };
 
+    IOSimpleLockLock(ECAccessLock);
     IOReturn ret = ec->evaluateInteger(readECOneByte, result, params, 1);
+    IOSimpleLockUnlock(ECAccessLock);
     if (ret != kIOReturnSuccess)
         AlwaysLog("read 0x%02x failed", offset);
 
@@ -571,7 +581,7 @@ IOReturn YogaVPC::method_re1b(UInt32 offset, UInt32 *result) {
 }
 
 IOReturn YogaVPC::method_recb(UInt32 offset, UInt32 size, OSData **data) {
-    if (!ECReadCap)
+    if (!(ECAccessCap & BIT(0)))
         return kIOReturnUnsupported;
 
     // Arg0 - offset in bytes from zero-based EC
@@ -582,7 +592,10 @@ IOReturn YogaVPC::method_recb(UInt32 offset, UInt32 size, OSData **data) {
     };
     OSObject* result;
 
-    if (ec->evaluateObject(readECBytes, &result, params, 2) != kIOReturnSuccess || !(*data = OSDynamicCast(OSData, result))) {
+    IOSimpleLockLock(ECAccessLock);
+    IOReturn ret = ec->evaluateObject(readECBytes, &result, params, 2);
+    IOSimpleLockUnlock(ECAccessLock);
+    if (ret != kIOReturnSuccess || !(*data = OSDynamicCast(OSData, result))) {
         AlwaysLog("read %d bytes @ 0x%02x failed", size, offset);
         OSSafeReleaseNULL(result);
         return kIOReturnInvalid;
@@ -594,11 +607,11 @@ IOReturn YogaVPC::method_recb(UInt32 offset, UInt32 size, OSData **data) {
         return kIOReturnNoBandwidth;
     }
 
-    return kIOReturnSuccess;
+    return ret;
 }
 
 IOReturn YogaVPC::method_we1b(UInt32 offset, UInt32 value) {
-    if (!ECReadCap)
+    if (!(ECAccessCap & BIT(1)))
         return kIOReturnUnsupported;
 
     OSObject* params[2] = {
@@ -607,7 +620,9 @@ IOReturn YogaVPC::method_we1b(UInt32 offset, UInt32 value) {
     };
     UInt32 result;
 
+    IOSimpleLockLock(ECAccessLock);
     IOReturn ret = ec->evaluateInteger(writeECOneByte, &result, params, 2);
+    IOSimpleLockUnlock(ECAccessLock);
     if (ret != kIOReturnSuccess)
         AlwaysLog("write 0x%02x @ 0x%02x failed", value, offset);
 
