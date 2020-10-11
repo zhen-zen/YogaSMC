@@ -45,6 +45,13 @@ YogaSMCUserClient::getTargetAndMethodForIndex(IOService **target, UInt32 index)
             1,
             kIOUCVariableStructureSize
         },
+        {    // kYSMCUCWriteEC
+            NULL,    // IOService * determined at runtime below
+            (IOMethod) &YogaSMCUserClient::writeEC,
+            kIOUCScalarIStructI,
+            1,
+            kIOUCVariableStructureSize
+        },
 //        {    // kYSMCUCWrite
 //            NULL,    // IOService * determined at runtime below
 //            (IOMethod) &YogaSMCUserClient::write,
@@ -116,17 +123,19 @@ IOReturn YogaSMCUserClient::readEC(UInt64 offset, UInt8* output, IOByteCount *ou
         return kIOReturnBadArgument;
     }
 
-    DebugLog("%s", __FUNCTION__);
-
     if (*outputSizeP == 1) {
         UInt32 result;
-        if (fProvider->method_re1b(UInt32(offset), &result) != kIOReturnSuccess)
+        if (fProvider->method_re1b(UInt32(offset), &result) != kIOReturnSuccess) {
+            AlwaysLog("%s re1b failed", __FUNCTION__);
             return kIOReturnIOError;
+        }
         *output = UInt8(result);
     } else {
         OSData *result;
-        if (fProvider->method_recb(UInt32(offset), UInt32(*outputSizeP), &result) != kIOReturnSuccess)
+        if (fProvider->method_recb(UInt32(offset), UInt32(*outputSizeP), &result) != kIOReturnSuccess) {
+            AlwaysLog("%s recb failed", __FUNCTION__);
             return kIOReturnIOError;
+        }
         if (result->getLength() == *outputSizeP) {
             const UInt8* data = reinterpret_cast<const UInt8 *>(result->getBytesNoCopy());
             memcpy(output, data, result->getLength());
@@ -135,6 +144,33 @@ IOReturn YogaSMCUserClient::readEC(UInt64 offset, UInt8* output, IOByteCount *ou
         }
         result->release();
     }
+    DebugLog("%s", __FUNCTION__);
+    return kIOReturnSuccess;
+}
+
+IOReturn YogaSMCUserClient::writeEC(UInt64 offset, UInt8* input, IOByteCount *inputSizeP) {
+    if (!fProvider->isOpen(this))
+        return kIOReturnNotReady;
+
+    if (!(fProvider && input && inputSizeP)) {
+        AlwaysLog("%s invalid arguments", __FUNCTION__);
+        return kIOReturnBadArgument;
+    }
+
+    if (offset + *inputSizeP > 0x100) {
+        AlwaysLog("%s invalid range", __FUNCTION__);
+        return kIOReturnBadArgument;
+    }
+
+    if (*inputSizeP != 1) {
+        AlwaysLog("%s bulk write is not supported yet", __FUNCTION__);
+    } else {
+        if (fProvider->method_we1b(UInt32(offset), UInt32(input[0])) != kIOReturnSuccess) {
+            AlwaysLog("%s we1b failed", __FUNCTION__);
+            return kIOReturnIOError;
+        }
+    }
+    DebugLog("%s", __FUNCTION__);
     return kIOReturnSuccess;
 }
 
