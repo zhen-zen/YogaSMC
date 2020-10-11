@@ -448,13 +448,13 @@ class YogaSMCPane : NSPreferencePane {
         if kIOReturnSuccess == IOServiceOpen(io_service, mach_task_self_, 0, &connect),
            connect != 0{
             if kIOReturnSuccess == IOConnectCallScalarMethod(connect, UInt32(kYSMCUCOpen), nil, 0, nil, nil) {
-                var input = VPCReadInput(mode: UInt8(kVPCUCRECB), addr: 0x84, count: 2)
-                var output = VPCReadOutput()
-                var outputCount = MemoryLayout<VPCReadOutput>.size
-                _ = IOConnectCallStructMethod(connect, UInt32(kYSMCUCRead), &input, MemoryLayout<VPCReadInput>.size, &output, &outputCount)
+                var input : UInt64 = 0x84
+                var outputSize = 2;
+                var output : [UInt8] = Array(repeating: 0, count: 2)
+                _ = IOConnectCallMethod(connect, UInt32(kYSMCUCReadEC), &input, 1, nil, 0, nil, nil, &output, &outputSize)
                 _ = IOConnectCallScalarMethod(connect, UInt32(kYSMCUCClose), nil, 0, nil, nil)
-                if outputCount == MemoryLayout<VPCReadOutput>.size && output.count == 2 {
-                    vFanSpeed.intValue = Int32(output.buf.0) | Int32(output.buf.1) << 8
+                if outputSize == 2 {
+                    vFanSpeed.intValue = Int32(output[0]) | Int32(output[1]) << 8
                 }
                 _ = IOServiceClose(connect)
             }

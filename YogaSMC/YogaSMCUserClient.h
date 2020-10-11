@@ -40,6 +40,7 @@ enum {
     kYSMCUCOpen,            // ScalarIScalarO
     kYSMCUCClose,        // ScalarIScalarO
     kYSMCUCRead,            // StructIStructO
+    kYSMCUCReadEC,        // ScalarIStructO
     kYSMCUCWrite,        // StructIStructO
     kYSMCUCNotify,            // StructIStructO
     kYSMCUCNumMethods

@@ -38,6 +38,13 @@ YogaSMCUserClient::getTargetAndMethodForIndex(IOService **target, UInt32 index)
             sizeof(VPCReadInput),
             sizeof(VPCReadOutput)
         },
+        {    // kYSMCUCReadEC
+            NULL,    // IOService * determined at runtime below
+            (IOMethod) &YogaSMCUserClient::readEC,
+            kIOUCScalarIStructO,
+            1,
+            kIOUCVariableStructureSize
+        },
 //        {    // kYSMCUCWrite
 //            NULL,    // IOService * determined at runtime below
 //            (IOMethod) &YogaSMCUserClient::write,
@@ -136,12 +143,49 @@ IOReturn YogaSMCUserClient::read(void *inStruct, void *outStruct, void *inCount,
                 memcpy(output->buf, data, result->getLength());
             }
             output->count = result->getLength();
+            result->release();
             break;
 
         default:
             AlwaysLog("%s invalid mode", __FUNCTION__);
             return kIOReturnBadArgument;
             break;
+    }
+    return kIOReturnSuccess;
+}
+
+IOReturn YogaSMCUserClient::readEC(UInt64 offset, UInt8* output, IOByteCount *outputSizeP) {
+    if (!fProvider->isOpen(this))
+        return kIOReturnNotReady;
+
+    if (!(fProvider && output && outputSizeP)) {
+        AlwaysLog("%s invalid arguments", __FUNCTION__);
+        return kIOReturnBadArgument;
+    }
+
+    if (offset + *outputSizeP > 0x100) {
+        AlwaysLog("%s invalid range", __FUNCTION__);
+        return kIOReturnBadArgument;
+    }
+
+    DebugLog("%s", __FUNCTION__);
+
+    if (*outputSizeP == 1) {
+        UInt32 result;
+        if (fProvider->method_re1b(UInt32(offset), &result) != kIOReturnSuccess)
+            return kIOReturnIOError;
+        *output = UInt8(result);
+    } else {
+        OSData *result;
+        if (fProvider->method_recb(UInt32(offset), UInt32(*outputSizeP), &result) != kIOReturnSuccess)
+            return kIOReturnIOError;
+        if (result->getLength() == *outputSizeP) {
+            const UInt8* data = reinterpret_cast<const UInt8 *>(result->getBytesNoCopy());
+            memcpy(output, data, result->getLength());
+        } else {
+            *outputSizeP = 0;
+        }
+        result->release();
     }
     return kIOReturnSuccess;
 }

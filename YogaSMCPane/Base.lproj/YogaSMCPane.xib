@@ -937,7 +937,7 @@
                                             </textFieldCell>
                                         </textField>
                                         <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="uDk-6Z-gTN" userLabel="vFanSpeed">
-                                            <rect key="frame" x="376" y="197" width="37" height="16"/>
+                                            <rect key="frame" x="365" y="197" width="48" height="16"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" placeholderString="0" id="fTl-dl-YbK">
                                                 <font key="font" metaFont="system"/>

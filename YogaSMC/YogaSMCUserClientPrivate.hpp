@@ -35,6 +35,7 @@ public:
     IOReturn userClientOpen(void);
     IOReturn userClientClose(void);
     IOReturn read( void *inStruct, void *outStruct, void *inCount, void *outCount, void *p5, void *p6 );
+    IOReturn readEC(UInt64 offset, UInt8 *output, IOByteCount *outputSizeP);
 //    IOReturn write( void *inStruct, void *outStruct, void *inCount, void *outCount, void *p5, void *p6 );
 //    IOReturn notify( void *inStruct, void *inCount, void *p3, void *p4, void *p5, void *p6 );
 
