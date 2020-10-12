@@ -9,7 +9,7 @@
 import Cocoa
 import os.log
 
-@main
+@NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
     var io_service : io_service_t = 0
     var connect : io_connect_t = 0;
