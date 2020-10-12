@@ -50,8 +50,10 @@ jobs:
         build-settings: -target BuildAll
         # The action to perform (e.g. build, test, ...).
         action: build # default is test
-    - name: build DMG
-      run: brew install create-dmg && create-dmg build/Debug/YogaSMCNC.dmg build/Debug/
+    - name: move files
+      run: mkdir build/Debug-App; mkdir build/Release-App; mv build/Debug/YogaSMCNC.app build/Debug-App/; mv build/Debug/YogaSMCPane.prefPane build/Debug-App/; mv build/Release/YogaSMCNC.app build/Release-App/; mv build/Release/YogaSMCPane.prefPane build/Release-App/
+    - name: build DMG 
+      run: brew install create-dmg && create-dmg build/YogaSMC-App-Debug.dmg build/Debug-App/ && create-dmg build/YogaSMC-App-Release.dmg build/Release-App/
     - uses: actions/upload-artifact@v2
       with:
         name: YogaSMC-Debug
@@ -60,11 +62,19 @@ jobs:
           !build/Debug/*.swiftmodule
     - uses: actions/upload-artifact@v2
       with:
+        name: YogaSMC-App-Debug
+        path: build/YogaSMC-App-Debug.dmg
+    - uses: actions/upload-artifact@v2
+      with:
         name: YogaSMC-Release
         path: |
           build/Release/
           !build/Release/*.dSYM
           !build/Release/*.swiftmodule
+    - uses: actions/upload-artifact@v2
+      with:
+        name: YogaSMC-App-Release
+        path: build/YogaSMC-App-Release.dmg
     - uses: actions/upload-artifact@v2
       with:
         name: YogaSMC-Release-with-dSYM
