@@ -35,7 +35,7 @@
 		6F7B5CFF24FBC3CC00AA80FF /* ThinkSMC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F7B5CFD24FBC3CC00AA80FF /* ThinkSMC.cpp */; };
 		6F7B5D0024FBC3CC00AA80FF /* ThinkSMC.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F7B5CFE24FBC3CC00AA80FF /* ThinkSMC.hpp */; };
 		6F7D484325344C25004074C7 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F7D484225344C25004074C7 /* main.swift */; };
-		6F7D486F25344D66004074C7 /* YogaSMCNCHelper.app in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6F7D484025344C25004074C7 /* YogaSMCNCHelper.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		6F7D486F25344D66004074C7 /* YogaSMCNCHelper.app in Copy Login Item */ = {isa = PBXBuildFile; fileRef = 6F7D484025344C25004074C7 /* YogaSMCNCHelper.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		6F7D487B253465DB004074C7 /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F7D487A253465DB004074C7 /* ServiceManagement.framework */; };
 		6F7D488325346671004074C7 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F1C70A3251473E7007D1DFC /* AppKit.framework */; };
 		6F7D488425346677004074C7 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F1C70A3251473E7007D1DFC /* AppKit.framework */; };
@@ -128,14 +128,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		6F7D486E25344D48004074C7 /* CopyFiles */ = {
+		6F7D486E25344D48004074C7 /* Copy Login Item */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = Contents/Library/LoginItems;
 			dstSubfolderSpec = 1;
 			files = (
-				6F7D486F25344D66004074C7 /* YogaSMCNCHelper.app in CopyFiles */,
+				6F7D486F25344D66004074C7 /* YogaSMCNCHelper.app in Copy Login Item */,
 			);
+			name = "Copy Login Item";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -507,7 +508,8 @@
 				6F0A987325343357002F9F65 /* Sources */,
 				6F0A987425343357002F9F65 /* Frameworks */,
 				6F0A987525343357002F9F65 /* Resources */,
-				6F7D486E25344D48004074C7 /* CopyFiles */,
+				6F7D486E25344D48004074C7 /* Copy Login Item */,
+				6F7D48B525351356004074C7 /* Merge Framework */,
 			);
 			buildRules = (
 			);
@@ -649,6 +651,27 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		6F7D48B525351356004074C7 /* Merge Framework */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 12;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Merge Framework";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cd ${BUILT_PRODUCTS_DIR}/YogaSMCNC.app/Contents/Library/LoginItems/YogaSMCNCHelper.app/Contents/Frameworks/\npwd\nfor i in *; do\n    rm $i;\n    ln -s ../../../../../Frameworks/$i $i\ndone;\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		6F08ACE024746B8B00681A63 /* Sources */ = {
@@ -894,7 +917,6 @@
 				CLANG_ANALYZER_DIVIDE_BY_ZERO = NO;
 				CLANG_ANALYZER_NULL_DEREFERENCE = NO;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
-				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1.1.0;
@@ -935,7 +957,6 @@
 			buildSettings = {
 				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
-				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1.1.0;
@@ -1116,7 +1137,6 @@
 				CLANG_ANALYZER_DEADCODE_DEADSTORES = NO;
 				CLANG_ANALYZER_DIVIDE_BY_ZERO = NO;
 				CLANG_ANALYZER_NULL_DEREFERENCE = NO;
-				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1.1.0;
@@ -1153,7 +1173,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
-				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1.1.0;
