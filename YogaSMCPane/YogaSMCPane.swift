@@ -567,7 +567,7 @@ class YogaSMCPane : NSPreferencePane {
             vClass.stringValue = "Idea"
             awakeIdea(props)
             #if DEBUG
-            registerNotification()
+//            registerNotification()
             #else
             TabView.removeTabViewItem(ThinkViewItem)
             #endif
@@ -575,7 +575,7 @@ class YogaSMCPane : NSPreferencePane {
             vClass.stringValue = "Think"
             awakeThink(props)
             #if DEBUG
-            registerNotification()
+//            registerNotification()
             #else
             TabView.removeTabViewItem(IdeaViewItem)
             #endif
