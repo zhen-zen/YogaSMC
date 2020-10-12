@@ -13,6 +13,9 @@
 		6F05D7EB252E362A00471F57 /* YogaSMCUserClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F05D7E0252E35A000471F57 /* YogaSMCUserClient.cpp */; };
 		6F08ACE824746B8B00681A63 /* YogaWMI.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F08ACE724746B8B00681A63 /* YogaWMI.hpp */; };
 		6F08ACEA24746B8B00681A63 /* YogaWMI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F08ACE924746B8B00681A63 /* YogaWMI.cpp */; };
+		6F0A987A25343357002F9F65 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F0A987925343357002F9F65 /* AppDelegate.swift */; };
+		6F0A987E25343359002F9F65 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6F0A987D25343359002F9F65 /* Assets.xcassets */; };
+		6F0A988125343359002F9F65 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6F0A987F25343359002F9F65 /* Main.storyboard */; };
 		6F1C7093251473BB007D1DFC /* YogaSMCPane.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 6F1C7092251473BB007D1DFC /* YogaSMCPane.tiff */; };
 		6F1C7096251473BB007D1DFC /* YogaSMCPane.xib in Resources */ = {isa = PBXBuildFile; fileRef = 6F1C7094251473BB007D1DFC /* YogaSMCPane.xib */; };
 		6F1C70A0251473CD007D1DFC /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F1C709F251473CD007D1DFC /* IOKit.framework */; };
@@ -73,6 +76,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		6F25B6A825343ADB00C2920C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6F08ACDB24746B8B00681A63 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6F0A987625343357002F9F65;
+			remoteInfo = YogaSMCNC;
+		};
 		6F97877424EB61C7008B03D2 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 6F08ACDB24746B8B00681A63 /* Project object */;
@@ -117,6 +127,11 @@
 		6F08ACE724746B8B00681A63 /* YogaWMI.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = YogaWMI.hpp; sourceTree = "<group>"; };
 		6F08ACE924746B8B00681A63 /* YogaWMI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = YogaWMI.cpp; sourceTree = "<group>"; };
 		6F08ACEB24746B8B00681A63 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		6F0A987725343357002F9F65 /* YogaSMCNC.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = YogaSMCNC.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6F0A987925343357002F9F65 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		6F0A987D25343359002F9F65 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		6F0A988025343359002F9F65 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		6F0A988225343359002F9F65 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		6F1C708C251473BB007D1DFC /* YogaSMCPane.prefPane */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = YogaSMCPane.prefPane; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F1C7092251473BB007D1DFC /* YogaSMCPane.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = YogaSMCPane.tiff; sourceTree = "<group>"; };
 		6F1C7095251473BB007D1DFC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/YogaSMCPane.xib; sourceTree = "<group>"; };
@@ -172,6 +187,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		6F0A987425343357002F9F65 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		6F1C7089251473BB007D1DFC /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -201,6 +223,7 @@
 				6F08ACE624746B8B00681A63 /* YogaSMC */,
 				6F83586324D0BFEE0031512F /* SDK */,
 				6F1C708D251473BB007D1DFC /* YogaSMCPane */,
+				6F0A987825343357002F9F65 /* YogaSMCNC */,
 				6F08ACE524746B8B00681A63 /* Products */,
 				6F1C709E251473CC007D1DFC /* Frameworks */,
 			);
@@ -212,6 +235,7 @@
 				6F08ACE424746B8B00681A63 /* YogaSMC.kext */,
 				6F88069624EB575F00ACD6C8 /* YogaSMCAlter.kext */,
 				6F1C708C251473BB007D1DFC /* YogaSMCPane.prefPane */,
+				6F0A987725343357002F9F65 /* YogaSMCNC.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -245,6 +269,17 @@
 				6F88069724EB575F00ACD6C8 /* Alter-Info.plist */,
 			);
 			path = YogaSMC;
+			sourceTree = "<group>";
+		};
+		6F0A987825343357002F9F65 /* YogaSMCNC */ = {
+			isa = PBXGroup;
+			children = (
+				6F0A987925343357002F9F65 /* AppDelegate.swift */,
+				6F0A987D25343359002F9F65 /* Assets.xcassets */,
+				6F0A987F25343359002F9F65 /* Main.storyboard */,
+				6F0A988225343359002F9F65 /* Info.plist */,
+			);
+			path = YogaSMCNC;
 			sourceTree = "<group>";
 		};
 		6F1C708D251473BB007D1DFC /* YogaSMCPane */ = {
@@ -389,6 +424,7 @@
 			buildToolPath = /bin/date;
 			buildWorkingDirectory = "";
 			dependencies = (
+				6F25B6A925343ADB00C2920C /* PBXTargetDependency */,
 				6FF2A6882516BD8B000817CD /* PBXTargetDependency */,
 				6F97877724EB61CA008B03D2 /* PBXTargetDependency */,
 				6F97877524EB61C7008B03D2 /* PBXTargetDependency */,
@@ -417,6 +453,23 @@
 			productName = YogaSMC;
 			productReference = 6F08ACE424746B8B00681A63 /* YogaSMC.kext */;
 			productType = "com.apple.product-type.kernel-extension";
+		};
+		6F0A987625343357002F9F65 /* YogaSMCNC */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6F0A988625343359002F9F65 /* Build configuration list for PBXNativeTarget "YogaSMCNC" */;
+			buildPhases = (
+				6F0A987325343357002F9F65 /* Sources */,
+				6F0A987425343357002F9F65 /* Frameworks */,
+				6F0A987525343357002F9F65 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = YogaSMCNC;
+			productName = YogaSMCNC;
+			productReference = 6F0A987725343357002F9F65 /* YogaSMCNC.app */;
+			productType = "com.apple.product-type.application";
 		};
 		6F1C708B251473BB007D1DFC /* YogaSMCPane */ = {
 			isa = PBXNativeTarget;
@@ -466,6 +519,9 @@
 					6F08ACE324746B8B00681A63 = {
 						CreatedOnToolsVersion = 11.4.1;
 					};
+					6F0A987625343357002F9F65 = {
+						CreatedOnToolsVersion = 12.0;
+					};
 					6F1C708B251473BB007D1DFC = {
 						CreatedOnToolsVersion = 12.0;
 						LastSwiftMigration = 1200;
@@ -492,11 +548,21 @@
 				6F88067624EB575F00ACD6C8 /* YogaSMCAlter */,
 				6F97877024EB61BB008B03D2 /* BuildAll */,
 				6F1C708B251473BB007D1DFC /* YogaSMCPane */,
+				6F0A987625343357002F9F65 /* YogaSMCNC */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		6F0A987525343357002F9F65 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6F0A987E25343359002F9F65 /* Assets.xcassets in Resources */,
+				6F0A988125343359002F9F65 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		6F1C708A251473BB007D1DFC /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -530,6 +596,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		6F0A987325343357002F9F65 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6F0A987A25343357002F9F65 /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		6F1C7088251473BB007D1DFC /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -558,6 +632,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		6F25B6A925343ADB00C2920C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6F0A987625343357002F9F65 /* YogaSMCNC */;
+			targetProxy = 6F25B6A825343ADB00C2920C /* PBXContainerItemProxy */;
+		};
 		6F97877524EB61C7008B03D2 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 6F08ACE324746B8B00681A63 /* YogaSMC */;
@@ -576,6 +655,14 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
+		6F0A987F25343359002F9F65 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				6F0A988025343359002F9F65 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
 		6F1C7094251473BB007D1DFC /* YogaSMCPane.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -794,6 +881,50 @@
 			};
 			name = Release;
 		};
+		6F0A988425343359002F9F65 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = YogaSMCNC/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				PRODUCT_BUNDLE_IDENTIFIER = org.zhen.YogaSMCNC;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		6F0A988525343359002F9F65 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = YogaSMCNC/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				PRODUCT_BUNDLE_IDENTIFIER = org.zhen.YogaSMCNC;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
 		6F1C7098251473BB007D1DFC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -963,6 +1094,15 @@
 			buildConfigurations = (
 				6F08ACEF24746B8B00681A63 /* Debug */,
 				6F08ACF024746B8B00681A63 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		6F0A988625343359002F9F65 /* Build configuration list for PBXNativeTarget "YogaSMCNC" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6F0A988425343359002F9F65 /* Debug */,
+				6F0A988525343359002F9F65 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
