@@ -33,6 +33,12 @@
                                                 <action selector="orderFrontStandardAboutPanel:" target="Ady-hI-5gd" id="b7J-NZ-Ak6"/>
                                             </connections>
                                         </menuItem>
+                                        <menuItem title="Fan" hidden="YES" id="d6r-fx-TSY">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="refreshFan:" target="Voe-Tx-rLC" id="xT0-Xf-NDo"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem isSeparatorItem="YES" id="kCx-OE-vgT"/>
                                         <menuItem title="Quit YogaSMCNC" keyEquivalent="q" id="4sb-4s-VLi">
                                             <connections>
@@ -53,6 +59,7 @@
                         <outlet property="appMenu" destination="uQy-DD-JDr" id="xRW-0W-h6J"/>
                         <outlet property="vBuild" destination="5kV-Vb-QxS" id="fjR-T6-s1b"/>
                         <outlet property="vClass" destination="367-Jc-c8P" id="nG4-aW-ng9"/>
+                        <outlet property="vFan" destination="d6r-fx-TSY" id="dgl-7k-8IY"/>
                         <outlet property="vVersion" destination="0Vw-zm-tOX" id="45q-y6-g9N"/>
                     </connections>
                 </customObject>

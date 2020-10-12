@@ -19,6 +19,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @IBOutlet weak var vBuild: NSMenuItem!
     @IBOutlet weak var vVersion: NSMenuItem!
     @IBOutlet weak var vClass: NSMenuItem!
+    @IBOutlet weak var vFan: NSMenuItem!
+    @IBAction func refreshFan(_ sender: NSMenuItem) {
+        if connect != 0 {
+            var input : UInt64 = 0x84
+            var outputSize = 2;
+            var output : [UInt8] = Array(repeating: 0, count: 2)
+            if kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadEC), &input, 1, nil, 0, nil, nil, &output, &outputSize),
+               outputSize == 2 {
+                let vFanSpeed = Int32(output[0]) | Int32(output[1]) << 8
+                vFan.title = "Fan: \(vFanSpeed) rpm"
+            }
+        }
+    }
     
     // from https://medium.com/@hoishing/menu-bar-apps-f2d270150660
     @objc func displayMenu() {
@@ -67,6 +80,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                         vClass.title = "Class: Idea"
                     case "ThinkVPC":
                         registerNotification()
+                        vFan.isHidden = false
+                        refreshFan(vFan)
                         vClass.title = "Class: Think"
                     default:
                         vClass.title = "Class: Unknown"
