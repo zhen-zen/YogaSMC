@@ -35,9 +35,9 @@
 		6F7BF89E2533FFC9002A7137 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F7BF89D2533FFC9002A7137 /* ContentView.swift */; };
 		6F7BF8A02533FFCA002A7137 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6F7BF89F2533FFCA002A7137 /* Assets.xcassets */; };
 		6F7BF8A32533FFCA002A7137 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6F7BF8A22533FFCA002A7137 /* Preview Assets.xcassets */; };
-		6F7BF8C0253410F5002A7137 /* YogaSMCUserClient.h in Headers */ = {isa = PBXBuildFile; fileRef = 6F81FC4025317AE100CFEDF5 /* YogaSMCUserClient.h */; };
 		6F81FC4425317B1200CFEDF5 /* YogaSMCUserClient.h in Headers */ = {isa = PBXBuildFile; fileRef = 6F81FC4025317AE100CFEDF5 /* YogaSMCUserClient.h */; };
 		6F81FC4825317B1300CFEDF5 /* YogaSMCUserClient.h in Headers */ = {isa = PBXBuildFile; fileRef = 6F81FC4025317AE100CFEDF5 /* YogaSMCUserClient.h */; };
+		6F81FC4C25317B2400CFEDF5 /* YogaSMCUserClient.h in Headers */ = {isa = PBXBuildFile; fileRef = 6F81FC4025317AE100CFEDF5 /* YogaSMCUserClient.h */; };
 		6F83587324D0C2B50031512F /* KeyImplementations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F83587124D0C2B50031512F /* KeyImplementations.cpp */; };
 		6F83587424D0C2B50031512F /* KeyImplementations.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F83587224D0C2B50031512F /* KeyImplementations.hpp */; };
 		6F8674CD24A876E000DC2FDF /* ThinkWMI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F8674CB24A876E000DC2FDF /* ThinkWMI.cpp */; };
@@ -77,13 +77,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		6F7BF8BA253410D3002A7137 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 6F08ACDB24746B8B00681A63 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 6F7BF8982533FFC9002A7137;
-			remoteInfo = YogaSMCNC;
-		};
 		6F97877424EB61C7008B03D2 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 6F08ACDB24746B8B00681A63 /* Project object */;
@@ -400,7 +393,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6F7BF8C0253410F5002A7137 /* YogaSMCUserClient.h in Headers */,
+				6F81FC4C25317B2400CFEDF5 /* YogaSMCUserClient.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -435,7 +428,6 @@
 			buildToolPath = /bin/date;
 			buildWorkingDirectory = "";
 			dependencies = (
-				6F7BF8BB253410D3002A7137 /* PBXTargetDependency */,
 				6FF2A6882516BD8B000817CD /* PBXTargetDependency */,
 				6F97877724EB61CA008B03D2 /* PBXTargetDependency */,
 				6F97877524EB61C7008B03D2 /* PBXTargetDependency */,
@@ -644,11 +636,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		6F7BF8BB253410D3002A7137 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 6F7BF8982533FFC9002A7137 /* YogaSMCNC */;
-			targetProxy = 6F7BF8BA253410D3002A7137 /* PBXContainerItemProxy */;
-		};
 		6F97877524EB61C7008B03D2 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 6F08ACE324746B8B00681A63 /* YogaSMC */;
