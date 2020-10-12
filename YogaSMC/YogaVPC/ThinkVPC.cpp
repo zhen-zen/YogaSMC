@@ -646,6 +646,9 @@ void ThinkVPC::updateVPC() {
         return;
     }
 
+    if (client != nullptr)
+        client->sendNotification(result);
+
     switch (result >> 0xC) {
         case 1:
             switch (result) {

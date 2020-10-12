@@ -16,6 +16,7 @@
 #include "common.h"
 #include "DYTC.h"
 #include "message.h"
+#include "YogaSMCUserClientPrivate.hpp"
 
 #ifndef ALTER
 #include "YogaSMC.hpp"
@@ -133,6 +134,11 @@ protected:
      *  VPC device
      */
     IOACPIPlatformDevice *vpc {nullptr};
+    
+    /**
+     *  VPC UserClient
+     */
+    YogaSMCUserClient *client {nullptr};
 #ifndef ALTER
     /**
      *  SMC service
@@ -244,6 +250,8 @@ protected:
 
     /**
      *  EC access capability, will be update on init
+     *  BIT 0 Read
+     *  BIT 1 Write
      */
     UInt8 ECAccessCap {0};
 

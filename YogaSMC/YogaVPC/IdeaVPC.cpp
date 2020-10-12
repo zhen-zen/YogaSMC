@@ -573,6 +573,10 @@ void IdeaVPC::updateVPC() {
     AlwaysLog("read VPC EC result: 0x%x %d", vpc1, retries);
     setProperty("VPCstatus", vpc1, 32);
 #endif
+
+    if (client != nullptr)
+        client->sendNotification(vpc1);
+
     for (int vpc_bit = 0; vpc_bit < 16; vpc_bit++) {
         if (BIT(vpc_bit) & vpc1) {
             switch (vpc_bit) {

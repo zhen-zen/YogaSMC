@@ -7,7 +7,6 @@
 //
 
 #include <IOKit/IOLib.h>
-#include "YogaSMCUserClient.h"
 #include "YogaSMCUserClientPrivate.hpp"
 
 OSDefineMetaClassAndStructors(YogaSMCUserClient, IOUserClient)
@@ -31,13 +30,6 @@ YogaSMCUserClient::getTargetAndMethodForIndex(IOService **target, UInt32 index)
             0,    // no inputs
             0    // no outputs
         },
-        {    // kYSMCUCRead
-            NULL,    // IOService * determined at runtime below
-            (IOMethod) &YogaSMCUserClient::read,
-            kIOUCStructIStructO,
-            sizeof(VPCReadInput),
-            sizeof(VPCReadOutput)
-        },
         {    // kYSMCUCReadEC
             NULL,    // IOService * determined at runtime below
             (IOMethod) &YogaSMCUserClient::readEC,
@@ -51,24 +43,10 @@ YogaSMCUserClient::getTargetAndMethodForIndex(IOService **target, UInt32 index)
             kIOUCScalarIStructI,
             1,
             kIOUCVariableStructureSize
-        },
-//        {    // kYSMCUCWrite
-//            NULL,    // IOService * determined at runtime below
-//            (IOMethod) &YogaSMCUserClient::write,
-//            kIOUCStructIStructO,
-//            0,
-//            0
-//        },
-//        {    // kYSMCUCNotify
-//            NULL,    // IOService * determined at runtime below
-//            (IOMethod) &YogaSMCUserClient::notify,
-//            kIOUCStructIStructO,
-//            0,
-//            0
-//        }
+        }
     };
 
-    if (index < (UInt32)kYSMCUCWrite) {
+    if (index < (UInt32)kYSMCUCNumMethods) {
         DebugLog("%s (index=%u)", __FUNCTION__, index);
         *target = this;
         return((IOExternalMethod *) &sMethods[index]);
@@ -99,13 +77,14 @@ IOReturn YogaSMCUserClient::userClientClose(void) {
         DebugLog("%s kIOReturnNotOpen", __FUNCTION__);
         return kIOReturnNotOpen;
     }
+
+    if (fProvider->client == this) {
+        fProvider->client = nullptr;
+        DebugLog("%s notification unregistered", __FUNCTION__);
+    }
+
     fProvider->close(this);
     DebugLog("%s", __FUNCTION__);
-    return kIOReturnSuccess;
-}
-
-IOReturn YogaSMCUserClient::read(void *inStruct, void *outStruct, void *inCount, void *outCount, void *p5, void *p6) {
-    AlwaysLog("%s temporary deprecated", __FUNCTION__);
     return kIOReturnSuccess;
 }
 
@@ -174,6 +153,46 @@ IOReturn YogaSMCUserClient::writeEC(UInt64 offset, UInt8* input, IOByteCount *in
     return kIOReturnSuccess;
 }
 
+IOReturn YogaSMCUserClient::registerNotificationPort(mach_port_t port, UInt32 type, io_user_reference_t refCon) {
+    if (!fProvider->isOpen(this) || !fProvider)
+        return kIOReturnNotReady;
+
+    if (fProvider->client) {
+        AlwaysLog("%s already registered", __FUNCTION__);
+        return kIOReturnPortExists;
+    }
+
+    fProvider->client = this;
+    AlwaysLog("%s subscribed", __FUNCTION__);
+
+    m_notificationPort = port;
+    notification.header.msgh_bits = MACH_MSGH_BITS(MACH_MSG_TYPE_COPY_SEND, 0);
+    notification.header.msgh_size = sizeof(SMCNotificationMessage);
+    notification.header.msgh_remote_port = m_notificationPort;
+    notification.header.msgh_local_port = MACH_PORT_NULL;
+    notification.header.msgh_reserved = 0;
+    notification.header.msgh_id = 0;
+    notification.ref = refCon;
+    return kIOReturnSuccess;
+}
+
+IOReturn YogaSMCUserClient::sendNotification(UInt32 event) {
+
+    if (m_notificationPort == MACH_PORT_NULL)
+        return kIOReturnError;
+
+    notification.event = event;
+
+    IOReturn ret = mach_msg_send_from_kernel_proper(&notification.header, notification.header.msgh_size);
+    if (ret != MACH_MSG_SUCCESS) {
+        if (ret != MACH_SEND_TIMED_OUT)
+            AlwaysLog("%s failed %x", __FUNCTION__, ret);
+        else
+            DebugLog("%s timed out", __FUNCTION__);
+    }
+    return ret;
+}
+
 bool YogaSMCUserClient::start(IOService *provider) {
     if (!(fProvider = OSDynamicCast(YogaVPC, provider)))
         return false;
@@ -198,6 +217,6 @@ IOReturn YogaSMCUserClient::clientClose(void) {
 
 IOReturn YogaSMCUserClient::clientDied(void) {
     AlwaysLog("%s", __FUNCTION__);
-    return super::clientDied();
+    return clientClose();
 }
 
