@@ -21,7 +21,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @IBOutlet weak var vVersion: NSMenuItem!
     @IBOutlet weak var vClass: NSMenuItem!
     @IBOutlet weak var vFan: NSMenuItem!
-    @IBAction func updateFan(_ sender: NSMenuItem) {
+
+    func updateFan() {
         if connect != 0 {
             var input : UInt64 = 0x84
             var outputSize = 2;
@@ -52,7 +53,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                                        pressure: 0)!
         NSMenu.popUpContextMenu(appMenu, with: event, for: button)
         if vClass.title == "Class: Think" {
-            updateFan(vFan)
+            updateFan()
         }
     }
 
@@ -85,6 +86,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     case "ThinkVPC":
                         registerNotification()
                         vFan.isHidden = false
+                        updateFan()
                         vClass.title = "Class: Think"
                     default:
                         vClass.title = "Class: Unknown"

@@ -87,6 +87,13 @@
 			remoteGlobalIDString = 6F0A987625343357002F9F65;
 			remoteInfo = YogaSMCNC;
 		};
+		6F7D488A253509CC004074C7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6F08ACDB24746B8B00681A63 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6F7D483F25344C25004074C7;
+			remoteInfo = YogaSMCNCHelper;
+		};
 		6F97877424EB61C7008B03D2 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 6F08ACDB24746B8B00681A63 /* Project object */;
@@ -505,6 +512,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				6F7D488B253509CC004074C7 /* PBXTargetDependency */,
 			);
 			name = YogaSMCNC;
 			productName = YogaSMCNC;
@@ -712,6 +720,11 @@
 			isa = PBXTargetDependency;
 			target = 6F0A987625343357002F9F65 /* YogaSMCNC */;
 			targetProxy = 6F25B6A825343ADB00C2920C /* PBXContainerItemProxy */;
+		};
+		6F7D488B253509CC004074C7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6F7D483F25344C25004074C7 /* YogaSMCNCHelper */;
+			targetProxy = 6F7D488A253509CC004074C7 /* PBXContainerItemProxy */;
 		};
 		6F97877524EB61C7008B03D2 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
