@@ -164,6 +164,7 @@ IOReturn YogaSMCUserClient::registerNotificationPort(mach_port_t port, UInt32 ty
 
     fProvider->client = this;
     AlwaysLog("%s subscribed", __FUNCTION__);
+    setProperty("Notification", true);
 
     m_notificationPort = port;
     notification.header.msgh_bits = MACH_MSGH_BITS(MACH_MSG_TYPE_COPY_SEND, 0);

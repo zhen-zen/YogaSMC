@@ -574,6 +574,11 @@ void IdeaVPC::updateVPC() {
     setProperty("VPCstatus", vpc1, 32);
 #endif
 
+    if (!vpc1) {
+        DebugLog("empty EC event");
+        return;
+    }
+
     if (client != nullptr)
         client->sendNotification(vpc1);
 

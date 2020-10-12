@@ -578,13 +578,11 @@ bool ThinkVPC::updateMicMuteLEDStatus(bool update) {
 }
 
 bool ThinkVPC::setMicMuteLEDStatus(UInt32 status) {
-    UInt32 result;
-
     OSObject* params[] = {
         OSNumber::withNumber(status, 32)
     };
 
-    if (vpc->evaluateInteger(setMicMuteLED, &result, params, 1) != kIOReturnSuccess) {
+    if (vpc->evaluateObject(setMicMuteLED, nullptr, params, 1) != kIOReturnSuccess) {
         AlwaysLog(toggleFailure, micMuteLEDPrompt);
         return false;
     }
