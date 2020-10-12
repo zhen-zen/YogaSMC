@@ -26,30 +26,22 @@ jobs:
     - name: Download Lilu / VirtualSMC SDK (script from hieplpvip/AsusSMC (Acidanthera/Lilu))
       run: src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/hieplpvip/AsusSMC/master/Scripts/bootstrap.sh) && eval "$src" || exit 1
     - name: Xcodebuild Debug
-      uses: sersoft-gmbh/xcodebuild-action@v1.1
+      uses: sersoft-gmbh/xcodebuild-action@v1
       with:
         project: YogaSMC.xcodeproj
-        # The scheme to build. Required when using a workspace.
-        #scheme: # optional
-        # The destination specifier to build.
+        # scheme: # optional
         # destination: # optional
         configuration: Debug
-        # Arbitrary, space separated build settings (e.g. PLATFORM_NAME=iphonesimulator).
         build-settings: -target BuildAll
-        # The action to perform (e.g. build, test, ...).
-        action: build # default is test
+        action: build
     - name: Xcodebuild Release
-      uses: sersoft-gmbh/xcodebuild-action@v1.1
+      uses: sersoft-gmbh/xcodebuild-action@v1
       with:
         project: YogaSMC.xcodeproj
-        # The destination specifier to build.
         # destination: # optional
-        # The configuration to build.
         configuration: Release
-        # Arbitrary, space separated build settings (e.g. PLATFORM_NAME=iphonesimulator).
         build-settings: -target BuildAll
-        # The action to perform (e.g. build, test, ...).
-        action: build # default is test
+        action: build
     - run: mkdir build/Release-App; mv build/Release/YogaSMCNC.app build/Release-App/; mv build/Release/YogaSMCPane.prefPane build/Release-App/; cp LICENSE build/Release-App/; ln -s /Applications build/Release-App/; cp -r YogaSMC/SSDTSample build/Release/
     - run: mkdir build/Debug-App; mv build/Debug/YogaSMCNC.app build/Debug-App/; mv build/Debug/YogaSMCPane.prefPane build/Debug-App/; cp LICENSE build/Debug-App/;  ln -s /Applications build/Debug-App/; cp -r YogaSMC/SSDTSample build/Debug/
     - name: Create DMG image
