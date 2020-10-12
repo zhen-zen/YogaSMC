@@ -50,6 +50,8 @@ jobs:
         build-settings: -target BuildAll
         # The action to perform (e.g. build, test, ...).
         action: build # default is test
+    - name: build DMG
+      run: brew install create-dmg && create-dmg build/Debug/YogaSMCNC.dmg build/Debug/
     - uses: actions/upload-artifact@v2
       with:
         name: YogaSMC-Debug
