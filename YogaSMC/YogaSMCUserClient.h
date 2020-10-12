@@ -16,8 +16,6 @@
 typedef uint64_t io_user_reference_t;
 #endif
 
-#define kVPCUCBufSize    32
-
 enum {
     kYSMCUCOpen,            // ScalarIScalarO
     kYSMCUCClose,        // ScalarIScalarO
