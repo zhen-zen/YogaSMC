@@ -88,7 +88,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         var notificationPort : CFMachPort?
         if kIOReturnSuccess == IOServiceOpen(io_service, mach_task_self_, 0, &connect),
            connect != 0 ,
-           kIOReturnSuccess == IOConnectCallScalarMethod(connect, 0, nil, 0, nil, nil) {
+           kIOReturnSuccess == IOConnectCallScalarMethod(connect, UInt32(kYSMCUCOpen), nil, 0, nil, nil) {
             var portContext = CFMachPortContext(version: 0, info: nil, retain: nil, release: nil, copyDescription: nil)
             notificationPort = CFMachPortCreate(kCFAllocatorDefault, notificationCallback, &portContext, nil)
             if notificationPort != nil  {
