@@ -6,8 +6,9 @@
 //  Copyright © 2020 Zhen. All rights reserved.
 //
 
-import Cocoa
+import AppKit
 import os.log
+import ServiceManagement
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -20,7 +21,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @IBOutlet weak var vVersion: NSMenuItem!
     @IBOutlet weak var vClass: NSMenuItem!
     @IBOutlet weak var vFan: NSMenuItem!
-    @IBAction func refreshFan(_ sender: NSMenuItem) {
+    @IBAction func updateFan(_ sender: NSMenuItem) {
         if connect != 0 {
             var input : UInt64 = 0x84
             var outputSize = 2;
@@ -50,6 +51,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                                        clickCount: 1,
                                        pressure: 0)!
         NSMenu.popUpContextMenu(appMenu, with: event, for: button)
+        if vClass.title == "Class: Think" {
+            updateFan(vFan)
+        }
     }
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
@@ -81,7 +85,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     case "ThinkVPC":
                         registerNotification()
                         vFan.isHidden = false
-                        refreshFan(vFan)
                         vClass.title = "Class: Think"
                     default:
                         vClass.title = "Class: Unknown"
@@ -112,6 +115,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
             IOConnectSetNotificationPort(connect, 0, CFMachPortGetPort(notificationPort), 0);
         }
+    }
+
+    // from https://github.com/MonitorControl/MonitorControl
+    func setStartAtLogin(enabled: Bool) {
+        let identifier = "\(Bundle.main.bundleIdentifier!)Helper" as CFString
+        SMLoginItemSetEnabled(identifier, enabled)
+        os_log("Toggle start at login state: %{public}@", type: .info, enabled ? "on" : "off")
     }
 }
 
