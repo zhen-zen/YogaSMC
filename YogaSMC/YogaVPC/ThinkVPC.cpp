@@ -159,11 +159,12 @@ bool ThinkVPC::initVPC() {
 
     OSObject *value;
     KBDProperty = OSDictionary::withCapacity(1);
-    AlwaysLog("HKEY interface version %x", version);
+    DebugLog("HKEY interface version %x", version);
     setPropertyNumber(KBDProperty, "Version", version, 32);
     switch (version >> 8) {
         case 1:
             AlwaysLog("HKEY version 0x100 not implemented");
+            hotkey_legacy = true;
             updateAdaptiveKBD(0);
             break;
 
@@ -658,59 +659,60 @@ void ThinkVPC::updateVPC() {
                     break;
 
                 case TP_HKEY_EV_MIC_MUTE:
-                    setMicMuteLEDStatus(micMuteLEDstate ? 0 : 2);
+                    if (!hotkey_legacy)
+                        setMicMuteLEDStatus(micMuteLEDstate ? 0 : 2);
                     break;
                     
                 default:
-                    AlwaysLog("Hotkey(MHKP) key presses event: 0x%x", result);
+                    DebugLog("Hotkey(MHKP) key presses event: 0x%x", result);
                     break;
             }
             break;
 
         case 2:
-            AlwaysLog("Hotkey(MHKP) wakeup reason event: 0x%x", result);
+            DebugLog("Hotkey(MHKP) wakeup reason event: 0x%x", result);
             break;
 
         case 3:
-            AlwaysLog("Hotkey(MHKP) bay-related wakeup event: 0x%x", result);
+            DebugLog("Hotkey(MHKP) bay-related wakeup event: 0x%x", result);
             break;
 
         case 4:
-            AlwaysLog("Hotkey(MHKP) dock-related event: 0x%x", result);
+            DebugLog("Hotkey(MHKP) dock-related event: 0x%x", result);
             break;
 
         case 5:
             switch (result) {
                 case TP_HKEY_EV_PEN_INSERTED:
-                    AlwaysLog("tablet pen inserted into bay");
+                    DebugLog("tablet pen inserted into bay");
                     break;
 
                 case TP_HKEY_EV_PEN_REMOVED:
-                    AlwaysLog("tablet pen removed from bay");
+                    DebugLog("tablet pen removed from bay");
                     break;
 
                 case TP_HKEY_EV_TABLET_TABLET:
-                    AlwaysLog("tablet mode");
+                    DebugLog("tablet mode");
                     break;
 
                 case TP_HKEY_EV_TABLET_NOTEBOOK:
-                    AlwaysLog("normal mode");
+                    DebugLog("normal mode");
                     break;
 
                 case TP_HKEY_EV_LID_CLOSE:
-                    AlwaysLog("Lid closed");
+                    DebugLog("Lid closed");
                     break;
 
                 case TP_HKEY_EV_LID_OPEN:
-                    AlwaysLog("Lid opened");
+                    DebugLog("Lid opened");
                     break;
 
                 case TP_HKEY_EV_BRGHT_CHANGED:
-                    AlwaysLog("brightness changed");
+                    DebugLog("brightness changed");
                     break;
 
                 default:
-                    AlwaysLog("Hotkey(MHKP) unknown human interface event: 0x%x", result);
+                    DebugLog("Hotkey(MHKP) unknown human interface event: 0x%x", result);
                     break;
             }
             break;
@@ -749,34 +751,34 @@ void ThinkVPC::updateVPC() {
                     break;
 
                 case TP_HKEY_EV_AC_CHANGED:
-                    AlwaysLog("AC status changed");
+                    DebugLog("AC status changed");
                     break;
 
                 case TP_HKEY_EV_KEY_NUMLOCK:
-                    AlwaysLog("Numlock");
+                    DebugLog("Numlock");
                     break;
 
                 case TP_HKEY_EV_KEY_FN:
-                    AlwaysLog("Fn");
+                    DebugLog("Fn");
                     break;
 
                 case TP_HKEY_EV_KEY_FN_ESC:
-                    AlwaysLog("Fn+Esc");
+                    DebugLog("Fn+Esc");
                     break;
 
                 case TP_HKEY_EV_LID_STATUS_CHANGED:
                     break;
 
                 case TP_HKEY_EV_TABLET_CHANGED:
-                    AlwaysLog("tablet mode has changed");
+                    DebugLog("tablet mode has changed");
                     break;
 
                 case TP_HKEY_EV_PALM_DETECTED:
-                    AlwaysLog("palm detected hovering the keyboard");
+                    DebugLog("palm detected hovering the keyboard");
                     break;
 
                 case TP_HKEY_EV_PALM_UNDETECTED:
-                    AlwaysLog("palm undetected hovering the keyboard");
+                    DebugLog("palm undetected hovering the keyboard");
                     break;
 
                 default:
@@ -786,11 +788,11 @@ void ThinkVPC::updateVPC() {
             break;
 
         case 7:
-            AlwaysLog("Hotkey(MHKP) misc event: 0x%x", result);
+            DebugLog("Hotkey(MHKP) misc event: 0x%x", result);
             break;
 
         default:
-            AlwaysLog("Hotkey(MHKP) unknown event: 0x%x", result);
+            DebugLog("Hotkey(MHKP) unknown event: 0x%x", result);
             break;
     }
 }

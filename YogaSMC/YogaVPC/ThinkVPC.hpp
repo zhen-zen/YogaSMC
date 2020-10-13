@@ -196,6 +196,7 @@ private:
     //    GHSL
     //    SHSL
 
+    bool hotkey_legacy {false}
     /**
      * All events supported by DHKN
      */
