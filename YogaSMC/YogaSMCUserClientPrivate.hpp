@@ -31,7 +31,7 @@ public:
     virtual void stop(IOService *provider) APPLE_KEXT_OVERRIDE;
 
     virtual IOExternalMethod *getTargetAndMethodForIndex(IOService **target, UInt32 Index) APPLE_KEXT_OVERRIDE;
-    IOReturn registerNotificationPort(mach_port_t port, UInt32 type, io_user_reference_t refCon);
+    IOReturn registerNotificationPort(mach_port_t port, UInt32 type, io_user_reference_t refCon) APPLE_KEXT_OVERRIDE;
 
     virtual IOReturn clientClose(void) APPLE_KEXT_OVERRIDE;
     virtual IOReturn clientDied(void) APPLE_KEXT_OVERRIDE;

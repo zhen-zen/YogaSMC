@@ -908,10 +908,6 @@
 				MARKETING_VERSION = 1.1.0;
 				MODULE_NAME = org.zhen.YogaSMC;
 				MODULE_VERSION = 1.1.0;
-				OTHER_CPLUSPLUSFLAGS = (
-					"$(OTHER_CFLAGS)",
-					"-Wno-inconsistent-missing-override",
-				);
 				PRODUCT_BUNDLE_IDENTIFIER = org.zhen.YogaSMC;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -950,10 +946,6 @@
 				MARKETING_VERSION = 1.1.0;
 				MODULE_NAME = org.zhen.YogaSMC;
 				MODULE_VERSION = 1.1.0;
-				OTHER_CPLUSPLUSFLAGS = (
-					"$(OTHER_CFLAGS)",
-					"-Wno-inconsistent-missing-override",
-				);
 				PRODUCT_BUNDLE_IDENTIFIER = org.zhen.YogaSMC;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1141,10 +1133,6 @@
 				MARKETING_VERSION = 1.1.0;
 				MODULE_NAME = org.zhen.YogaSMC;
 				MODULE_VERSION = 1.1.0;
-				OTHER_CPLUSPLUSFLAGS = (
-					"$(OTHER_CFLAGS)",
-					"-Wno-inconsistent-missing-override",
-				);
 				PRODUCT_BUNDLE_IDENTIFIER = org.zhen.YogaSMC;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1179,10 +1167,6 @@
 				MARKETING_VERSION = 1.1.0;
 				MODULE_NAME = org.zhen.YogaSMC;
 				MODULE_VERSION = 1.1.0;
-				OTHER_CPLUSPLUSFLAGS = (
-					"$(OTHER_CFLAGS)",
-					"-Wno-inconsistent-missing-override",
-				);
 				PRODUCT_BUNDLE_IDENTIFIER = org.zhen.YogaSMC;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
