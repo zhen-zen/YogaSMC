@@ -15,6 +15,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var connect : io_connect_t = 0;
     let defaults = UserDefaults.standard
     let io_service : io_service_t = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("YogaVPC"))
+    var helper : OSDUIHelperProtocol!
+
+    var notified = false
 
     var statusItem: NSStatusItem?
     @IBOutlet weak var appMenu: NSMenu!
@@ -32,6 +35,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                outputSize == 2 {
                 let vFanSpeed = Int32(output[0]) | Int32(output[1]) << 8
                 vFan.title = "Fan: \(vFanSpeed) rpm"
+            } else {
+                os_log("Failed to access EC", type: .error)
             }
         }
     }
@@ -90,11 +95,44 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        statusItem = NSStatusBar.system.statusItem(withLength: -1)
+        // from https://ffried.codes/2018/01/20/the-internals-of-the-macos-hud/
+        let conn = NSXPCConnection(machServiceName: "com.apple.OSDUIHelper", options: [])
+        conn.remoteObjectInterface = NSXPCInterface(with: OSDUIHelperProtocol.self)
+        conn.interruptionHandler = { os_log("Interrupted!", type: .error) }
+        conn.invalidationHandler = { os_log("Invalidated!", type: .error) }
+        conn.resume()
+
+        let target = conn.remoteObjectProxyWithErrorHandler { os_log("Failed: %@", type: .error, $0 as CVarArg) }
+        if let tmp = target as? OSDUIHelperProtocol {
+            helper = tmp
+        } else {
+            os_log("Wrong type %@", type: .fault, target as! CVarArg)
+            let alert = NSAlert()
+            alert.messageText = "Failed to init OSD helper"
+            alert.alertStyle = .critical
+            alert.addButton(withTitle: "Quit")
+            alert.runModal()
+            NSApp.terminate(nil)
+        }
+
+        if kIOReturnSuccess != IOServiceOpen(io_service, mach_task_self_, 0, &connect) {
+            os_log("Failed to connect to YogaSMC", type: .fault)
+            helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 2000, withText: "Failed to connect \n to YogaSMC")
+            NSApp.terminate(nil)
+        } else {
+            if kIOReturnSuccess == IOConnectCallScalarMethod(connect, UInt32(kYSMCUCOpen), nil, 0, nil, nil) {
+                os_log("Connected to YogaSMC", type: .info)
+            } else {
+                os_log("Another instance have connected to YogaSMC", type: .error)
+                helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: "Another instance have \n connected to YogaSMC")
+                NSApp.terminate(nil)
+            }
+        }
 
         loadConfig()
         
         if !defaults.bool(forKey: "HideIcon") {
+            statusItem = NSStatusBar.system.statusItem(withLength: -1)
             guard let button = statusItem?.button else {
                 os_log("Status bar item failed. Try removing some menu bar item.", type: .fault)
                 NSApp.terminate(nil)
@@ -108,7 +146,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         if !getProerty() {
             os_log("YogaSMC not installed", type: .error)
-            OSD("YogaSMC Unavailable")
+            helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: "YogaSMC Unavailable")
             NSApp.terminate(nil)
         }
     }
@@ -124,17 +162,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     vVersion.title = "Version: \(version ?? "Unknown")"
                     switch props["IOClass"] as? NSString {
                     case "IdeaVPC":
-                        registerNotification()
+                        notified = registerNotification()
                         vClass.title = "Class: Idea"
                     case "ThinkVPC":
-                        registerNotification()
+                        notified = registerNotification()
                         vFan.isHidden = false
                         updateFan()
                         vClass.title = "Class: Think"
                     default:
                         vClass.title = "Class: Unknown"
                         os_log("Unknown class", type: .error)
-                        OSD("Unknown class")
+                        helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: "Unknown class")
                     }
                     return true
                 }
@@ -144,7 +182,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
-        // Insert code here to tear down your application
         if connect != 0 {
             IOServiceClose(connect);
         }
@@ -160,19 +197,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         vStartAtLogin.state = defaults.bool(forKey: "StartAtLogin") ? .on : .off
     }
 
-    func registerNotification() {
-        var notificationPort : CFMachPort?
-        if kIOReturnSuccess == IOServiceOpen(io_service, mach_task_self_, 0, &connect),
-           connect != 0 ,
-           kIOReturnSuccess == IOConnectCallScalarMethod(connect, UInt32(kYSMCUCOpen), nil, 0, nil, nil) {
-            var portContext = CFMachPortContext(version: 0, info: nil, retain: nil, release: nil, copyDescription: nil)
-            notificationPort = CFMachPortCreate(kCFAllocatorDefault, notificationCallback, &portContext, nil)
-            if notificationPort != nil  {
-                let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, notificationPort, 0);
-                CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .defaultMode);
+    func registerNotification() -> Bool {
+        if connect != 0 {
+            var portContext = CFMachPortContext(version: 0, info: &helper, retain: nil, release: nil, copyDescription: nil)
+            if let notificationPort = CFMachPortCreate(kCFAllocatorDefault, notificationCallback, &portContext, nil)  {
+                if let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, notificationPort, 0) {
+                    CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .defaultMode);
+                }
+                IOConnectSetNotificationPort(connect, 0, CFMachPortGetPort(notificationPort), 0);
+                return true
+            } else {
+                os_log("Failed to create mach port", type: .error)
             }
-            IOConnectSetNotificationPort(connect, 0, CFMachPortGetPort(notificationPort), 0);
         }
+        return false
     }
 
     // from https://github.com/MonitorControl/MonitorControl
@@ -187,6 +225,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 }
+
+//    After move to /Applications
+//    let path = "\(Bundle.main.resourcePath ?? "/Applications/YogaSMCNC.app/Contents/Resources")/kBrightOff.pdf"
+let defaultImage = "/System/Library/CoreServices/OSDUIHelper.app/Contents/Resources/kBrightOff.pdf" as NSString
 
 // from https://ffried.codes/2018/01/20/the-internals-of-the-macos-hud/
 @objc enum OSDImage: CLongLong {
@@ -238,32 +280,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func showImage(_ img: OSDImage, onDisplayID: CGDirectDisplayID, priority: CUnsignedInt, msecUntilFade: CUnsignedInt)
 }
 
-func OSD(_ prompt: String) {
-    // from https://ffried.codes/2018/01/20/the-internals-of-the-macos-hud/
-    let conn = NSXPCConnection(machServiceName: "com.apple.OSDUIHelper", options: [])
-    conn.remoteObjectInterface = NSXPCInterface(with: OSDUIHelperProtocol.self)
-    conn.interruptionHandler = { os_log("Interrupted!", type: .error) }
-    conn.invalidationHandler = { os_log("Invalidated!", type: .error) }
-    conn.resume()
-
-    let target = conn.remoteObjectProxyWithErrorHandler { os_log("Failed: %@", type: .error, $0 as CVarArg) }
-    guard let helper = target as? OSDUIHelperProtocol else { os_log("Wrong type %@", type: .fault, target as! CVarArg); return }
-
-
-//    After move to /Applications
-//    let path = "\(Bundle.main.resourcePath ?? "/Applications/YogaSMCNC.app/Contents/Resources")/kBrightOff.pdf"
-    let path = "/System/Library/CoreServices/OSDUIHelper.app/Contents/Resources/kBrightOff.pdf"
-    helper.showImageAtPath(path as NSString, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: prompt as NSString)
-}
-
 func notificationCallback (_ port : CFMachPort?, _ msg : UnsafeMutableRawPointer?, _ size : CFIndex, _ info : UnsafeMutableRawPointer?) {
-    if let notification = msg?.bindMemory(to: UInt32.self, capacity: 10){
-        let arrPtr = UnsafeBufferPointer(start: notification, count: 10)
-        let output = Array(arrPtr)
-        let prompt = String(format:"Event %x", output[6])
-        OSD(prompt)
-    } else {
-        OSD("Event unknown")
-        os_log("Event unknown", type: .error)
+    if let helper = info!.assumingMemoryBound(to: OSDUIHelperProtocol?.self).pointee {
+        if let notification = msg?.load(as: SMCNotificationMessage.self) {
+            let prompt = String(format:"Event 0x%04x", notification.event) as NSString
+            helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: prompt)
+            #if DEBUG
+            os_log("Event 0x%04x", type: .debug, notification.event)
+            #endif
+        } else {
+            helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: "Event unknown")
+            os_log("Event unknown", type: .error)
+        }
     }
 }
