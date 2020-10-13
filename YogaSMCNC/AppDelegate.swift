@@ -106,6 +106,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             button.action = #selector(displayMenu)
         }
 
+        if !getProerty() {
+            os_log("YogaSMC not installed", type: .error)
+            OSD("YogaSMC Unavailable")
+            NSApp.terminate(nil)
+        }
+    }
+
+    func getProerty() -> Bool {
         if io_service != 0 {
             var CFProps : Unmanaged<CFMutableDictionary>? = nil
             if (kIOReturnSuccess == IORegistryEntryCreateCFProperties(io_service, &CFProps, kCFAllocatorDefault, 0) && CFProps != nil) {
@@ -126,11 +134,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     default:
                         vClass.title = "Class: Unknown"
                         os_log("Unknown class", type: .error)
-                        break
+                        OSD("Unknown class")
                     }
+                    return true
                 }
             }
         }
+        return false
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {

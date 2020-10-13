@@ -482,8 +482,8 @@ class YogaSMCPane : NSPreferencePane {
                    outputSize == 2 {
                     vFanSpeed.intValue = Int32(output[0]) | Int32(output[1]) << 8
                 }
-                IOServiceClose(connect)
             }
+            IOServiceClose(connect)
         }
     }
 
