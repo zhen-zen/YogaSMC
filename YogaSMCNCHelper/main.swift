@@ -3,7 +3,7 @@
 //  YogaSMCNCHelper
 //
 //  Created by Zhen on 10/12/20.
-//  Copyright © 2020 zhen. All rights reserved.
+//  Copyright © 2020 Zhen. All rights reserved.
 //
 
 import AppKit
@@ -21,7 +21,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let pathComponents = bundlePath.pathComponents
         let path = NSString.path(withComponents: Array(pathComponents[0 ..< (pathComponents.count - 4)]))
 
-        NSWorkspace.shared.launchApplication(path)
+        if !NSWorkspace.shared.launchApplication(path) {
+            let alert = NSAlert()
+            alert.messageText = "Failed to open \(path)"
+            alert.alertStyle = .warning
+            alert.addButton(withTitle: "OK")
+            alert.runModal()
+        }
         NSApp.terminate(nil)
     }
 

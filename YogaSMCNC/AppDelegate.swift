@@ -12,8 +12,9 @@ import ServiceManagement
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
-    var io_service : io_service_t = 0
     var connect : io_connect_t = 0;
+    let defaults = UserDefaults.standard
+    let io_service : io_service_t = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("YogaVPC"))
 
     var statusItem: NSStatusItem?
     @IBOutlet weak var appMenu: NSMenu!
@@ -34,7 +35,38 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
     }
-    
+
+    @IBOutlet weak var vStartAtLogin: NSMenuItem!
+    @IBAction func toggleStartAtLogin(_ sender: NSMenuItem) {
+        if setStartAtLogin(enabled: vStartAtLogin.state == .off) {
+            vStartAtLogin.state = (vStartAtLogin.state == .on) ? .off : .on
+            defaults.setValue((vStartAtLogin.state == .on), forKey: "StartAtLogin")
+        }
+    }
+
+    @IBAction func openPrefpane(_ sender: NSMenuItem) {
+        // from https://medium.com/macoclock/everything-you-need-to-do-to-launch-an-applescript-from-appkit-on-macos-catalina-with-swift-1ba82537f7c3
+        let source = """
+                            tell application "System Preferences"
+                                reveal pane "org.zhen.YogaSMCPane"
+                                activate
+                            end tell
+                     """
+        if let script = NSAppleScript(source: source) {
+            var error: NSDictionary?
+            script.executeAndReturnError(&error)
+            if error != nil {
+                os_log("Failed to open prefpane", type: .error)
+                let alert = NSAlert()
+                alert.messageText = "Failed to open Preferences"
+                alert.informativeText = "Please install YogaSMCPane"
+                alert.alertStyle = .warning
+                alert.addButton(withTitle: "OK")
+                alert.runModal()
+            }
+        }
+    }
+
     // from https://medium.com/@hoishing/menu-bar-apps-f2d270150660
     @objc func displayMenu() {
         guard let button = statusItem?.button else { return }
@@ -60,17 +92,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         statusItem = NSStatusBar.system.statusItem(withLength: -1)
 
-        guard let button = statusItem?.button else {
-            print("status bar item failed. Try removing some menu bar item.")
-            NSApp.terminate(nil)
-            return
-        }
+        loadConfig()
         
-        button.title = "⎇"
-        button.target = self
-        button.action = #selector(displayMenu)
+        if !defaults.bool(forKey: "HideIcon") {
+            guard let button = statusItem?.button else {
+                os_log("Status bar item failed. Try removing some menu bar item.", type: .fault)
+                NSApp.terminate(nil)
+                return
+            }
+            
+            button.title = "⎇"
+            button.target = self
+            button.action = #selector(displayMenu)
+        }
 
-        io_service = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("YogaVPC"))
         if io_service != 0 {
             var CFProps : Unmanaged<CFMutableDictionary>? = nil
             if (kIOReturnSuccess == IORegistryEntryCreateCFProperties(io_service, &CFProps, kCFAllocatorDefault, 0) && CFProps != nil) {
@@ -90,6 +125,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                         vClass.title = "Class: Think"
                     default:
                         vClass.title = "Class: Unknown"
+                        os_log("Unknown class", type: .error)
                         break
                     }
                 }
@@ -102,6 +138,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if connect != 0 {
             IOServiceClose(connect);
         }
+    }
+
+    func loadConfig() {
+        if defaults.object(forKey: "FirstLaunch") == nil {
+            os_log("First launch", type: .info)
+            defaults.setValue(false, forKey: "FirstLaunch")
+            defaults.setValue(false, forKey: "HideIcon")
+            defaults.setValue(false, forKey: "StartAtLogin")
+        }
+        vStartAtLogin.state = defaults.bool(forKey: "StartAtLogin") ? .on : .off
     }
 
     func registerNotification() {
@@ -120,10 +166,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     // from https://github.com/MonitorControl/MonitorControl
-    func setStartAtLogin(enabled: Bool) {
+    func setStartAtLogin(enabled: Bool) -> Bool {
         let identifier = "\(Bundle.main.bundleIdentifier!)Helper" as CFString
-        SMLoginItemSetEnabled(identifier, enabled)
-        os_log("Toggle start at login state: %{public}@", type: .info, enabled ? "on" : "off")
+        if SMLoginItemSetEnabled(identifier, enabled) {
+            os_log("Toggle start at login state: %{public}@", type: .info, enabled ? "on" : "off")
+            return true
+        } else {
+            os_log("Toggle start at login failed", type: .error)
+            return false
+        }
     }
 }
 
@@ -203,5 +254,6 @@ func notificationCallback (_ port : CFMachPort?, _ msg : UnsafeMutableRawPointer
         OSD(prompt)
     } else {
         OSD("Event unknown")
+        os_log("Event unknown", type: .error)
     }
 }
