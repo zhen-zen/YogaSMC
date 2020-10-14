@@ -352,8 +352,8 @@ func eventActuator(_ desc: eventDesc, _ conf: UnsafePointer<notificationConfig?>
     switch desc.action {
     case .nothing:
         os_log("%s: Do nothing", type: .info, desc.name)
-    case .micMute:
-        os_log("%s: Toggle Mic mute", type: .info, desc.name)
+    default:
+        os_log("%s: Not implmented", type: .info, desc.name)
     }
 }
 
