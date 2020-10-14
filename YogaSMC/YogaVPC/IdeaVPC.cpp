@@ -564,13 +564,13 @@ void IdeaVPC::updateVPC() {
     UInt32 retries = 0;
 
     if (!read_ec_data(VPCCMD_R_VPC1, &vpc1, &retries) || !read_ec_data(VPCCMD_R_VPC2, &vpc2, &retries)) {
-        AlwaysLog("Failed to read VPC %d", retries);
+        AlwaysLog("Failed to read VPC %lld", retries);
         return;
     }
 
     vpc1 = (vpc2 << 8) | vpc1;
 #ifdef DEBUG
-    AlwaysLog("read VPC EC result: 0x%x %d", vpc1, retries);
+    AlwaysLog("read VPC EC result: 0x%x %lld", vpc1, retries);
     setProperty("VPCstatus", vpc1, 32);
 #endif
 
@@ -653,7 +653,7 @@ void IdeaVPC::updateVPC() {
     }
 }
 
-bool IdeaVPC::read_ec_data(UInt32 cmd, UInt32 *result, UInt8 *retries) {
+bool IdeaVPC::read_ec_data(UInt32 cmd, UInt32 *result, UInt32 *retries) {
     if (!method_vpcw(1, cmd))
         return false;
 
@@ -677,7 +677,7 @@ bool IdeaVPC::read_ec_data(UInt32 cmd, UInt32 *result, UInt8 *retries) {
     return false;
 }
 
-bool IdeaVPC::write_ec_data(UInt32 cmd, UInt32 value, UInt8 *retries) {
+bool IdeaVPC::write_ec_data(UInt32 cmd, UInt32 value, UInt32 *retries) {
     UInt32 result;
 
     if (!method_vpcw(0, value))
