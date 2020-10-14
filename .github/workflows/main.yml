@@ -81,3 +81,25 @@ jobs:
         path: |
           build/Release/*.dSYM
           build/Release/LICENSE
+  analyze:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Download MacKernelSDK
+      run: git clone --depth 1 https://github.com/acidanthera/MacKernelSDK.git
+    - name: Download Lilu / VirtualSMC SDK (script from hieplpvip/AsusSMC (Acidanthera/Lilu))
+      run: src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/hieplpvip/AsusSMC/master/Scripts/bootstrap.sh) && eval "$src" || exit 1
+    - name: Xcodebuild Debug Analyze
+      uses: sersoft-gmbh/xcodebuild-action@v1
+      with:
+        project: YogaSMC.xcodeproj
+        configuration: Debug
+        build-settings: -target BuildAll
+        action: analyze
+    - name: Xcodebuild Release Analyze
+      uses: sersoft-gmbh/xcodebuild-action@v1
+      with:
+        project: YogaSMC.xcodeproj
+        configuration: Release
+        build-settings: -target BuildAll
+        action: analyze
