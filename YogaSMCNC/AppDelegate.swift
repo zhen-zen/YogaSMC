@@ -239,7 +239,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func registerNotification() -> Bool {
         if conf.connect != 0 {
-            var portContext = CFMachPortContext(version: 0, info: &conf, retain: nil, release: nil, copyDescription: nil)
+            // fix warning per https://forums.swift.org/t/swift-5-2-pointers-and-coretext/34862
+            var portContext : CFMachPortContext = withUnsafeMutableBytes(of: &conf) { conf in
+                CFMachPortContext(version: 0, info: conf.baseAddress, retain: nil, release: nil, copyDescription: nil)
+            }
             if let notificationPort = CFMachPortCreate(kCFAllocatorDefault, notificationCallback, &portContext, nil)  {
                 if let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, notificationPort, 0) {
                     CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .defaultMode);
@@ -389,10 +392,10 @@ let IdeaEvents : Dictionary<UInt32, eventDesc> = [
     0x0200 : eventDesc("Screen Off", nil),
     0x0201 : eventDesc("Screen On", nil),
     0x0500 : eventDesc("TouchPad Off", nil), // Off
-    0x0501 : eventDesc("TouchPad On", nil), // On
+    0x0501 : eventDesc("TouchPad On", nil), // Same as 0x0A00
     0x0700 : eventDesc("Camera", nil, .camera),
     0x0800 : eventDesc("Mic Mute", nil, .micMute),
-    0x0A00 : eventDesc("TouchPad On", nil, .nothing, false), // Same as 0x501
+    0x0A00 : eventDesc("TouchPad On", nil, .nothing, false),
     0x0D00 : eventDesc("Airplane Mode", nil, .wireless)
 ]
 
