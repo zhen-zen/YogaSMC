@@ -367,7 +367,9 @@ struct eventDesc {
     let display : Bool
     init(_ name: String, _ image: String?, _ action: eventAction = .nothing, _ display: Bool = true) {
         self.name = name as NSString
-        if let path = Bundle.main.resourcePath,
+        if image?.hasPrefix("/") {
+            self.img = image
+        } else if let path = Bundle.main.resourcePath,
            path.hasPrefix("/Applications"),
             let img = image {
             self.image = "\(path)/\(img)" as NSString
