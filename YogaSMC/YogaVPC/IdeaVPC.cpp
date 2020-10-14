@@ -581,7 +581,7 @@ void IdeaVPC::updateVPC() {
 
     for (int vpc_bit = 0; vpc_bit < 16; vpc_bit++) {
         if (BIT(vpc_bit) & vpc1) {
-            notifier = vpc_bit << 8
+            notifier = vpc_bit << 8;
             switch (vpc_bit) {
                 case 0:
                     if (!read_ec_data(VPCCMD_R_SPECIAL_BUTTONS, &result, &retries)) {
@@ -590,7 +590,6 @@ void IdeaVPC::updateVPC() {
                         switch (result) {
                             case 0x40:
                                 AlwaysLog("Fn+Q cooling");
-                                // TODO: fan status switch
                                 break;
 
                             default:
@@ -622,17 +621,14 @@ void IdeaVPC::updateVPC() {
                     else
                         AlwaysLog("Fn+F6 touchpad 0x%x %s", result, result ? "on" : "off");
                     notifier |= result;
-                    // functional, TODO: manually toggle
                     break;
 
                 case 7:
                     AlwaysLog("Fn+F8 camera");
-                    // TODO: camera status switch
                     break;
 
                 case 8: // ENERGY_EVENT_MIC
                     AlwaysLog("Fn+F4 mic");
-                    // TODO: mic status switch
                     break;
 
                 case 10:
@@ -645,7 +641,6 @@ void IdeaVPC::updateVPC() {
 
                 case 13:
                     AlwaysLog("Fn+F7 airplane mode");
-                    // TODO: airplane mode switch
                     break;
 
                 default:
