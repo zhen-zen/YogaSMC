@@ -137,6 +137,20 @@ class YogaSMCPane : NSPreferencePane {
     @IBOutlet weak var vHideMenubarIcon: NSButton!
     @IBAction func toggleMenubarIcon(_ sender: NSButton) {
         defaults.setValue((vHideMenubarIcon.state == .on), forKey: "HideIcon")
+        let source = """
+                            tell application "YogaSMCNC"
+                                quit
+                            end tell
+                            tell application "YogaSMCNC" to activate
+                     """
+        if let script = NSAppleScript(source: source) {
+            var error: NSDictionary?
+            script.executeAndReturnError(&error)
+            if error != nil {
+                os_log("Failed to quit YogaSMC", type: .error)
+            }
+        }
+
     }
     
     // Idea
