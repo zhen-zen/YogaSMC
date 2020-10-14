@@ -189,12 +189,12 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                 getPropertyNumber(readECPrompt);
 
                 UInt32 result;
-                UInt8 retries = 0;
+                UInt32 retries = 0;
 
                 if (read_ec_data(value->unsigned32BitValue(), &result, &retries))
-                    AlwaysLog("%s 0x%x result: 0x%x %d", readECPrompt, value->unsigned32BitValue(), result, retries);
+                    AlwaysLog("%s 0x%x result: 0x%x %lld", readECPrompt, value->unsigned32BitValue(), result, retries);
                 else
-                    AlwaysLog("%s failed 0x%x %d", readECPrompt, value->unsigned32BitValue(), retries);
+                    AlwaysLog("%s failed 0x%x %lld", readECPrompt, value->unsigned32BitValue(), retries);
             } else if (key->isEqualTo(writeECPrompt)) {
                 if (ECLock)
                     continue;
@@ -202,7 +202,7 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                 getPropertyNumber(writeECPrompt);
 
                 UInt32 command, data;
-                UInt8 retries = 0;
+                UInt32 retries = 0;
                 command = value->unsigned32BitValue() >> 8;
                 data = value->unsigned32BitValue() & 0xff;
 
