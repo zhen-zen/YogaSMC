@@ -215,8 +215,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             var dict : [String: Any] = [:]
             dict["id"] = Int(k)
             dict["name"] = v.name
-            if v.image != nil {
-                dict["image"] = v.image
+            if let res = v.image {
+                if let path = Bundle.main.resourcePath,
+                   res.hasPrefix(path) {
+                    dict["image"] = res.lastPathComponent
+               } else {
+                    dict["image"] = res
+               }
             }
             dict["action"] = v.action.rawValue
             dict["display"] = v.display
@@ -367,12 +372,16 @@ struct eventDesc {
     let display : Bool
     init(_ name: String, _ image: String?, _ action: eventAction = .nothing, _ display: Bool = true) {
         self.name = name as NSString
-        if image?.hasPrefix("/") {
-            self.img = image
-        } else if let path = Bundle.main.resourcePath,
-           path.hasPrefix("/Applications"),
-            let img = image {
-            self.image = "\(path)/\(img)" as NSString
+        if let img = image {
+            if img.hasPrefix("/") {
+                self.image = img as NSString
+            } else if let path = Bundle.main.path(forResource: img, ofType: nil),
+                      path.hasPrefix("/Applications") {
+                self.image = path as NSString
+            } else {
+                os_log("Incompatible res path: %s", type: .error, img)
+                self.image = nil
+            }
         } else {
             self.image = nil
         }
