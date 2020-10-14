@@ -199,7 +199,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         if let arr = defaults.object(forKey: "Events") as? [[String: Any]] {
             for v in arr {
-                conf.events[v["id"] as! UInt32] = eventDesc(v["name"] as! String, v["image"] as? String, eventAction(rawValue: v["action"] as! Int) ?? .nothing)
+                conf.events[v["id"] as! UInt32] = eventDesc(v["name"] as! String, v["image"] as? String, eventAction(rawValue: v["action"] as! Int) ?? .nothing, v["display"] as? Bool ?? true)
             }
             os_log("Loaded %d events", type: .info, conf.events.capacity)
         } else {
@@ -217,6 +217,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 dict["image"] = v.image
             }
             dict["action"] = v.action.rawValue
+            dict["display"] = v.display
             array.append(dict)
         }
         defaults.setValue(array, forKey: "Events")
@@ -343,7 +344,9 @@ enum eventAction : Int {
 }
 
 func eventActuator(_ desc: eventDesc, _ conf: UnsafePointer<notificationConfig?>) {
-    conf.pointee?.helper.showImageAtPath(desc.image ?? defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: desc.name)
+    if desc.display {
+        conf.pointee?.helper.showImageAtPath(desc.image ?? defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: desc.name)
+    }
     switch desc.action {
     case .nothing:
         os_log("%s: Do nothing", type: .info, desc.name)
@@ -356,7 +359,8 @@ struct eventDesc {
     let name : NSString
     let image : NSString?
     let action : eventAction
-    init(_ name: String, _ image: String?, _ action: eventAction = .nothing) {
+    let display : Bool
+    init(_ name: String, _ image: String?, _ action: eventAction = .nothing, _ display: Bool = true) {
         self.name = name as NSString
         if let path = Bundle.main.resourcePath,
            path.hasPrefix("/Applications"),
@@ -366,6 +370,7 @@ struct eventDesc {
             self.image = nil
         }
         self.action = action
+        self.display = display
     }
 }
 
