@@ -14,7 +14,6 @@ import ServiceManagement
 class AppDelegate: NSObject, NSApplicationDelegate {
     let defaults = UserDefaults(suiteName: "org.zhen.YogaSMC")!
     var conf = notificationConfig()
-    var notified = false
 
     var statusItem: NSStatusItem?
     @IBOutlet weak var appMenu: NSMenu!
@@ -161,16 +160,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     case "IdeaVPC":
                         if conf.events.isEmpty {
                             conf.events = IdeaEvents
-                            saveEvents()
                         }
-                        notified = registerNotification()
+                        _ = registerNotification()
                         vClass.title = "Class: Idea"
                     case "ThinkVPC":
                         if conf.events.isEmpty {
                             conf.events = ThinkEvents
-                            saveEvents()
                         }
-                        notified = registerNotification()
+                        _ = registerNotification()
                         vFan.isHidden = false
                         updateFan()
                         vClass.title = "Class: Think"
@@ -190,9 +187,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if conf.connect != 0 {
             IOServiceClose(conf.connect);
         }
+        if !conf.events.isEmpty,
+           Bundle.main.bundlePath.hasPrefix("/Applications") {
+            saveEvents()
+        }
     }
 
     func loadEvents() {
+        if !Bundle.main.bundlePath.hasPrefix("/Applications") {
+            conf.helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 2000, withText: "Please move the app \n into Applications")
+        }
         if let arr = defaults.object(forKey: "Events") as? [[String: Any]] {
             for v in arr {
                 conf.events[v["id"] as! UInt32] = eventDesc(v["name"] as! String, v["image"] as? String, eventAction(rawValue: v["action"] as! Int) ?? .nothing)
@@ -204,11 +208,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func saveEvents() {
-        if !Bundle.main.bundlePath.hasPrefix("/Applications") {
-            conf.helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: "Please move the app \n into Applications")
-            return
-        }
-
         var array : [[String: Any]] = []
         for (k, v) in conf.events {
             var dict : [String: Any] = [:]
@@ -317,24 +316,25 @@ let defaultImage : NSString = "/System/Library/CoreServices/OSDUIHelper.app/Cont
 }
 
 func notificationCallback(_ port: CFMachPort?, _ msg: UnsafeMutableRawPointer?, _ size: CFIndex, _ info: UnsafeMutableRawPointer?) {
-    var conf = info!.assumingMemoryBound(to: notificationConfig?.self).pointee
-    if conf != nil {
+    let conf = info!.assumingMemoryBound(to: notificationConfig?.self)
+    if conf.pointee != nil  {
         if let notification = msg?.load(as: SMCNotificationMessage.self) {
-            if let desc = conf?.events[notification.event] {
-                eventActuator(desc, &conf!)
+            if let desc = conf.pointee?.events[notification.event] {
+                eventActuator(desc, conf)
             } else {
-                let prompt = String(format:"Event 0x%04x", notification.event) as NSString
-                conf!.helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: prompt)
+                let name = String(format:"Event 0x%04x", notification.event)
+                conf.pointee?.helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: name as NSString)
+                conf.pointee?.events[notification.event] = eventDesc(name, nil)
                 #if DEBUG
                 os_log("Event 0x%04x", type: .debug, notification.event)
                 #endif
             }
         } else {
-            conf!.helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: "Null Event")
+            conf.pointee?.helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: "Null Event")
             os_log("Null Event", type: .error)
         }
     } else {
-        os_log("Invalid helper", type: .error)
+        os_log("Invalid conf", type: .error)
     }
 }
 
@@ -342,13 +342,13 @@ enum eventAction : Int {
     case nothing, micMute
 }
 
-func eventActuator(_ desc: eventDesc, _ conf: UnsafePointer<notificationConfig>) {
-    conf.pointee.helper.showImageAtPath(desc.image ?? defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: desc.name)
+func eventActuator(_ desc: eventDesc, _ conf: UnsafePointer<notificationConfig?>) {
+    conf.pointee?.helper.showImageAtPath(desc.image ?? defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: desc.name)
     switch desc.action {
     case .nothing:
-        os_log("Do nothing", type: .info)
+        os_log("%s: Do nothing", type: .info, desc.name)
     case .micMute:
-        os_log("Toggle Mic mute", type: .info)
+        os_log("%s: Toggle Mic mute", type: .info, desc.name)
     }
 }
 
@@ -359,7 +359,7 @@ struct eventDesc {
     init(_ name: String, _ image: String?, _ action: eventAction = .nothing) {
         self.name = name as NSString
         if let path = Bundle.main.resourcePath,
-           !path.hasPrefix("/Users"),
+           path.hasPrefix("/Applications"),
             let img = image {
             self.image = "\(path)/\(img)" as NSString
         } else {
