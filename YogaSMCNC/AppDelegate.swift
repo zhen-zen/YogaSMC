@@ -17,6 +17,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     let io_service : io_service_t = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("YogaVPC"))
     var helper : OSDUIHelperProtocol!
 
+    var config : notificationConfig?
     var notified = false
 
     var statusItem: NSStatusItem?
@@ -162,9 +163,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     vVersion.title = "Version: \(version ?? "Unknown")"
                     switch props["IOClass"] as? NSString {
                     case "IdeaVPC":
+                        config = notificationConfig(connect: connect, events: IdeaEvents, helper: helper, io_service: io_service)
                         notified = registerNotification()
                         vClass.title = "Class: Idea"
                     case "ThinkVPC":
+                        config = notificationConfig(connect: connect, events: ThinkEvents, helper: helper, io_service: io_service)
                         notified = registerNotification()
                         vFan.isHidden = false
                         updateFan()
@@ -199,7 +202,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func registerNotification() -> Bool {
         if connect != 0 {
-            var portContext = CFMachPortContext(version: 0, info: &helper, retain: nil, release: nil, copyDescription: nil)
+            var portContext = CFMachPortContext(version: 0, info: &config, retain: nil, release: nil, copyDescription: nil)
             if let notificationPort = CFMachPortCreate(kCFAllocatorDefault, notificationCallback, &portContext, nil)  {
                 if let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, notificationPort, 0) {
                     CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .defaultMode);
@@ -228,7 +231,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
 //    After move to /Applications
 //    let path = "\(Bundle.main.resourcePath ?? "/Applications/YogaSMCNC.app/Contents/Resources")/kBrightOff.pdf"
-let defaultImage = "/System/Library/CoreServices/OSDUIHelper.app/Contents/Resources/kBrightOff.pdf" as NSString
+let defaultImage : NSString = "/System/Library/CoreServices/OSDUIHelper.app/Contents/Resources/kBrightOff.pdf"
+let testImage : NSString = "/System/Library/CoreServices/OSDUIHelper.app/Contents/Resources/kBright.pdf"
 
 // from https://ffried.codes/2018/01/20/the-internals-of-the-macos-hud/
 @objc enum OSDImage: CLongLong {
@@ -281,16 +285,37 @@ let defaultImage = "/System/Library/CoreServices/OSDUIHelper.app/Contents/Resour
 }
 
 func notificationCallback (_ port : CFMachPort?, _ msg : UnsafeMutableRawPointer?, _ size : CFIndex, _ info : UnsafeMutableRawPointer?) {
-    if let helper = info!.assumingMemoryBound(to: OSDUIHelperProtocol?.self).pointee {
+    if let conf = info!.assumingMemoryBound(to: notificationConfig?.self).pointee {
         if let notification = msg?.load(as: SMCNotificationMessage.self) {
-            let prompt = String(format:"Event 0x%04x", notification.event) as NSString
-            helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: prompt)
-            #if DEBUG
-            os_log("Event 0x%04x", type: .debug, notification.event)
-            #endif
+            if let desc = conf.events[notification.event] {
+                conf.helper.showImageAtPath(desc.Image ?? defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: desc.Name)
+            } else {
+                let prompt = String(format:"Event 0x%04x", notification.event) as NSString
+                conf.helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: prompt)
+                #if DEBUG
+                os_log("Event 0x%04x", type: .debug, notification.event)
+                #endif
+            }
         } else {
-            helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: "Event unknown")
-            os_log("Event unknown", type: .error)
+            conf.helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: "Null Event")
+            os_log("Null Event", type: .error)
         }
+    } else {
+        os_log("Invalid helper", type: .error)
     }
 }
+
+struct eventDesc {
+    let Name : NSString
+    let Image : NSString?
+}
+
+struct notificationConfig {
+    let connect : io_connect_t
+    let events : Dictionary<UInt32, eventDesc>
+    let helper : OSDUIHelperProtocol
+    let io_service : io_service_t
+}
+
+let IdeaEvents : Dictionary<UInt32, eventDesc> = [0x2 : eventDesc(Name: "Keyboard Backlight", Image: testImage), 0x100 : eventDesc(Name: "Mic Mute", Image: nil)]
+let ThinkEvents : Dictionary<UInt32, eventDesc> = [0x101B : eventDesc(Name: "Mic Mute", Image: nil)]
