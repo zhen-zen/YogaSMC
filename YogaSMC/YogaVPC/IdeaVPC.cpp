@@ -561,7 +561,7 @@ bool IdeaVPC::toggleFnlock() {
 
 void IdeaVPC::updateVPC() {
     UInt32 vpc1, vpc2, result, notifier;
-    UInt8 retries = 0;
+    UInt32 retries = 0;
 
     if (!read_ec_data(VPCCMD_R_VPC1, &vpc1, &retries) || !read_ec_data(VPCCMD_R_VPC2, &vpc2, &retries)) {
         AlwaysLog("Failed to read VPC %d", retries);
@@ -669,9 +669,9 @@ bool IdeaVPC::read_ec_data(UInt32 cmd, UInt32 *result, UInt8 *retries) {
             return method_vpcr(0, result);
 
         *retries = *retries + 1;
-        IODelay(250);
+        IODelay(1000);
         clock_get_uptime(&now_abs);
-    } while (now_abs < deadline || *retries < 5);
+    } while (now_abs < deadline);
 
     AlwaysLog(timeoutPrompt, readECPrompt, cmd);
     return false;
@@ -698,9 +698,9 @@ bool IdeaVPC::write_ec_data(UInt32 cmd, UInt32 value, UInt8 *retries) {
             return true;
 
         *retries = *retries + 1;
-        IODelay(250);
+        IODelay(1000);
         clock_get_uptime(&now_abs);
-    } while (now_abs < deadline || *retries < 5);
+    } while (now_abs < deadline);
 
     AlwaysLog(timeoutPrompt, writeECPrompt, cmd);
     return false;
