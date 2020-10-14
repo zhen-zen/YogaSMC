@@ -284,20 +284,21 @@ let testImage : NSString = "/System/Library/CoreServices/OSDUIHelper.app/Content
     @objc func showImage(_ img: OSDImage, onDisplayID: CGDirectDisplayID, priority: CUnsignedInt, msecUntilFade: CUnsignedInt)
 }
 
-func notificationCallback (_ port : CFMachPort?, _ msg : UnsafeMutableRawPointer?, _ size : CFIndex, _ info : UnsafeMutableRawPointer?) {
-    if let conf = info!.assumingMemoryBound(to: notificationConfig?.self).pointee {
+func notificationCallback (_ port: CFMachPort?, _ msg: UnsafeMutableRawPointer?, _ size: CFIndex, _ info: UnsafeMutableRawPointer?) {
+    var conf = info!.assumingMemoryBound(to: notificationConfig?.self).pointee
+    if conf != nil {
         if let notification = msg?.load(as: SMCNotificationMessage.self) {
-            if let desc = conf.events[notification.event] {
-                conf.helper.showImageAtPath(desc.Image ?? defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: desc.Name)
+            if let desc = conf?.events[notification.event] {
+                eventActuator(desc, &conf!)
             } else {
                 let prompt = String(format:"Event 0x%04x", notification.event) as NSString
-                conf.helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: prompt)
+                conf!.helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: prompt)
                 #if DEBUG
                 os_log("Event 0x%04x", type: .debug, notification.event)
                 #endif
             }
         } else {
-            conf.helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: "Null Event")
+            conf!.helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: "Null Event")
             os_log("Null Event", type: .error)
         }
     } else {
@@ -305,9 +306,29 @@ func notificationCallback (_ port : CFMachPort?, _ msg : UnsafeMutableRawPointer
     }
 }
 
+enum eventAction {
+    case nothing, micMute
+}
+
+func eventActuator (_ desc: eventDesc, _ conf: UnsafePointer<notificationConfig>) {
+    conf.pointee.helper.showImageAtPath(desc.image ?? defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: desc.name)
+    switch desc.action {
+    case .nothing:
+        os_log("Do nothing", type: .info)
+    case .micMute:
+        os_log("Toggle Mic mute", type: .info)
+    }
+}
+
 struct eventDesc {
-    let Name : NSString
-    let Image : NSString?
+    let name : NSString
+    let image : NSString?
+    let action : eventAction
+    init (_ name: NSString, _ image: NSString?, _ action: eventAction = .nothing) {
+        self.name = name
+        self.image = image
+        self.action = action
+    }
 }
 
 struct notificationConfig {
@@ -317,5 +338,5 @@ struct notificationConfig {
     let io_service : io_service_t
 }
 
-let IdeaEvents : Dictionary<UInt32, eventDesc> = [0x2 : eventDesc(Name: "Keyboard Backlight", Image: testImage), 0x100 : eventDesc(Name: "Mic Mute", Image: nil)]
-let ThinkEvents : Dictionary<UInt32, eventDesc> = [0x101B : eventDesc(Name: "Mic Mute", Image: nil)]
+let IdeaEvents : Dictionary<UInt32, eventDesc> = [0x2 : eventDesc("Keyboard Backlight", testImage), 0x100 : eventDesc("Mic Mute", nil, .micMute)]
+let ThinkEvents : Dictionary<UInt32, eventDesc> = [0x101B : eventDesc("Mic Mute", nil)]
