@@ -563,12 +563,17 @@ void IdeaVPC::updateVPC() {
     UInt32 vpc1, vpc2, result, notifier;
     UInt8 retries = 0;
 
-    if (!read_ec_data(VPCCMD_R_VPC1, &vpc1, &retries) || !read_ec_data(VPCCMD_R_VPC2, &vpc2, &retries)) {
-        AlwaysLog("Failed to read VPC %d", retries);
+    if (!read_ec_data(VPCCMD_R_VPC1, &vpc1, &retries)) {
+        AlwaysLog("Failed to read VPC1 after %d attempts", retries);
         return;
     }
 
-    vpc1 = (vpc2 << 8) | vpc1;
+    if (!read_ec_data(VPCCMD_R_VPC2, &vpc2, &retries)) {
+        AlwaysLog("Failed to read VPC2 after %d attempts", retries);
+    } else {
+        vpc1 = (vpc2 << 8) | vpc1;
+    }
+
 #ifdef DEBUG
     AlwaysLog("read VPC EC result: 0x%x %d", vpc1, retries);
     setProperty("VPCstatus", vpc1, 32);
