@@ -560,7 +560,7 @@ bool IdeaVPC::toggleFnlock() {
 }
 
 void IdeaVPC::updateVPC() {
-    UInt32 vpc1, vpc2, result;
+    UInt32 vpc1, vpc2, result, notifier;
     UInt8 retries = 0;
 
     if (!read_ec_data(VPCCMD_R_VPC1, &vpc1, &retries) || !read_ec_data(VPCCMD_R_VPC2, &vpc2, &retries)) {
@@ -579,11 +579,9 @@ void IdeaVPC::updateVPC() {
         return;
     }
 
-    if (client != nullptr)
-        client->sendNotification(vpc1);
-
     for (int vpc_bit = 0; vpc_bit < 16; vpc_bit++) {
         if (BIT(vpc_bit) & vpc1) {
+            notifier = vpc_bit << 8
             switch (vpc_bit) {
                 case 0:
                     if (!read_ec_data(VPCCMD_R_SPECIAL_BUTTONS, &result, &retries)) {
@@ -599,6 +597,7 @@ void IdeaVPC::updateVPC() {
                                 AlwaysLog("Special button 0x%x", result);
                                 break;
                         }
+                        notifier |= result;
                     }
                     break;
 
@@ -613,6 +612,7 @@ void IdeaVPC::updateVPC() {
                         AlwaysLog("Failed to read VPCCMD_R_BL_POWER %d", retries);
                     else
                         AlwaysLog("Open lid? 0x%x %s", result, result ? "on" : "off");
+                    notifier |= result;
                     // functional, TODO: turn off screen on demand
                     break;
 
@@ -621,6 +621,7 @@ void IdeaVPC::updateVPC() {
                         AlwaysLog("Failed to read VPCCMD_R_TOUCHPAD %d", retries);
                     else
                         AlwaysLog("Fn+F6 touchpad 0x%x %s", result, result ? "on" : "off");
+                    notifier |= result;
                     // functional, TODO: manually toggle
                     break;
 
@@ -635,8 +636,7 @@ void IdeaVPC::updateVPC() {
                     break;
 
                 case 10:
-                    AlwaysLog("Fn+F6 touchpad on");
-                    // functional, identical to case 5?
+                    AlwaysLog("Touchpad on");
                     break;
 
                 case 12: // ENERGY_EVENT_KEYBDLED
@@ -652,6 +652,8 @@ void IdeaVPC::updateVPC() {
                     AlwaysLog("Unknown VPC event %d", vpc_bit);
                     break;
             }
+            if (client != nullptr)
+                client->sendNotification(notifier);
         }
     }
 }

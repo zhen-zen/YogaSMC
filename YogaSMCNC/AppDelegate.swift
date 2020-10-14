@@ -345,7 +345,7 @@ func notificationCallback(_ port: CFMachPort?, _ msg: UnsafeMutableRawPointer?, 
 }
 
 enum eventAction : Int {
-    case nothing, micMute
+    case nothing, micMute, camera, wireless, thermal
 }
 
 func eventActuator(_ desc: eventDesc, _ conf: UnsafePointer<notificationConfig?>) {
@@ -383,5 +383,21 @@ struct notificationConfig {
     var io_service : io_service_t = 0
 }
 
-let IdeaEvents : Dictionary<UInt32, eventDesc> = [0x2 : eventDesc("Keyboard Backlight", "kBright.pdf"), 0x100 : eventDesc("Mic Mute", nil, .micMute)]
-let ThinkEvents : Dictionary<UInt32, eventDesc> = [0x1005 : eventDesc("Network", nil), 0x1012 : eventDesc("Keyboard Backlight", "kBright.pdf"), 0x101B : eventDesc("Mic Mute", nil)]
+let IdeaEvents : Dictionary<UInt32, eventDesc> = [
+    0x0040 : eventDesc("Fn-Q Cooling", nil, .thermal),
+    0x0100 : eventDesc("Keyboard Backlight", "kBright.pdf"),
+    0x0200 : eventDesc("Screen Off", nil),
+    0x0201 : eventDesc("Screen On", nil),
+    0x0500 : eventDesc("TouchPad Off", nil), // Off
+    0x0501 : eventDesc("TouchPad On", nil), // On
+    0x0700 : eventDesc("Camera", nil, .camera),
+    0x0800 : eventDesc("Mic Mute", nil, .micMute),
+    0x0A00 : eventDesc("TouchPad On", nil, .nothing, false), // Same as 0x501
+    0x0D00 : eventDesc("Airplane Mode", nil, .wireless)
+]
+
+let ThinkEvents : Dictionary<UInt32, eventDesc> = [
+    0x1005 : eventDesc("Network", nil, .wireless),
+    0x1012 : eventDesc("Keyboard Backlight", "kBright.pdf"),
+    0x101B : eventDesc("Mic Mute", nil, .micMute)
+]
