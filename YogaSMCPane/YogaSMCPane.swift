@@ -124,24 +124,21 @@ func OSD(_ prompt: String) {
     helper.showImageAtPath("/System/Library/CoreServices/OSDUIHelper.app/Contents/Resources/kBright.pdf", onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 2000, withText: prompt as NSString)
 }
 
-func notificationCallback (_ port : CFMachPort?, _ msg : UnsafeMutableRawPointer?, _ size : CFIndex, _ info : UnsafeMutableRawPointer?) {
-    if let notification = msg?.load(as: SMCNotificationMessage.self) {
-        let prompt = String(format:"Event %x", notification.event)
-        OSD(prompt)
-    } else {
-        OSD("Event unknown")
-    }
-}
-
 class YogaSMCPane : NSPreferencePane {
-    var io_service : io_service_t = 0
+    let io_service = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("YogaVPC"))
+    let defaults = UserDefaults(suiteName: "org.zhen.YogaSMC")!
+
     var thinkBatteryNumber = 0
 
     @IBOutlet weak var vVersion: NSTextField!
     @IBOutlet weak var vBuild: NSTextField!
     @IBOutlet weak var vClass: NSTextField!
     @IBOutlet weak var vECRead: NSTextField!
-
+    @IBOutlet weak var vHideMenubarIcon: NSButton!
+    @IBAction func toggleMenubarIcon(_ sender: NSButton) {
+        defaults.setValue((vHideMenubarIcon.state == .on), forKey: "HideIcon")
+    }
+    
     // Idea
     @IBOutlet weak var FunctionKey: NSStackView!
     @IBOutlet weak var vFnKeyRadio: NSButton!
@@ -308,9 +305,6 @@ class YogaSMCPane : NSPreferencePane {
     }
 
     override func mainViewDidLoad() {
-//        UserDefaults.standard.set("value", forKey: "testKey")
-//        let rvalue = UserDefaults.standard.string(forKey: "testKey")
-
         super.mainViewDidLoad()
         os_log(#function, type: .info)
         // nothing
@@ -367,24 +361,6 @@ class YogaSMCPane : NSPreferencePane {
                 vMfgDate.stringValue = mfgDate
             } else {
                 vMfgDate.stringValue = "Unknown"
-            }
-        }
-    }
-
-    func registerNotification() {
-        var connect : io_connect_t = 0;
-        var notificationPort : CFMachPort?
-        if kIOReturnSuccess == IOServiceOpen(io_service, mach_task_self_, 0, &connect),
-           connect != 0{
-            if kIOReturnSuccess == IOConnectCallScalarMethod(connect, UInt32(kYSMCUCOpen), nil, 0, nil, nil) {
-                var portContext = CFMachPortContext(version: 0, info: nil, retain: nil, release: nil, copyDescription: nil)
-                notificationPort = CFMachPortCreate(kCFAllocatorDefault, notificationCallback, &portContext, nil)
-                if notificationPort != nil  {
-                    let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, notificationPort, 0);
-                    CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .defaultMode);
-                }
-                IOConnectSetNotificationPort(connect, 0, CFMachPortGetPort(notificationPort), 0);
-                //                IOServiceClose(connect)
             }
         }
     }
@@ -473,7 +449,7 @@ class YogaSMCPane : NSPreferencePane {
     func updateThinkFan() {
         var connect : io_connect_t = 0;
         if kIOReturnSuccess == IOServiceOpen(io_service, mach_task_self_, 0, &connect),
-           connect != 0{
+           connect != 0 {
             if kIOReturnSuccess == IOConnectCallScalarMethod(connect, UInt32(kYSMCUCOpen), nil, 0, nil, nil) {
                 var input : UInt64 = 0x84
                 var outputSize = 2;
@@ -497,8 +473,6 @@ class YogaSMCPane : NSPreferencePane {
     }
 
     override func awakeFromNib() {
-        io_service = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("YogaVPC"))
-
         if (io_service == 0 || !sendBoolean("Update", true, io_service)) {
             return
         }
@@ -566,17 +540,13 @@ class YogaSMCPane : NSPreferencePane {
         case "IdeaVPC":
             vClass.stringValue = "Idea"
             awakeIdea(props)
-            #if DEBUG
-//            registerNotification()
-            #else
+            #if !DEBUG
             TabView.removeTabViewItem(ThinkViewItem)
             #endif
         case "ThinkVPC":
             vClass.stringValue = "Think"
             awakeThink(props)
-            #if DEBUG
-//            registerNotification()
-            #else
+            #if !DEBUG
             TabView.removeTabViewItem(IdeaViewItem)
             #endif
         case "YogaVPC":
@@ -587,6 +557,11 @@ class YogaSMCPane : NSPreferencePane {
             vClass.stringValue = "Unsupported"
             TabView.removeTabViewItem(IdeaViewItem)
             TabView.removeTabViewItem(ThinkViewItem)
+        }
+
+        if defaults.object(forKey: "HideIcon") != nil {
+            vHideMenubarIcon.isEnabled = true
+            vHideMenubarIcon.state = defaults.bool(forKey: "HideIcon") ? .on : .off
         }
     }
 }

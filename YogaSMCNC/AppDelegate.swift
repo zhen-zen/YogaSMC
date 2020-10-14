@@ -127,7 +127,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         loadConfig()
         
-        if !defaults.bool(forKey: "HideIcon") {
+        if defaults.bool(forKey: "HideIcon") {
+            os_log("Icon hidden", type: .info)
+        } else {
             statusItem = NSStatusBar.system.statusItem(withLength: -1)
             guard let button = statusItem?.button else {
                 os_log("Status bar item failed. Try removing some menu bar item.", type: .fault)
@@ -321,6 +323,9 @@ func notificationCallback(_ port: CFMachPort?, _ msg: UnsafeMutableRawPointer?, 
     if conf.pointee != nil  {
         if let notification = msg?.load(as: SMCNotificationMessage.self) {
             if let desc = conf.pointee?.events[notification.event] {
+                if desc.display {
+                    conf.pointee?.helper.showImageAtPath(desc.image ?? defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: desc.name)
+                }
                 eventActuator(desc, conf)
             } else {
                 let name = String(format:"Event 0x%04x", notification.event)
@@ -344,9 +349,6 @@ enum eventAction : Int {
 }
 
 func eventActuator(_ desc: eventDesc, _ conf: UnsafePointer<notificationConfig?>) {
-    if desc.display {
-        conf.pointee?.helper.showImageAtPath(desc.image ?? defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: desc.name)
-    }
     switch desc.action {
     case .nothing:
         os_log("%s: Do nothing", type: .info, desc.name)
