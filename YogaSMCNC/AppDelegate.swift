@@ -163,8 +163,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                             conf.events = IdeaEvents
                             saveEvents()
                         }
-//                        saveEvents(IdeaEvents)
-//                        config = notificationConfig(connect: connect, events: IdeaEvents, helper: helper, io_service: io_service)
                         notified = registerNotification()
                         vClass.title = "Class: Idea"
                     case "ThinkVPC":
@@ -172,7 +170,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                             conf.events = ThinkEvents
                             saveEvents()
                         }
-//                        config = notificationConfig(connect: connect, events: ThinkEvents, helper: helper, io_service: io_service)
                         notified = registerNotification()
                         vFan.isHidden = false
                         updateFan()
@@ -202,11 +199,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
             os_log("Loaded %d events", type: .info, conf.events.capacity)
         } else {
-            os_log("Events not found in preference", type: .info)
+            os_log("Events not found in preference, loading defaults", type: .info)
         }
     }
 
     func saveEvents() {
+        if !Bundle.main.bundlePath.hasPrefix("/Applications") {
+            conf.helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: "Please move the app \n into Applications")
+            return
+        }
+
         var array : [[String: Any]] = []
         for (k, v) in conf.events {
             var dict : [String: Any] = [:]
