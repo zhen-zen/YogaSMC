@@ -651,10 +651,11 @@ void ThinkVPC::updateVPC() {
             switch (result) {
                 case TP_HKEY_EV_KBD_LIGHT:
                     updateBacklight();
-
-                case TP_HKEY_EV_BRGHT_UP:
-                case TP_HKEY_EV_BRGHT_DOWN:
                     break;
+
+                case TP_HKEY_EV_SLEEP:
+                    if (!client)
+                        vpc->evaluateObject("SLPP");
 
                 case TP_HKEY_EV_MIC_MUTE:
                     if (!hotkey_legacy)
@@ -794,7 +795,7 @@ void ThinkVPC::updateVPC() {
             break;
     }
 
-    if (client != nullptr)
+    if (client)
         client->sendNotification(result);
 }
 
