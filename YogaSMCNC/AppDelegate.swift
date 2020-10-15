@@ -381,19 +381,19 @@ let IdeaEvents : Dictionary<UInt32, eventDesc> = [
 ]
 
 let ThinkEvents : Dictionary<UInt32, eventDesc> = [
-    0x1004 : eventDesc("Sleep", action: .sleep),
-    0x1005 : eventDesc("Airplane Mode", action: .wireless),
-    0x1007 : eventDesc("Second Display", action: .mirror),
-    0x1010 : eventDesc("Brightness Up", display: false),
-    0x1011 : eventDesc("Brightness Down", display: false),
-    0x1012 : eventDesc("Keyboard Backlight", "kBright.pdf", action: .backlit, display: false),
-    0x101B : eventDesc("Mic Mute", action: .micmute),
-    0x101d : eventDesc("Settings", action: .prefpane),
-    0x101e : eventDesc("Spotlight", action: .spotlight),
-    0x101f : eventDesc("Mission Control", action: .mission),
-    0x1020 : eventDesc("Launchpad", action: .launchpad),
-    0x1311 : eventDesc("Custom Hotkey", action: .nothing, script: prefpaneAS),
-    0x1314 : eventDesc("Bluetooth", action: .bluetooth),
-    0x1315 : eventDesc("Keyboard Disable", action: .keyboard),
-    0x6060 : eventDesc("FnLock"),
+    TP_HKEY_EV_SLEEP.rawValue : eventDesc("Sleep", action: .sleep), // 0x1004
+    TP_HKEY_EV_NETWORK.rawValue : eventDesc("Airplane Mode", action: .wireless), // 0x1005
+    TP_HKEY_EV_DISPLAY.rawValue : eventDesc("Second Display", action: .mirror), // 0x1007
+    TP_HKEY_EV_BRGHT_UP.rawValue : eventDesc("Brightness Up", display: false), // 0x1010
+    TP_HKEY_EV_BRGHT_DOWN.rawValue : eventDesc("Brightness Down", display: false), // 0x1011
+    TP_HKEY_EV_KBD_LIGHT.rawValue : eventDesc("Keyboard Backlight", "kBright.pdf", action: .backlit, display: false), // 0x1012
+    TP_HKEY_EV_MIC_MUTE.rawValue : eventDesc("Mic Mute", action: .micmute), // 0x101B
+    TP_HKEY_EV_SETTING.rawValue : eventDesc("Settings", action: .prefpane), // 0x101D
+    TP_HKEY_EV_SEARCH.rawValue : eventDesc("Search", action: .spotlight), // 0x101E
+    TP_HKEY_EV_MISSION.rawValue : eventDesc("Mission Control", action: .mission), // 0x101F
+    TP_HKEY_EV_APPS.rawValue : eventDesc("Launchpad", action: .launchpad), // 0x1020
+    TP_HKEY_EV_STAR.rawValue : eventDesc("Custom Hotkey", action: .nothing, script: prefpaneAS), // 0x1311
+    TP_HKEY_EV_BLUETOOTH.rawValue : eventDesc("Bluetooth", action: .bluetooth), // 0x1314
+    TP_HKEY_EV_KEYBOARD.rawValue : eventDesc("Keyboard Disable", action: .keyboard), // 0x1315
+    TP_HKEY_EV_KEY_FN_ESC.rawValue : eventDesc("FnLock"), // 0x6060
 ]

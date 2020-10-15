@@ -7,6 +7,7 @@
 //  Copyright © 2020 Zhen. All rights reserved.
 //
 
+#include "ThinkEvents.h"
 #include "ThinkVPC.hpp"
 
 OSDefineMetaClassAndStructors(ThinkVPC, YogaVPC);
