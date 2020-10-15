@@ -20,20 +20,6 @@ DefinitionBlock ("", "SSDT", 2, "hack", "Think", 0x00000000)
     }
 
     /*
-     * Optional: Route sleep button routine to origin _SB.SLPB if userclient is not started.
-     */
-    External (_SB.SLPB, MethodObj)    // 0 Arguments
-
-    Scope (\_SB.PCI0.LPCB.EC.HKEY)
-    {
-        // Used as a proxy-method to interface with _SB.SLPB in YogaSMC
-        Method (SLPP, 0, NotSerialized)
-        {
-            Notify (\_SB.SLPB, 0x80)
-        }
-    }
-
-    /*
      * Optional: Sensor access
      * 
      * Double check name of FieldUnit for collision
