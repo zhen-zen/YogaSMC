@@ -877,7 +877,7 @@ bool ThinkVPC::setSSTStatus(UInt32 value) {
             return false;
         }
 
-        DebugLog(toggleSuccess, "SST Proxy, value, property[value]);
+        DebugLog(toggleSuccess, "SST Proxy", value, property[value]);
         return true;
     }
     // Replicate of _SI._SST
