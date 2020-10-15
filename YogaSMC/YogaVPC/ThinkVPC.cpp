@@ -867,17 +867,17 @@ bool ThinkVPC::setSSTStatus(UInt32 value) {
 #ifdef DEBUG
     char const *property[5] = {"Indicator off", "Working", "Waking", "Sleeping", "Hibernating"};
 #endif
-    if (vpc->validateObject("_SI._SSI") == kIOReturnSuccess) {
+    if (vpc->validateObject("CSSI") == kIOReturnSuccess) {
         OSObject* params[] = {
             OSNumber::withNumber(value, 32)
         };
         
-        if (vpc->evaluateObject("_SI._SSI", nullptr, params, 1) != kIOReturnSuccess) {
-            AlwaysLog(toggleFailure, SSTPrompt);
+        if (vpc->evaluateObject("CSSI", nullptr, params, 1) != kIOReturnSuccess) {
+            AlwaysLog(toggleFailure, SST Proxy);
             return false;
         }
 
-        DebugLog(toggleSuccess, SSTPrompt, value, property[value]);
+        DebugLog(toggleSuccess, SST Proxy, value, property[value]);
         return true;
     }
     // Replicate of _SI._SST
