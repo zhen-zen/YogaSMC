@@ -46,26 +46,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @IBAction func openPrefpane(_ sender: NSMenuItem) {
-        // from https://medium.com/macoclock/everything-you-need-to-do-to-launch-an-applescript-from-appkit-on-macos-catalina-with-swift-1ba82537f7c3
-        let source = """
-                            tell application "System Preferences"
-                                reveal pane "org.zhen.YogaSMCPane"
-                                activate
-                            end tell
-                     """
-        if let script = NSAppleScript(source: source) {
-            var error: NSDictionary?
-            script.executeAndReturnError(&error)
-            if error != nil {
-                os_log("Failed to open prefpane", type: .error)
-                let alert = NSAlert()
-                alert.messageText = "Failed to open Preferences"
-                alert.informativeText = "Please install YogaSMCPane"
-                alert.alertStyle = .warning
-                alert.addButton(withTitle: "OK")
-                alert.runModal()
-            }
-        }
+        openPrefpaneAS()
     }
 
     // from https://medium.com/@hoishing/menu-bar-apps-f2d270150660
@@ -182,7 +163,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         if let arr = defaults.object(forKey: "Events") as? [[String: Any]] {
             for v in arr {
-                conf.events[v["id"] as! UInt32] = eventDesc(v["name"] as! String, v["image"] as? String, eventAction(rawValue: v["action"] as! Int) ?? .nothing, v["display"] as? Bool ?? true)
+                conf.events[v["id"] as! UInt32] = eventDesc(
+                    v["name"] as! String,
+                    v["image"] as? String,
+                    action: eventAction(rawValue: v["action"] as! Int) ?? .nothing,
+                    display: v["display"] as? Bool ?? true)
             }
             os_log("Loaded %d events", type: .info, conf.events.capacity)
         } else {
@@ -331,8 +316,34 @@ func notificationCallback(_ port: CFMachPort?, _ msg: UnsafeMutableRawPointer?, 
     }
 }
 
+func openPrefpaneAS() {
+    // from https://medium.com/macoclock/everything-you-need-to-do-to-launch-an-applescript-from-appkit-on-macos-catalina-with-swift-1ba82537f7c3
+    let source = """
+                        tell application "System Preferences"
+                            reveal pane "org.zhen.YogaSMCPane"
+                            activate
+                        end tell
+                 """
+    if let script = NSAppleScript(source: source) {
+        var error: NSDictionary?
+        script.executeAndReturnError(&error)
+        if error != nil {
+            os_log("Failed to open prefpane", type: .error)
+            let alert = NSAlert()
+            alert.messageText = "Failed to open Preferences"
+            alert.informativeText = "Please install YogaSMCPane"
+            alert.alertStyle = .warning
+            alert.addButton(withTitle: "OK")
+            alert.runModal()
+        }
+    }
+}
+
 enum eventAction : Int {
-    case nothing, micMute, camera, wireless, thermal
+    // Userspace
+    case nothing, micMute, camera, wireless, bluetooth, prefpane, mirror
+    // Driver
+    case backlit, keyboard, thermal
 }
 
 // Resources
@@ -343,9 +354,18 @@ enum eventImage : String {
 func eventActuator(_ desc: eventDesc, _ conf: UnsafePointer<sharedConfig?>) {
     switch desc.action {
     case .nothing:
+        #if DEBUG
         os_log("%s: Do nothing", type: .info, desc.name)
+        #endif
+    case .backlit:
+        // TODO: query status
+        showOSD(desc.name, img: desc.image)
+    case .prefpane:
+        openPrefpaneAS()
     default:
+        #if DEBUG
         os_log("%s: Not implmented", type: .info, desc.name)
+        #endif
     }
 }
 
@@ -355,7 +375,7 @@ struct eventDesc {
     let action : eventAction
     let display : Bool
 
-    init(_ name: String, _ image: String?, _ action: eventAction = .nothing, _ display: Bool = true) {
+    init(_ name: String, _ image: String? = nil, action: eventAction = .nothing, display: Bool = true) {
         self.name = name
         if let img = image {
             if img.hasPrefix("/") {
@@ -374,7 +394,7 @@ struct eventDesc {
         self.display = display
     }
 
-    init(_ name: String, _ image: eventImage, _ action: eventAction = .nothing, _ display: Bool = true) {
+    init(_ name: String, _ image: eventImage, action: eventAction = .nothing, display: Bool = true) {
         self.name = name
         if let path = Bundle.main.path(forResource: image.rawValue, ofType: "pdf"),
            path.hasPrefix("/Applications") {
@@ -394,20 +414,28 @@ struct sharedConfig {
 }
 
 let IdeaEvents : Dictionary<UInt32, eventDesc> = [
-    0x0040 : eventDesc("Fn-Q Cooling", nil, .thermal),
-    0x0100 : eventDesc("Keyboard Backlight", "kBright.pdf"),
-    0x0200 : eventDesc("Screen Off", nil),
-    0x0201 : eventDesc("Screen On", nil),
-    0x0500 : eventDesc("TouchPad Off", nil), // Off
-    0x0501 : eventDesc("TouchPad On", nil), // Same as 0x0A00
-    0x0700 : eventDesc("Camera", nil, .camera),
-    0x0800 : eventDesc("Mic Mute", nil, .micMute),
-    0x0A00 : eventDesc("TouchPad On", nil, .nothing, false),
-    0x0D00 : eventDesc("Airplane Mode", nil, .wireless)
+    0x0040 : eventDesc("Fn-Q Cooling", action: .thermal),
+    0x0100 : eventDesc("Keyboard Backlight", "kBright.pdf", action: .backlit, display: false),
+    0x0200 : eventDesc("Screen Off"),
+    0x0201 : eventDesc("Screen On"),
+    0x0500 : eventDesc("TouchPad Off"), // Off
+    0x0501 : eventDesc("TouchPad On"), // Same as 0x0A00
+    0x0700 : eventDesc("Camera", action: .camera),
+    0x0800 : eventDesc("Mic Mute", action: .micMute),
+    0x0A00 : eventDesc("TouchPad On", display: false),
+    0x0D00 : eventDesc("Airplane Mode", action: .wireless),
 ]
 
 let ThinkEvents : Dictionary<UInt32, eventDesc> = [
-    0x1005 : eventDesc("Network", nil, .wireless),
-    0x1012 : eventDesc("Keyboard Backlight", "kBright.pdf"),
-    0x101B : eventDesc("Mic Mute", nil, .micMute)
+    0x1005 : eventDesc("Airplane Mode", action: .wireless),
+    0x1007 : eventDesc("Second Display", action: .mirror),
+    0x1010 : eventDesc("Brightness Up", display: false),
+    0x1011 : eventDesc("Brightness Down", display: false),
+    0x1012 : eventDesc("Keyboard Backlight", "kBright.pdf", action: .backlit, display: false),
+    0x101B : eventDesc("Mic Mute", action: .micMute),
+    0x101d : eventDesc("Settings", action: .prefpane),
+    0x1311 : eventDesc("Custom Hotkey", action: .prefpane),
+    0x1314 : eventDesc("Bluetooth", action: .bluetooth),
+    0x1315 : eventDesc("Keyboard Disable", action: .keyboard),
+    0x6060 : eventDesc("FnLock"),
 ]
