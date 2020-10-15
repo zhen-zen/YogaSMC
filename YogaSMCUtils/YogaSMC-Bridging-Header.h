@@ -13,5 +13,6 @@
 #import <OSD/OSDManager.h>
 
 #import "../YogaSMC/YogaSMCUserClient.h"
+#import "../YogaSMC/YogaVPC/ThinkEvents.h"
 
 #endif /* YogaSMC_Bridging_Header_h */
