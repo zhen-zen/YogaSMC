@@ -46,7 +46,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @IBAction func openPrefpane(_ sender: NSMenuItem) {
-        openPrefpaneAS()
+        prefpaneHelper()
     }
 
     // from https://medium.com/@hoishing/menu-bar-apps-f2d270150660
@@ -166,8 +166,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 conf.events[v["id"] as! UInt32] = eventDesc(
                     v["name"] as! String,
                     v["image"] as? String,
-                    action: eventAction(rawValue: v["action"] as! Int) ?? .nothing,
-                    display: v["display"] as? Bool ?? true)
+                    action: eventAction(rawValue: v["action"] as! String) ?? .nothing,
+                    display: v["display"] as? Bool ?? true,
+                    script: v["script"] as? String)
             }
             os_log("Loaded %d events", type: .info, conf.events.capacity)
         } else {
@@ -191,6 +192,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
             dict["action"] = v.action.rawValue
             dict["display"] = v.display
+            if v.script != nil {
+                dict["script"] = v.script
+            }
             array.append(dict)
         }
         defaults.setValue(array, forKey: "Events")
@@ -245,10 +249,9 @@ func notificationCallback(_ port: CFMachPort?, _ msg: UnsafeMutableRawPointer?, 
     if conf.pointee != nil  {
         if let notification = msg?.load(as: SMCNotificationMessage.self) {
             if let desc = conf.pointee?.events[notification.event] {
-                if desc.display {
+                if eventActuator(desc, conf) {
                     showOSD(desc.name, desc.image)
                 }
-                eventActuator(desc, conf)
             } else {
                 let name = String(format:"Event 0x%04x", notification.event)
                 showOSD(name)
@@ -266,30 +269,7 @@ func notificationCallback(_ port: CFMachPort?, _ msg: UnsafeMutableRawPointer?, 
     }
 }
 
-func openPrefpaneAS() {
-    // from https://medium.com/macoclock/everything-you-need-to-do-to-launch-an-applescript-from-appkit-on-macos-catalina-with-swift-1ba82537f7c3
-    let source = """
-                        tell application "System Preferences"
-                            reveal pane "org.zhen.YogaSMCPane"
-                            activate
-                        end tell
-                 """
-    if let script = NSAppleScript(source: source) {
-        var error: NSDictionary?
-        script.executeAndReturnError(&error)
-        if error != nil {
-            os_log("Failed to open prefpane", type: .error)
-            let alert = NSAlert()
-            alert.messageText = "Failed to open Preferences"
-            alert.informativeText = "Please install YogaSMCPane"
-            alert.alertStyle = .warning
-            alert.addButton(withTitle: "OK")
-            alert.runModal()
-        }
-    }
-}
-
-enum eventAction : Int {
+enum eventAction : String {
     // Userspace
     case nothing, micMute, camera, wireless, bluetooth, prefpane, mirror
     // Driver
@@ -301,7 +281,20 @@ enum eventImage : String {
     case kBright//, kBrightOff
 }
 
-func eventActuator(_ desc: eventDesc, _ conf: UnsafePointer<sharedConfig?>) {
+func eventActuator(_ desc: eventDesc, _ conf: UnsafePointer<sharedConfig?>) -> Bool {
+    var ret : NSAppleEventDescriptor?
+    if let src = desc.script {
+        if let script = NSAppleScript(source: src) {
+            var error: NSDictionary?
+            ret = script.executeAndReturnError(&error)
+            if error != nil {
+                os_log("%s: failed to execute script", type: .error, desc.name)
+            }
+            if ret!.isRecordDescriptor {
+                os_log("%s: valid return", type: .info, desc.name)
+            }
+        }
+    }
     switch desc.action {
     case .nothing:
         #if DEBUG
@@ -316,12 +309,13 @@ func eventActuator(_ desc: eventDesc, _ conf: UnsafePointer<sharedConfig?>) {
             os_log("%s: failed to evaluate status", type: .info, desc.name)
         }
     case .prefpane:
-        openPrefpaneAS()
+        prefpaneHelper()
     default:
         #if DEBUG
         os_log("%s: Not implmented", type: .info, desc.name)
         #endif
     }
+    return desc.display
 }
 
 struct eventDesc {
@@ -329,8 +323,9 @@ struct eventDesc {
     let image : NSString?
     let action : eventAction
     let display : Bool
+    let script : String?
 
-    init(_ name: String, _ image: String? = nil, action: eventAction = .nothing, display: Bool = true) {
+    init(_ name: String, _ image: String? = nil, action: eventAction = .nothing, display: Bool = true, script: String? = nil) {
         self.name = name
         if let img = image {
             if img.hasPrefix("/") {
@@ -347,9 +342,10 @@ struct eventDesc {
         }
         self.action = action
         self.display = display
+        self.script = script
     }
 
-    init(_ name: String, _ image: eventImage, action: eventAction = .nothing, display: Bool = true) {
+    init(_ name: String, _ image: eventImage, action: eventAction = .nothing, display: Bool = true, script: String? = nil) {
         self.name = name
         if let path = Bundle.main.path(forResource: image.rawValue, ofType: "pdf"),
            path.hasPrefix("/Applications") {
@@ -359,6 +355,7 @@ struct eventDesc {
         }
         self.action = action
         self.display = display
+        self.script = script
     }
 }
 
