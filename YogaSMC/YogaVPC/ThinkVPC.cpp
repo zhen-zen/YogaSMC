@@ -655,7 +655,7 @@ void ThinkVPC::updateVPC() {
 
                 case TP_HKEY_EV_SLEEP:
                     if (!client)
-                        vpc->evaluateObject("SLPP");
+                        vpc->evaluateObject(setHKEYsleep);
 
                 case TP_HKEY_EV_MIC_MUTE:
                     if (!hotkey_legacy)
@@ -873,11 +873,11 @@ bool ThinkVPC::setSSTStatus(UInt32 value) {
         };
         
         if (vpc->evaluateObject("CSSI", nullptr, params, 1) != kIOReturnSuccess) {
-            AlwaysLog(toggleFailure, SSTPrompt);
+            AlwaysLog(toggleFailure, "SST Proxy");
             return false;
         }
 
-        DebugLog(toggleSuccess, SSTPrompt, value, property[value]);
+        DebugLog(toggleSuccess, "SST Proxy", value, property[value]);
         return true;
     }
     // Replicate of _SI._SST
