@@ -42,8 +42,8 @@ enum  {
 /* HKEY events */
 enum tpacpi_hkey_event_t {
     /* Hotkey-related */
-    TP_HKEY_EV_HOTKEY_BASE      = 0x1001, /* First hotkey (FN+F1) */
-    TP_HKEY_EV_SLEEP            = 0x1004, /* Sleep button */
+    TP_HKEY_EV_HOTKEY_BASE      = 0x1001, /* First hotkey (FN+F1, _Q10) */
+    TP_HKEY_EV_SLEEP            = 0x1004, /* Sleep button (F4, _Q13) */
     TP_HKEY_EV_NETWORK          = 0x1005, /* Network (F8, _Q64) */
     TP_HKEY_EV_DISPLAY          = 0x1007, /* Dual Display (F7, _Q16/_Q19) */
     TP_HKEY_EV_BRGHT_UP         = 0x1010, /* Brightness up (F6, _Q14/_Q1C) */
@@ -54,9 +54,9 @@ enum tpacpi_hkey_event_t {
     TP_HKEY_EV_VOL_MUTE         = 0x1017, /* Mixer output mute */
     TP_HKEY_EV_MIC_MUTE         = 0x101B, /* Microphone Mute (F4, _Q6A) */
     TP_HKEY_EV_SETTING          = 0x101D, /* Settings (F9, _Q66) */
-    TP_HKEY_EV_SEARCH           = 0x101e, /* Searth (F10, _Q67) */
-    TP_HKEY_EV_MISSION          = 0x101f, /* All open apps/Mission Control (F11, _Q68) */
-    TP_HKEY_EV_APPS             = 0x1020, /* All programs/Launchpad (F12, _Q69
+    TP_HKEY_EV_SEARCH           = 0x101E, /* Search (F10, _Q67) */
+    TP_HKEY_EV_MISSION          = 0x101F, /* All open apps/Mission Control (F11, _Q68) */
+    TP_HKEY_EV_APPS             = 0x1020, /* All programs/Launchpad (F12, _Q69) */
 
     /* Hotkey-related (preset masks) */
     TP_HKEY_EV_STAR             = 0x1311, /* Star (F12, _Q62) */
@@ -84,8 +84,8 @@ enum tpacpi_hkey_event_t {
     TP_HKEY_EV_LID_CLOSE          = 0x5001, /* laptop lid closed */
     TP_HKEY_EV_LID_OPEN           = 0x5002, /* laptop lid opened */
     TP_HKEY_EV_TABLET_TABLET      = 0x5009, /* tablet swivel up */
-    TP_HKEY_EV_TABLET_NOTEBOOK    = 0x500a, /* tablet swivel down */
-    TP_HKEY_EV_TABLET_CHANGED     = 0x60c0, /* X1 Yoga (2016):
+    TP_HKEY_EV_TABLET_NOTEBOOK    = 0x500A, /* tablet swivel down */
+    TP_HKEY_EV_TABLET_CHANGED     = 0x60C0, /* X1 Yoga (2016):
                            * enter/leave tablet mode
                            */
     TP_HKEY_EV_PEN_INSERTED       = 0x500b, /* tablet pen inserted */
@@ -115,8 +115,8 @@ enum tpacpi_hkey_event_t {
     TP_HKEY_EV_AC_CHANGED        = 0x6040, /* AC status changed */
 
     /* Further user-interface events */
-    TP_HKEY_EV_PALM_DETECTED      = 0x60b0, /* palm hoveres keyboard */
-    TP_HKEY_EV_PALM_UNDETECTED    = 0x60b1, /* palm removed */
+    TP_HKEY_EV_PALM_DETECTED      = 0x60B0, /* palm hoveres keyboard */
+    TP_HKEY_EV_PALM_UNDETECTED    = 0x60B1, /* palm removed */
 
     /* Misc */
     TP_HKEY_EV_RFKILL_CHANGED    = 0x7000, /* rfkill switch changed */

@@ -249,9 +249,7 @@ func notificationCallback(_ port: CFMachPort?, _ msg: UnsafeMutableRawPointer?, 
     if conf.pointee != nil  {
         if let notification = msg?.load(as: SMCNotificationMessage.self) {
             if let desc = conf.pointee?.events[notification.event] {
-                if eventActuator(desc, conf) {
-                    showOSD(desc.name, desc.image)
-                }
+                eventActuator(desc, conf)
             } else {
                 let name = String(format:"Event 0x%04x", notification.event)
                 showOSD(name)
@@ -271,7 +269,7 @@ func notificationCallback(_ port: CFMachPort?, _ msg: UnsafeMutableRawPointer?, 
 
 enum eventAction : String {
     // Userspace
-    case nothing, micMute, camera, wireless, bluetooth, prefpane, mirror
+    case nothing, micmute, camera, wireless, bluetooth, prefpane, mirror, spotlight, mission, launchpad, sleep
     // Driver
     case backlit, keyboard, thermal
 }
@@ -281,7 +279,7 @@ enum eventImage : String {
     case kBright//, kBrightOff
 }
 
-func eventActuator(_ desc: eventDesc, _ conf: UnsafePointer<sharedConfig?>) -> Bool {
+func eventActuator(_ desc: eventDesc, _ conf: UnsafePointer<sharedConfig?>) {
     var ret : NSAppleEventDescriptor?
     if let src = desc.script {
         if let script = NSAppleScript(source: src) {
@@ -295,6 +293,7 @@ func eventActuator(_ desc: eventDesc, _ conf: UnsafePointer<sharedConfig?>) -> B
             }
         }
     }
+
     switch desc.action {
     case .nothing:
         #if DEBUG
@@ -315,7 +314,10 @@ func eventActuator(_ desc: eventDesc, _ conf: UnsafePointer<sharedConfig?>) -> B
         os_log("%s: Not implmented", type: .info, desc.name)
         #endif
     }
-    return desc.display
+
+    if desc.display {
+        showOSD(desc.name, desc.image)
+    }
 }
 
 struct eventDesc {
@@ -373,24 +375,24 @@ let IdeaEvents : Dictionary<UInt32, eventDesc> = [
     0x0500 : eventDesc("TouchPad Off"), // Off
     0x0501 : eventDesc("TouchPad On"), // Same as 0x0A00
     0x0700 : eventDesc("Camera", action: .camera),
-    0x0800 : eventDesc("Mic Mute", action: .micMute),
+    0x0800 : eventDesc("Mic Mute", action: .micmute),
     0x0A00 : eventDesc("TouchPad On", display: false),
     0x0D00 : eventDesc("Airplane Mode", action: .wireless),
 ]
 
 let ThinkEvents : Dictionary<UInt32, eventDesc> = [
-    0x1004 : eventDesc("Sleep Button"),
+    0x1004 : eventDesc("Sleep", action: .sleep),
     0x1005 : eventDesc("Airplane Mode", action: .wireless),
     0x1007 : eventDesc("Second Display", action: .mirror),
     0x1010 : eventDesc("Brightness Up", display: false),
     0x1011 : eventDesc("Brightness Down", display: false),
     0x1012 : eventDesc("Keyboard Backlight", "kBright.pdf", action: .backlit, display: false),
-    0x101B : eventDesc("Mic Mute", action: .micMute),
+    0x101B : eventDesc("Mic Mute", action: .micmute),
     0x101d : eventDesc("Settings", action: .prefpane),
-    0x101e : eventDesc("Search", action: .siri),
+    0x101e : eventDesc("Spotlight", action: .spotlight),
     0x101f : eventDesc("Mission Control", action: .mission),
-    0x1020 : eventDesc("App View", action: .launchpad),
-    0x1311 : eventDesc("Custom Hotkey", action: .prefpane),
+    0x1020 : eventDesc("Launchpad", action: .launchpad),
+    0x1311 : eventDesc("Custom Hotkey", action: .nothing, script: prefpaneAS),
     0x1314 : eventDesc("Bluetooth", action: .bluetooth),
     0x1315 : eventDesc("Keyboard Disable", action: .keyboard),
     0x6060 : eventDesc("FnLock"),
