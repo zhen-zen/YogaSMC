@@ -163,9 +163,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         if let arr = defaults.object(forKey: "Events") as? [[String: Any]] {
             for v in arr {
-                if let name = v["name"] as? String {
+                if let id = v["id"] as? UInt32,
+                   let name = v["name"] as? String {
                     let action = v["action"] as? String
-                    conf.events[v["id"] as! UInt32] = eventDesc(
+                    conf.events[id] = eventDesc(
                         name,
                         v["image"] as? String,
                         action: (action != nil) ? eventAction(rawValue: action!) ?? .nothing : .nothing,
