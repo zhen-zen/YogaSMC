@@ -645,9 +645,6 @@ void ThinkVPC::updateVPC() {
         return;
     }
 
-    if (client != nullptr)
-        client->sendNotification(result);
-
     switch (result >> 0xC) {
         case 1:
             switch (result) {
@@ -795,6 +792,9 @@ void ThinkVPC::updateVPC() {
             DebugLog("Hotkey(MHKP) unknown event: 0x%x", result);
             break;
     }
+
+    if (client != nullptr)
+        client->sendNotification(result);
 }
 
 bool ThinkVPC::setHotkeyStatus(bool enable) {

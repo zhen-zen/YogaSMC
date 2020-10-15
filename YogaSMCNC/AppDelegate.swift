@@ -308,8 +308,13 @@ func eventActuator(_ desc: eventDesc, _ conf: UnsafePointer<sharedConfig?>) {
         os_log("%s: Do nothing", type: .info, desc.name)
         #endif
     case .backlit:
-        // TODO: query status
-        showOSD(desc.name, desc.image)
+        let backlightLevel = getNumber("BacklightLevel", conf.pointee!.io_service)
+        if backlightLevel != -1 {
+            // TODO: low / high
+            showOSD(desc.name, backlightLevel != 0 ? desc.image : nil)
+        } else {
+            os_log("%s: failed to evaluate status", type: .info, desc.name)
+        }
     case .prefpane:
         openPrefpaneAS()
     default:
