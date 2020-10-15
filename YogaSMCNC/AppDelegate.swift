@@ -163,12 +163,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         if let arr = defaults.object(forKey: "Events") as? [[String: Any]] {
             for v in arr {
-                conf.events[v["id"] as! UInt32] = eventDesc(
-                    v["name"] as! String,
-                    v["image"] as? String,
-                    action: eventAction(rawValue: v["action"] as! String) ?? .nothing,
-                    display: v["display"] as? Bool ?? true,
-                    script: v["script"] as? String)
+                if let name = v["name"] as? String {
+                    let action = v["action"] as? String
+                    conf.events[v["id"] as! UInt32] = eventDesc(
+                        name,
+                        v["image"] as? String,
+                        action: (action != nil) ? eventAction(rawValue: action!) ?? .nothing : .nothing,
+                        display: v["display"] as? Bool ?? true,
+                        script: v["script"] as? String)
+                }
             }
             os_log("Loaded %d events", type: .info, conf.events.capacity)
         } else {
