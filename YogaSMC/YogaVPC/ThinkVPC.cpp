@@ -655,7 +655,7 @@ void ThinkVPC::updateVPC() {
 
                 case TP_HKEY_EV_SLEEP:
                     if (!client)
-                        vpc->evaluateObject("SLPP");
+                        vpc->evaluateObject("MHKS");
 
                 case TP_HKEY_EV_MIC_MUTE:
                     if (!hotkey_legacy)
@@ -867,12 +867,12 @@ bool ThinkVPC::setSSTStatus(UInt32 value) {
 #ifdef DEBUG
     char const *property[5] = {"Indicator off", "Working", "Waking", "Sleeping", "Hibernating"};
 #endif
-    if (vpc->validateObject("CSSI") == kIOReturnSuccess) {
+    if (vpc->validateObject("_SI._SSI") == kIOReturnSuccess) {
         OSObject* params[] = {
             OSNumber::withNumber(value, 32)
         };
         
-        if (vpc->evaluateObject("CSSI", nullptr, params, 1) != kIOReturnSuccess) {
+        if (vpc->evaluateObject("_SI._SSI", nullptr, params, 1) != kIOReturnSuccess) {
             AlwaysLog(toggleFailure, SSTPrompt);
             return false;
         }
