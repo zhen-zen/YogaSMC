@@ -67,6 +67,10 @@
 		6F88068C24EB575F00ACD6C8 /* YogaVPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F96A30A24B93D25006562EC /* YogaVPC.cpp */; };
 		6F88068D24EB575F00ACD6C8 /* ThinkWMI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F8674CB24A876E000DC2FDF /* ThinkWMI.cpp */; };
 		6F88068E24EB575F00ACD6C8 /* bmfparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6FD2BB8B247B37A20018EA36 /* bmfparser.cpp */; };
+		6F8B1F252538083A003DD8A8 /* PropertyHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F8B1F242538083A003DD8A8 /* PropertyHelper.swift */; };
+		6F8B1F262538083A003DD8A8 /* PropertyHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F8B1F242538083A003DD8A8 /* PropertyHelper.swift */; };
+		6F8B1F2D253808DC003DD8A8 /* OSDHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F8B1F2C253808DC003DD8A8 /* OSDHelper.swift */; };
+		6F8B1F2E253808DC003DD8A8 /* OSDHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F8B1F2C253808DC003DD8A8 /* OSDHelper.swift */; };
 		6F9553BA24BA515B00215EBB /* IdeaVPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F9553B824BA515B00215EBB /* IdeaVPC.cpp */; };
 		6F9553BB24BA515B00215EBB /* IdeaVPC.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F9553B924BA515B00215EBB /* IdeaVPC.hpp */; };
 		6F96A30C24B93D25006562EC /* YogaVPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F96A30A24B93D25006562EC /* YogaVPC.cpp */; };
@@ -192,6 +196,8 @@
 		6F87BF7F24D26A5D00D64375 /* YogaSMC.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = YogaSMC.hpp; sourceTree = "<group>"; };
 		6F88069624EB575F00ACD6C8 /* YogaSMCAlter.kext */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = YogaSMCAlter.kext; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F88069724EB575F00ACD6C8 /* Alter-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Alter-Info.plist"; sourceTree = "<group>"; };
+		6F8B1F242538083A003DD8A8 /* PropertyHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PropertyHelper.swift; sourceTree = "<group>"; };
+		6F8B1F2C253808DC003DD8A8 /* OSDHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSDHelper.swift; sourceTree = "<group>"; };
 		6F9553B824BA515B00215EBB /* IdeaVPC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IdeaVPC.cpp; sourceTree = "<group>"; };
 		6F9553B924BA515B00215EBB /* IdeaVPC.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IdeaVPC.hpp; sourceTree = "<group>"; };
 		6F96A30A24B93D25006562EC /* YogaVPC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = YogaVPC.cpp; sourceTree = "<group>"; };
@@ -202,7 +208,7 @@
 		6FCF7F582474B74800A82B13 /* WMI.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WMI.cpp; sourceTree = "<group>"; };
 		6FCF7F5B2474B89000A82B13 /* common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
 		6FD082B22537DA1A00491976 /* OSD.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OSD.framework; path = /System/Library/PrivateFrameworks/OSD.framework; sourceTree = "<absolute>"; };
-		6FD083002537E87400491976 /* YogaSMCNC-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "YogaSMCNC-Bridging-Header.h"; sourceTree = "<group>"; };
+		6FD083002537E87400491976 /* YogaSMC-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "YogaSMC-Bridging-Header.h"; sourceTree = "<group>"; };
 		6FD2BB46247721040018EA36 /* bmfdec.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bmfdec.h; sourceTree = "<group>"; };
 		6FD2BB47247721040018EA36 /* bmfdec.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = bmfdec.c; sourceTree = "<group>"; };
 		6FD2BB8B247B37A20018EA36 /* bmfparser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = bmfparser.cpp; sourceTree = "<group>"; };
@@ -265,13 +271,14 @@
 			children = (
 				6F7CB51C2536CA26002B2D04 /* kBright.pdf */,
 				6F70425F24D2CF5200FD5659 /* Docs */,
-				6F08ACE624746B8B00681A63 /* YogaSMC */,
+				6F1C709E251473CC007D1DFC /* Frameworks */,
 				6F83586324D0BFEE0031512F /* SDK */,
-				6F1C708D251473BB007D1DFC /* YogaSMCPane */,
+				6F08ACE624746B8B00681A63 /* YogaSMC */,
 				6F0A987825343357002F9F65 /* YogaSMCNC */,
 				6F7D484125344C25004074C7 /* YogaSMCNCHelper */,
+				6F1C708D251473BB007D1DFC /* YogaSMCPane */,
+				6F8B1F1925380748003DD8A8 /* YogaSMCUtils */,
 				6F08ACE524746B8B00681A63 /* Products */,
-				6F1C709E251473CC007D1DFC /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -325,7 +332,6 @@
 				6F0A987D25343359002F9F65 /* Assets.xcassets */,
 				6F0A987F25343359002F9F65 /* Main.storyboard */,
 				6F0A988225343359002F9F65 /* Info.plist */,
-				6FD083002537E87400491976 /* YogaSMCNC-Bridging-Header.h */,
 			);
 			path = YogaSMCNC;
 			sourceTree = "<group>";
@@ -404,6 +410,16 @@
 			);
 			name = SDK;
 			path = YogaSMC;
+			sourceTree = "<group>";
+		};
+		6F8B1F1925380748003DD8A8 /* YogaSMCUtils */ = {
+			isa = PBXGroup;
+			children = (
+				6F8B1F2C253808DC003DD8A8 /* OSDHelper.swift */,
+				6F8B1F242538083A003DD8A8 /* PropertyHelper.swift */,
+				6FD083002537E87400491976 /* YogaSMC-Bridging-Header.h */,
+			);
+			path = YogaSMCUtils;
 			sourceTree = "<group>";
 		};
 		6F9553BC24BA516100215EBB /* YogaVPC */ = {
@@ -681,6 +697,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6F8B1F2E253808DC003DD8A8 /* OSDHelper.swift in Sources */,
+				6F8B1F262538083A003DD8A8 /* PropertyHelper.swift in Sources */,
 				6F0A987A25343357002F9F65 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -689,6 +707,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6F8B1F2D253808DC003DD8A8 /* OSDHelper.swift in Sources */,
+				6F8B1F252538083A003DD8A8 /* PropertyHelper.swift in Sources */,
 				6F1C70A725147410007D1DFC /* YogaSMCPane.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -981,7 +1001,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = org.zhen.YogaSMCNC;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_OBJC_BRIDGING_HEADER = "YogaSMCNC/YogaSMCNC-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "YogaSMCUtils/YogaSMC-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				SYSTEM_FRAMEWORK_SEARCH_PATHS = (
@@ -1015,7 +1035,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = org.zhen.YogaSMCNC;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OBJC_BRIDGING_HEADER = "YogaSMCNC/YogaSMCNC-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "YogaSMCUtils/YogaSMC-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 				SYSTEM_FRAMEWORK_SEARCH_PATHS = (
@@ -1050,7 +1070,7 @@
 				OTHER_SWIFT_FLAGS = "-D DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = org.zhen.YogaSMCPane;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "YogaSMCNC/YogaSMCNC-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "YogaSMCUtils/YogaSMC-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				SYSTEM_FRAMEWORK_SEARCH_PATHS = (
@@ -1086,7 +1106,7 @@
 				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = org.zhen.YogaSMCPane;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "YogaSMCNC/YogaSMCNC-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "YogaSMCUtils/YogaSMC-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				SYSTEM_FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
