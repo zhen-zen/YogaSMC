@@ -309,6 +309,18 @@ func eventActuator(_ desc: eventDesc, _ conf: UnsafePointer<sharedConfig?>) {
         }
     case .prefpane:
         prefpaneHelper()
+    case .sleep:
+        if desc.script == nil,
+           let scpt = NSAppleScript(source: sleepAS) {
+            var error: NSDictionary?
+            ret = scpt.executeAndReturnError(&error)
+            if error != nil {
+                os_log("%s: failed to execute script", type: .error, desc.name)
+            }
+        }
+    case .thermal:
+        showOSD("Thermal: \(desc.name)")
+        os_log("%s: thermal event", type: .info, desc.name)
     default:
         #if DEBUG
         os_log("%s: Not implmented", type: .info, desc.name)

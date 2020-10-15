@@ -3,7 +3,7 @@
 //  YogaSMC
 //
 //  Created by Zhen on 10/14/20.
-//  Copyright © 2020 zhen. All rights reserved.
+//  Copyright © 2020 Zhen. All rights reserved.
 //
 
 import AppKit
@@ -16,6 +16,7 @@ let prefpaneAS = """
                         activate
                     end tell
                  """
+let sleepAS = "tell application \"System Events\" to sleep"
 
 func prefpaneHelper() {
     // from https://medium.com/macoclock/everything-you-need-to-do-to-launch-an-applescript-from-appkit-on-macos-catalina-with-swift-1ba82537f7c3
