@@ -1,3 +1,4 @@
+//  SPDX-License-Identifier: GPL-2.0-only
 //
 //  ThinkEvents.h
 //  YogaSMC
@@ -10,6 +11,8 @@
 #define ThinkEvents_h
 
 #include <libkern/OSTypes.h>
+
+// mostly from linux/drivers/platform/x86/thinkpad_acpi.c
 
 /* HKEY events */
 enum tpacpi_hkey_event_t : UInt32 {
