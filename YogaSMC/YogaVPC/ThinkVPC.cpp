@@ -655,7 +655,7 @@ void ThinkVPC::updateVPC() {
 
                 case TP_HKEY_EV_SLEEP:
                     if (!client)
-                        vpc->evaluateObject("MHKS");
+                        setHKEYsleep();
 
                 case TP_HKEY_EV_MIC_MUTE:
                     if (!hotkey_legacy)
