@@ -49,23 +49,6 @@ let thinkBatteryName = ["BAT_ANY", "BAT_PRIMARY", "BAT_SECONDARY"]
     /* and more cases from 1 to 28 (except 18 and 24) */
 }
 
-// from https://github.com/w0lfschild/macOS_headers/blob/master/macOS/CoreServices/OSDUIHelper/1/OSDUIHelperProtocol-Protocol.h
-
-@objc protocol OSDUIHelperProtocol {
-
-    @objc func showFullScreenImage(_ img: OSDImage, onDisplayID: CGDirectDisplayID, priority: CUnsignedInt, msecToAnimate: CUnsignedInt)
-
-    @objc func fadeClassicImageOnDisplay(_ img: CUnsignedInt)
-
-    @objc func showImageAtPath(_ img: NSString, onDisplayID: CGDirectDisplayID, priority: CUnsignedInt, msecUntilFade: CUnsignedInt, withText: NSString)
-
-    @objc func showImage(_ img: OSDImage, onDisplayID: CGDirectDisplayID, priority: CUnsignedInt, msecUntilFade: CUnsignedInt, filledChiclets: CUnsignedInt, totalChiclets: CUnsignedInt, locked: CBool)
-
-    @objc func showImage(_ img: OSDImage, onDisplayID: CGDirectDisplayID, priority: CUnsignedInt, msecUntilFade: CUnsignedInt, withText: NSString)
-
-    @objc func showImage(_ img: OSDImage, onDisplayID: CGDirectDisplayID, priority: CUnsignedInt, msecUntilFade: CUnsignedInt)
-}
-
 func getBoolean(_ key: String, _ io_service: io_service_t) -> Bool {
     guard let rvalue = IORegistryEntryCreateCFProperty(io_service, key as CFString, kCFAllocatorDefault, 0) else {
         return false
@@ -110,18 +93,19 @@ func sendString(_ key: String, _ value: String, _ io_service: io_service_t) -> B
     return (kIOReturnSuccess == IORegistryEntrySetCFProperty(io_service, key as CFString, value as CFString))
 }
 
-func OSD(_ prompt: String) {
-    // from https://ffried.codes/2018/01/20/the-internals-of-the-macos-hud/
-    let conn = NSXPCConnection(machServiceName: "com.apple.OSDUIHelper", options: [])
-    conn.remoteObjectInterface = NSXPCInterface(with: OSDUIHelperProtocol.self)
-    conn.interruptionHandler = { os_log("Interrupted!", type: .debug) }
-    conn.invalidationHandler = { os_log("Invalidated!", type: .error) }
-    conn.resume()
+// from https://github.com/alin23/Lunar/blob/master/Lunar/Data/Hotkeys.swift
+func showOSD(_ prompt: String, _ img: NSString? = nil, _ duration: UInt32 = 1000, _ priority: UInt32 = 0x1f4) {
+    guard let manager = OSDManager.sharedManager() as? OSDManager else {
+        os_log("OSDManager unavailable", type: .error)
+        return
+    }
 
-    let target = conn.remoteObjectProxyWithErrorHandler { os_log("Failed: %@", type: .error, $0 as CVarArg) }
-    guard let helper = target as? OSDUIHelperProtocol else { os_log("Wrong type %@", type: .fault, target as! CVarArg); return }
-
-    helper.showImageAtPath("/System/Library/CoreServices/OSDUIHelper.app/Contents/Resources/kBright.pdf", onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 2000, withText: prompt as NSString)
+    manager.showImage(
+        atPath: img ?? "/System/Library/CoreServices/OSDUIHelper.app/Contents/Resources/kBright.pdf",
+        onDisplayID: CGMainDisplayID(),
+        priority: priority,
+        msecUntilFade: duration,
+        withText: prompt as NSString)
 }
 
 class YogaSMCPane : NSPreferencePane {
@@ -200,7 +184,7 @@ class YogaSMCPane : NSPreferencePane {
                 }
                 #if DEBUG
                 let prompt = String(format:"Start %d", vChargeThresholdStart.integerValue)
-                OSD(prompt)
+                showOSD(prompt)
                 #endif
                 _ = sendNumber("setCMstart", vChargeThresholdStart.integerValue, io_service)
             }
@@ -223,7 +207,7 @@ class YogaSMCPane : NSPreferencePane {
                 }
                 #if DEBUG
                 let prompt = String(format:"Stop %d", vChargeThresholdStop.integerValue)
-                OSD(prompt)
+                showOSD(prompt)
                 #endif
                 _ = sendNumber("setCMstop", vChargeThresholdStop.integerValue == 100 ? 0 : vChargeThresholdStop.integerValue, io_service)
             }
@@ -257,7 +241,7 @@ class YogaSMCPane : NSPreferencePane {
         let value = thinkLEDCommand[vCustomLEDSlider.integerValue] + vCustomLEDList.indexOfSelectedItem
         #if DEBUG
         let prompt = String(format:"LED 0x%02X", value)
-        OSD(prompt)
+        showOSD(prompt)
         #endif
         if (!sendNumber("LED", value, io_service)) {
             return

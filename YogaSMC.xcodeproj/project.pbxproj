@@ -74,6 +74,8 @@
 		6FCF7F592474B74800A82B13 /* WMI.h in Headers */ = {isa = PBXBuildFile; fileRef = 6FCF7F572474B74800A82B13 /* WMI.h */; };
 		6FCF7F5A2474B74800A82B13 /* WMI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6FCF7F582474B74800A82B13 /* WMI.cpp */; };
 		6FCF7F5C2474B89000A82B13 /* common.h in Headers */ = {isa = PBXBuildFile; fileRef = 6FCF7F5B2474B89000A82B13 /* common.h */; };
+		6FD082B32537DA1A00491976 /* OSD.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FD082B22537DA1A00491976 /* OSD.framework */; };
+		6FD082B42537DA1A00491976 /* OSD.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FD082B22537DA1A00491976 /* OSD.framework */; };
 		6FD2BB48247721040018EA36 /* bmfdec.h in Headers */ = {isa = PBXBuildFile; fileRef = 6FD2BB46247721040018EA36 /* bmfdec.h */; };
 		6FD2BB49247721040018EA36 /* bmfdec.c in Sources */ = {isa = PBXBuildFile; fileRef = 6FD2BB47247721040018EA36 /* bmfdec.c */; };
 		6FD2BB8D247B37A20018EA36 /* bmfparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6FD2BB8B247B37A20018EA36 /* bmfparser.cpp */; };
@@ -199,6 +201,8 @@
 		6FCF7F572474B74800A82B13 /* WMI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WMI.h; sourceTree = "<group>"; };
 		6FCF7F582474B74800A82B13 /* WMI.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WMI.cpp; sourceTree = "<group>"; };
 		6FCF7F5B2474B89000A82B13 /* common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
+		6FD082B22537DA1A00491976 /* OSD.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OSD.framework; path = /System/Library/PrivateFrameworks/OSD.framework; sourceTree = "<absolute>"; };
+		6FD083002537E87400491976 /* YogaSMCNC-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "YogaSMCNC-Bridging-Header.h"; sourceTree = "<group>"; };
 		6FD2BB46247721040018EA36 /* bmfdec.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bmfdec.h; sourceTree = "<group>"; };
 		6FD2BB47247721040018EA36 /* bmfdec.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = bmfdec.c; sourceTree = "<group>"; };
 		6FD2BB8B247B37A20018EA36 /* bmfparser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = bmfparser.cpp; sourceTree = "<group>"; };
@@ -220,6 +224,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6F7D487B253465DB004074C7 /* ServiceManagement.framework in Frameworks */,
+				6FD082B42537DA1A00491976 /* OSD.framework in Frameworks */,
 				6F7D488425346677004074C7 /* AppKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -231,6 +236,7 @@
 				6F1C70A4251473E7007D1DFC /* AppKit.framework in Frameworks */,
 				6F1C70A2251473DF007D1DFC /* CoreFoundation.framework in Frameworks */,
 				6F1C70A0251473CD007D1DFC /* IOKit.framework in Frameworks */,
+				6FD082B32537DA1A00491976 /* OSD.framework in Frameworks */,
 				6F1C70B2251475BA007D1DFC /* PreferencePanes.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -319,6 +325,7 @@
 				6F0A987D25343359002F9F65 /* Assets.xcassets */,
 				6F0A987F25343359002F9F65 /* Main.storyboard */,
 				6F0A988225343359002F9F65 /* Info.plist */,
+				6FD083002537E87400491976 /* YogaSMCNC-Bridging-Header.h */,
 			);
 			path = YogaSMCNC;
 			sourceTree = "<group>";
@@ -338,6 +345,7 @@
 			isa = PBXGroup;
 			children = (
 				6F7D487A253465DB004074C7 /* ServiceManagement.framework */,
+				6FD082B22537DA1A00491976 /* OSD.framework */,
 				6F05D7F125300CDE00471F57 /* libkmod.a */,
 				6F1C70B1251475BA007D1DFC /* PreferencePanes.framework */,
 				6F1C70A3251473E7007D1DFC /* AppKit.framework */,
@@ -436,13 +444,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		6F1C7087251473BB007D1DFC /* Headers */ = {
-			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		6F88067724EB575F00ACD6C8 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -527,7 +528,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 6F1C709A251473BB007D1DFC /* Build configuration list for PBXNativeTarget "YogaSMCPane" */;
 			buildPhases = (
-				6F1C7087251473BB007D1DFC /* Headers */,
 				6F1C7088251473BB007D1DFC /* Sources */,
 				6F1C7089251473BB007D1DFC /* Frameworks */,
 				6F1C708A251473BB007D1DFC /* Resources */,
@@ -966,6 +966,11 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks",
+					"$(PROJECT_DIR)",
+				);
 				INFOPLIST_FILE = YogaSMCNC/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -976,9 +981,13 @@
 				PRODUCT_BUNDLE_IDENTIFIER = org.zhen.YogaSMCNC;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_OBJC_BRIDGING_HEADER = YogaSMC/YogaSMCUserClient.h;
+				SWIFT_OBJC_BRIDGING_HEADER = "YogaSMCNC/YogaSMCNC-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
+				SYSTEM_FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks",
+				);
 			};
 			name = Debug;
 		};
@@ -991,6 +1000,11 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks",
+					"$(PROJECT_DIR)",
+				);
 				INFOPLIST_FILE = YogaSMCNC/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1001,9 +1015,13 @@
 				PRODUCT_BUNDLE_IDENTIFIER = org.zhen.YogaSMCNC;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OBJC_BRIDGING_HEADER = YogaSMC/YogaSMCUserClient.h;
+				SWIFT_OBJC_BRIDGING_HEADER = "YogaSMCNC/YogaSMCNC-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
+				SYSTEM_FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks",
+				);
 			};
 			name = Release;
 		};
@@ -1015,6 +1033,11 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks",
+					"$(PROJECT_DIR)",
+				);
 				INFOPLIST_FILE = YogaSMCPane/Info.plist;
 				INSTALL_PATH = "$(HOME)/Library/PreferencePanes";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1027,9 +1050,13 @@
 				OTHER_SWIFT_FLAGS = "-D DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = org.zhen.YogaSMCPane;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = YogaSMC/YogaSMCUserClient.h;
+				SWIFT_OBJC_BRIDGING_HEADER = "YogaSMCNC/YogaSMCNC-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
+				SYSTEM_FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks",
+				);
 				WRAPPER_EXTENSION = prefPane;
 			};
 			name = Debug;
@@ -1042,6 +1069,11 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks",
+					"$(PROJECT_DIR)",
+				);
 				INFOPLIST_FILE = YogaSMCPane/Info.plist;
 				INSTALL_PATH = "$(HOME)/Library/PreferencePanes";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1054,8 +1086,12 @@
 				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = org.zhen.YogaSMCPane;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = YogaSMC/YogaSMCUserClient.h;
+				SWIFT_OBJC_BRIDGING_HEADER = "YogaSMCNC/YogaSMCNC-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
+				SYSTEM_FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks",
+				);
 				WRAPPER_EXTENSION = prefPane;
 			};
 			name = Release;

@@ -13,7 +13,7 @@ import ServiceManagement
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
     let defaults = UserDefaults(suiteName: "org.zhen.YogaSMC")!
-    var conf = notificationConfig()
+    var conf = sharedConfig()
 
     var statusItem: NSStatusItem?
     @IBOutlet weak var appMenu: NSMenu!
@@ -91,39 +91,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        // from https://ffried.codes/2018/01/20/the-internals-of-the-macos-hud/
-        let conn = NSXPCConnection(machServiceName: "com.apple.OSDUIHelper", options: [])
-        conn.remoteObjectInterface = NSXPCInterface(with: OSDUIHelperProtocol.self)
-        conn.interruptionHandler = { os_log("Interrupted!", type: .error) }
-        conn.invalidationHandler = { os_log("Invalidated!", type: .error) }
-        conn.resume()
-
-        let target = conn.remoteObjectProxyWithErrorHandler { os_log("Failed: %@", type: .error, $0 as CVarArg) }
-        conf.helper = target as? OSDUIHelperProtocol
-        if conf.helper == nil {
-            os_log("Wrong type %@", type: .fault, target as! CVarArg)
-            let alert = NSAlert()
-            alert.messageText = "Failed to init OSD helper"
-            alert.alertStyle = .critical
-            alert.addButton(withTitle: "Quit")
-            alert.runModal()
-            NSApp.terminate(nil)
-        }
-
-        conf.io_service = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("YogaVPC"))
-        if kIOReturnSuccess != IOServiceOpen(conf.io_service, mach_task_self_, 0, &conf.connect) {
+        guard conf.io_service != 0,
+              kIOReturnSuccess == IOServiceOpen(conf.io_service, mach_task_self_, 0, &conf.connect) else {
             os_log("Failed to connect to YogaSMC", type: .fault)
-            conf.helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 2000, withText: "Failed to connect \n to YogaSMC")
+            showOSD("Failed to connect \n to YogaSMC", duration: 2000)
             NSApp.terminate(nil)
-        } else {
-            if kIOReturnSuccess == IOConnectCallScalarMethod(conf.connect, UInt32(kYSMCUCOpen), nil, 0, nil, nil) {
-                os_log("Connected to YogaSMC", type: .info)
-            } else {
-                os_log("Another instance have connected to YogaSMC", type: .error)
-                conf.helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: "Another instance have \n connected to YogaSMC")
-                NSApp.terminate(nil)
-            }
+            return
         }
+
+        guard kIOReturnSuccess == IOConnectCallScalarMethod(conf.connect, UInt32(kYSMCUCOpen), nil, 0, nil, nil) else {
+            os_log("Another instance has connected to YogaSMC", type: .error)
+            showOSD("Another instance has \n connected to YogaSMC", duration: 2000)
+            NSApp.terminate(nil)
+            return
+        }
+
+        os_log("Connected to YogaSMC", type: .info)
 
         loadConfig()
         
@@ -143,43 +126,41 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         if !getProerty() {
-            os_log("YogaSMC not installed", type: .error)
-            conf.helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: "YogaSMC Unavailable")
+            os_log("YogaSMC unavailable", type: .error)
+            showOSD("YogaSMC unavailable", duration: 2000)
             NSApp.terminate(nil)
         }
     }
 
     func getProerty() -> Bool {
-        if conf.io_service != 0 {
-            var CFProps : Unmanaged<CFMutableDictionary>? = nil
-            if (kIOReturnSuccess == IORegistryEntryCreateCFProperties(conf.io_service, &CFProps, kCFAllocatorDefault, 0) && CFProps != nil) {
-                if let props = CFProps?.takeRetainedValue() as NSDictionary? {
-                    let build = props["YogaSMC,Build"] as? NSString
-                    vBuild.title = "Build: \(build ?? "Unknown")"
-                    let version = props["YogaSMC,Version"] as? NSString
-                    vVersion.title = "Version: \(version ?? "Unknown")"
-                    switch props["IOClass"] as? NSString {
-                    case "IdeaVPC":
-                        if conf.events.isEmpty {
-                            conf.events = IdeaEvents
-                        }
-                        _ = registerNotification()
-                        vClass.title = "Class: Idea"
-                    case "ThinkVPC":
-                        if conf.events.isEmpty {
-                            conf.events = ThinkEvents
-                        }
-                        _ = registerNotification()
-                        vFan.isHidden = false
-                        updateFan()
-                        vClass.title = "Class: Think"
-                    default:
-                        vClass.title = "Class: Unknown"
-                        os_log("Unknown class", type: .error)
-                        conf.helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: "Unknown class")
+        var CFProps : Unmanaged<CFMutableDictionary>? = nil
+        if (kIOReturnSuccess == IORegistryEntryCreateCFProperties(conf.io_service, &CFProps, kCFAllocatorDefault, 0) && CFProps != nil) {
+            if let props = CFProps?.takeRetainedValue() as NSDictionary? {
+                let build = props["YogaSMC,Build"] as? NSString
+                vBuild.title = "Build: \(build ?? "Unknown")"
+                let version = props["YogaSMC,Version"] as? NSString
+                vVersion.title = "Version: \(version ?? "Unknown")"
+                switch props["IOClass"] as? NSString {
+                case "IdeaVPC":
+                    if conf.events.isEmpty {
+                        conf.events = IdeaEvents
                     }
-                    return true
+                    _ = registerNotification()
+                    vClass.title = "Class: Idea"
+                case "ThinkVPC":
+                    if conf.events.isEmpty {
+                        conf.events = ThinkEvents
+                    }
+                    _ = registerNotification()
+                    vFan.isHidden = false
+                    updateFan()
+                    vClass.title = "Class: Think"
+                default:
+                    vClass.title = "Class: Unknown"
+                    os_log("Unknown class", type: .error)
+                    showOSD("Unknown class", duration: 2000)
                 }
+                return true
             }
         }
         return false
@@ -197,7 +178,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func loadEvents() {
         if !Bundle.main.bundlePath.hasPrefix("/Applications") {
-            conf.helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 2000, withText: "Please move the app \n into Applications")
+            showOSD("Please move the app \n into Applications")
         }
         if let arr = defaults.object(forKey: "Events") as? [[String: Any]] {
             for v in arr {
@@ -309,42 +290,40 @@ let defaultImage : NSString = "/System/Library/CoreServices/OSDUIHelper.app/Cont
     /* and more cases from 1 to 28 (except 18 and 24) */
 }
 
-// from https://github.com/w0lfschild/macOS_headers/blob/master/macOS/CoreServices/OSDUIHelper/1/OSDUIHelperProtocol-Protocol.h
+// from https://github.com/alin23/Lunar/blob/master/Lunar/Data/Hotkeys.swift
+func showOSD(_ prompt: String, img: NSString? = nil, duration: UInt32 = 1000, priority: UInt32 = 0x1f4) {
+    guard let manager = OSDManager.sharedManager() as? OSDManager else {
+        os_log("OSDManager unavailable", type: .error)
+        return
+    }
 
-@objc protocol OSDUIHelperProtocol {
-
-    @objc func showFullScreenImage(_ img: OSDImage, onDisplayID: CGDirectDisplayID, priority: CUnsignedInt, msecToAnimate: CUnsignedInt)
-
-    @objc func fadeClassicImageOnDisplay(_ img: CUnsignedInt)
-
-    @objc func showImageAtPath(_ img: NSString, onDisplayID: CGDirectDisplayID, priority: CUnsignedInt, msecUntilFade: CUnsignedInt, withText: NSString)
-
-    @objc func showImage(_ img: OSDImage, onDisplayID: CGDirectDisplayID, priority: CUnsignedInt, msecUntilFade: CUnsignedInt, filledChiclets: CUnsignedInt, totalChiclets: CUnsignedInt, locked: CBool)
-
-    @objc func showImage(_ img: OSDImage, onDisplayID: CGDirectDisplayID, priority: CUnsignedInt, msecUntilFade: CUnsignedInt, withText: NSString)
-
-    @objc func showImage(_ img: OSDImage, onDisplayID: CGDirectDisplayID, priority: CUnsignedInt, msecUntilFade: CUnsignedInt)
+    manager.showImage(
+        atPath: img ?? defaultImage,
+        onDisplayID: CGMainDisplayID(),
+        priority: priority,
+        msecUntilFade: duration,
+        withText: prompt as NSString)
 }
 
 func notificationCallback(_ port: CFMachPort?, _ msg: UnsafeMutableRawPointer?, _ size: CFIndex, _ info: UnsafeMutableRawPointer?) {
-    let conf = info!.assumingMemoryBound(to: notificationConfig?.self)
+    let conf = info!.assumingMemoryBound(to: sharedConfig?.self)
     if conf.pointee != nil  {
         if let notification = msg?.load(as: SMCNotificationMessage.self) {
             if let desc = conf.pointee?.events[notification.event] {
                 if desc.display {
-                    conf.pointee?.helper.showImageAtPath(desc.image ?? defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: desc.name)
+                    showOSD(desc.name, img: desc.image)
                 }
                 eventActuator(desc, conf)
             } else {
                 let name = String(format:"Event 0x%04x", notification.event)
-                conf.pointee?.helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: name as NSString)
+                showOSD(name)
                 conf.pointee?.events[notification.event] = eventDesc(name, nil)
                 #if DEBUG
                 os_log("Event 0x%04x", type: .debug, notification.event)
                 #endif
             }
         } else {
-            conf.pointee?.helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: "Null Event")
+            showOSD("Null Event")
             os_log("Null Event", type: .error)
         }
     } else {
@@ -356,7 +335,12 @@ enum eventAction : Int {
     case nothing, micMute, camera, wireless, thermal
 }
 
-func eventActuator(_ desc: eventDesc, _ conf: UnsafePointer<notificationConfig?>) {
+// Resources
+enum eventImage : String {
+    case kBright//, kBrightOff
+}
+
+func eventActuator(_ desc: eventDesc, _ conf: UnsafePointer<sharedConfig?>) {
     switch desc.action {
     case .nothing:
         os_log("%s: Do nothing", type: .info, desc.name)
@@ -366,12 +350,13 @@ func eventActuator(_ desc: eventDesc, _ conf: UnsafePointer<notificationConfig?>
 }
 
 struct eventDesc {
-    let name : NSString
+    let name : String
     let image : NSString?
     let action : eventAction
     let display : Bool
+
     init(_ name: String, _ image: String?, _ action: eventAction = .nothing, _ display: Bool = true) {
-        self.name = name as NSString
+        self.name = name
         if let img = image {
             if img.hasPrefix("/") {
                 self.image = img as NSString
@@ -388,13 +373,24 @@ struct eventDesc {
         self.action = action
         self.display = display
     }
+
+    init(_ name: String, _ image: eventImage, _ action: eventAction = .nothing, _ display: Bool = true) {
+        self.name = name
+        if let path = Bundle.main.path(forResource: image.rawValue, ofType: "pdf"),
+           path.hasPrefix("/Applications") {
+            self.image = path as NSString
+        } else {
+            self.image = nil
+        }
+        self.action = action
+        self.display = display
+    }
 }
 
-struct notificationConfig {
+struct sharedConfig {
     var connect : io_connect_t = 0
     var events : Dictionary<UInt32, eventDesc> = [:]
-    var helper : OSDUIHelperProtocol!
-    var io_service : io_service_t = 0
+    let io_service : io_service_t = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("YogaVPC"))
 }
 
 let IdeaEvents : Dictionary<UInt32, eventDesc> = [
