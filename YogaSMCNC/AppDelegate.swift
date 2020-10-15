@@ -379,6 +379,7 @@ let IdeaEvents : Dictionary<UInt32, eventDesc> = [
 ]
 
 let ThinkEvents : Dictionary<UInt32, eventDesc> = [
+    0x1004 : eventDesc("Sleep Button"),
     0x1005 : eventDesc("Airplane Mode", action: .wireless),
     0x1007 : eventDesc("Second Display", action: .mirror),
     0x1010 : eventDesc("Brightness Up", display: false),
@@ -386,6 +387,9 @@ let ThinkEvents : Dictionary<UInt32, eventDesc> = [
     0x1012 : eventDesc("Keyboard Backlight", "kBright.pdf", action: .backlit, display: false),
     0x101B : eventDesc("Mic Mute", action: .micMute),
     0x101d : eventDesc("Settings", action: .prefpane),
+    0x101e : eventDesc("Search", action: .siri),
+    0x101f : eventDesc("Mission Control", action: .mission),
+    0x1020 : eventDesc("App View", action: .launchpad),
     0x1311 : eventDesc("Custom Hotkey", action: .prefpane),
     0x1314 : eventDesc("Bluetooth", action: .bluetooth),
     0x1315 : eventDesc("Keyboard Disable", action: .keyboard),
