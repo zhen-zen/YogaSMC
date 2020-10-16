@@ -646,11 +646,13 @@ void ThinkVPC::updateVPC() {
         return;
     }
 
+    UInt32 data = 0;
     switch (result >> 0xC) {
         case 1:
             switch (result) {
                 case TP_HKEY_EV_KBD_LIGHT:
                     updateBacklight();
+                    data = backlightLevel;
                     break;
 
                 case TP_HKEY_EV_SLEEP:
@@ -796,7 +798,7 @@ void ThinkVPC::updateVPC() {
     }
 
     if (client)
-        client->sendNotification(result);
+        client->sendNotification(result, data);
 }
 
 bool ThinkVPC::setHotkeyStatus(bool enable) {
@@ -826,14 +828,14 @@ bool ThinkVPC::updateBacklight(bool update) {
     };
 
     if (vpc->evaluateInteger(getKBDBacklightLevel, &state, params, 1) != kIOReturnSuccess) {
-        AlwaysLog(updateFailure, KeyboardPrompt);
+        AlwaysLog(updateFailure, backlightPrompt);
         return false;
     }
 
     backlightLevel = state & 0x3;
 
     if (update) {
-        DebugLog(updateSuccess, KeyboardPrompt, state);
+        DebugLog(updateSuccess, backlightPrompt, state);
         if (backlightCap)
             setProperty(backlightPrompt, backlightLevel, 32);
     }
