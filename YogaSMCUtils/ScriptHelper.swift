@@ -20,6 +20,41 @@ let prefpaneAS = """
 let sleepAS = "tell application \"System Events\" to sleep"
 
 let getMicVolumeAS = "input volume of (get volume settings)"
+let setMicVolumeAS = "set volume input volume %d"
+
+var volume : Int32 = 50
+
+func micMuteHelper() {
+    if let scpt = NSAppleScript(source: getMicVolumeAS) {
+        var error: NSDictionary?
+        var ret = scpt.executeAndReturnError(&error)
+        if error != nil {
+            os_log("MicMute: failed to execute script", type: .error)
+            return
+        }
+        let current = ret.int32Value
+        if current != 0 {
+            showOSD("Mute")
+            if let mute = NSAppleScript(source: String(format: setMicVolumeAS, 0)) {
+                ret = mute.executeAndReturnError(&error)
+                if error != nil {
+                    os_log("MicMute: failed to execute script", type: .error)
+                    return
+                }
+            }
+            volume = current
+        } else {
+            showOSD("Unmute")
+            if let unmute = NSAppleScript(source: String(format: setMicVolumeAS, volume)) {
+                ret = unmute.executeAndReturnError(&error)
+                if error != nil {
+                    os_log("MicMute: failed to execute script", type: .error)
+                    return
+                }
+            }
+        }
+    }
+}
 
 func prefpaneHelper() {
     guard let application : SystemPreferencesApplication = SBApplication(bundleIdentifier: "com.apple.systempreferences") else {

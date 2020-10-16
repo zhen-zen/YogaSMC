@@ -275,7 +275,7 @@ enum eventAction : String {
     // Userspace
     case nothing, micmute, camera, wireless, bluetooth, prefpane, mirror, spotlight, mission, launchpad, sleep
     // Driver
-    case backlit, keyboard, thermal
+    case backlight, keyboard, thermal
 }
 
 // Resources
@@ -303,13 +303,26 @@ func eventActuator(_ desc: eventDesc, _ conf: UnsafePointer<sharedConfig?>) {
         #if DEBUG
         os_log("%s: Do nothing", type: .info, desc.name)
         #endif
-    case .backlit:
+    case .backlight:
         let backlightLevel = getNumber("BacklightLevel", conf.pointee!.io_service)
-        if backlightLevel != -1 {
-            // TODO: low / high
-            showOSD(desc.name, backlightLevel != 0 ? desc.image : nil)
-        } else {
+        if backlightLevel == -1 {
             os_log("%s: failed to evaluate status", type: .info, desc.name)
+            return
+        }
+        switch backlightLevel {
+        case 0:
+            showOSD("Backlight Off", backlightOff)
+        case 1:
+            // TODO: update resource
+            showOSD("Backlight Low", backlightMax)
+        case 2:
+            showOSD("Backlight High", backlightMax)
+        default:
+            showOSD("Backlight \(data)", backlightMax)
+        }
+    case .micmute:
+        if desc.script == nil {
+            micMuteHelper()
         }
     case .prefpane:
         prefpaneHelper()
@@ -385,13 +398,13 @@ struct sharedConfig {
 
 let IdeaEvents : Dictionary<UInt32, eventDesc> = [
     0x0040 : eventDesc("Fn-Q Cooling", action: .thermal),
-    0x0100 : eventDesc("Keyboard Backlight", "kBright.pdf", action: .backlit, display: false),
+    0x0100 : eventDesc("Keyboard Backlight", "kBright.pdf", action: .backlight, display: false),
     0x0200 : eventDesc("Screen Off"),
     0x0201 : eventDesc("Screen On"),
     0x0500 : eventDesc("TouchPad Off"), // Off
     0x0501 : eventDesc("TouchPad On"), // Same as 0x0A00
     0x0700 : eventDesc("Camera", action: .camera),
-    0x0800 : eventDesc("Mic Mute", action: .micmute),
+    0x0800 : eventDesc("Mic Mute", action: .micmute, display: false),
     0x0A00 : eventDesc("TouchPad On", display: false),
     0x0D00 : eventDesc("Airplane Mode", action: .wireless),
 ]
@@ -402,8 +415,8 @@ let ThinkEvents : Dictionary<UInt32, eventDesc> = [
     TP_HKEY_EV_DISPLAY.rawValue : eventDesc("Second Display", action: .mirror), // 0x1007
     TP_HKEY_EV_BRGHT_UP.rawValue : eventDesc("Brightness Up", display: false), // 0x1010
     TP_HKEY_EV_BRGHT_DOWN.rawValue : eventDesc("Brightness Down", display: false), // 0x1011
-    TP_HKEY_EV_KBD_LIGHT.rawValue : eventDesc("Keyboard Backlight", "kBright.pdf", action: .backlit, display: false), // 0x1012
-    TP_HKEY_EV_MIC_MUTE.rawValue : eventDesc("Mic Mute", action: .micmute), // 0x101B
+    TP_HKEY_EV_KBD_LIGHT.rawValue : eventDesc("Keyboard Backlight", action: .backlight, display: false), // 0x1012
+    TP_HKEY_EV_MIC_MUTE.rawValue : eventDesc("Mic Mute", action: .micmute, display: false), // 0x101B
     TP_HKEY_EV_SETTING.rawValue : eventDesc("Settings", action: .prefpane), // 0x101D
     TP_HKEY_EV_SEARCH.rawValue : eventDesc("Search", action: .spotlight), // 0x101E
     TP_HKEY_EV_MISSION.rawValue : eventDesc("Mission Control", action: .mission), // 0x101F
