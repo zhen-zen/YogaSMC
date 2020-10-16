@@ -253,7 +253,7 @@ func notificationCallback(_ port: CFMachPort?, _ msg: UnsafeMutableRawPointer?, 
     if conf.pointee != nil  {
         if let notification = msg?.load(as: SMCNotificationMessage.self) {
             if let desc = conf.pointee?.events[notification.event] {
-                eventActuator(desc, conf)
+                eventActuator(desc, notification.data, conf)
             } else {
                 let name = String(format:"Event 0x%04x", notification.event)
                 showOSD(name)
@@ -283,7 +283,7 @@ enum eventImage : String {
     case kBright//, kBrightOff
 }
 
-func eventActuator(_ desc: eventDesc, _ conf: UnsafePointer<sharedConfig?>) {
+func eventActuator(_ desc: eventDesc, _ data: UInt32, _ conf: UnsafePointer<sharedConfig?>) {
     var ret : NSAppleEventDescriptor?
     if let src = desc.script {
         if let script = NSAppleScript(source: src) {
@@ -304,12 +304,7 @@ func eventActuator(_ desc: eventDesc, _ conf: UnsafePointer<sharedConfig?>) {
         os_log("%s: Do nothing", type: .info, desc.name)
         #endif
     case .backlight:
-        let backlightLevel = getNumber("BacklightLevel", conf.pointee!.io_service)
-        if backlightLevel == -1 {
-            os_log("%s: failed to evaluate status", type: .info, desc.name)
-            return
-        }
-        switch backlightLevel {
+        switch data {
         case 0:
             showOSD("Backlight Off", backlightOff)
         case 1:
