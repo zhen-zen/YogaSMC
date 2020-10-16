@@ -195,7 +195,7 @@ bool ThinkVPC::initVPC() {
 
     mutestate_orig = mutestate;
     AlwaysLog("Initial HAUM setting was %d", mutestate_orig);
-    setMutestatus(TP_EC_MUTE_BTN_NONE);
+    setMutestatus(TP_EC_MUTE_BTN_TOGGLE);
     setHotkeyStatus(true);
 
     UInt32 state;
