@@ -566,7 +566,7 @@ bool IdeaVPC::toggleFnlock() {
 }
 
 void IdeaVPC::updateVPC() {
-    UInt32 vpc1, vpc2, result, notifier;
+    UInt32 vpc1, vpc2, result;
     UInt8 retries = 0;
 
     if (!read_ec_data(VPCCMD_R_VPC1, &vpc1, &retries) || !read_ec_data(VPCCMD_R_VPC2, &vpc2, &retries)) {

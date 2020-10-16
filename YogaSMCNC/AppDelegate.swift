@@ -392,16 +392,14 @@ struct sharedConfig {
 }
 
 let IdeaEvents : Dictionary<UInt32, eventDesc> = [
-    0x0040 : eventDesc("Fn-Q Cooling", action: .thermal),
-    0x0100 : eventDesc("Keyboard Backlight", "kBright.pdf", action: .backlight, display: false),
-    0x0200 : eventDesc("Screen Off"),
-    0x0201 : eventDesc("Screen On"),
-    0x0500 : eventDesc("TouchPad Off"), // Off
-    0x0501 : eventDesc("TouchPad On"), // Same as 0x0A00
-    0x0700 : eventDesc("Camera", action: .camera),
-    0x0800 : eventDesc("Mic Mute", action: .micmute, display: false),
-    0x0A00 : eventDesc("TouchPad On", display: false),
-    0x0D00 : eventDesc("Airplane Mode", action: .wireless),
+    0x00 : eventDesc("Fn-Q Cooling", action: .thermal),
+    0x01 : eventDesc("Keyboard Backlight", "kBright.pdf", action: .backlight, display: false),
+    0x02 : eventDesc("Screen"),
+    0x05 : eventDesc("TouchPad"),
+    0x07 : eventDesc("Camera", action: .camera),
+    0x08 : eventDesc("Mic Mute", action: .micmute, display: false),
+    0x0A : eventDesc("TouchPad On", display: false),
+    0x0D : eventDesc("Airplane Mode", action: .wireless),
 ]
 
 let ThinkEvents : Dictionary<UInt32, eventDesc> = [
