@@ -204,11 +204,11 @@ protected:
     /**
      *  Update keyboad backlight status
      *
-     *  @param update only update internal status when false
+     *  @param update true if triggered from hardware
      *
      *  @return true if success
      */
-    inline virtual bool updateBacklight(bool update=true) {return true;};
+    inline virtual bool updateBacklight(bool update=false) {return true;};
 
     /**
      *  Set backlight mode

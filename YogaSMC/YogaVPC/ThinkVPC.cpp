@@ -651,7 +651,7 @@ void ThinkVPC::updateVPC() {
         case 1:
             switch (result) {
                 case TP_HKEY_EV_KBD_LIGHT:
-                    updateBacklight();
+                    updateBacklight(true);
                     data = backlightLevel;
                     break;
 
@@ -836,9 +836,8 @@ bool ThinkVPC::updateBacklight(bool update) {
 
     if (update) {
         DebugLog(updateSuccess, backlightPrompt, state);
-        if (backlightCap)
-            setProperty(backlightPrompt, backlightLevel, 32);
     }
+    setProperty(backlightPrompt, backlightLevel, 32);
 
     return true;
 }

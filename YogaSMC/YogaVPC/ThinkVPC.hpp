@@ -182,7 +182,7 @@ private:
     inline void initSMC() APPLE_KEXT_OVERRIDE {smc = ThinkSMC::withDevice(this, ec);};
 #endif
 
-    bool updateBacklight(bool update=true) APPLE_KEXT_OVERRIDE;
+    bool updateBacklight(bool update=false) APPLE_KEXT_OVERRIDE;
     bool setBacklight(UInt32 level) APPLE_KEXT_OVERRIDE;
 
     /**

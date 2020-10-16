@@ -459,9 +459,13 @@ bool IdeaVPC::updateKeyboard(bool update) {
 
     if (FnlockCap)
         FnlockMode = BIT(HA_FNLOCK_BIT) & state;
-    if (backlightCap)
+    if (backlightCap) {
+        // Preserve low / high level on non keyboard triggered events
+        if (!update && backlightLevel)
+            backlightLevel -= 1;
         // Inference from brightness cycle: 0 -> 1 -> 2 -> 0
         backlightLevel = (BIT(HA_BACKLIGHT_BIT) & state) ? (backlightLevel ? 2 : 1) : 0;
+    }
 
     if (update) {
         DebugLog(updateSuccess, KeyboardPrompt, state);
@@ -531,11 +535,11 @@ bool IdeaVPC::setBacklight(UInt32 level) {
         return false;
     }
 
-    // Only off / low level could be set
-    backlightLevel = level ? 1 : 0;
+    if (level && backlightLevel)
+        // Preserve low / high level on non keyboard triggered events
+        backlightLevel -= 1;
+    // Don't update internal value since it will trigger another event
     DebugLog(toggleSuccess, backlightPrompt, (backlightLevel ? HACMD_BACKLIGHT_ON : HACMD_BACKLIGHT_OFF), (backlightLevel ? "on" : "off"));
-    setProperty(backlightPrompt, backlightLevel, 32);
-
     return true;
 }
 
@@ -604,7 +608,7 @@ void IdeaVPC::updateVPC() {
 
                 case 1: // ENERGY_EVENT_GENERAL / ENERGY_EVENT_KEYBDLED_OLD
                     AlwaysLog("Fn+Space keyboard backlight?");
-                    updateKeyboard();
+                    updateKeyboard(true);
                     data = backlightLevel;
                     // also on AC connect / disconnect
                     break;
