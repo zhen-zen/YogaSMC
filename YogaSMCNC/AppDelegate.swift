@@ -164,14 +164,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if let arr = defaults.object(forKey: "Events") as? [[String: Any]] {
             for v in arr {
                 if let id = v["id"] as? UInt32,
-                   let name = v["name"] as? String {
-                    let action = v["action"] as? String
-                    conf.events[id] = eventDesc(
-                        name,
-                        v["image"] as? String,
-                        action: (action != nil) ? eventAction(rawValue: action!) ?? .nothing : .nothing,
-                        display: v["display"] as? Bool ?? true,
-                        script: v["script"] as? String)
+                   let events = v["events"] as? [[String: Any]] {
+                    var e : Dictionary<UInt32, eventDesc> = [:]
+                    for event in events {
+                        if let data = event["data"] as? UInt32,
+                           let name = event["name"] as? String {
+                            let action = event["action"] as? String
+                            e[data] = eventDesc(
+                                name,
+                                event["image"] as? String,
+                                action: (action != nil) ? eventAction(rawValue: action!) ?? .nothing : .nothing,
+                                display: event["display"] as? Bool ?? true,
+                                script: event["script"] as? String)
+                        }
+                    }
+                    conf.events[id] = e
                 }
             }
             os_log("Loaded %d events", type: .info, conf.events.capacity)
@@ -183,26 +190,32 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func saveEvents() {
         var array : [[String: Any]] = []
         for (k, v) in conf.events {
+            var events : [[String: Any]] = []
             var dict : [String: Any] = [:]
             dict["id"] = Int(k)
-            dict["name"] = v.name
-            if let res = v.image {
-                if let path = Bundle.main.resourcePath,
-                   res.hasPrefix(path) {
-                    dict["image"] = res.lastPathComponent
-               } else {
-                    dict["image"] = res
-               }
+            for (data, e) in v {
+                var event : [String: Any] = [:]
+                event["data"] = Int(data)
+                event["name"] = e.name
+                if let res = e.image {
+                    if let path = Bundle.main.resourcePath,
+                       res.hasPrefix(path) {
+                        event["image"] = res.lastPathComponent
+                   } else {
+                        event["image"] = res
+                   }
+                }
+                event["action"] = e.action.rawValue
+                event["display"] = e.display
+                if e.script != nil {
+                    event["script"] = e.script
+                }
+                events.append(event)
             }
-            dict["action"] = v.action.rawValue
-            dict["display"] = v.display
-            if v.script != nil {
-                dict["script"] = v.script
-            }
+            dict["events"] = events
             array.append(dict)
         }
         defaults.setValue(array, forKey: "Events")
-        os_log("Default events saved", type: .info)
     }
     
     func loadConfig() {
@@ -252,12 +265,20 @@ func notificationCallback(_ port: CFMachPort?, _ msg: UnsafeMutableRawPointer?, 
     let conf = info!.assumingMemoryBound(to: sharedConfig?.self)
     if conf.pointee != nil  {
         if let notification = msg?.load(as: SMCNotificationMessage.self) {
-            if let desc = conf.pointee?.events[notification.event] {
-                eventActuator(desc, notification.data, conf)
+            if let events = conf.pointee?.events[notification.event] {
+                if let desc = events[notification.data] {
+                    eventActuator(desc, notification.data, conf)
+                } else if let desc = events[0]{
+                    eventActuator(desc, notification.data, conf)
+                } else {
+                    let name = String(format:"Event 0x%04x", notification.event)
+                    showOSD(name)
+                    os_log("Event 0x%04x default data not found", type: .error, notification.event)
+                }
             } else {
                 let name = String(format:"Event 0x%04x", notification.event)
                 showOSD(name)
-                conf.pointee?.events[notification.event] = eventDesc(name, nil)
+                conf.pointee?.events[notification.event] = [0: eventDesc(name, nil)]
                 #if DEBUG
                 os_log("Event 0x%04x", type: .debug, notification.event)
                 #endif
@@ -387,35 +408,38 @@ struct eventDesc {
 
 struct sharedConfig {
     var connect : io_connect_t = 0
-    var events : Dictionary<UInt32, eventDesc> = [:]
+    var events : Dictionary<UInt32, Dictionary<UInt32, eventDesc>> = [:]
     let io_service : io_service_t = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("YogaVPC"))
 }
 
-let IdeaEvents : Dictionary<UInt32, eventDesc> = [
-    0x00 : eventDesc("Fn-Q Cooling", action: .thermal),
-    0x01 : eventDesc("Keyboard Backlight", "kBright.pdf", action: .backlight, display: false),
-    0x02 : eventDesc("Screen"),
-    0x05 : eventDesc("TouchPad"),
-    0x07 : eventDesc("Camera", action: .camera),
-    0x08 : eventDesc("Mic Mute", action: .micmute, display: false),
-    0x0A : eventDesc("TouchPad On", display: false),
-    0x0D : eventDesc("Airplane Mode", action: .wireless),
+let IdeaEvents : Dictionary<UInt32, Dictionary<UInt32, eventDesc>> = [
+    0x00 : [0: eventDesc("Special Button", display: false),
+            0x40: eventDesc("Fn-Q Cooling", action: .thermal)],
+    0x01 : [0: eventDesc("Keyboard Backlight", action: .backlight, display: false)],
+    0x02 : [0: eventDesc("Screen Off"),
+            1: eventDesc("Screen On")],
+    0x05 : [0: eventDesc("TouchPad Off"),
+            1: eventDesc("TouchPad On")],
+    0x07 : [0: eventDesc("Camera", action: .camera)],
+    0x08 : [0: eventDesc("Mic Mute", action: .micmute, display: false)],
+    0x0A : [0: eventDesc("TouchPad On", display: false)],
+    0x0D : [0: eventDesc("Airplane Mode", action: .wireless)],
 ]
 
-let ThinkEvents : Dictionary<UInt32, eventDesc> = [
-    TP_HKEY_EV_SLEEP.rawValue : eventDesc("Sleep", action: .sleep), // 0x1004
-    TP_HKEY_EV_NETWORK.rawValue : eventDesc("Airplane Mode", action: .wireless), // 0x1005
-    TP_HKEY_EV_DISPLAY.rawValue : eventDesc("Second Display", action: .mirror), // 0x1007
-    TP_HKEY_EV_BRGHT_UP.rawValue : eventDesc("Brightness Up", display: false), // 0x1010
-    TP_HKEY_EV_BRGHT_DOWN.rawValue : eventDesc("Brightness Down", display: false), // 0x1011
-    TP_HKEY_EV_KBD_LIGHT.rawValue : eventDesc("Keyboard Backlight", action: .backlight, display: false), // 0x1012
-    TP_HKEY_EV_MIC_MUTE.rawValue : eventDesc("Mic Mute", action: .micmute, display: false), // 0x101B
-    TP_HKEY_EV_SETTING.rawValue : eventDesc("Settings", action: .prefpane), // 0x101D
-    TP_HKEY_EV_SEARCH.rawValue : eventDesc("Search", action: .spotlight), // 0x101E
-    TP_HKEY_EV_MISSION.rawValue : eventDesc("Mission Control", action: .mission), // 0x101F
-    TP_HKEY_EV_APPS.rawValue : eventDesc("Launchpad", action: .launchpad), // 0x1020
-    TP_HKEY_EV_STAR.rawValue : eventDesc("Custom Hotkey", action: .nothing, script: prefpaneAS), // 0x1311
-    TP_HKEY_EV_BLUETOOTH.rawValue : eventDesc("Bluetooth", action: .bluetooth), // 0x1314
-    TP_HKEY_EV_KEYBOARD.rawValue : eventDesc("Keyboard Disable", action: .keyboard), // 0x1315
-    TP_HKEY_EV_KEY_FN_ESC.rawValue : eventDesc("FnLock"), // 0x6060
+let ThinkEvents : Dictionary<UInt32, Dictionary<UInt32, eventDesc>> = [
+    TP_HKEY_EV_SLEEP.rawValue : [0: eventDesc("Sleep", action: .sleep, display: false)], // 0x1004
+    TP_HKEY_EV_NETWORK.rawValue : [0: eventDesc("Airplane Mode", action: .wireless)], // 0x1005
+    TP_HKEY_EV_DISPLAY.rawValue : [0: eventDesc("Second Display", action: .mirror)], // 0x1007
+    TP_HKEY_EV_BRGHT_UP.rawValue : [0: eventDesc("Brightness Up", display: false)], // 0x1010
+    TP_HKEY_EV_BRGHT_DOWN.rawValue : [0: eventDesc("Brightness Down", display: false)], // 0x1011
+    TP_HKEY_EV_KBD_LIGHT.rawValue : [0: eventDesc("Keyboard Backlight", action: .backlight, display: false)], // 0x1012
+    TP_HKEY_EV_MIC_MUTE.rawValue : [0: eventDesc("Mic Mute", action: .micmute, display: false)], // 0x101B
+    TP_HKEY_EV_SETTING.rawValue : [0: eventDesc("Settings", action: .prefpane)], // 0x101D
+    TP_HKEY_EV_SEARCH.rawValue : [0: eventDesc("Search", action: .spotlight)], // 0x101E
+    TP_HKEY_EV_MISSION.rawValue : [0: eventDesc("Mission Control", action: .mission)], // 0x101F
+    TP_HKEY_EV_APPS.rawValue : [0: eventDesc("Launchpad", action: .launchpad)], // 0x1020
+    TP_HKEY_EV_STAR.rawValue : [0: eventDesc("Custom Hotkey", action: .nothing, script: prefpaneAS)], // 0x1311
+    TP_HKEY_EV_BLUETOOTH.rawValue : [0: eventDesc("Bluetooth", action: .bluetooth)], // 0x1314
+    TP_HKEY_EV_KEYBOARD.rawValue : [0: eventDesc("Keyboard Disable", action: .keyboard)], // 0x1315
+    TP_HKEY_EV_KEY_FN_ESC.rawValue : [0: eventDesc("FnLock")], // 0x6060
 ]
