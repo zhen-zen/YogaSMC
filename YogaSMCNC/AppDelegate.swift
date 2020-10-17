@@ -176,7 +176,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                                 event["image"] as? String,
                                 action: (action != nil) ? eventAction(rawValue: action!) ?? .nothing : .nothing,
                                 display: event["display"] as? Bool ?? true,
-                                script: event["script"] as? String)
+                                option: event["option"] as? String)
                         }
                     }
                     conf.events[id] = e
@@ -208,8 +208,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
                 event["action"] = e.action.rawValue
                 event["display"] = e.display
-                if e.script != nil {
-                    event["script"] = e.script
+                if e.option != nil {
+                    event["option"] = e.option
                 }
                 events.append(event)
             }
@@ -316,7 +316,7 @@ func eventActuator(_ desc: eventDesc, _ data: UInt32, _ conf: UnsafePointer<shar
         os_log("%s: Do nothing", type: .info, desc.name)
         #endif
     case .script:
-        if let scpt = desc.script {
+        if let scpt = desc.option {
             if !scriptHelper(scpt, desc.name) {
                 return
             }
@@ -345,9 +345,7 @@ func eventActuator(_ desc: eventDesc, _ data: UInt32, _ conf: UnsafePointer<shar
             showOSDRes("Backlight \(data)", "BacklightLow.pdf")
         }
     case .micmute:
-        if desc.script == nil {
-            micMuteHelper()
-        }
+        micMuteHelper()
     case .desktop:
         CoreDockSendNotification("com.apple.showdesktop.awake" as CFString, nil)
         return
@@ -367,13 +365,13 @@ func eventActuator(_ desc: eventDesc, _ data: UInt32, _ conf: UnsafePointer<shar
             showOSD(desc.name, desc.image ?? sleepImage)
             sleep(1)
         }
-        _ = scriptHelper(sleepAS, desc.name)
+        _ = scriptHelper(desc.option ?? sleepAS, desc.name)
         return
     case .search:
-        _ = scriptHelper(searchAS, desc.name)
+        _ = scriptHelper(desc.option ?? searchAS, desc.name)
         return
     case .spotlight:
-        _ = scriptHelper(spotlightAS, desc.name)
+        _ = scriptHelper(desc.option ?? spotlightAS, desc.name)
         return
     case .thermal:
         showOSD("Thermal: \(desc.name)")
@@ -398,9 +396,9 @@ struct eventDesc {
     let image : NSString?
     let action : eventAction
     let display : Bool
-    let script : String?
+    let option : String?
 
-    init(_ name: String, _ image: String? = nil, action: eventAction = .nothing, display: Bool = true, script: String? = nil) {
+    init(_ name: String, _ image: String? = nil, action: eventAction = .nothing, display: Bool = true, option: String? = nil) {
         self.name = name
         if let img = image {
             if img.hasPrefix("/") {
@@ -417,10 +415,10 @@ struct eventDesc {
         }
         self.action = action
         self.display = display
-        self.script = script
+        self.option = option
     }
 
-    init(_ name: String, _ image: eventImage, action: eventAction = .nothing, display: Bool = true, script: String? = nil) {
+    init(_ name: String, _ image: eventImage, action: eventAction = .nothing, display: Bool = true, option: String? = nil) {
         self.name = name
         if let path = Bundle.main.path(forResource: image.rawValue, ofType: "pdf"),
            path.hasPrefix("/Applications") {
@@ -430,7 +428,7 @@ struct eventDesc {
         }
         self.action = action
         self.display = display
-        self.script = script
+        self.option = option
     }
 }
 
@@ -464,7 +462,7 @@ let ThinkEvents : Dictionary<UInt32, Dictionary<UInt32, eventDesc>> = [
     TP_HKEY_EV_SEARCH.rawValue : [0: eventDesc("Search", action: .spotlight)], // 0x101E
     TP_HKEY_EV_MISSION.rawValue : [0: eventDesc("Mission Control", action: .mission)], // 0x101F
     TP_HKEY_EV_APPS.rawValue : [0: eventDesc("Launchpad", action: .launchpad)], // 0x1020
-    TP_HKEY_EV_STAR.rawValue : [0: eventDesc("Custom Hotkey", action: .script, script: prefpaneAS)], // 0x1311
+    TP_HKEY_EV_STAR.rawValue : [0: eventDesc("Custom Hotkey", action: .script, option: prefpaneAS)], // 0x1311
     TP_HKEY_EV_BLUETOOTH.rawValue : [0: eventDesc("Bluetooth", action: .bluetooth)], // 0x1314
     TP_HKEY_EV_KEYBOARD.rawValue : [0: eventDesc("Keyboard Disable", action: .keyboard)], // 0x1315
     TP_HKEY_EV_THM_TABLE_CHANGED.rawValue : [0: eventDesc("Thermal Table Change", display: false)], // 0x6030

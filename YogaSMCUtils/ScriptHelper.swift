@@ -20,7 +20,7 @@ let prefpaneAS = """
 let sleepAS = "tell application \"System Events\" to sleep"
 
 let searchAS = "tell application \"System Events\" to keystroke space using {command down, option down}"
-let spotlightAS = "tell application \"System Events\" to keystroke space using {command down}"
+let spotlightAS = "tell application \"System Events\" to keystroke space using command down"
 
 let getAudioMutedAS = "output muted of (get volume settings)"
 let setAudioMuteAS = "set volume with output muted"

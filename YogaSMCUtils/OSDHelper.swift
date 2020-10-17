@@ -43,8 +43,6 @@ import os.log
 }
 
 let defaultImage : NSString = "/System/Library/CoreServices/OSDUIHelper.app/Contents/Resources/kBrightOff.pdf"
-let backlightOff : NSString = "/System/Library/CoreServices/OSDUIHelper.app/Contents/Resources/kBrightOff.pdf"
-let backlightMax : NSString = "/System/Library/CoreServices/OSDUIHelper.app/Contents/Resources/kBright.pdf"
 let sleepImage : NSString = "/System/Library/CoreServices/OSDUIHelper.app/Contents/Resources/RemoteSleepGeneric.pdf"
 
 // from https://github.com/alin23/Lunar/blob/master/Lunar/Data/Hotkeys.swift
