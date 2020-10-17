@@ -295,7 +295,7 @@ func notificationCallback(_ port: CFMachPort?, _ msg: UnsafeMutableRawPointer?, 
 
 enum eventAction : String {
     // Userspace
-    case nothing, micmute, camera, airplane, wireless, bluetooth, bluetoothdiscoverable, prefpane, mirror, spotlight, mission, launchpad, desktop, expose, sleep
+    case nothing, script, micmute, camera, airplane, wireless, bluetooth, bluetoothdiscoverable, prefpane, mirror, spotlight, mission, launchpad, desktop, expose, sleep
     // Driver
     case backlight, keyboard, thermal
 }
@@ -306,25 +306,18 @@ enum eventImage : String {
 }
 
 func eventActuator(_ desc: eventDesc, _ data: UInt32, _ conf: UnsafePointer<sharedConfig?>) {
-    var ret : NSAppleEventDescriptor?
-    if let src = desc.script {
-        if let script = NSAppleScript(source: src) {
-            var error: NSDictionary?
-            ret = script.executeAndReturnError(&error)
-            if error != nil {
-                os_log("%s: failed to execute script", type: .error, desc.name)
-            }
-            if ret!.isRecordDescriptor {
-                os_log("%s: valid return", type: .info, desc.name)
-            }
-        }
-    }
-
     switch desc.action {
     case .nothing:
         #if DEBUG
         os_log("%s: Do nothing", type: .info, desc.name)
         #endif
+    case .script:
+        if let scpt = desc.script {
+            scriptHelper(scpt, desc.name, desc.display)
+        } else {
+            os_log("%s: script not found", type: .error)
+        }
+        return
     case .airplane:
         airplaneModeHelper()
         return
@@ -369,18 +362,15 @@ func eventActuator(_ desc: eventDesc, _ data: UInt32, _ conf: UnsafePointer<shar
             showOSD(desc.name, desc.image ?? sleepImage)
             sleep(1)
         }
-        if desc.script == nil,
-           let scpt = NSAppleScript(source: sleepAS) {
-            var error: NSDictionary?
-            ret = scpt.executeAndReturnError(&error)
-            if error != nil {
-                os_log("%s: failed to execute script", type: .error, desc.name)
-            }
-        }
+        scriptHelper(sleepAS, "Sleep")
+        return
+    case .spotlight:
+        scriptHelper(spotlightAS, "Spotlight")
         return
     case .thermal:
         showOSD("Thermal: \(desc.name)")
         os_log("%s: thermal event", type: .info, desc.name)
+        return
     case .wireless:
         wirelessHelper()
         return
@@ -466,8 +456,9 @@ let ThinkEvents : Dictionary<UInt32, Dictionary<UInt32, eventDesc>> = [
     TP_HKEY_EV_SEARCH.rawValue : [0: eventDesc("Search", action: .spotlight)], // 0x101E
     TP_HKEY_EV_MISSION.rawValue : [0: eventDesc("Mission Control", action: .mission)], // 0x101F
     TP_HKEY_EV_APPS.rawValue : [0: eventDesc("Launchpad", action: .launchpad)], // 0x1020
-    TP_HKEY_EV_STAR.rawValue : [0: eventDesc("Custom Hotkey", action: .nothing, script: prefpaneAS)], // 0x1311
+    TP_HKEY_EV_STAR.rawValue : [0: eventDesc("Custom Hotkey", action: .script, script: prefpaneAS)], // 0x1311
     TP_HKEY_EV_BLUETOOTH.rawValue : [0: eventDesc("Bluetooth", action: .bluetooth)], // 0x1314
     TP_HKEY_EV_KEYBOARD.rawValue : [0: eventDesc("Keyboard Disable", action: .keyboard)], // 0x1315
+    TP_HKEY_EV_THM_TABLE_CHANGED.rawValue : [0: eventDesc("Thermal Table Change", display: false)], // 0x6030
     TP_HKEY_EV_KEY_FN_ESC.rawValue : [0: eventDesc("FnLock")], // 0x6060
 ]

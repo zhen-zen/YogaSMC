@@ -19,10 +19,28 @@ let prefpaneAS = """
                  """
 let sleepAS = "tell application \"System Events\" to sleep"
 
+let spotlightAS = "tell application \"System Events\" to keystroke space using {command down, option down}"
+
+let getAudioMutedAS = "output muted of (get volume settings)"
+let setAudioMuteAS = "set volume with output muted"
+let setAudioUnmuteAS = "set volume without output muted"
+
 let getMicVolumeAS = "input volume of (get volume settings)"
 let setMicVolumeAS = "set volume input volume %d"
 
 var volume : Int32 = 50
+
+func scriptHelper(_ source: String, _ name: String, _ display: Bool = false) {
+    if let scpt = NSAppleScript(source: source) {
+        var error: NSDictionary?
+        _ = scpt.executeAndReturnError(&error)
+        if error != nil {
+            os_log("%s: failed to execute script", type: .error)
+        } else if display {
+            showOSD(name)
+        }
+    }
+}
 
 func micMuteHelper() {
     if let scpt = NSAppleScript(source: getMicVolumeAS) {
