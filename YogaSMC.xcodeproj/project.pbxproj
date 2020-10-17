@@ -34,7 +34,6 @@
 		6F7B0EEA25303D87001616D6 /* libkmod.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F05D7F125300CDE00471F57 /* libkmod.a */; };
 		6F7B5CFF24FBC3CC00AA80FF /* ThinkSMC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F7B5CFD24FBC3CC00AA80FF /* ThinkSMC.cpp */; };
 		6F7B5D0024FBC3CC00AA80FF /* ThinkSMC.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F7B5CFE24FBC3CC00AA80FF /* ThinkSMC.hpp */; };
-		6F7CB51D2536CA27002B2D04 /* kBright.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 6F7CB51C2536CA26002B2D04 /* kBright.pdf */; };
 		6F7D484325344C25004074C7 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F7D484225344C25004074C7 /* main.swift */; };
 		6F7D486F25344D66004074C7 /* YogaSMCNCHelper.app in Copy Login Item */ = {isa = PBXBuildFile; fileRef = 6F7D484025344C25004074C7 /* YogaSMCNCHelper.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		6F7D487B253465DB004074C7 /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F7D487A253465DB004074C7 /* ServiceManagement.framework */; };
@@ -186,7 +185,6 @@
 		6F77A23724F4FE59007A127B /* IdeaSMC.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IdeaSMC.hpp; sourceTree = "<group>"; };
 		6F7B5CFD24FBC3CC00AA80FF /* ThinkSMC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ThinkSMC.cpp; sourceTree = "<group>"; };
 		6F7B5CFE24FBC3CC00AA80FF /* ThinkSMC.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ThinkSMC.hpp; sourceTree = "<group>"; };
-		6F7CB51C2536CA26002B2D04 /* kBright.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; name = kBright.pdf; path = /System/Library/CoreServices/OSDUIHelper.app/Contents/Resources/kBright.pdf; sourceTree = "<group>"; };
 		6F7D484025344C25004074C7 /* YogaSMCNCHelper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = YogaSMCNCHelper.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F7D484225344C25004074C7 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		6F7D484B25344C25004074C7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -286,7 +284,6 @@
 		6F08ACDA24746B8B00681A63 = {
 			isa = PBXGroup;
 			children = (
-				6F7CB51C2536CA26002B2D04 /* kBright.pdf */,
 				6F70425F24D2CF5200FD5659 /* Docs */,
 				6F1C709E251473CC007D1DFC /* Frameworks */,
 				6F83586324D0BFEE0031512F /* SDK */,
@@ -672,7 +669,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6F7CB51D2536CA27002B2D04 /* kBright.pdf in Resources */,
 				6F0A987E25343359002F9F65 /* Assets.xcassets in Resources */,
 				6F0A988125343359002F9F65 /* Main.storyboard in Resources */,
 			);
