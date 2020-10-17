@@ -50,6 +50,8 @@
 		6F861215253AF7E4008FB857 /* BacklightLow.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 6F861212253AF7E4008FB857 /* BacklightLow.pdf */; };
 		6F861216253AF7E4008FB857 /* BacklightOff.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 6F861213253AF7E4008FB857 /* BacklightOff.pdf */; };
 		6F861217253AF7E4008FB857 /* BacklightHigh.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 6F861214253AF7E4008FB857 /* BacklightHigh.pdf */; };
+		6F86122F253B692C008FB857 /* AirplaneMode.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 6F86122D253B692C008FB857 /* AirplaneMode.pdf */; };
+		6F861230253B692C008FB857 /* Antenna.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 6F86122E253B692C008FB857 /* Antenna.pdf */; };
 		6F8674CD24A876E000DC2FDF /* ThinkWMI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F8674CB24A876E000DC2FDF /* ThinkWMI.cpp */; };
 		6F8674CE24A876E000DC2FDF /* ThinkWMI.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F8674CC24A876E000DC2FDF /* ThinkWMI.hpp */; };
 		6F87BF8024D26A5D00D64375 /* YogaSMC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F87BF7E24D26A5D00D64375 /* YogaSMC.cpp */; };
@@ -204,6 +206,8 @@
 		6F861212253AF7E4008FB857 /* BacklightLow.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = BacklightLow.pdf; sourceTree = "<group>"; };
 		6F861213253AF7E4008FB857 /* BacklightOff.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = BacklightOff.pdf; sourceTree = "<group>"; };
 		6F861214253AF7E4008FB857 /* BacklightHigh.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = BacklightHigh.pdf; sourceTree = "<group>"; };
+		6F86122D253B692C008FB857 /* AirplaneMode.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = AirplaneMode.pdf; sourceTree = "<group>"; };
+		6F86122E253B692C008FB857 /* Antenna.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = Antenna.pdf; sourceTree = "<group>"; };
 		6F8674CB24A876E000DC2FDF /* ThinkWMI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ThinkWMI.cpp; sourceTree = "<group>"; };
 		6F8674CC24A876E000DC2FDF /* ThinkWMI.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ThinkWMI.hpp; sourceTree = "<group>"; };
 		6F87BF7E24D26A5D00D64375 /* YogaSMC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = YogaSMC.cpp; sourceTree = "<group>"; };
@@ -440,6 +444,8 @@
 		6F86121D253AF7FA008FB857 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				6F86122D253B692C008FB857 /* AirplaneMode.pdf */,
+				6F86122E253B692C008FB857 /* Antenna.pdf */,
 				6F861214253AF7E4008FB857 /* BacklightHigh.pdf */,
 				6F861212253AF7E4008FB857 /* BacklightLow.pdf */,
 				6F861213253AF7E4008FB857 /* BacklightOff.pdf */,
@@ -691,6 +697,8 @@
 				6F861217253AF7E4008FB857 /* BacklightHigh.pdf in Resources */,
 				6F0A987E25343359002F9F65 /* Assets.xcassets in Resources */,
 				6F0A988125343359002F9F65 /* Main.storyboard in Resources */,
+				6F86122F253B692C008FB857 /* AirplaneMode.pdf in Resources */,
+				6F861230253B692C008FB857 /* Antenna.pdf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

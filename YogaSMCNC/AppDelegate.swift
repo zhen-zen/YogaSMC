@@ -456,6 +456,8 @@ let ThinkEvents : Dictionary<UInt32, Dictionary<UInt32, eventDesc>> = [
     TP_HKEY_EV_SLEEP.rawValue : [0: eventDesc("Sleep", action: .sleep, display: false)], // 0x1004
     TP_HKEY_EV_NETWORK.rawValue : [0: eventDesc("Airplane Mode", action: .wireless)], // 0x1005
     TP_HKEY_EV_DISPLAY.rawValue : [0: eventDesc("Second Display", action: .mirror)], // 0x1007
+    TP_HKEY_EV_BRGHT_UP.rawValue : [0: eventDesc("Brightness Up", display: false)], // 0x1010
+    TP_HKEY_EV_BRGHT_DOWN.rawValue : [0: eventDesc("Brightness Down", display: false)], // 0x1011
     TP_HKEY_EV_KBD_LIGHT.rawValue : [0: eventDesc("Keyboard Backlight", action: .backlight, display: false)], // 0x1012
     TP_HKEY_EV_MIC_MUTE.rawValue : [0: eventDesc("Mic Mute", action: .micmute, display: false)], // 0x101B
     TP_HKEY_EV_SETTING.rawValue : [0: eventDesc("Settings", action: .prefpane, display: false)], // 0x101D
