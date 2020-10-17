@@ -24,4 +24,7 @@ void IOBluetoothPreferenceSetControllerPowerState(int state);
 int IOBluetoothPreferenceGetDiscoverableState();
 void IOBluetoothPreferenceSetDiscoverableState(int state);
 
+// from https://github.com/koekeishiya/yabai/issues/147
+CG_EXTERN void CoreDockSendNotification(CFStringRef, void*);
+
 #endif /* YogaSMC_Bridging_Header_h */

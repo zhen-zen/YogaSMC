@@ -47,6 +47,7 @@
 		6F8611CE253AA2FA008FB857 /* IOBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F8611CD253AA2FA008FB857 /* IOBluetooth.framework */; };
 		6F8611D5253AB59F008FB857 /* RFHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F8611D4253AB59F008FB857 /* RFHelper.swift */; };
 		6F8611E1253AB869008FB857 /* CoreWLAN.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F8611E0253AB869008FB857 /* CoreWLAN.framework */; };
+		6F8611F2253AC075008FB857 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F8611F1253AC075008FB857 /* ApplicationServices.framework */; };
 		6F8674CD24A876E000DC2FDF /* ThinkWMI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F8674CB24A876E000DC2FDF /* ThinkWMI.cpp */; };
 		6F8674CE24A876E000DC2FDF /* ThinkWMI.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F8674CC24A876E000DC2FDF /* ThinkWMI.hpp */; };
 		6F87BF8024D26A5D00D64375 /* YogaSMC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F87BF7E24D26A5D00D64375 /* YogaSMC.cpp */; };
@@ -198,6 +199,7 @@
 		6F8611CD253AA2FA008FB857 /* IOBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOBluetooth.framework; path = System/Library/Frameworks/IOBluetooth.framework; sourceTree = SDKROOT; };
 		6F8611D4253AB59F008FB857 /* RFHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RFHelper.swift; sourceTree = "<group>"; };
 		6F8611E0253AB869008FB857 /* CoreWLAN.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreWLAN.framework; path = System/Library/Frameworks/CoreWLAN.framework; sourceTree = SDKROOT; };
+		6F8611F1253AC075008FB857 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = System/Library/Frameworks/ApplicationServices.framework; sourceTree = SDKROOT; };
 		6F8674CB24A876E000DC2FDF /* ThinkWMI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ThinkWMI.cpp; sourceTree = "<group>"; };
 		6F8674CC24A876E000DC2FDF /* ThinkWMI.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ThinkWMI.hpp; sourceTree = "<group>"; };
 		6F87BF7E24D26A5D00D64375 /* YogaSMC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = YogaSMC.cpp; sourceTree = "<group>"; };
@@ -252,6 +254,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6F1C70A4251473E7007D1DFC /* AppKit.framework in Frameworks */,
+				6F8611F2253AC075008FB857 /* ApplicationServices.framework in Frameworks */,
 				6F8611CE253AA2FA008FB857 /* IOBluetooth.framework in Frameworks */,
 				6F8611E1253AB869008FB857 /* CoreWLAN.framework in Frameworks */,
 				6F1C70A2251473DF007D1DFC /* CoreFoundation.framework in Frameworks */,
@@ -365,6 +368,7 @@
 		6F1C709E251473CC007D1DFC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				6F8611F1253AC075008FB857 /* ApplicationServices.framework */,
 				6F1C70A3251473E7007D1DFC /* AppKit.framework */,
 				6F1C70A1251473DF007D1DFC /* CoreFoundation.framework */,
 				6F8611E0253AB869008FB857 /* CoreWLAN.framework */,
