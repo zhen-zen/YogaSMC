@@ -452,7 +452,7 @@ let ThinkEvents : Dictionary<UInt32, Dictionary<UInt32, eventDesc>> = [
     TP_HKEY_EV_DISPLAY.rawValue : [0: eventDesc("Second Display", action: .mirror)], // 0x1007
     TP_HKEY_EV_KBD_LIGHT.rawValue : [0: eventDesc("Keyboard Backlight", action: .backlight, display: false)], // 0x1012
     TP_HKEY_EV_MIC_MUTE.rawValue : [0: eventDesc("Mic Mute", action: .micmute, display: false)], // 0x101B
-    TP_HKEY_EV_SETTING.rawValue : [0: eventDesc("Settings", action: .prefpane)], // 0x101D
+    TP_HKEY_EV_SETTING.rawValue : [0: eventDesc("Settings", action: .prefpane, display: false)], // 0x101D
     TP_HKEY_EV_SEARCH.rawValue : [0: eventDesc("Search", action: .spotlight)], // 0x101E
     TP_HKEY_EV_MISSION.rawValue : [0: eventDesc("Mission Control", action: .mission)], // 0x101F
     TP_HKEY_EV_APPS.rawValue : [0: eventDesc("Launchpad", action: .launchpad)], // 0x1020
