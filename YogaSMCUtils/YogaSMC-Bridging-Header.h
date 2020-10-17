@@ -15,4 +15,13 @@
 #import "../YogaSMC/YogaSMCUserClient.h"
 #import "../YogaSMC/YogaVPC/ThinkEvents.h"
 
+// from https://github.com/toy/blueutil/blob/master/blueutil.m#L44
+int IOBluetoothPreferencesAvailable();
+
+int IOBluetoothPreferenceGetControllerPowerState();
+void IOBluetoothPreferenceSetControllerPowerState(int state);
+
+int IOBluetoothPreferenceGetDiscoverableState();
+void IOBluetoothPreferenceSetDiscoverableState(int state);
+
 #endif /* YogaSMC_Bridging_Header_h */

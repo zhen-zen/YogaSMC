@@ -294,7 +294,7 @@ func notificationCallback(_ port: CFMachPort?, _ msg: UnsafeMutableRawPointer?, 
 
 enum eventAction : String {
     // Userspace
-    case nothing, micmute, camera, wireless, bluetooth, prefpane, mirror, spotlight, mission, launchpad, sleep
+    case nothing, micmute, camera, airplane, wireless, bluetooth, bluetoothdiscoverable, prefpane, mirror, spotlight, mission, launchpad, sleep
     // Driver
     case backlight, keyboard, thermal
 }
@@ -324,6 +324,15 @@ func eventActuator(_ desc: eventDesc, _ data: UInt32, _ conf: UnsafePointer<shar
         #if DEBUG
         os_log("%s: Do nothing", type: .info, desc.name)
         #endif
+    case .airplane:
+        airplaneModeHelper()
+        return
+    case .bluetooth:
+        bluetoothHelper()
+        return
+    case .bluetoothdiscoverable:
+        bluetoothDiscoverableHelper()
+        return
     case .backlight:
         switch data {
         case 0:
@@ -359,6 +368,9 @@ func eventActuator(_ desc: eventDesc, _ data: UInt32, _ conf: UnsafePointer<shar
     case .thermal:
         showOSD("Thermal: \(desc.name)")
         os_log("%s: thermal event", type: .info, desc.name)
+    case .wireless:
+        wirelessHelper()
+        return
     default:
         #if DEBUG
         os_log("%s: Not implmented", type: .info, desc.name)
@@ -428,7 +440,7 @@ let IdeaEvents : Dictionary<UInt32, Dictionary<UInt32, eventDesc>> = [
     0x07 : [0: eventDesc("Camera", action: .camera)],
     0x08 : [0: eventDesc("Mic Mute", action: .micmute, display: false)],
     0x0A : [0: eventDesc("TouchPad On", display: false)],
-    0x0D : [0: eventDesc("Airplane Mode", action: .wireless)],
+    0x0D : [0: eventDesc("Airplane Mode", action: .airplane)],
 ]
 
 let ThinkEvents : Dictionary<UInt32, Dictionary<UInt32, eventDesc>> = [

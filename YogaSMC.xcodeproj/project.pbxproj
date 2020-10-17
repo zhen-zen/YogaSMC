@@ -44,6 +44,9 @@
 		6F81FC4825317B1300CFEDF5 /* YogaSMCUserClient.h in Headers */ = {isa = PBXBuildFile; fileRef = 6F81FC4025317AE100CFEDF5 /* YogaSMCUserClient.h */; };
 		6F83587324D0C2B50031512F /* KeyImplementations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F83587124D0C2B50031512F /* KeyImplementations.cpp */; };
 		6F83587424D0C2B50031512F /* KeyImplementations.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F83587224D0C2B50031512F /* KeyImplementations.hpp */; };
+		6F8611CE253AA2FA008FB857 /* IOBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F8611CD253AA2FA008FB857 /* IOBluetooth.framework */; };
+		6F8611D5253AB59F008FB857 /* RFHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F8611D4253AB59F008FB857 /* RFHelper.swift */; };
+		6F8611E1253AB869008FB857 /* CoreWLAN.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F8611E0253AB869008FB857 /* CoreWLAN.framework */; };
 		6F8674CD24A876E000DC2FDF /* ThinkWMI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F8674CB24A876E000DC2FDF /* ThinkWMI.cpp */; };
 		6F8674CE24A876E000DC2FDF /* ThinkWMI.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F8674CC24A876E000DC2FDF /* ThinkWMI.hpp */; };
 		6F87BF8024D26A5D00D64375 /* YogaSMC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F87BF7E24D26A5D00D64375 /* YogaSMC.cpp */; };
@@ -192,6 +195,9 @@
 		6F83586F24D0C0C90031512F /* VirtualSMCSDK */ = {isa = PBXFileReference; lastKnownFileType = text; name = VirtualSMCSDK; path = VirtualSMC.kext/Contents/Resources/VirtualSMCSDK; sourceTree = SOURCE_ROOT; };
 		6F83587124D0C2B50031512F /* KeyImplementations.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = KeyImplementations.cpp; sourceTree = "<group>"; };
 		6F83587224D0C2B50031512F /* KeyImplementations.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = KeyImplementations.hpp; sourceTree = "<group>"; };
+		6F8611CD253AA2FA008FB857 /* IOBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOBluetooth.framework; path = System/Library/Frameworks/IOBluetooth.framework; sourceTree = SDKROOT; };
+		6F8611D4253AB59F008FB857 /* RFHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RFHelper.swift; sourceTree = "<group>"; };
+		6F8611E0253AB869008FB857 /* CoreWLAN.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreWLAN.framework; path = System/Library/Frameworks/CoreWLAN.framework; sourceTree = SDKROOT; };
 		6F8674CB24A876E000DC2FDF /* ThinkWMI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ThinkWMI.cpp; sourceTree = "<group>"; };
 		6F8674CC24A876E000DC2FDF /* ThinkWMI.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ThinkWMI.hpp; sourceTree = "<group>"; };
 		6F87BF7E24D26A5D00D64375 /* YogaSMC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = YogaSMC.cpp; sourceTree = "<group>"; };
@@ -246,6 +252,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				6F1C70A4251473E7007D1DFC /* AppKit.framework in Frameworks */,
+				6F8611CE253AA2FA008FB857 /* IOBluetooth.framework in Frameworks */,
+				6F8611E1253AB869008FB857 /* CoreWLAN.framework in Frameworks */,
 				6F1C70A2251473DF007D1DFC /* CoreFoundation.framework in Frameworks */,
 				6F1C70A0251473CD007D1DFC /* IOKit.framework in Frameworks */,
 				6FD082B32537DA1A00491976 /* OSD.framework in Frameworks */,
@@ -357,13 +365,15 @@
 		6F1C709E251473CC007D1DFC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				6F7D487A253465DB004074C7 /* ServiceManagement.framework */,
-				6FD082B22537DA1A00491976 /* OSD.framework */,
-				6F05D7F125300CDE00471F57 /* libkmod.a */,
-				6F1C70B1251475BA007D1DFC /* PreferencePanes.framework */,
 				6F1C70A3251473E7007D1DFC /* AppKit.framework */,
 				6F1C70A1251473DF007D1DFC /* CoreFoundation.framework */,
+				6F8611E0253AB869008FB857 /* CoreWLAN.framework */,
+				6F8611CD253AA2FA008FB857 /* IOBluetooth.framework */,
 				6F1C709F251473CD007D1DFC /* IOKit.framework */,
+				6FD082B22537DA1A00491976 /* OSD.framework */,
+				6F1C70B1251475BA007D1DFC /* PreferencePanes.framework */,
+				6F7D487A253465DB004074C7 /* ServiceManagement.framework */,
+				6F05D7F125300CDE00471F57 /* libkmod.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -424,6 +434,7 @@
 			children = (
 				6F8B1F2C253808DC003DD8A8 /* OSDHelper.swift */,
 				6F8B1F242538083A003DD8A8 /* PropertyHelper.swift */,
+				6F8611D4253AB59F008FB857 /* RFHelper.swift */,
 				6F8B1F70253821C3003DD8A8 /* ScriptHelper.swift */,
 				6F8B1FB92538C53A003DD8A8 /* SystemPreferences.swift */,
 				6FD083002537E87400491976 /* YogaSMC-Bridging-Header.h */,
@@ -709,6 +720,7 @@
 			files = (
 				6F8B1F2E253808DC003DD8A8 /* OSDHelper.swift in Sources */,
 				6F8B1F262538083A003DD8A8 /* PropertyHelper.swift in Sources */,
+				6F8611D5253AB59F008FB857 /* RFHelper.swift in Sources */,
 				6F8B1F71253821C3003DD8A8 /* ScriptHelper.swift in Sources */,
 				6F8B1FC52538CB37003DD8A8 /* SystemPreferences.swift in Sources */,
 				6F0A987A25343357002F9F65 /* AppDelegate.swift in Sources */,
