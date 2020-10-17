@@ -343,6 +343,10 @@ func eventActuator(_ desc: eventDesc, _ data: UInt32, _ conf: UnsafePointer<shar
     case .prefpane:
         prefpaneHelper()
     case .sleep:
+        if desc.display {
+            showOSD(desc.name, desc.image ?? sleepImage)
+            sleep(1)
+        }
         if desc.script == nil,
            let scpt = NSAppleScript(source: sleepAS) {
             var error: NSDictionary?
@@ -351,6 +355,7 @@ func eventActuator(_ desc: eventDesc, _ data: UInt32, _ conf: UnsafePointer<shar
                 os_log("%s: failed to execute script", type: .error, desc.name)
             }
         }
+        return
     case .thermal:
         showOSD("Thermal: \(desc.name)")
         os_log("%s: thermal event", type: .info, desc.name)
