@@ -660,8 +660,7 @@ void ThinkVPC::updateVPC() {
                         vpc->evaluateObject(setHKEYsleep);
 
                 case TP_HKEY_EV_MIC_MUTE:
-                    if (!hotkey_legacy)
-                        setMicMuteLEDStatus(micMuteLEDstate ? 0 : 2);
+                    setMicMuteLEDStatus(micMuteLEDstate ? 0 : 2);
                     break;
                     
                 default:
