@@ -313,7 +313,9 @@ func eventActuator(_ desc: eventDesc, _ data: UInt32, _ conf: UnsafePointer<shar
         #endif
     case .script:
         if let scpt = desc.script {
-            scriptHelper(scpt, desc.name)
+            if !scriptHelper(scpt, desc.name) {
+                return
+            }
         } else {
             os_log("%s: script not found", type: .error)
             return
@@ -362,10 +364,10 @@ func eventActuator(_ desc: eventDesc, _ data: UInt32, _ conf: UnsafePointer<shar
             showOSD(desc.name, desc.image ?? sleepImage)
             sleep(1)
         }
-        scriptHelper(sleepAS, desc.name)
+        _ = scriptHelper(sleepAS, desc.name)
         return
     case .spotlight:
-        scriptHelper(spotlightAS, desc.name)
+        _ = scriptHelper(spotlightAS, desc.name)
         return
     case .thermal:
         showOSD("Thermal: \(desc.name)")

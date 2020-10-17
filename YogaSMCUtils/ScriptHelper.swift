@@ -30,16 +30,16 @@ let setMicVolumeAS = "set volume input volume %d"
 
 var volume : Int32 = 50
 
-func scriptHelper(_ source: String, _ name: String, _ display: Bool = false) {
+func scriptHelper(_ source: String, _ name: String) -> Bool {
     if let scpt = NSAppleScript(source: source) {
         var error: NSDictionary?
         _ = scpt.executeAndReturnError(&error)
-        if error != nil {
-            os_log("%s: failed to execute script", type: .error)
-        } else if display {
-            showOSD(name)
+        if error == nil {
+            return true
         }
     }
+    os_log("%s: failed to execute script", type: .error)
+    return false
 }
 
 func micMuteHelper() {
