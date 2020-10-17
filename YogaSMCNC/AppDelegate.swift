@@ -295,7 +295,11 @@ func notificationCallback(_ port: CFMachPort?, _ msg: UnsafeMutableRawPointer?, 
 
 enum eventAction : String {
     // Userspace
-    case nothing, script, micmute, camera, airplane, wireless, bluetooth, bluetoothdiscoverable, prefpane, mirror, spotlight, mission, launchpad, desktop, expose, sleep
+    case nothing, script
+    case airplane, wireless, bluetooth, bluetoothdiscoverable
+    case prefpane, spotlight, search, sleep, micmute
+    case mission, launchpad, desktop, expose
+    case mirror, camera
     // Driver
     case backlight, keyboard, thermal
 }
@@ -365,6 +369,9 @@ func eventActuator(_ desc: eventDesc, _ data: UInt32, _ conf: UnsafePointer<shar
             sleep(1)
         }
         _ = scriptHelper(sleepAS, desc.name)
+        return
+    case .search:
+        _ = scriptHelper(searchAS, desc.name)
         return
     case .spotlight:
         _ = scriptHelper(spotlightAS, desc.name)
