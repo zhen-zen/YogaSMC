@@ -61,3 +61,23 @@ func showOSD(_ prompt: String, _ img: NSString? = nil, duration: UInt32 = 1000, 
         msecUntilFade: duration,
         withText: prompt as NSString)
 }
+
+func showOSDRes(_ prompt: String, _ img: String, duration: UInt32 = 1000, priority: UInt32 = 0x1f4) {
+    guard let manager = OSDManager.sharedManager() as? OSDManager else {
+        os_log("OSDManager unavailable", type: .error)
+        return
+    }
+
+    var image : NSString?
+    if let path = Bundle.main.path(forResource: img, ofType: nil),
+              path.hasPrefix("/Applications") {
+        image = path as NSString
+    }
+
+    manager.showImage(
+        atPath: image ?? defaultImage,
+        onDisplayID: CGMainDisplayID(),
+        priority: priority,
+        msecUntilFade: duration,
+        withText: prompt as NSString)
+}

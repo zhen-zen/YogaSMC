@@ -47,6 +47,9 @@
 		6F8611D5253AB59F008FB857 /* RFHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F8611D4253AB59F008FB857 /* RFHelper.swift */; };
 		6F8611E1253AB869008FB857 /* CoreWLAN.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F8611E0253AB869008FB857 /* CoreWLAN.framework */; };
 		6F8611F2253AC075008FB857 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F8611F1253AC075008FB857 /* ApplicationServices.framework */; };
+		6F861215253AF7E4008FB857 /* BacklightLow.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 6F861212253AF7E4008FB857 /* BacklightLow.pdf */; };
+		6F861216253AF7E4008FB857 /* BacklightOff.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 6F861213253AF7E4008FB857 /* BacklightOff.pdf */; };
+		6F861217253AF7E4008FB857 /* BacklightHigh.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 6F861214253AF7E4008FB857 /* BacklightHigh.pdf */; };
 		6F8674CD24A876E000DC2FDF /* ThinkWMI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F8674CB24A876E000DC2FDF /* ThinkWMI.cpp */; };
 		6F8674CE24A876E000DC2FDF /* ThinkWMI.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F8674CC24A876E000DC2FDF /* ThinkWMI.hpp */; };
 		6F87BF8024D26A5D00D64375 /* YogaSMC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F87BF7E24D26A5D00D64375 /* YogaSMC.cpp */; };
@@ -198,6 +201,9 @@
 		6F8611D4253AB59F008FB857 /* RFHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RFHelper.swift; sourceTree = "<group>"; };
 		6F8611E0253AB869008FB857 /* CoreWLAN.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreWLAN.framework; path = System/Library/Frameworks/CoreWLAN.framework; sourceTree = SDKROOT; };
 		6F8611F1253AC075008FB857 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = System/Library/Frameworks/ApplicationServices.framework; sourceTree = SDKROOT; };
+		6F861212253AF7E4008FB857 /* BacklightLow.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = BacklightLow.pdf; sourceTree = "<group>"; };
+		6F861213253AF7E4008FB857 /* BacklightOff.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = BacklightOff.pdf; sourceTree = "<group>"; };
+		6F861214253AF7E4008FB857 /* BacklightHigh.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = BacklightHigh.pdf; sourceTree = "<group>"; };
 		6F8674CB24A876E000DC2FDF /* ThinkWMI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ThinkWMI.cpp; sourceTree = "<group>"; };
 		6F8674CC24A876E000DC2FDF /* ThinkWMI.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ThinkWMI.hpp; sourceTree = "<group>"; };
 		6F87BF7E24D26A5D00D64375 /* YogaSMC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = YogaSMC.cpp; sourceTree = "<group>"; };
@@ -342,6 +348,7 @@
 		6F0A987825343357002F9F65 /* YogaSMCNC */ = {
 			isa = PBXGroup;
 			children = (
+				6F86121D253AF7FA008FB857 /* Resources */,
 				6F8B1FEA2538D64B003DD8A8 /* YogaSMCNC.entitlements */,
 				6F0A987925343357002F9F65 /* AppDelegate.swift */,
 				6F0A987D25343359002F9F65 /* Assets.xcassets */,
@@ -428,6 +435,16 @@
 			);
 			name = SDK;
 			path = YogaSMC;
+			sourceTree = "<group>";
+		};
+		6F86121D253AF7FA008FB857 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				6F861214253AF7E4008FB857 /* BacklightHigh.pdf */,
+				6F861212253AF7E4008FB857 /* BacklightLow.pdf */,
+				6F861213253AF7E4008FB857 /* BacklightOff.pdf */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		6F8B1F1925380748003DD8A8 /* YogaSMCUtils */ = {
@@ -669,6 +686,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6F861215253AF7E4008FB857 /* BacklightLow.pdf in Resources */,
+				6F861216253AF7E4008FB857 /* BacklightOff.pdf in Resources */,
+				6F861217253AF7E4008FB857 /* BacklightHigh.pdf in Resources */,
 				6F0A987E25343359002F9F65 /* Assets.xcassets in Resources */,
 				6F0A988125343359002F9F65 /* Main.storyboard in Resources */,
 			);

@@ -336,14 +336,13 @@ func eventActuator(_ desc: eventDesc, _ data: UInt32, _ conf: UnsafePointer<shar
     case .backlight:
         switch data {
         case 0:
-            showOSD("Backlight Off", backlightOff)
+            showOSDRes("Backlight Off", "BacklightOff.pdf")
         case 1:
-            // TODO: update resource
-            showOSD("Backlight Low", backlightMax)
+            showOSDRes("Backlight Low", "BacklightLow.pdf")
         case 2:
-            showOSD("Backlight High", backlightMax)
+            showOSDRes("Backlight High", "BacklightHigh.pdf")
         default:
-            showOSD("Backlight \(data)", backlightMax)
+            showOSDRes("Backlight \(data)", "BacklightLow.pdf")
         }
     case .micmute:
         if desc.script == nil {
