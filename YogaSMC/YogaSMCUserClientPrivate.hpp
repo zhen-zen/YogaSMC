@@ -36,7 +36,7 @@ public:
     virtual IOReturn clientClose(void) APPLE_KEXT_OVERRIDE;
     virtual IOReturn clientDied(void) APPLE_KEXT_OVERRIDE;
 
-    IOReturn sendNotification(UInt32 event);
+    IOReturn sendNotification(UInt32 event, UInt32 data=0);
 
     // Externally accessible methods
     IOReturn userClientOpen(void);

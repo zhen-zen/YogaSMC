@@ -241,9 +241,9 @@ private:
      *
      *  @return true if success
      */
-    bool updateKeyboard(bool update=true);
+    bool updateKeyboard(bool update=false);
 
-    inline bool updateBacklight(bool update=true) APPLE_KEXT_OVERRIDE {return updateKeyboard(update);};
+    inline bool updateBacklight(bool update=false) APPLE_KEXT_OVERRIDE {return updateKeyboard(update);};
     bool setBacklight(UInt32 level) APPLE_KEXT_OVERRIDE;
 
     /**

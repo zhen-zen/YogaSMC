@@ -172,7 +172,7 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
             } else if (key->isEqualTo(backlightPrompt)) {
                 OSNumber *value;
                 getPropertyNumber(backlightPrompt);
-                updateBacklight(false);
+                updateBacklight();
                 if (value->unsigned32BitValue() == backlightLevel)
                     DebugLog(valueMatched, backlightPrompt, backlightLevel);
                 else

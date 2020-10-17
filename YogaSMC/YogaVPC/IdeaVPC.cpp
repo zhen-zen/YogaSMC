@@ -459,8 +459,13 @@ bool IdeaVPC::updateKeyboard(bool update) {
 
     if (FnlockCap)
         FnlockMode = BIT(HA_FNLOCK_BIT) & state;
-    if (backlightCap)
-        backlightLevel = (BIT(HA_BACKLIGHT_BIT) & state) ? 1 : 0;
+    if (backlightCap) {
+        // Preserve low / high level on non keyboard triggered events
+        if (!update && backlightLevel)
+            backlightLevel -= 1;
+        // Inference from brightness cycle: 0 -> 1 -> 2 -> 0
+        backlightLevel = (BIT(HA_BACKLIGHT_BIT) & state) ? (backlightLevel ? 2 : 1) : 0;
+    }
 
     if (update) {
         DebugLog(updateSuccess, KeyboardPrompt, state);
@@ -530,10 +535,11 @@ bool IdeaVPC::setBacklight(UInt32 level) {
         return false;
     }
 
-    backlightLevel = level;
+    if (level && backlightLevel)
+        // Preserve low / high level on non keyboard triggered events
+        backlightLevel -= 1;
+    // Don't update internal value since it will trigger another event
     DebugLog(toggleSuccess, backlightPrompt, (backlightLevel ? HACMD_BACKLIGHT_ON : HACMD_BACKLIGHT_OFF), (backlightLevel ? "on" : "off"));
-    setProperty(backlightPrompt, backlightLevel);
-
     return true;
 }
 
@@ -560,7 +566,7 @@ bool IdeaVPC::toggleFnlock() {
 }
 
 void IdeaVPC::updateVPC() {
-    UInt32 vpc1, vpc2, result, notifier;
+    UInt32 vpc1, vpc2, result;
     UInt8 retries = 0;
 
     if (!read_ec_data(VPCCMD_R_VPC1, &vpc1, &retries) || !read_ec_data(VPCCMD_R_VPC2, &vpc2, &retries)) {
@@ -581,7 +587,7 @@ void IdeaVPC::updateVPC() {
 
     for (int vpc_bit = 0; vpc_bit < 16; vpc_bit++) {
         if (BIT(vpc_bit) & vpc1) {
-            notifier = vpc_bit << 8;
+            UInt32 data = 0;
             switch (vpc_bit) {
                 case 0:
                     if (!read_ec_data(VPCCMD_R_SPECIAL_BUTTONS, &result, &retries)) {
@@ -596,13 +602,14 @@ void IdeaVPC::updateVPC() {
                                 AlwaysLog("Special button 0x%x", result);
                                 break;
                         }
-                        notifier |= result;
+                        data = result;
                     }
                     break;
 
                 case 1: // ENERGY_EVENT_GENERAL / ENERGY_EVENT_KEYBDLED_OLD
                     AlwaysLog("Fn+Space keyboard backlight?");
-                    updateKeyboard();
+                    updateKeyboard(true);
+                    data = backlightLevel;
                     // also on AC connect / disconnect
                     break;
 
@@ -611,7 +618,7 @@ void IdeaVPC::updateVPC() {
                         AlwaysLog("Failed to read VPCCMD_R_BL_POWER %d", retries);
                     else
                         AlwaysLog("Open lid? 0x%x %s", result, result ? "on" : "off");
-                    notifier |= result;
+                    data = result;
                     // functional, TODO: turn off screen on demand
                     break;
 
@@ -620,7 +627,7 @@ void IdeaVPC::updateVPC() {
                         AlwaysLog("Failed to read VPCCMD_R_TOUCHPAD %d", retries);
                     else
                         AlwaysLog("Fn+F6 touchpad 0x%x %s", result, result ? "on" : "off");
-                    notifier |= result;
+                    data = result;
                     break;
 
                 case 7:
@@ -647,8 +654,9 @@ void IdeaVPC::updateVPC() {
                     AlwaysLog("Unknown VPC event %d", vpc_bit);
                     break;
             }
+
             if (client != nullptr)
-                client->sendNotification(notifier);
+                client->sendNotification(vpc_bit, data);
         }
     }
 }

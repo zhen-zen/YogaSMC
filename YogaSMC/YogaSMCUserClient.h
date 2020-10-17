@@ -27,6 +27,7 @@ enum {
 typedef struct {
     mach_msg_header_t header;
     UInt32 event;
+    UInt32 data;
     io_user_reference_t ref;
 } SMCNotificationMessage;
 

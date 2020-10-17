@@ -7,6 +7,7 @@
 //
 
 import AppKit
+import ApplicationServices
 import os.log
 import ServiceManagement
 
@@ -46,7 +47,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @IBAction func openPrefpane(_ sender: NSMenuItem) {
-        openPrefpaneAS()
+        prefpaneHelper()
     }
 
     // from https://medium.com/@hoishing/menu-bar-apps-f2d270150660
@@ -163,11 +164,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         if let arr = defaults.object(forKey: "Events") as? [[String: Any]] {
             for v in arr {
-                conf.events[v["id"] as! UInt32] = eventDesc(
-                    v["name"] as! String,
-                    v["image"] as? String,
-                    action: eventAction(rawValue: v["action"] as! Int) ?? .nothing,
-                    display: v["display"] as? Bool ?? true)
+                if let id = v["id"] as? UInt32,
+                   let events = v["events"] as? [[String: Any]] {
+                    var e : Dictionary<UInt32, eventDesc> = [:]
+                    for event in events {
+                        if let data = event["data"] as? UInt32,
+                           let name = event["name"] as? String {
+                            let action = event["action"] as? String
+                            e[data] = eventDesc(
+                                name,
+                                event["image"] as? String,
+                                action: (action != nil) ? eventAction(rawValue: action!) ?? .nothing : .nothing,
+                                display: event["display"] as? Bool ?? true,
+                                script: event["script"] as? String)
+                        }
+                    }
+                    conf.events[id] = e
+                }
             }
             os_log("Loaded %d events", type: .info, conf.events.capacity)
         } else {
@@ -178,23 +191,32 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func saveEvents() {
         var array : [[String: Any]] = []
         for (k, v) in conf.events {
+            var events : [[String: Any]] = []
             var dict : [String: Any] = [:]
             dict["id"] = Int(k)
-            dict["name"] = v.name
-            if let res = v.image {
-                if let path = Bundle.main.resourcePath,
-                   res.hasPrefix(path) {
-                    dict["image"] = res.lastPathComponent
-               } else {
-                    dict["image"] = res
-               }
+            for (data, e) in v {
+                var event : [String: Any] = [:]
+                event["data"] = Int(data)
+                event["name"] = e.name
+                if let res = e.image {
+                    if let path = Bundle.main.resourcePath,
+                       res.hasPrefix(path) {
+                        event["image"] = res.lastPathComponent
+                   } else {
+                        event["image"] = res
+                   }
+                }
+                event["action"] = e.action.rawValue
+                event["display"] = e.display
+                if e.script != nil {
+                    event["script"] = e.script
+                }
+                events.append(event)
             }
-            dict["action"] = v.action.rawValue
-            dict["display"] = v.display
+            dict["events"] = events
             array.append(dict)
         }
         defaults.setValue(array, forKey: "Events")
-        os_log("Default events saved", type: .info)
     }
     
     func loadConfig() {
@@ -244,15 +266,20 @@ func notificationCallback(_ port: CFMachPort?, _ msg: UnsafeMutableRawPointer?, 
     let conf = info!.assumingMemoryBound(to: sharedConfig?.self)
     if conf.pointee != nil  {
         if let notification = msg?.load(as: SMCNotificationMessage.self) {
-            if let desc = conf.pointee?.events[notification.event] {
-                if desc.display {
-                    showOSD(desc.name, desc.image)
+            if let events = conf.pointee?.events[notification.event] {
+                if let desc = events[notification.data] {
+                    eventActuator(desc, notification.data, conf)
+                } else if let desc = events[0]{
+                    eventActuator(desc, notification.data, conf)
+                } else {
+                    let name = String(format:"Event 0x%04x", notification.event)
+                    showOSD(name)
+                    os_log("Event 0x%04x default data not found", type: .error, notification.event)
                 }
-                eventActuator(desc, conf)
             } else {
                 let name = String(format:"Event 0x%04x", notification.event)
                 showOSD(name)
-                conf.pointee?.events[notification.event] = eventDesc(name, nil)
+                conf.pointee?.events[notification.event] = [0: eventDesc(name, nil)]
                 #if DEBUG
                 os_log("Event 0x%04x", type: .debug, notification.event)
                 #endif
@@ -266,34 +293,11 @@ func notificationCallback(_ port: CFMachPort?, _ msg: UnsafeMutableRawPointer?, 
     }
 }
 
-func openPrefpaneAS() {
-    // from https://medium.com/macoclock/everything-you-need-to-do-to-launch-an-applescript-from-appkit-on-macos-catalina-with-swift-1ba82537f7c3
-    let source = """
-                        tell application "System Preferences"
-                            reveal pane "org.zhen.YogaSMCPane"
-                            activate
-                        end tell
-                 """
-    if let script = NSAppleScript(source: source) {
-        var error: NSDictionary?
-        script.executeAndReturnError(&error)
-        if error != nil {
-            os_log("Failed to open prefpane", type: .error)
-            let alert = NSAlert()
-            alert.messageText = "Failed to open Preferences"
-            alert.informativeText = "Please install YogaSMCPane"
-            alert.alertStyle = .warning
-            alert.addButton(withTitle: "OK")
-            alert.runModal()
-        }
-    }
-}
-
-enum eventAction : Int {
+enum eventAction : String {
     // Userspace
-    case nothing, micMute, camera, wireless, bluetooth, prefpane, mirror
+    case nothing, script, micmute, camera, airplane, wireless, bluetooth, bluetoothdiscoverable, prefpane, mirror, spotlight, mission, launchpad, desktop, expose, sleep
     // Driver
-    case backlit, keyboard, thermal
+    case backlight, keyboard, thermal
 }
 
 // Resources
@@ -301,26 +305,83 @@ enum eventImage : String {
     case kBright//, kBrightOff
 }
 
-func eventActuator(_ desc: eventDesc, _ conf: UnsafePointer<sharedConfig?>) {
+func eventActuator(_ desc: eventDesc, _ data: UInt32, _ conf: UnsafePointer<sharedConfig?>) {
     switch desc.action {
     case .nothing:
         #if DEBUG
         os_log("%s: Do nothing", type: .info, desc.name)
         #endif
-    case .backlit:
-        let backlightLevel = getNumber("BacklightLevel", conf.pointee!.io_service)
-        if backlightLevel != -1 {
-            // TODO: low / high
-            showOSD(desc.name, backlightLevel != 0 ? desc.image : nil)
+    case .script:
+        if let scpt = desc.script {
+            scriptHelper(scpt, desc.name)
         } else {
-            os_log("%s: failed to evaluate status", type: .info, desc.name)
+            os_log("%s: script not found", type: .error)
+            return
         }
+    case .airplane:
+        airplaneModeHelper()
+        return
+    case .bluetooth:
+        bluetoothHelper()
+        return
+    case .bluetoothdiscoverable:
+        bluetoothDiscoverableHelper()
+        return
+    case .backlight:
+        switch data {
+        case 0:
+            showOSD("Backlight Off", backlightOff)
+        case 1:
+            // TODO: update resource
+            showOSD("Backlight Low", backlightMax)
+        case 2:
+            showOSD("Backlight High", backlightMax)
+        default:
+            showOSD("Backlight \(data)", backlightMax)
+        }
+    case .micmute:
+        if desc.script == nil {
+            micMuteHelper()
+        }
+    case .desktop:
+        CoreDockSendNotification("com.apple.showdesktop.awake" as CFString, nil)
+        return
+    case .expose:
+        CoreDockSendNotification("com.apple.expose.front.awake" as CFString, nil)
+        return
+    case .mission:
+        CoreDockSendNotification("com.apple.expose.awake" as CFString, nil)
+        return
+    case .launchpad:
+        CoreDockSendNotification("com.apple.launchpad.toggle" as CFString, nil)
+        return
     case .prefpane:
-        openPrefpaneAS()
+        prefpaneHelper()
+    case .sleep:
+        if desc.display {
+            showOSD(desc.name, desc.image ?? sleepImage)
+            sleep(1)
+        }
+        scriptHelper(sleepAS, desc.name)
+        return
+    case .spotlight:
+        scriptHelper(spotlightAS, desc.name)
+        return
+    case .thermal:
+        showOSD("Thermal: \(desc.name)")
+        os_log("%s: thermal event", type: .info, desc.name)
+        return
+    case .wireless:
+        wirelessHelper()
+        return
     default:
         #if DEBUG
         os_log("%s: Not implmented", type: .info, desc.name)
         #endif
+    }
+
+    if desc.display {
+        showOSD(desc.name, desc.image)
     }
 }
 
@@ -329,8 +390,9 @@ struct eventDesc {
     let image : NSString?
     let action : eventAction
     let display : Bool
+    let script : String?
 
-    init(_ name: String, _ image: String? = nil, action: eventAction = .nothing, display: Bool = true) {
+    init(_ name: String, _ image: String? = nil, action: eventAction = .nothing, display: Bool = true, script: String? = nil) {
         self.name = name
         if let img = image {
             if img.hasPrefix("/") {
@@ -347,9 +409,10 @@ struct eventDesc {
         }
         self.action = action
         self.display = display
+        self.script = script
     }
 
-    init(_ name: String, _ image: eventImage, action: eventAction = .nothing, display: Bool = true) {
+    init(_ name: String, _ image: eventImage, action: eventAction = .nothing, display: Bool = true, script: String? = nil) {
         self.name = name
         if let path = Bundle.main.path(forResource: image.rawValue, ofType: "pdf"),
            path.hasPrefix("/Applications") {
@@ -359,38 +422,44 @@ struct eventDesc {
         }
         self.action = action
         self.display = display
+        self.script = script
     }
 }
 
 struct sharedConfig {
     var connect : io_connect_t = 0
-    var events : Dictionary<UInt32, eventDesc> = [:]
+    var events : Dictionary<UInt32, Dictionary<UInt32, eventDesc>> = [:]
     let io_service : io_service_t = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("YogaVPC"))
 }
 
-let IdeaEvents : Dictionary<UInt32, eventDesc> = [
-    0x0040 : eventDesc("Fn-Q Cooling", action: .thermal),
-    0x0100 : eventDesc("Keyboard Backlight", "kBright.pdf", action: .backlit, display: false),
-    0x0200 : eventDesc("Screen Off"),
-    0x0201 : eventDesc("Screen On"),
-    0x0500 : eventDesc("TouchPad Off"), // Off
-    0x0501 : eventDesc("TouchPad On"), // Same as 0x0A00
-    0x0700 : eventDesc("Camera", action: .camera),
-    0x0800 : eventDesc("Mic Mute", action: .micMute),
-    0x0A00 : eventDesc("TouchPad On", display: false),
-    0x0D00 : eventDesc("Airplane Mode", action: .wireless),
+let IdeaEvents : Dictionary<UInt32, Dictionary<UInt32, eventDesc>> = [
+    0x00 : [0: eventDesc("Special Button", display: false),
+            0x40: eventDesc("Fn-Q Cooling", action: .thermal)],
+    0x01 : [0: eventDesc("Keyboard Backlight", action: .backlight, display: false)],
+    0x02 : [0: eventDesc("Screen Off"),
+            1: eventDesc("Screen On")],
+    0x05 : [0: eventDesc("TouchPad Off"),
+            1: eventDesc("TouchPad On")],
+    0x07 : [0: eventDesc("Camera", action: .camera)],
+    0x08 : [0: eventDesc("Mic Mute", action: .micmute, display: false)],
+    0x0A : [0: eventDesc("TouchPad On", display: false)],
+    0x0D : [0: eventDesc("Airplane Mode", action: .airplane)],
 ]
 
-let ThinkEvents : Dictionary<UInt32, eventDesc> = [
-    0x1005 : eventDesc("Airplane Mode", action: .wireless),
-    0x1007 : eventDesc("Second Display", action: .mirror),
-    0x1010 : eventDesc("Brightness Up", display: false),
-    0x1011 : eventDesc("Brightness Down", display: false),
-    0x1012 : eventDesc("Keyboard Backlight", "kBright.pdf", action: .backlit, display: false),
-    0x101B : eventDesc("Mic Mute", action: .micMute),
-    0x101d : eventDesc("Settings", action: .prefpane),
-    0x1311 : eventDesc("Custom Hotkey", action: .prefpane),
-    0x1314 : eventDesc("Bluetooth", action: .bluetooth),
-    0x1315 : eventDesc("Keyboard Disable", action: .keyboard),
-    0x6060 : eventDesc("FnLock"),
+let ThinkEvents : Dictionary<UInt32, Dictionary<UInt32, eventDesc>> = [
+    TP_HKEY_EV_SLEEP.rawValue : [0: eventDesc("Sleep", action: .sleep, display: false)], // 0x1004
+    TP_HKEY_EV_NETWORK.rawValue : [0: eventDesc("Airplane Mode", action: .wireless)], // 0x1005
+    TP_HKEY_EV_DISPLAY.rawValue : [0: eventDesc("Second Display", action: .mirror)], // 0x1007
+    TP_HKEY_EV_KBD_LIGHT.rawValue : [0: eventDesc("Keyboard Backlight", action: .backlight, display: false)], // 0x1012
+    TP_HKEY_EV_MIC_MUTE.rawValue : [0: eventDesc("Mic Mute", action: .micmute, display: false)], // 0x101B
+    TP_HKEY_EV_SETTING.rawValue : [0: eventDesc("Settings", action: .prefpane)], // 0x101D
+    TP_HKEY_EV_SEARCH.rawValue : [0: eventDesc("Search", action: .spotlight)], // 0x101E
+    TP_HKEY_EV_MISSION.rawValue : [0: eventDesc("Mission Control", action: .mission)], // 0x101F
+    TP_HKEY_EV_APPS.rawValue : [0: eventDesc("Launchpad", action: .launchpad)], // 0x1020
+    TP_HKEY_EV_STAR.rawValue : [0: eventDesc("Custom Hotkey", action: .script, script: prefpaneAS)], // 0x1311
+    TP_HKEY_EV_BLUETOOTH.rawValue : [0: eventDesc("Bluetooth", action: .bluetooth)], // 0x1314
+    TP_HKEY_EV_KEYBOARD.rawValue : [0: eventDesc("Keyboard Disable", action: .keyboard)], // 0x1315
+    TP_HKEY_EV_THM_TABLE_CHANGED.rawValue : [0: eventDesc("Thermal Table Change", display: false)], // 0x6030
+    TP_HKEY_EV_AC_CHANGED.rawValue: [0: eventDesc("AC Status Change", display: false)], // 0x6040
+    TP_HKEY_EV_KEY_FN_ESC.rawValue : [0: eventDesc("FnLock")], // 0x6060
 ]

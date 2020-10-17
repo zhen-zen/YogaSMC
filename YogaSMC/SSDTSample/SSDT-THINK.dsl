@@ -3,10 +3,11 @@
  */
 DefinitionBlock ("", "SSDT", 2, "hack", "Think", 0x00000000)
 {
+    External (_SB_.PCI0.LPCB.EC.HKEY, DeviceObj)
+
     /*
      * Optional: Route to customized LED pattern or origin _SI._SST if differ from built in pattern.
      */
-    External (_SB_.PCI0.LPCB.EC__.HKEY, DeviceObj)
     External (_SI_._SST, MethodObj)    // 1 Arguments
 
     Scope (\_SB.PCI0.LPCB.EC.HKEY)

@@ -177,12 +177,12 @@ IOReturn YogaSMCUserClient::registerNotificationPort(mach_port_t port, UInt32 ty
     return kIOReturnSuccess;
 }
 
-IOReturn YogaSMCUserClient::sendNotification(UInt32 event) {
-
+IOReturn YogaSMCUserClient::sendNotification(UInt32 event, UInt32 data) {
     if (m_notificationPort == MACH_PORT_NULL)
         return kIOReturnError;
 
     notification.event = event;
+    notification.data = data;
 
     IOReturn ret = mach_msg_send_from_kernel_proper(&notification.header, notification.header.msgh_size);
     if (ret != MACH_MSG_SUCCESS) {
