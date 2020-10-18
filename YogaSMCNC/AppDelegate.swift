@@ -306,7 +306,7 @@ enum eventAction : String {
 
 // Resources
 enum eventImage : String {
-    case kBright//, kBrightOff
+    case AirplaneMode, Antenna, BacklightHigh, BacklightLow, BacklightOff, Star
 }
 
 func eventActuator(_ desc: eventDesc, _ data: UInt32, _ conf: UnsafePointer<sharedConfig?>) {
@@ -336,13 +336,13 @@ func eventActuator(_ desc: eventDesc, _ data: UInt32, _ conf: UnsafePointer<shar
     case .backlight:
         switch data {
         case 0:
-            showOSDRes("Backlight Off", "BacklightOff.pdf")
+            showOSDRes("Backlight Off", .BacklightOff)
         case 1:
-            showOSDRes("Backlight Low", "BacklightLow.pdf")
+            showOSDRes("Backlight Low", .BacklightLow)
         case 2:
-            showOSDRes("Backlight High", "BacklightHigh.pdf")
+            showOSDRes("Backlight High", .BacklightHigh)
         default:
-            showOSDRes("Backlight \(data)", "BacklightLow.pdf")
+            showOSDRes("Backlight \(data)", .BacklightLow)
         }
     case .micmute:
         micMuteHelper()
@@ -464,7 +464,7 @@ let ThinkEvents : Dictionary<UInt32, Dictionary<UInt32, eventDesc>> = [
     TP_HKEY_EV_SEARCH.rawValue : [0: eventDesc("Search", action: .spotlight)], // 0x101E
     TP_HKEY_EV_MISSION.rawValue : [0: eventDesc("Mission Control", action: .mission)], // 0x101F
     TP_HKEY_EV_APPS.rawValue : [0: eventDesc("Launchpad", action: .launchpad)], // 0x1020
-    TP_HKEY_EV_STAR.rawValue : [0: eventDesc("Custom Hotkey", action: .script, option: prefpaneAS)], // 0x1311
+    TP_HKEY_EV_STAR.rawValue : [0: eventDesc("Custom Hotkey", .Star , action: .script, option: prefpaneAS)], // 0x1311
     TP_HKEY_EV_BLUETOOTH.rawValue : [0: eventDesc("Bluetooth", action: .bluetooth)], // 0x1314
     TP_HKEY_EV_KEYBOARD.rawValue : [0: eventDesc("Keyboard Disable", action: .keyboard)], // 0x1315
     TP_HKEY_EV_THM_TABLE_CHANGED.rawValue : [0: eventDesc("Thermal Table Change", display: false)], // 0x6030

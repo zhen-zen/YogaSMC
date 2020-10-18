@@ -74,7 +74,7 @@ func airplaneModeHelper() {
         IOBluetoothPreferenceSetControllerPowerState(1)
         do {
             try iface.setPower(true)
-            showOSDRes("Airplane Mode Off", "Antenna.pdf")
+            showOSDRes("Airplane Mode Off", .Antenna)
         } catch {
             showOSD("Wireless Toggle failed")
         }
@@ -82,7 +82,7 @@ func airplaneModeHelper() {
         IOBluetoothPreferenceSetControllerPowerState(0)
         do {
             try iface.setPower(false)
-            showOSDRes("Airplane Mode On", "AirplaneMode.pdf")
+            showOSDRes("Airplane Mode On", .AirplaneMode)
         } catch {
             showOSD("Wireless Toggle failed")
         }
