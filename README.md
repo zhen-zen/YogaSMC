@@ -1,12 +1,14 @@
 # YogaSMC ![CI](https://github.com/zhen-zen/YogaSMC/workflows/CI/badge.svg) [![Join the chat at https://gitter.im/YogaSMC/community](https://badges.gitter.im/YogaSMC/community.svg)](https://gitter.im/YogaSMC/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-This driver consists of YogaSMC (WIP), YogaWMI and YogaVPC.
+This driver consists of YogaSMC, YogaWMI and YogaVPC.
 
 Each component can be derived for different targets. Currently IdeaPad and ThinkPad series are supported.
 
 Command to driver can be sent with [ioio](https://github.com/RehabMan/OS-X-ioio), e.g. `ioio -s IdeaVPC ConservationMode true`.
 
-A preference pane is in beta, which provides graphical interface to information and settings.
+The preference pane provides a graphical interface to basic information as well as some settings, such as battery conservation and backlight.
+
+The notification application receives EC events and displays them on OSD. Its config can be customized at `~/Library/Preferences/org.zhen.YogaSMC.plist`. Also feel free to contribute presets and resources to this repo. Current template is based on a 170*170 canvas with icon center at (70,85).  
 
 The driver will update the status in ioreg, while details are available in system log, e.g. `log stream --predicate 'senderImagePath contains "YogaSMC"'`. 
 
@@ -21,7 +23,7 @@ The EC field name for corresponding SMC key is read from Info.plist. If there's 
 ### Fan control (WIP)
 
 ## YogaWMI
-Support for parsing WMI devices and properties.
+Support for parsing WMI devices and properties. On some devices, it could act as YogaVPC with access to extensive device control method.
 
 (For Thunderbolt WMI interface, see [al3xtjames/ThunderboltPkg](https://github.com/al3xtjames/ThunderboltPkg) instead.)
 
@@ -66,6 +68,7 @@ Currently available functions:
 - Battery conservation mode
 - Quick charge mode (need testing)
 - Fn lock mode
+- …
 
 ### ThinkVPC
 Based on [linux/drivers/platform/x86/thinkpad_acpi.c](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/thinkpad_acpi.c), targets `HKEY` using `_HID` `LEN0268`.
@@ -76,3 +79,4 @@ Currently available functions:
 - Basic Fan control (WIP)
 - HW Mute status (read-only)
 - Audio / Mic Mute LED
+- …
