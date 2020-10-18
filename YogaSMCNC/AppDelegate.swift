@@ -18,10 +18,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     var statusItem: NSStatusItem?
     @IBOutlet weak var appMenu: NSMenu!
-    @IBOutlet weak var vBuild: NSMenuItem!
-    @IBOutlet weak var vVersion: NSMenuItem!
-    @IBOutlet weak var vClass: NSMenuItem!
-    @IBOutlet weak var vFan: NSMenuItem!
 
     func updateFan() {
         if conf.connect != 0 {
@@ -31,18 +27,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             if kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadEC), &input, 1, nil, 0, nil, nil, &output, &outputSize),
                outputSize == 2 {
                 let vFanSpeed = Int32(output[0]) | Int32(output[1]) << 8
-                vFan.title = "Fan: \(vFanSpeed) rpm"
+                appMenu.items[5].title = "Fan: \(vFanSpeed) rpm"
             } else {
                 os_log("Failed to access EC", type: .error)
             }
         }
     }
 
-    @IBOutlet weak var vStartAtLogin: NSMenuItem!
-    @IBAction func toggleStartAtLogin(_ sender: NSMenuItem) {
-        if setStartAtLogin(enabled: vStartAtLogin.state == .off) {
-            vStartAtLogin.state = (vStartAtLogin.state == .on) ? .off : .on
-            defaults.setValue((vStartAtLogin.state == .on), forKey: "StartAtLogin")
+    @objc func toggleStartAtLogin(_ sender: NSMenuItem) {
+        if setStartAtLogin(enabled: sender.state == .off) {
+            sender.state = (sender.state == .on) ? .off : .on
+            defaults.setValue((sender.state == .on), forKey: "StartAtLogin")
         }
     }
 
@@ -67,7 +62,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                                        clickCount: 1,
                                        pressure: 0)!
         NSMenu.popUpContextMenu(appMenu, with: event, for: button)
-        if vClass.title == "Class: Think" {
+        if appMenu.items[4].title == "Class: Think" {
             updateFan()
         }
     }
@@ -114,27 +109,44 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    func initMenu() {
+        appMenu.addItem(NSMenuItem.separator())
+        
+        let item = NSMenuItem()
+        let slider = NSSlider(value: 0, minValue: 0, maxValue: 100, target: nil, action: nil)
+        slider.isEnabled = false
+        slider.frame.size.width = 180
+        slider.frame.origin = NSPoint(x: 20, y: 5)
+
+        let view = NSView(frame: NSRect(x: 0, y: 0, width: slider.frame.width + 30, height: slider.frame.height + 10))
+        view.addSubview(slider)
+        item.view = view
+
+        appMenu.insertItem(item, at: 6)
+    }
+
     func getProerty() -> Bool {
         var CFProps : Unmanaged<CFMutableDictionary>? = nil
         if (kIOReturnSuccess == IORegistryEntryCreateCFProperties(conf.io_service, &CFProps, kCFAllocatorDefault, 0) && CFProps != nil) {
             if let props = CFProps?.takeRetainedValue() as NSDictionary? {
                 let build = props["YogaSMC,Build"] as? NSString
-                vBuild.title = "Build: \(build ?? "Unknown")"
+                appMenu.insertItem(withTitle: "Build: \(build ?? "Unknown")", action: nil, keyEquivalent: "", at: 2)
                 let version = props["YogaSMC,Version"] as? NSString
-                vVersion.title = "Version: \(version ?? "Unknown")"
+                appMenu.insertItem(withTitle: "Version: \(version ?? "Unknown")", action: nil, keyEquivalent: "", at: 3)
                 switch props["IOClass"] as? NSString {
                 case "IdeaVPC":
                     if conf.events.isEmpty {
                         conf.events = IdeaEvents
                     }
                     _ = registerNotification()
-                    vClass.title = "Class: Idea"
+                    appMenu.insertItem(withTitle: "Class: Idea", action: nil, keyEquivalent: "", at: 4)
                 case "ThinkVPC":
                     if conf.events.isEmpty {
                         conf.events = ThinkEvents
                     }
                     _ = registerNotification()
-                    vFan.isHidden = false
+                    appMenu.insertItem(withTitle: "Class: Think", action: nil, keyEquivalent: "", at: 4)
+                    appMenu.insertItem(withTitle: "Fan", action: nil, keyEquivalent: "", at: 5)
                     updateFan()
                     if let current = scriptHelper(getMicVolumeAS, "MicMute"),
                        sendNumber("MicMuteLED", current.int32Value == 0 ? 2 : 0, conf.io_service) {
@@ -142,9 +154,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     } else {
                         os_log("Failed to update Mic Mute LED", type: .error)
                     }
-                    vClass.title = "Class: Think"
                 default:
-                    vClass.title = "Class: Unknown"
+                    appMenu.insertItem(withTitle: "Class: Unknown", action: nil, keyEquivalent: "", at: 4)
                     os_log("Unknown class", type: .error)
                     showOSD("Unknown class", duration: 2000)
                 }
@@ -232,7 +243,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             defaults.setValue(false, forKey: "HideIcon")
             defaults.setValue(false, forKey: "StartAtLogin")
         }
-        vStartAtLogin.state = defaults.bool(forKey: "StartAtLogin") ? .on : .off
+        let item = NSMenuItem(title: "Start at Login", action: #selector(toggleStartAtLogin(_:)), keyEquivalent: "S")
+        item.state = defaults.bool(forKey: "StartAtLogin") ? .on : .off
+        appMenu.insertItem(NSMenuItem.separator(), at: 2)
+        appMenu.insertItem(item, at: 3)
+        appMenu.insertItem(NSMenuItem.separator(), at: 4)
         loadEvents()
     }
 
@@ -254,17 +269,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         return false
     }
+}
 
-    // from https://github.com/MonitorControl/MonitorControl
-    func setStartAtLogin(enabled: Bool) -> Bool {
-        let identifier = "\(Bundle.main.bundleIdentifier!)Helper" as CFString
-        if SMLoginItemSetEnabled(identifier, enabled) {
-            os_log("Toggle start at login state: %{public}@", type: .info, enabled ? "on" : "off")
-            return true
-        } else {
-            os_log("Toggle start at login failed", type: .error)
-            return false
-        }
+// from https://github.com/MonitorControl/MonitorControl
+func setStartAtLogin(enabled: Bool) -> Bool {
+    let identifier = "\(Bundle.main.bundleIdentifier!)Helper" as CFString
+    if SMLoginItemSetEnabled(identifier, enabled) {
+        os_log("Toggle start at login state: %{public}@", type: .info, enabled ? "on" : "off")
+        return true
+    } else {
+        os_log("Toggle start at login failed", type: .error)
+        return false
     }
 }
 

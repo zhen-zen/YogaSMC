@@ -8,7 +8,7 @@ Command to driver can be sent with [ioio](https://github.com/RehabMan/OS-X-ioio)
 
 The driver will update the status in ioreg, while details are available in system log, e.g. `log stream --predicate 'senderImagePath contains "YogaSMC"'`. 
 
-Companion userspace apps, YogaSMCPane and YogaSMCNC are also available with GUI and notification service.
+Companion userspace apps, YogaSMCPane and YogaSMCNC are also available with GUI configuration and notification service.
 
 ## YogaSMC
 Allow syncing SMC keys like sensors reading and battery conservation mode.
@@ -34,7 +34,7 @@ Currently available functions:
 - Fn+esc (obsolete paper looking function), currently assigned to Fn mode switch.
 
 ### ThinkWMI (WIP)
-Based on [lenovo/thinklmi](https://github.com/lenovo/thinklmi) ([iksaif/thinkpad-wmi](https://github.com/iksaif/thinkpad-wmi))
+~~Based on [lenovo/thinklmi](https://github.com/lenovo/thinklmi) ([iksaif/thinkpad-wmi](https://github.com/iksaif/thinkpad-wmi))~~
 
 ## YogaVPC
 Intercepting events on vendor-specific Virtual Power Controller (VPC) devices and sync states, some instructions are on [project boards](https://github.com/zhen-zen/YogaSMC/projects/).
@@ -42,12 +42,7 @@ Intercepting events on vendor-specific Virtual Power Controller (VPC) devices an
 Currently available functions:
 - EC reading
 - DYTC setting (available for idea/think, might need appropriate OS version for XOSI)
-- Automatic Keyboard backlight: 
-  -  BIT 0: Triggered by sleep/wake
-  -  BIT 1: Triggered by yoga mode change
-  -  BIT 2: _SI._SST
-  -  BIT 3: Mute LED
-  -  BIT 4: Mic Mute LED
+- Automatic backlight and LED control
 - Clamshell mode (need additional patch on `_LID` like  `SSDT-RCSM.dsl` in `SSDTSample`)
 
 ### EC reading:
@@ -80,10 +75,10 @@ Currently available functions:
 - …
 
 ## YogaSMCPane
-The preference pane provides a graphical interface to basic information and settings, such as battery conservation mode and backlight.
+The preference pane provides a graphical user interface for basic information and settings, such as battery conservation mode and backlight.
 
 ## YogaSMCNC
-The notification application receives EC events and displays them on OSD. Its config can be customized at `~/Library/Preferences/org.zhen.YogaSMC.plist`. Also feel free to contribute presets and resources to this repo.  
+The notification application receives EC events and displays them on OSD. Corresonding actions will also be triggered for function keys. The configuration can be customized at `~/Library/Preferences/org.zhen.YogaSMC.plist` after closing the app.  
 
 ## Credits
 - [Apple](https://www.apple.com) for macOS
