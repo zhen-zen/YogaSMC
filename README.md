@@ -6,11 +6,9 @@ Each component can be derived for different targets. Currently IdeaPad and Think
 
 Command to driver can be sent with [ioio](https://github.com/RehabMan/OS-X-ioio), e.g. `ioio -s IdeaVPC ConservationMode true`.
 
-The preference pane provides a graphical interface to basic information as well as some settings, such as battery conservation and backlight.
-
-The notification application receives EC events and displays them on OSD. Its config can be customized at `~/Library/Preferences/org.zhen.YogaSMC.plist`. Also feel free to contribute presets and resources to this repo.  
-
 The driver will update the status in ioreg, while details are available in system log, e.g. `log stream --predicate 'senderImagePath contains "YogaSMC"'`. 
+
+Companion userspace apps, YogaSMCPane and YogaSMCNC are also available with GUI and notification service.
 
 ## YogaSMC
 Allow syncing SMC keys like sensors reading and battery conservation mode.
@@ -81,11 +79,17 @@ Currently available functions:
 - Audio / Mic Mute LED
 - …
 
+## YogaSMCPane
+The preference pane provides a graphical interface to basic information and settings, such as battery conservation mode and backlight.
+
+## YogaSMCNC
+The notification application receives EC events and displays them on OSD. Its config can be customized at `~/Library/Preferences/org.zhen.YogaSMC.plist`. Also feel free to contribute presets and resources to this repo.  
+
 ## Credits
 - [Apple](https://www.apple.com) for macOS
 - [Linux](https://www.linux.org) for [ideapad-laptop](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/ideapad-laptop.c) and [thinkpad-acpi](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/thinkpad_acpi.c) kernel module  
 - [RehabMan](https://github.com/RehabMan) for [OS-X-Voodoo-PS2-Controller](https://github.com/RehabMan/OS-X-Voodoo-PS2-Controller), [OS-X-ACPI-Debug](https://github.com/RehabMan/OS-X-ACPI-Debug), [OS-X-ioio](https://github.com/RehabMan/OS-X-ioio) and DSDT patches
 - [vit9696](https://github.com/vit9696) for [VirtualSMC](https://github.com/acidanthera/VirtualSMC)
-- [the-darkvoid](https://github.com/the-darkvoid) for [https://github.com/the-darkvoid/macOS-IOElectrify](https://github.com/the-darkvoid/macOS-IOElectrify)
+- [the-darkvoid](https://github.com/the-darkvoid) for [macOS-IOElectrify](https://github.com/the-darkvoid/macOS-IOElectrify)
 - [pali](https://github.com/pali) for [bmfdec](https://github.com/pali/bmfdec)
 - [benbender](https://github.com/benbender), [1Revenger1](https://github.com/1Revenger1) and other contributors for testing and feedback 
