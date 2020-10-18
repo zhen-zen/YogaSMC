@@ -9,6 +9,8 @@
 #ifndef DYTC_h
 #define DYTC_h
 
+#include <libkern/OSTypes.h>
+
 // based on ibm-acpi-devel
 
 enum {

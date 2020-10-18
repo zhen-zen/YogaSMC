@@ -10,12 +10,8 @@
 #ifndef YogaVPC_hpp
 #define YogaVPC_hpp
 
-#include <IOKit/IOCommandGate.h>
-#include <IOKit/IOService.h>
-#include <IOKit/acpi/IOACPIPlatformDevice.h>
-#include "common.h"
 #include "DYTC.h"
-#include "message.h"
+#include "YogaBaseService.hpp"
 #include "YogaSMCUserClientPrivate.hpp"
 
 #ifndef ALTER
@@ -23,9 +19,9 @@
 #endif
 
 class YogaSMCUserClient;
-class YogaVPC : public IOService
+class YogaVPC : public YogaBaseService
 {
-  typedef IOService super;
+  typedef YogaBaseService super;
   OSDeclareDefaultStructors(YogaVPC);
 
 private:
@@ -64,15 +60,6 @@ private:
      *  @return true if success
      */
     bool toggleClamshell();
-
-    /**
-     *  Iterate over IOACPIPlane for PNP device
-     *
-     *  @param id PNP name
-     *  @param dev target ACPI device
-     *  @return true on sucess
-     */
-    bool findPNP(const char *id, IOACPIPlatformDevice **dev);
 
     /**
      *  Related ACPI methods
@@ -120,10 +107,6 @@ private:
     OSDictionary *DYTCVersion {nullptr};
 
 protected:
-    const char* name;
-
-    IOWorkLoop *workLoop {nullptr};
-    IOCommandGate *commandGate {nullptr};
 
     /**
      *  EC device
@@ -297,7 +280,6 @@ protected:
     IOReturn readECName(const char* name, UInt32 *result);
 
 public:
-    virtual bool init(OSDictionary *dictionary) APPLE_KEXT_OVERRIDE;
     virtual IOService *probe(IOService *provider, SInt32 *score) APPLE_KEXT_OVERRIDE;
 
     virtual bool start(IOService *provider) APPLE_KEXT_OVERRIDE;

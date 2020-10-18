@@ -54,6 +54,10 @@
 		6F861230253B692C008FB857 /* Antenna.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 6F86122E253B692C008FB857 /* Antenna.pdf */; };
 		6F861237253BD518008FB857 /* Star.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 6F861236253BD518008FB857 /* Star.pdf */; };
 		6F861243253BD7FB008FB857 /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F861242253BD7FB008FB857 /* Configuration.swift */; };
+		6F861251253BF805008FB857 /* YogaBaseService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F86124F253BF805008FB857 /* YogaBaseService.cpp */; };
+		6F861252253BF805008FB857 /* YogaBaseService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F86124F253BF805008FB857 /* YogaBaseService.cpp */; };
+		6F861253253BF805008FB857 /* YogaBaseService.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F861250253BF805008FB857 /* YogaBaseService.hpp */; };
+		6F861254253BF805008FB857 /* YogaBaseService.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F861250253BF805008FB857 /* YogaBaseService.hpp */; };
 		6F8674CD24A876E000DC2FDF /* ThinkWMI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F8674CB24A876E000DC2FDF /* ThinkWMI.cpp */; };
 		6F8674CE24A876E000DC2FDF /* ThinkWMI.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F8674CC24A876E000DC2FDF /* ThinkWMI.hpp */; };
 		6F87BF8024D26A5D00D64375 /* YogaSMC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F87BF7E24D26A5D00D64375 /* YogaSMC.cpp */; };
@@ -212,6 +216,8 @@
 		6F86122E253B692C008FB857 /* Antenna.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = Antenna.pdf; sourceTree = "<group>"; };
 		6F861236253BD518008FB857 /* Star.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = Star.pdf; sourceTree = "<group>"; };
 		6F861242253BD7FB008FB857 /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
+		6F86124F253BF805008FB857 /* YogaBaseService.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = YogaBaseService.cpp; sourceTree = "<group>"; };
+		6F861250253BF805008FB857 /* YogaBaseService.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = YogaBaseService.hpp; sourceTree = "<group>"; };
 		6F8674CB24A876E000DC2FDF /* ThinkWMI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ThinkWMI.cpp; sourceTree = "<group>"; };
 		6F8674CC24A876E000DC2FDF /* ThinkWMI.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ThinkWMI.hpp; sourceTree = "<group>"; };
 		6F87BF7E24D26A5D00D64375 /* YogaSMC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = YogaSMC.cpp; sourceTree = "<group>"; };
@@ -338,6 +344,8 @@
 				6F96F4D524CD9593005A7686 /* message.h */,
 				6F83587224D0C2B50031512F /* KeyImplementations.hpp */,
 				6F83587124D0C2B50031512F /* KeyImplementations.cpp */,
+				6F861250253BF805008FB857 /* YogaBaseService.hpp */,
+				6F86124F253BF805008FB857 /* YogaBaseService.cpp */,
 				6F87BF7F24D26A5D00D64375 /* YogaSMC.hpp */,
 				6F87BF7E24D26A5D00D64375 /* YogaSMC.cpp */,
 				6F05D7E1252E35A000471F57 /* YogaSMCUserClientPrivate.hpp */,
@@ -496,6 +504,7 @@
 				6F05D7E3252E35A000471F57 /* YogaSMCUserClientPrivate.hpp in Headers */,
 				6FCF7F592474B74800A82B13 /* WMI.h in Headers */,
 				6F96A30D24B93D25006562EC /* YogaVPC.hpp in Headers */,
+				6F861253253BF805008FB857 /* YogaBaseService.hpp in Headers */,
 				6FD2BB8E247B37A20018EA36 /* bmfparser.hpp in Headers */,
 				6FCF7F5C2474B89000A82B13 /* common.h in Headers */,
 				6FD2BB48247721040018EA36 /* bmfdec.h in Headers */,
@@ -519,6 +528,7 @@
 				6F05D7E7252E362600471F57 /* YogaSMCUserClientPrivate.hpp in Headers */,
 				6F81FC4825317B1300CFEDF5 /* YogaSMCUserClient.h in Headers */,
 				6F88067924EB575F00ACD6C8 /* WMI.h in Headers */,
+				6F861254253BF805008FB857 /* YogaBaseService.hpp in Headers */,
 				6F88067A24EB575F00ACD6C8 /* YogaVPC.hpp in Headers */,
 				6F88067B24EB575F00ACD6C8 /* bmfparser.hpp in Headers */,
 				6F88067C24EB575F00ACD6C8 /* common.h in Headers */,
@@ -740,6 +750,7 @@
 				6F05D7E2252E35A000471F57 /* YogaSMCUserClient.cpp in Sources */,
 				6F48676324A293A0003AD4CA /* IdeaWMI.cpp in Sources */,
 				6F7B5CFF24FBC3CC00AA80FF /* ThinkSMC.cpp in Sources */,
+				6F861251253BF805008FB857 /* YogaBaseService.cpp in Sources */,
 				6FD2BB49247721040018EA36 /* bmfdec.c in Sources */,
 				6FCF7F5A2474B74800A82B13 /* WMI.cpp in Sources */,
 				6F96A30C24B93D25006562EC /* YogaVPC.cpp in Sources */,
@@ -785,6 +796,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6F861252253BF805008FB857 /* YogaBaseService.cpp in Sources */,
 				6F88068524EB575F00ACD6C8 /* IdeaVPC.cpp in Sources */,
 				6F05D7EB252E362A00471F57 /* YogaSMCUserClient.cpp in Sources */,
 				6F88068624EB575F00ACD6C8 /* ThinkVPC.cpp in Sources */,
