@@ -51,12 +51,12 @@ func micMuteHelper() {
     if current.int32Value != 0 {
         if scriptHelper(String(format: setMicVolumeAS, 0), "MicMute") != nil {
             volume = current.int32Value
-            showOSD("Mute")
+            showOSDRes("Mute", .MicOff)
         }
     } else {
         if scriptHelper(String(format: setMicVolumeAS, volume), "MicMute") != nil {
             volume = current.int32Value
-            showOSD("Unmute")
+            showOSDRes("Unmute", .MicOn)
         }
     }
 }

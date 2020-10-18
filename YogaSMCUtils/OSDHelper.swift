@@ -47,7 +47,7 @@ let sleepImage : NSString = "/System/Library/CoreServices/OSDUIHelper.app/Conten
 
 // Bundled resources
 enum eventImage : String {
-    case AirplaneMode, Antenna, BacklightHigh, BacklightLow, BacklightOff, Star
+    case AirplaneMode, Antenna, BacklightHigh, BacklightLow, BacklightOff, Star, MicOn, MicOff
 }
 
 // from https://github.com/alin23/Lunar/blob/master/Lunar/Data/Hotkeys.swift

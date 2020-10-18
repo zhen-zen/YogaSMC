@@ -157,7 +157,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_ aNotification: Notification) {
         if conf.connect != 0 {
             IOServiceClose(conf.connect)
-            
         }
         if !conf.events.isEmpty,
            Bundle.main.bundlePath.hasPrefix("/Applications") {

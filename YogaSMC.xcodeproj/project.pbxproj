@@ -87,6 +87,8 @@
 		6F8B1F2E253808DC003DD8A8 /* OSDHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F8B1F2C253808DC003DD8A8 /* OSDHelper.swift */; };
 		6F8B1F71253821C3003DD8A8 /* ScriptHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F8B1F70253821C3003DD8A8 /* ScriptHelper.swift */; };
 		6F8B1FC52538CB37003DD8A8 /* SystemPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F8B1FB92538C53A003DD8A8 /* SystemPreferences.swift */; };
+		6F8B2303253C4241005BEC5D /* MicOn.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 6F8B2301253C4241005BEC5D /* MicOn.pdf */; };
+		6F8B2304253C4241005BEC5D /* MicOff.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 6F8B2302253C4241005BEC5D /* MicOff.pdf */; };
 		6F9553BA24BA515B00215EBB /* IdeaVPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F9553B824BA515B00215EBB /* IdeaVPC.cpp */; };
 		6F9553BB24BA515B00215EBB /* IdeaVPC.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F9553B924BA515B00215EBB /* IdeaVPC.hpp */; };
 		6F96A30C24B93D25006562EC /* YogaVPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F96A30A24B93D25006562EC /* YogaVPC.cpp */; };
@@ -230,6 +232,8 @@
 		6F8B1F902538309F003DD8A8 /* ThinkEvents.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ThinkEvents.h; sourceTree = "<group>"; };
 		6F8B1FB92538C53A003DD8A8 /* SystemPreferences.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SystemPreferences.swift; sourceTree = "<group>"; };
 		6F8B1FEA2538D64B003DD8A8 /* YogaSMCNC.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = YogaSMCNC.entitlements; sourceTree = "<group>"; };
+		6F8B2301253C4241005BEC5D /* MicOn.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = MicOn.pdf; sourceTree = "<group>"; };
+		6F8B2302253C4241005BEC5D /* MicOff.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = MicOff.pdf; sourceTree = "<group>"; };
 		6F9553B824BA515B00215EBB /* IdeaVPC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IdeaVPC.cpp; sourceTree = "<group>"; };
 		6F9553B924BA515B00215EBB /* IdeaVPC.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IdeaVPC.hpp; sourceTree = "<group>"; };
 		6F96A30A24B93D25006562EC /* YogaVPC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = YogaVPC.cpp; sourceTree = "<group>"; };
@@ -462,6 +466,8 @@
 				6F861214253AF7E4008FB857 /* BacklightHigh.pdf */,
 				6F861212253AF7E4008FB857 /* BacklightLow.pdf */,
 				6F861213253AF7E4008FB857 /* BacklightOff.pdf */,
+				6F8B2302253C4241005BEC5D /* MicOff.pdf */,
+				6F8B2301253C4241005BEC5D /* MicOn.pdf */,
 				6F861236253BD518008FB857 /* Star.pdf */,
 			);
 			path = Resources;
@@ -708,9 +714,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6F8B2303253C4241005BEC5D /* MicOn.pdf in Resources */,
 				6F861215253AF7E4008FB857 /* BacklightLow.pdf in Resources */,
 				6F861216253AF7E4008FB857 /* BacklightOff.pdf in Resources */,
 				6F861237253BD518008FB857 /* Star.pdf in Resources */,
+				6F8B2304253C4241005BEC5D /* MicOff.pdf in Resources */,
 				6F861217253AF7E4008FB857 /* BacklightHigh.pdf in Resources */,
 				6F0A987E25343359002F9F65 /* Assets.xcassets in Resources */,
 				6F0A988125343359002F9F65 /* Main.storyboard in Resources */,
