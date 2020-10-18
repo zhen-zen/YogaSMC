@@ -26,7 +26,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func updateFan() {
         if conf.connect != 0 {
             var input : UInt64 = 0x84
-            var outputSize = 2;
+            var outputSize = 2
             var output : [UInt8] = Array(repeating: 0, count: 2)
             if kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadEC), &input, 1, nil, 0, nil, nil, &output, &outputSize),
                outputSize == 2 {
@@ -156,7 +156,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationWillTerminate(_ aNotification: Notification) {
         if conf.connect != 0 {
-            IOServiceClose(conf.connect);
+            IOServiceClose(conf.connect)
+            
         }
         if !conf.events.isEmpty,
            Bundle.main.bundlePath.hasPrefix("/Applications") {
@@ -244,9 +245,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
             if let notificationPort = CFMachPortCreate(kCFAllocatorDefault, notificationCallback, &portContext, nil)  {
                 if let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, notificationPort, 0) {
-                    CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .defaultMode);
+                    CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .defaultMode)
                 }
-                IOConnectSetNotificationPort(conf.connect, 0, CFMachPortGetPort(notificationPort), 0);
+                IOConnectSetNotificationPort(conf.connect, 0, CFMachPortGetPort(notificationPort), 0)
                 return true
             } else {
                 os_log("Failed to create mach port", type: .error)
