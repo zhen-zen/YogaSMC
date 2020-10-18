@@ -662,7 +662,11 @@ void ThinkVPC::updateVPC() {
                 case TP_HKEY_EV_MIC_MUTE:
                     setMicMuteLEDStatus(micMuteLEDstate ? 0 : 2);
                     break;
-                    
+
+                case TP_HKEY_EV_KEYBOARD:
+                    toggleKeyboard();
+                    data = Keyboardenabled;
+
                 default:
                     DebugLog("Hotkey(MHKP) key presses event: 0x%x", result);
                     break;
