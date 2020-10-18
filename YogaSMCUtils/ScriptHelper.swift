@@ -31,46 +31,32 @@ let setMicVolumeAS = "set volume input volume %d"
 
 var volume : Int32 = 50
 
-func scriptHelper(_ source: String, _ name: String) -> Bool {
+// based on https://medium.com/macoclock/everything-you-need-to-do-to-launch-an-applescript-from-appkit-on-macos-catalina-with-swift-1ba82537f7c3
+func scriptHelper(_ source: String, _ name: String) -> NSAppleEventDescriptor? {
     if let scpt = NSAppleScript(source: source) {
         var error: NSDictionary?
-        _ = scpt.executeAndReturnError(&error)
+        let ret = scpt.executeAndReturnError(&error)
         if error == nil {
-            return true
+            return ret
         }
     }
     os_log("%s: failed to execute script", type: .error)
-    return false
+    return nil
 }
 
 func micMuteHelper() {
-    if let scpt = NSAppleScript(source: getMicVolumeAS) {
-        var error: NSDictionary?
-        var ret = scpt.executeAndReturnError(&error)
-        if error != nil {
-            os_log("MicMute: failed to execute script", type: .error)
-            return
-        }
-        let current = ret.int32Value
-        if current != 0 {
+    guard let current = scriptHelper(getMicVolumeAS, "MicMute") else {
+        return
+    }
+    if current.int32Value != 0 {
+        if scriptHelper(String(format: setMicVolumeAS, 0), "MicMute") != nil {
+            volume = current.int32Value
             showOSD("Mute")
-            if let mute = NSAppleScript(source: String(format: setMicVolumeAS, 0)) {
-                ret = mute.executeAndReturnError(&error)
-                if error != nil {
-                    os_log("MicMute: failed to execute script", type: .error)
-                    return
-                }
-            }
-            volume = current
-        } else {
+        }
+    } else {
+        if scriptHelper(String(format: setMicVolumeAS, volume), "MicMute") != nil {
+            volume = current.int32Value
             showOSD("Unmute")
-            if let unmute = NSAppleScript(source: String(format: setMicVolumeAS, volume)) {
-                ret = unmute.executeAndReturnError(&error)
-                if error != nil {
-                    os_log("MicMute: failed to execute script", type: .error)
-                    return
-                }
-            }
         }
     }
 }
@@ -91,19 +77,13 @@ func prefpaneHelper() {
         #if DEBUG
         showOSD("Please grant access \n to Apple Event")
         #endif
-        // from https://medium.com/macoclock/everything-you-need-to-do-to-launch-an-applescript-from-appkit-on-macos-catalina-with-swift-1ba82537f7c3
-        if let script = NSAppleScript(source: prefpaneAS) {
-            var error: NSDictionary?
-            script.executeAndReturnError(&error)
-            if error != nil {
-                os_log("Failed to open prefpane", type: .error)
-                let alert = NSAlert()
-                alert.messageText = "Failed to open Preferences"
-                alert.informativeText = "Please install YogaSMCPane"
-                alert.alertStyle = .warning
-                alert.addButton(withTitle: "OK")
-                alert.runModal()
-            }
+        if scriptHelper(prefpaneAS, "Prefpane") == nil {
+            let alert = NSAlert()
+            alert.messageText = "Failed to open Preferences"
+            alert.informativeText = "Please install YogaSMCPane"
+            alert.alertStyle = .warning
+            alert.addButton(withTitle: "OK")
+            alert.runModal()
         }
         return
     }

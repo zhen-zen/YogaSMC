@@ -136,6 +136,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     _ = registerNotification()
                     vFan.isHidden = false
                     updateFan()
+                    if let current = scriptHelper(getMicVolumeAS, "MicMute"),
+                       sendNumber("MicMuteLED", current.int32Value == 0 ? 0 : 2, conf.io_service) {
+                        os_log("Mic Mute LED updated", type: .info)
+                    } else {
+                        os_log("Failed to update Mic Mute LED", type: .error)
+                    }
                     vClass.title = "Class: Think"
                 default:
                     vClass.title = "Class: Unknown"
@@ -301,7 +307,7 @@ func eventActuator(_ desc: eventDesc, _ data: UInt32, _ conf: UnsafePointer<shar
         #endif
     case .script:
         if let scpt = desc.option {
-            if !scriptHelper(scpt, desc.name) {
+            guard scriptHelper(scpt, desc.name) != nil else {
                 return
             }
         } else {
