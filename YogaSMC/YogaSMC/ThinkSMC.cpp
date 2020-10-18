@@ -20,6 +20,7 @@ ThinkSMC* ThinkSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device
     dictionary->setObject("Sensors", dev->conf);
 
     dev->ec = device;
+    dev->name = device->getName();
 
     if (!dev->init(dictionary) ||
         !dev->attach(provider)) {

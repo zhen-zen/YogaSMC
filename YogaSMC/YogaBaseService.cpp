@@ -12,11 +12,13 @@ OSDefineMetaClassAndStructors(YogaBaseService, IOService)
 
 bool YogaBaseService::init(OSDictionary *dictionary)
 {
-    if(!super::init(dictionary))
+    if (!super::init(dictionary))
         return false;
 
+    DebugLog("Initializing");
+
     _deliverNotification = OSSymbol::withCString(kDeliverNotifications);
-     if (!_deliverNotification)
+    if (!_deliverNotification)
         return false;
 
     _notificationServices = OSSet::withCapacity(1);

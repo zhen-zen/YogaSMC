@@ -8,30 +8,10 @@
 
 #include "YogaSMC.hpp"
 
-OSDefineMetaClassAndStructors(YogaSMC, IOService);
+OSDefineMetaClassAndStructors(YogaSMC, YogaBaseService);
 
 bool ADDPR(debugEnabled) = false;
 uint32_t ADDPR(debugPrintDelay) = 0;
-
-bool YogaSMC::init(OSDictionary *dictionary)
-{
-    if (!super::init(dictionary))
-        return false;
-
-    DebugLog("Initializing");
-
-    _deliverNotification = OSSymbol::withCString(kDeliverNotifications);
-     if (!_deliverNotification)
-        return false;
-
-    _notificationServices = OSSet::withCapacity(1);
-
-    extern kmod_info_t kmod_info;
-    setProperty("YogaSMC,Build", __DATE__);
-    setProperty("YogaSMC,Version", kmod_info.version);
-
-    return true;
-}
 
 void YogaSMC::addVSMCKey() {
     // Message-based
@@ -79,46 +59,17 @@ bool YogaSMC::start(IOService *provider) {
     if (!super::start(provider))
         return false;
 
-    if (ec)
-        name = ec->getName();
-
     DebugLog("Starting");
 
-    workLoop = IOWorkLoop::workLoop();
-    commandGate = IOCommandGate::commandGate(this);
     poller = IOTimerEventSource::timerEventSource(this, [](OSObject *object, IOTimerEventSource *sender) {
         auto smc = OSDynamicCast(YogaSMC, object);
         if (smc) smc->updateEC();
     });
 
-    if (!workLoop || !commandGate || !poller ||
-        (workLoop->addEventSource(commandGate) != kIOReturnSuccess) ||
+    if (!poller ||
         (workLoop->addEventSource(poller) != kIOReturnSuccess)) {
-        AlwaysLog("Failed to add commandGate and poller");
+        AlwaysLog("Failed to add poller");
         return false;
-    }
-
-    OSDictionary * propertyMatch = propertyMatching(_deliverNotification, kOSBooleanTrue);
-    if (propertyMatch) {
-        IOServiceMatchingNotificationHandler notificationHandler = OSMemberFunctionCast(IOServiceMatchingNotificationHandler, this, &YogaSMC::notificationHandler);
-
-        //
-        // Register notifications for availability of any IOService objects wanting to consume our message events
-        //
-        _publishNotify = addMatchingNotification(gIOFirstPublishNotification,
-                                             propertyMatch,
-                                             notificationHandler,
-                                             this,
-                                             0, 10000);
-
-        _terminateNotify = addMatchingNotification(gIOTerminatedNotification,
-                                               propertyMatch,
-                                               notificationHandler,
-                                               this,
-                                               0, 10000);
-
-        propertyMatch->release();
-
     }
 
     addVSMCKey();
@@ -134,18 +85,9 @@ void YogaSMC::stop(IOService *provider)
 {
     AlwaysLog("Stopping");
 
-    _publishNotify->remove();
-    _terminateNotify->remove();
-    _notificationServices->flushCollection();
-    OSSafeReleaseNULL(_notificationServices);
-    OSSafeReleaseNULL(_deliverNotification);
-
-    workLoop->removeEventSource(commandGate);
     poller->disable();
     workLoop->removeEventSource(poller);
-    OSSafeReleaseNULL(commandGate);
     OSSafeReleaseNULL(poller);
-    OSSafeReleaseNULL(workLoop);
 
     terminate();
     PMstop();
@@ -173,46 +115,6 @@ bool YogaSMC::vsmcNotificationHandler(void *sensors, void *refCon, IOService *vs
     return false;
 }
 
-void YogaSMC::dispatchMessageGated(int* message, void* data)
-{
-    OSCollectionIterator* i = OSCollectionIterator::withCollection(_notificationServices);
-
-    if (i) {
-        while (IOService* service = OSDynamicCast(IOService, i->getNextObject())) {
-            service->message(*message, this, data);
-        }
-        i->release();
-    }
-}
-
-void YogaSMC::dispatchMessage(int message, void* data)
-{
-    if (_notificationServices->getCount() == 0) {
-        AlwaysLog("No available notification consumer");
-        return;
-    }
-    commandGate->runAction(OSMemberFunctionCast(IOCommandGate::Action, this, &YogaSMC::dispatchMessageGated), &message, data);
-}
-
-void YogaSMC::notificationHandlerGated(IOService *newService, IONotifier *notifier)
-{
-    if (notifier == _publishNotify) {
-        DebugLog("Notification consumer published: %s", newService->getName());
-        _notificationServices->setObject(newService);
-    }
-
-    if (notifier == _terminateNotify) {
-        DebugLog("Notification consumer terminated: %s", newService->getName());
-        _notificationServices->removeObject(newService);
-    }
-}
-
-bool YogaSMC::notificationHandler(void *refCon, IOService *newService, IONotifier *notifier)
-{
-    commandGate->runAction(OSMemberFunctionCast(IOCommandGate::Action, this, &YogaSMC::notificationHandlerGated), newService, notifier);
-    return true;
-}
-
 YogaSMC* YogaSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) {
     YogaSMC* dev = OSTypeAlloc(YogaSMC);
 
@@ -222,6 +124,7 @@ YogaSMC* YogaSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) 
     dictionary->setObject("Sensors", dev->conf);
 
     dev->ec = device;
+    dev->name = device->getName();
 
     if (!dev->init(dictionary) ||
         !dev->attach(provider)) {
