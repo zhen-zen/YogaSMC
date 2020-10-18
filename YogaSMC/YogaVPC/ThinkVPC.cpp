@@ -660,7 +660,8 @@ void ThinkVPC::updateVPC() {
                         vpc->evaluateObject(setHKEYsleep);
 
                 case TP_HKEY_EV_MIC_MUTE:
-                    setMicMuteLEDStatus(micMuteLEDstate ? 0 : 2);
+                    if (!client)
+                        setMicMuteLEDStatus(micMuteLEDstate ? 0 : 2);
                     break;
 
                 case TP_HKEY_EV_KEYBOARD:

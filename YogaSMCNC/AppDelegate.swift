@@ -137,7 +137,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     vFan.isHidden = false
                     updateFan()
                     if let current = scriptHelper(getMicVolumeAS, "MicMute"),
-                       sendNumber("MicMuteLED", current.int32Value == 0 ? 0 : 2, conf.io_service) {
+                       sendNumber("MicMuteLED", current.int32Value == 0 ? 2 : 0, conf.io_service) {
                         os_log("Mic Mute LED updated", type: .info)
                     } else {
                         os_log("Failed to update Mic Mute LED", type: .error)
@@ -335,7 +335,7 @@ func eventActuator(_ desc: eventDesc, _ data: UInt32, _ conf: UnsafePointer<shar
             showOSDRes("Backlight \(data)", .BacklightLow)
         }
     case .micmute:
-        micMuteHelper()
+        micMuteHelper(conf.pointee!.io_service)
         return
     case .desktop:
         CoreDockSendNotification("com.apple.showdesktop.awake" as CFString, nil)

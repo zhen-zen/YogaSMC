@@ -46,7 +46,6 @@ func wirelessHelper() {
         showOSD("Wireless Unavailable")
         os_log("Wireless unavailable!", type: .error)
         return
-
     }
     do {
         try iface.setPower(!iface.powerOn())
@@ -67,7 +66,6 @@ func airplaneModeHelper() {
         showOSD("Wireless Unavailable")
         os_log("Wireless unavailable!", type: .error)
         return
-
     }
     if IOBluetoothPreferenceGetControllerPowerState() == 0,
        !iface.powerOn() {
