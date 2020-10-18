@@ -1,0 +1,103 @@
+name: Release
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Download MacKernelSDK
+      run: git clone --depth 1 https://github.com/acidanthera/MacKernelSDK.git
+    - name: Download Lilu / VirtualSMC SDK (script from hieplpvip/AsusSMC (Acidanthera/Lilu))
+      run: src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/hieplpvip/AsusSMC/master/Scripts/bootstrap.sh) && eval "$src" || exit 1
+    - name: Xcodebuild Debug
+      uses: sersoft-gmbh/xcodebuild-action@v1
+      with:
+        project: YogaSMC.xcodeproj
+        # scheme: # optional
+        # destination: # optional
+        configuration: Debug
+        build-settings: -target BuildAll
+        action: build
+    - name: Xcodebuild Release
+      uses: sersoft-gmbh/xcodebuild-action@v1
+      with:
+        project: YogaSMC.xcodeproj
+        # destination: # optional
+        configuration: Release
+        build-settings: -target BuildAll
+        action: build
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: true
+    - name: Prepare release image
+      run: mkdir build/Release-App; mv build/Release/YogaSMCNC.app build/Release-App/; mv build/Release/YogaSMCPane.prefPane build/Release-App/; ln -s /Applications build/Release-App/
+    - name: Prepare debug image
+      run: mkdir build/Debug-App; mv build/Debug/YogaSMCNC.app build/Debug-App/; mv build/Debug/YogaSMCPane.prefPane build/Debug-App/;  ln -s /Applications build/Debug-App/
+    - name: Prepare debug kext
+      uses: montudor/action-zip@v0.1.0
+        with: zip -X -r build/YogaSMC-Debug.zip build/Debug/*.kext LICENSE YogaSMC/SSDTSample
+    - name: Prepare release kext
+      uses: montudor/action-zip@v0.1.0
+        with: zip -X -r build/YogaSMC-Release.zip build/Release/*.kext LICENSE YogaSMC/SSDTSample
+    - name: Upload debug kext
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_name: YogaSMC-Debug
+        asset_path: build/YogaSMC-Debug.zip
+        asset_content_type: application/zip
+    - name: Upload release kext
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_name: YogaSMC-Release
+        asset_path: build/YogaSMC-Release.zip
+        asset_content_type: application/zip
+    - name: Create DMG image
+      run: brew install create-dmg && create-dmg --window-size 450 450 build/YogaSMC-App-Debug.dmg build/Debug-App/ && create-dmg --window-size 450 450 build/YogaSMC-App-Release.dmg build/Release-App/
+    - name: Upload debug app
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_name: YogaSMC-App-Debug
+        asset_path: build/YogaSMC-App-Debug.dmg
+        asset_content_type: application/octet-stream
+    - name: Upload release app
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_name: YogaSMC-App-Release
+        asset_path: build/YogaSMC-App-Release.dmg
+        asset_content_type: application/octet-stream
+    - name: Prepare release dSYM
+      uses: montudor/action-zip@v0.1.0
+        with: zip -X -r build/YogaSMC-Release-dSYM.zip build/Release/*.dSYM LICENSE
+    - name: Upload release dSYM
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_name: YogaSMC-Release-dSYM
+        asset_path: build/YogaSMC-Release-dSYM.zip
+        asset_content_type: application/zip
+    
