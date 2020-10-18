@@ -57,40 +57,6 @@ protected:
      */
     virtual void ACPIEvent(UInt32 argument);
 
-    /**
-     *  Current Keyboard status
-     */
-    bool Keyboardenabled {true};
-    
-    /**
-     *  Current TouchPad status
-     */
-    bool TouchPadenabled {true};
-
-    /**
-     *  Switch  touchpad status
-     */
-    void toggleTouchpad();
-    
-    /**
-     *  Switch keyboard status
-     */
-    void toggleKeyboard();
-
-    /**
-     *  Set keyboard and touchpad status
-     *
-     *  @param enable  desired status
-     */
-    void setTopCase(bool enable);
-
-    /**
-     *  Update keyboard and touchpad status
-     *
-     *  @return false if keyboard and touchpad status mismatch
-     */
-    bool updateTopCase();
-
 public:
     virtual IOService *probe(IOService *provider, SInt32 *score) APPLE_KEXT_OVERRIDE;
 

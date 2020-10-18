@@ -159,3 +159,37 @@ bool YogaBaseService::findPNP(const char *id, IOACPIPlatformDevice **dev) {
 
     return !!(*dev);
 }
+
+void YogaBaseService::toggleTouchpad() {
+    dispatchMessage(kSMC_getDisableTouchpad, &TouchPadenabled);
+    TouchPadenabled = !TouchPadenabled;
+    dispatchMessage(kSMC_setDisableTouchpad, &TouchPadenabled);
+    DebugLog("TouchPad Input %s", TouchPadenabled ? "enabled" : "disabled");
+    setProperty("TouchPadEnabled", TouchPadenabled);
+}
+
+void YogaBaseService::toggleKeyboard() {
+    dispatchMessage(kSMC_getKeyboardStatus, &Keyboardenabled);
+    Keyboardenabled = !Keyboardenabled;
+    dispatchMessage(kSMC_setKeyboardStatus, &Keyboardenabled);
+    DebugLog("Keyboard Input %s", Keyboardenabled ? "enabled" : "disabled");
+    setProperty("KeyboardEnabled", Keyboardenabled);
+}
+
+void YogaBaseService::setTopCase(bool enable) {
+    dispatchMessage(kSMC_setKeyboardStatus, &enable);
+    dispatchMessage(kSMC_setDisableTouchpad, &enable);
+    DebugLog("TopCase Input %s", enable ? "enabled" : "disabled");
+    setProperty("TopCaseEnabled", enable);
+}
+
+bool YogaBaseService::updateTopCase() {
+    dispatchMessage(kSMC_getKeyboardStatus, &Keyboardenabled);
+    dispatchMessage(kSMC_getDisableTouchpad, &TouchPadenabled);
+    if (Keyboardenabled != TouchPadenabled) {
+        AlwaysLog("status mismatch: %d, %d", Keyboardenabled, TouchPadenabled);
+        return false;
+    }
+    return true;
+}
+

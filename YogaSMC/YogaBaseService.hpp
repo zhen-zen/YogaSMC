@@ -42,8 +42,6 @@ protected:
      */
 //    YogaSMCUserClient *client {nullptr};
 
-    void dispatchMessage(int message, void* data);
-
     /**
      *  Iterate over IOACPIPlane for PNP device
      *
@@ -53,12 +51,48 @@ protected:
      */
     bool findPNP(const char *id, IOACPIPlatformDevice **dev);
 
+    /**
+     *  Current Keyboard status
+     */
+    bool Keyboardenabled {true};
+    
+    /**
+     *  Current TouchPad status
+     */
+    bool TouchPadenabled {true};
+
+    /**
+     *  Switch  touchpad status
+     */
+    void toggleTouchpad();
+    
+    /**
+     *  Switch keyboard status
+     */
+    void toggleKeyboard();
+
+    /**
+     *  Set keyboard and touchpad status
+     *
+     *  @param enable  desired status
+     */
+    void setTopCase(bool enable);
+
+    /**
+     *  Update keyboard and touchpad status
+     *
+     *  @return false if keyboard and touchpad status mismatch
+     */
+    bool updateTopCase();
+
 public:
     virtual bool init(OSDictionary *dictionary) APPLE_KEXT_OVERRIDE;
     virtual IOService *probe(IOService *provider, SInt32 *score) APPLE_KEXT_OVERRIDE;
 
     virtual bool start(IOService *provider) APPLE_KEXT_OVERRIDE;
     virtual void stop(IOService *provider) APPLE_KEXT_OVERRIDE;
+
+    void dispatchMessage(int message, void* data);
 
 //    friend class YogaSMCUserClient;
 };
