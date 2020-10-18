@@ -20,11 +20,6 @@ enum eventAction : String {
     case backlight, keyboard, thermal
 }
 
-// Resources
-enum eventImage : String {
-    case AirplaneMode, Antenna, BacklightHigh, BacklightLow, BacklightOff, Star
-}
-
 struct eventDesc {
     let name : String
     let image : NSString?

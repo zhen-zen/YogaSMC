@@ -45,6 +45,11 @@ import os.log
 let defaultImage : NSString = "/System/Library/CoreServices/OSDUIHelper.app/Contents/Resources/kBrightOff.pdf"
 let sleepImage : NSString = "/System/Library/CoreServices/OSDUIHelper.app/Contents/Resources/RemoteSleepGeneric.pdf"
 
+// Bundled resources
+enum eventImage : String {
+    case AirplaneMode, Antenna, BacklightHigh, BacklightLow, BacklightOff, Star
+}
+
 // from https://github.com/alin23/Lunar/blob/master/Lunar/Data/Hotkeys.swift
 func showOSD(_ prompt: String, _ img: NSString? = nil, duration: UInt32 = 1000, priority: UInt32 = 0x1f4) {
     guard let manager = OSDManager.sharedManager() as? OSDManager else {
@@ -67,7 +72,7 @@ func showOSDRes(_ prompt: String, _ img: eventImage, duration: UInt32 = 1000, pr
     }
 
     var image : NSString?
-    if let path = Bundle.main.path(forResource: img.rawValue, ofType: "pdf"),
+    if let path = Bundle.main.pathForImageResource(img.rawValue),
               path.hasPrefix("/Applications") {
         image = path as NSString
     }
