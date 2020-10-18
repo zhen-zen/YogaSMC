@@ -956,6 +956,10 @@ IOReturn ThinkVPC::setPowerState(unsigned long powerState, IOService *whatDevice
             setMuteLEDStatus(true);
         if ((automaticBacklightMode & BIT(4)) && micMuteLEDstateSaved)
             setMicMuteLEDStatus(micMuteLEDstateSaved);
+        UInt32 lidState;
+        if (ec->evaluateInteger("HPLD", &lidState) == kIOReturnSuccess)
+            if (lidState == 0)
+                setLEDStatus(0x80);
     }
 
     return kIOPMAckImplied;
