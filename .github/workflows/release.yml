@@ -45,13 +45,9 @@ jobs:
     - name: Prepare debug image
       run: mkdir build/Debug-App; mv build/Debug/YogaSMCNC.app build/Debug-App/; mv build/Debug/YogaSMCPane.prefPane build/Debug-App/;  ln -s /Applications build/Debug-App/
     - name: Prepare debug kext
-      uses: montudor/action-zip@v0.1.0
-      with:
-        args: zip -X -r build/YogaSMC-Debug.zip build/Debug/*.kext LICENSE YogaSMC/SSDTSample
+      run: zip -X -r build/YogaSMC-Debug.zip build/Debug/*.kext LICENSE YogaSMC/SSDTSample
     - name: Prepare release kext
-      uses: montudor/action-zip@v0.1.0
-      with:
-        args: zip -X -r build/YogaSMC-Release.zip build/Release/*.kext LICENSE YogaSMC/SSDTSample
+      run: zip -X -r build/YogaSMC-Release.zip build/Release/*.kext LICENSE YogaSMC/SSDTSample
     - name: Upload debug kext
       uses: actions/upload-release-asset@v1
       env:
@@ -91,9 +87,7 @@ jobs:
         asset_path: build/YogaSMC-App-Release.dmg
         asset_content_type: application/octet-stream
     - name: Prepare release dSYM
-      uses: montudor/action-zip@v0.1.0
-      with:
-        args: zip -X -r build/YogaSMC-Release-dSYM.zip build/Release/*.dSYM LICENSE
+      run: zip -X -r build/YogaSMC-Release-dSYM.zip build/Release/*.dSYM LICENSE
     - name: Upload release dSYM
       uses: actions/upload-release-asset@v1
       env:
