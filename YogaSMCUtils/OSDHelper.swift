@@ -43,11 +43,10 @@ import os.log
 }
 
 let defaultImage : NSString = "/System/Library/CoreServices/OSDUIHelper.app/Contents/Resources/kBrightOff.pdf"
-let sleepImage : NSString = "/System/Library/CoreServices/OSDUIHelper.app/Contents/Resources/RemoteSleepGeneric.pdf"
 
 // Bundled resources
 enum eventImage : String {
-    case AirplaneMode, Antenna, BacklightHigh, BacklightLow, BacklightOff, Star, MicOn, MicOff
+    case AirplaneMode, Antenna, BacklightHigh, BacklightLow, BacklightOff, Bluetooth, Camera, Mic, MicOff, Keyboard, KeyboardOff, SecondDisplay, Sleep, Star, Wifi, WifiOff
 }
 
 // from https://github.com/alin23/Lunar/blob/master/Lunar/Data/Hotkeys.swift

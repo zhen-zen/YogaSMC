@@ -58,7 +58,7 @@ func micMuteHelper(_ io_service : io_service_t) {
         if scriptHelper(String(format: setMicVolumeAS, volume), "MicMute") != nil {
             volume = current.int32Value
             _ = sendNumber("MicMuteLED", 0, io_service)
-            showOSDRes("Unmute", .MicOn)
+            showOSDRes("Unmute", .Mic)
         }
     }
 }

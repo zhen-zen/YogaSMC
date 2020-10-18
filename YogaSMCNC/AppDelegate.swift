@@ -354,7 +354,11 @@ func eventActuator(_ desc: eventDesc, _ data: UInt32, _ conf: UnsafePointer<shar
         return
     case .sleep:
         if desc.display {
-            showOSD(desc.name, desc.image ?? sleepImage)
+            if let img = desc.image {
+                showOSD(desc.name, img)
+            } else {
+                showOSDRes(desc.name, .Sleep)
+            }
             sleep(1)
         }
         _ = scriptHelper(desc.option ?? sleepAS, desc.name)

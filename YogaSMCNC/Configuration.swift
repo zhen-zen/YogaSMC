@@ -15,7 +15,7 @@ enum eventAction : String {
     case airplane, wireless, bluetooth, bluetoothdiscoverable
     case prefpane, spotlight, search, sleep, micmute
     case mission, launchpad, desktop, expose
-    case mirror, camera
+    case mirror, camera, yoga
     // Driver
     case backlight, keyboard, thermal
 }
@@ -69,11 +69,11 @@ let IdeaEvents : Dictionary<UInt32, Dictionary<UInt32, eventDesc>> = [
             1: eventDesc("Screen On")],
     0x05 : [0: eventDesc("TouchPad Off"),
             1: eventDesc("TouchPad On")],
-    0x07 : [0: eventDesc("Camera", action: .camera)],
+    0x07 : [0: eventDesc("Camera", .Camera, action: .camera)],
     0x08 : [0: eventDesc("Mic Mute", action: .micmute, display: false)],
     0x0A : [0: eventDesc("TouchPad On", display: false)],
     0x0D : [0: eventDesc("Airplane Mode", action: .airplane)],
-    0x10 : [0: eventDesc("Unknown Yoga Mode"),
+    0x10 : [0: eventDesc("Yoga Mode", action: .yoga),
             1: eventDesc("Laptop Mode"),
             2: eventDesc("Tablet Mode"),
             3: eventDesc("Stand Mode"),
@@ -83,7 +83,7 @@ let IdeaEvents : Dictionary<UInt32, Dictionary<UInt32, eventDesc>> = [
 let ThinkEvents : Dictionary<UInt32, Dictionary<UInt32, eventDesc>> = [
     TP_HKEY_EV_SLEEP.rawValue : [0: eventDesc("Sleep", action: .sleep, display: false)], // 0x1004
     TP_HKEY_EV_NETWORK.rawValue : [0: eventDesc("Airplane Mode", action: .wireless)], // 0x1005
-    TP_HKEY_EV_DISPLAY.rawValue : [0: eventDesc("Second Display", action: .mirror)], // 0x1007
+    TP_HKEY_EV_DISPLAY.rawValue : [0: eventDesc("Second Display", .SecondDisplay, action: .mirror)], // 0x1007
     TP_HKEY_EV_BRGHT_UP.rawValue : [0: eventDesc("Brightness Up", display: false)], // 0x1010
     TP_HKEY_EV_BRGHT_DOWN.rawValue : [0: eventDesc("Brightness Down", display: false)], // 0x1011
     TP_HKEY_EV_KBD_LIGHT.rawValue : [0: eventDesc("Keyboard Backlight", action: .backlight, display: false)], // 0x1012
@@ -94,8 +94,8 @@ let ThinkEvents : Dictionary<UInt32, Dictionary<UInt32, eventDesc>> = [
     TP_HKEY_EV_APPS.rawValue : [0: eventDesc("Launchpad", action: .launchpad, display: false)], // 0x1020
     TP_HKEY_EV_STAR.rawValue : [0: eventDesc("Custom Hotkey", .Star , action: .script, option: prefpaneAS)], // 0x1311
     TP_HKEY_EV_BLUETOOTH.rawValue : [0: eventDesc("Bluetooth", action: .bluetooth)], // 0x1314
-    TP_HKEY_EV_KEYBOARD.rawValue : [0: eventDesc("Keyboard Disabled"),
-                                    1: eventDesc("Keyboard Enabled")], // 0x1315
+    TP_HKEY_EV_KEYBOARD.rawValue : [0: eventDesc("Keyboard Disabled", .KeyboardOff),
+                                    1: eventDesc("Keyboard Enabled", .Keyboard)], // 0x1315
     TP_HKEY_EV_THM_TABLE_CHANGED.rawValue : [0: eventDesc("Thermal Table Change", display: false)], // 0x6030
     TP_HKEY_EV_AC_CHANGED.rawValue: [0: eventDesc("AC Status Change", display: false)], // 0x6040
     TP_HKEY_EV_KEY_FN_ESC.rawValue : [0: eventDesc("FnLock")], // 0x6060
