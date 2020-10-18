@@ -9,25 +9,12 @@
 
 #include "YogaVPC.hpp"
 
-OSDefineMetaClassAndStructors(YogaVPC, IOService);
-
-bool YogaVPC::init(OSDictionary *dictionary)
-{
-    if (!super::init(dictionary))
-        return false;
-
-    DebugLog("Initializing");
-
-    extern kmod_info_t kmod_info;
-    setProperty("YogaSMC,Build", __DATE__);
-    setProperty("YogaSMC,Version", kmod_info.version);
-
-    return true;
-}
+OSDefineMetaClassAndStructors(YogaVPC, YogaBaseService);
 
 IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
 {
-    name = provider->getName();
+    if (!super::probe(provider, score))
+        return nullptr;
  
     DebugLog("Probing");
 
@@ -44,20 +31,13 @@ IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
 #ifndef ALTER
     initSMC();
 #endif
-    return super::probe(provider, score);
+    return this;
 }
 
 bool YogaVPC::start(IOService *provider) {
     if (!super::start(provider))
         return false;
     DebugLog("Starting");
-
-    workLoop = IOWorkLoop::workLoop();
-    commandGate = IOCommandGate::commandGate(this);
-    if (!workLoop || !commandGate || (workLoop->addEventSource(commandGate) != kIOReturnSuccess)) {
-        AlwaysLog("Failed to add commandGate");
-        return false;
-    }
 
     if (!initVPC())
         return false;
@@ -132,9 +112,6 @@ void YogaVPC::stop(IOService *provider) {
         smc->detach(this);
     }
 #endif
-    workLoop->removeEventSource(commandGate);
-    OSSafeReleaseNULL(commandGate);
-    OSSafeReleaseNULL(workLoop);
 
     PMstop();
 
@@ -518,29 +495,6 @@ bool YogaVPC::setDYTC(int perfmode) {
         }
     }
     return parseDYTC(result);
-}
-
-bool YogaVPC::findPNP(const char *id, IOACPIPlatformDevice **dev) {
-    auto iterator = IORegistryIterator::iterateOver(gIOACPIPlane, kIORegistryIterateRecursively);
-    if (!iterator) {
-        AlwaysLog("findPNP failed");
-        return nullptr;
-    }
-    auto pnp = OSString::withCString(id);
-
-    while (auto entry = iterator->getNextObject()) {
-        if (entry->compareName(pnp)) {
-            *dev = OSDynamicCast(IOACPIPlatformDevice, entry);
-            if (*dev) {
-                AlwaysLog("%s available at %s", id, (*dev)->getName());
-                break;
-            }
-        }
-    }
-    iterator->release();
-    pnp->release();
-
-    return !!(*dev);
 }
 
 IOReturn YogaVPC::readECName(const char* name, UInt32 *result) {
