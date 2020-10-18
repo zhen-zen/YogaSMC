@@ -9,31 +9,12 @@
 
 #include "YogaWMI.hpp"
 
-OSDefineMetaClassAndStructors(YogaWMI, IOService)
-
-bool YogaWMI::init(OSDictionary *dictionary)
-{
-    if(!super::init(dictionary))
-        return false;
-
-    DebugLog("Initializing");
-
-    _deliverNotification = OSSymbol::withCString(kDeliverNotifications);
-     if (!_deliverNotification)
-        return false;
-
-    _notificationServices = OSSet::withCapacity(1);
-
-    extern kmod_info_t kmod_info;
-    setProperty("YogaSMC,Build", __DATE__);
-    setProperty("YogaSMC,Version", kmod_info.version);
-
-    return true;
-}
+OSDefineMetaClassAndStructors(YogaWMI, YogaBaseService)
 
 IOService *YogaWMI::probe(IOService *provider, SInt32 *score)
 {
-    name = provider->getName();
+    if (!super::probe(provider, score))
+        return nullptr;
 
     if (strncmp(name, "WTBT", 4) == 0) {
         DebugLog("Exit on Thunderbolt interface");
@@ -54,7 +35,7 @@ IOService *YogaWMI::probe(IOService *provider, SInt32 *score)
         return nullptr;
     }
 
-    return super::probe(provider, score);
+    return this;
 }
 
 void YogaWMI::checkEvent(const char *cname, UInt32 id) {
@@ -97,7 +78,9 @@ void YogaWMI::getNotifyID(OSString *key) {
 
 bool YogaWMI::start(IOService *provider)
 {
-    bool res = super::start(provider);
+    if (!super::start(provider))
+        return false;
+
     AlwaysLog("Starting");
 
     YWMI = new WMI(provider);
@@ -118,62 +101,21 @@ bool YogaWMI::start(IOService *provider)
         }
     }
 
-    workLoop = IOWorkLoop::workLoop();
-    commandGate = IOCommandGate::commandGate(this);
-    if (!workLoop || !commandGate || (workLoop->addEventSource(commandGate) != kIOReturnSuccess)) {
-        AlwaysLog("Failed to add commandGate");
-        return false;
-    }
-
-    OSDictionary * propertyMatch = propertyMatching(_deliverNotification, kOSBooleanTrue);
-    if (propertyMatch) {
-      IOServiceMatchingNotificationHandler notificationHandler = OSMemberFunctionCast(IOServiceMatchingNotificationHandler, this, &YogaWMI::notificationHandler);
-
-      //
-      // Register notifications for availability of any IOService objects wanting to consume our message events
-      //
-      _publishNotify = addMatchingNotification(gIOFirstPublishNotification,
-                                             propertyMatch,
-                                             notificationHandler,
-                                             this,
-                                             0, 10000);
-
-      _terminateNotify = addMatchingNotification(gIOTerminatedNotification,
-                                               propertyMatch,
-                                               notificationHandler,
-                                               this,
-                                               0, 10000);
-
-      propertyMatch->release();
-    }
-
     PMinit();
     provider->joinPMtree(this);
     registerPowerDriver(this, IOPMPowerStates, kIOPMNumberPowerStates);
 
-    return res;
+    return true;
 }
 
 void YogaWMI::stop(IOService *provider)
 {
     AlwaysLog("Stopping");
 
-    if (YWMI) {
+    if (YWMI)
         delete YWMI;
-    }
-
-    _publishNotify->remove();
-    _terminateNotify->remove();
-    _notificationServices->flushCollection();
-    OSSafeReleaseNULL(_notificationServices);
-    OSSafeReleaseNULL(_deliverNotification);
-
-    workLoop->removeEventSource(commandGate);
-    OSSafeReleaseNULL(commandGate);
-    OSSafeReleaseNULL(workLoop);
 
     PMstop();
-
     super::stop(provider);
 }
 
@@ -198,69 +140,6 @@ IOReturn YogaWMI::message(UInt32 type, IOService *provider, void *argument) {
                 AlwaysLog("message: type=%x, provider=%s, unknown argument", type, provider->getName());
     }
     return kIOReturnSuccess;
-}
-
-void YogaWMI::dispatchMessageGated(int* message, void* data)
-{
-    OSCollectionIterator* i = OSCollectionIterator::withCollection(_notificationServices);
-
-    if (i) {
-        while (IOService* service = OSDynamicCast(IOService, i->getNextObject())) {
-            service->message(*message, this, data);
-        }
-        i->release();
-    }
-}
-
-void YogaWMI::dispatchMessage(int message, void* data)
-{
-    if (_notificationServices->getCount() == 0) {
-        AlwaysLog("No available notification consumer");
-        return;
-    }
-    commandGate->runAction(OSMemberFunctionCast(IOCommandGate::Action, this, &YogaWMI::dispatchMessageGated), &message, data);
-}
-
-void YogaWMI::notificationHandlerGated(IOService *newService, IONotifier *notifier)
-{
-    if (notifier == _publishNotify) {
-        DebugLog("Notification consumer published: %s", newService->getName());
-        _notificationServices->setObject(newService);
-    }
-
-    if (notifier == _terminateNotify) {
-        DebugLog("Notification consumer terminated: %s", newService->getName());
-        _notificationServices->removeObject(newService);
-    }
-}
-
-bool YogaWMI::notificationHandler(void *refCon, IOService *newService, IONotifier *notifier)
-{
-    commandGate->runAction(OSMemberFunctionCast(IOCommandGate::Action, this, &YogaWMI::notificationHandlerGated), newService, notifier);
-    return true;
-}
-
-bool YogaWMI::findPNP(const char *id, IOACPIPlatformDevice **dev) {
-    auto iterator = IORegistryIterator::iterateOver(gIOACPIPlane, kIORegistryIterateRecursively);
-    if (!iterator) {
-        AlwaysLog("findPNP failed");
-        return false;
-    }
-    auto pnp = OSString::withCString(id);
-
-    while (auto entry = iterator->getNextObject()) {
-        if (entry->compareName(pnp)) {
-            *dev = OSDynamicCast(IOACPIPlatformDevice, entry);
-            if (*dev) {
-                DebugLog("%s available at %s", id, (*dev)->getName());
-                break;
-            }
-        }
-    }
-    iterator->release();
-    pnp->release();
-
-    return !!(*dev);
 }
 
 void YogaWMI::toggleTouchpad() {
