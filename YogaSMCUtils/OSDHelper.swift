@@ -46,7 +46,7 @@ let defaultImage : NSString = "/System/Library/CoreServices/OSDUIHelper.app/Cont
 
 // Bundled resources
 enum eventImage : String {
-    case AirplaneMode, Antenna, BacklightHigh, BacklightLow, BacklightOff, Bluetooth, Camera, Mic, MicOff, Keyboard, KeyboardOff, SecondDisplay, Sleep, Star, Wifi, WifiOff
+    case AirplaneMode, Antenna, BacklightHigh, BacklightLow, BacklightOff, Bluetooth, Camera, FunctionKey, Mic, MicOff, Keyboard, KeyboardOff, SecondDisplay, Sleep, Star, Wifi, WifiOff
 }
 
 // from https://github.com/alin23/Lunar/blob/master/Lunar/Data/Hotkeys.swift

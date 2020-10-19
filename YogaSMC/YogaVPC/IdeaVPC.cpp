@@ -567,6 +567,8 @@ bool IdeaVPC::toggleFnlock() {
     DebugLog(toggleSuccess, FnKeyPrompt, (FnlockMode ? HACMD_FNLOCK_ON : HACMD_FNLOCK_OFF), (FnlockMode ? "on" : "off"));
     setProperty(FnKeyPrompt, FnlockMode);
 
+    if (client)
+        client->sendNotification(0x11, FnlockMode);
     return true;
 }
 
