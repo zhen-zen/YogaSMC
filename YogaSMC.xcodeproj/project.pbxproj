@@ -101,6 +101,7 @@
 		6F9553BB24BA515B00215EBB /* IdeaVPC.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F9553B924BA515B00215EBB /* IdeaVPC.hpp */; };
 		6F96A30C24B93D25006562EC /* YogaVPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F96A30A24B93D25006562EC /* YogaVPC.cpp */; };
 		6F96A30D24B93D25006562EC /* YogaVPC.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F96A30B24B93D25006562EC /* YogaVPC.hpp */; };
+		6F984C33253E1A8A00629109 /* NotificationCenter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F984C32253E1A8A00629109 /* NotificationCenter.framework */; };
 		6FA75308253D68C600EBE9D7 /* FunctionKey.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 6FA75307253D68C600EBE9D7 /* FunctionKey.pdf */; };
 		6FCF7F592474B74800A82B13 /* WMI.h in Headers */ = {isa = PBXBuildFile; fileRef = 6FCF7F572474B74800A82B13 /* WMI.h */; };
 		6FCF7F5A2474B74800A82B13 /* WMI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6FCF7F582474B74800A82B13 /* WMI.cpp */; };
@@ -256,6 +257,7 @@
 		6F96A30A24B93D25006562EC /* YogaVPC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = YogaVPC.cpp; sourceTree = "<group>"; };
 		6F96A30B24B93D25006562EC /* YogaVPC.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = YogaVPC.hpp; sourceTree = "<group>"; };
 		6F96F4D524CD9593005A7686 /* message.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = message.h; sourceTree = "<group>"; };
+		6F984C32253E1A8A00629109 /* NotificationCenter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NotificationCenter.framework; path = System/Library/Frameworks/NotificationCenter.framework; sourceTree = SDKROOT; };
 		6F9B2AB124D2ADD800005C16 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		6FA75307253D68C600EBE9D7 /* FunctionKey.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = FunctionKey.pdf; sourceTree = "<group>"; };
 		6FCF7F572474B74800A82B13 /* WMI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WMI.h; sourceTree = "<group>"; };
@@ -283,6 +285,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6F984C33253E1A8A00629109 /* NotificationCenter.framework in Frameworks */,
 				6F7D487B253465DB004074C7 /* ServiceManagement.framework in Frameworks */,
 				6FD082B42537DA1A00491976 /* OSD.framework in Frameworks */,
 				6F7D488425346677004074C7 /* AppKit.framework in Frameworks */,
@@ -417,6 +420,7 @@
 				6F8611E0253AB869008FB857 /* CoreWLAN.framework */,
 				6F8611CD253AA2FA008FB857 /* IOBluetooth.framework */,
 				6F1C709F251473CD007D1DFC /* IOKit.framework */,
+				6F984C32253E1A8A00629109 /* NotificationCenter.framework */,
 				6FD082B22537DA1A00491976 /* OSD.framework */,
 				6F1C70B1251475BA007D1DFC /* PreferencePanes.framework */,
 				6F7D487A253465DB004074C7 /* ServiceManagement.framework */,

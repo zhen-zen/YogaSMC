@@ -8,6 +8,7 @@
 
 import AppKit
 import ApplicationServices
+import NotificationCenter
 import os.log
 import ServiceManagement
 
@@ -167,6 +168,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
            Bundle.main.bundlePath.hasPrefix("/Applications") {
             saveEvents()
         }
+        NotificationCenter.default.removeObserver(self)
     }
 
     func loadEvents() {
