@@ -45,7 +45,7 @@ jobs:
     - name: Prepare debug image
       run: mkdir build/Debug-App; mv build/Debug/YogaSMCNC.app build/Debug-App/; mv build/Debug/YogaSMCPane.prefPane build/Debug-App/; cp LICENSE build/Debug-App/;  ln -s /Applications build/Debug-App/; cp -r YogaSMC/SSDTSample build/Debug/
     - name: Prepare debug kext
-      run: cd build/Release; zip -X -r YogaSMC-Debug.zip *.kext LICENSE SSDTSample
+      run: cd build/Debug; zip -X -r YogaSMC-Debug.zip *.kext LICENSE SSDTSample
     - name: Prepare release kext
       run: cd build/Release; zip -X -r YogaSMC-Release.zip *.kext LICENSE SSDTSample
     - name: Upload debug kext
