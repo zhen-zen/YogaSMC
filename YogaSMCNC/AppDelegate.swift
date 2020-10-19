@@ -18,8 +18,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     var statusItem: NSStatusItem?
     @IBOutlet weak var appMenu: NSMenu!
+    var hide = false
+    var isThink = false
 
-    func updateFan() {
+    func updateThinkFan() {
         if conf.connect != 0 {
             var input : UInt64 = 0x84
             var outputSize = 2
@@ -41,7 +43,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    @objc func openPrefpane(_ sender: NSMenuItem) {
+    @objc func openPrefpane() {
         prefpaneHelper()
     }
 
@@ -62,8 +64,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                                        clickCount: 1,
                                        pressure: 0)!
         NSMenu.popUpContextMenu(appMenu, with: event, for: button)
-        if appMenu.items[4].title == "Class: Think" {
-            updateFan()
+        if isThink {
+            updateThinkFan()
         }
     }
 
@@ -87,7 +89,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         loadConfig()
         
-        if defaults.bool(forKey: "HideIcon") {
+        if hide {
             os_log("Icon hidden", type: .info)
         } else {
             statusItem = NSStatusBar.system.statusItem(withLength: -1)
@@ -112,36 +114,38 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func getProerty() -> Bool {
         var CFProps : Unmanaged<CFMutableDictionary>? = nil
         if (kIOReturnSuccess == IORegistryEntryCreateCFProperties(conf.io_service, &CFProps, kCFAllocatorDefault, 0) && CFProps != nil) {
-            if let props = CFProps?.takeRetainedValue() as NSDictionary? {
-                let build = props["YogaSMC,Build"] as? NSString
-                appMenu.insertItem(withTitle: "Build: \(build ?? "Unknown")", action: nil, keyEquivalent: "", at: 2)
-                let version = props["YogaSMC,Version"] as? NSString
-                appMenu.insertItem(withTitle: "Version: \(version ?? "Unknown")", action: nil, keyEquivalent: "", at: 3)
-                switch props["IOClass"] as? NSString {
+            if let props = CFProps?.takeRetainedValue() as NSDictionary?,
+               let IOClass = props["IOClass"] as? NSString {
+                switch IOClass {
                 case "IdeaVPC":
                     if conf.events.isEmpty {
                         conf.events = IdeaEvents
                     }
                     _ = registerNotification()
-                    appMenu.insertItem(withTitle: "Class: Idea", action: nil, keyEquivalent: "", at: 4)
                 case "ThinkVPC":
                     if conf.events.isEmpty {
                         conf.events = ThinkEvents
                     }
                     _ = registerNotification()
-                    appMenu.insertItem(withTitle: "Class: Think", action: nil, keyEquivalent: "", at: 4)
-                    appMenu.insertItem(withTitle: "Fan", action: nil, keyEquivalent: "", at: 5)
-                    updateFan()
-                    if let current = scriptHelper(getMicVolumeAS, "MicMute"),
-                       sendNumber("MicMuteLED", current.int32Value == 0 ? 2 : 0, conf.io_service) {
-                        os_log("Mic Mute LED updated", type: .info)
-                    } else {
-                        os_log("Failed to update Mic Mute LED", type: .error)
-                    }
+                    isThink = true
                 default:
-                    appMenu.insertItem(withTitle: "Class: Unknown", action: nil, keyEquivalent: "", at: 4)
                     os_log("Unknown class", type: .error)
                     showOSD("Unknown class", duration: 2000)
+                }
+                if !hide {
+                    appMenu.insertItem(withTitle: "Class: \(IOClass)", action: nil, keyEquivalent: "", at: 2)
+                    appMenu.insertItem(withTitle: "Build: \(props["YogaSMC,Build"] as? NSString ?? "Unknown")", action: nil, keyEquivalent: "", at: 3)
+                    appMenu.insertItem(withTitle: "Version: \(props["YogaSMC,Version"] as? NSString ?? "Unknown")", action: nil, keyEquivalent: "", at: 4)
+                    if isThink {
+                        appMenu.insertItem(withTitle: "Fan", action: nil, keyEquivalent: "", at: 5)
+                        updateThinkFan()
+                        if let current = scriptHelper(getMicVolumeAS, "MicMute"),
+                           sendNumber("MicMuteLED", current.int32Value == 0 ? 2 : 0, conf.io_service) {
+                            os_log("Mic Mute LED updated", type: .info)
+                        } else {
+                            os_log("Failed to update Mic Mute LED", type: .error)
+                        }
+                    }
                 }
                 return true
             }
@@ -227,12 +231,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             defaults.setValue(false, forKey: "HideIcon")
             defaults.setValue(false, forKey: "StartAtLogin")
         }
+        hide = defaults.bool(forKey: "HideIcon")
         let login = NSMenuItem(title: "Start at Login", action: #selector(toggleStartAtLogin(_:)), keyEquivalent: "s")
         login.state = defaults.bool(forKey: "StartAtLogin") ? .on : .off
         appMenu.insertItem(NSMenuItem.separator(), at: 2)
         appMenu.insertItem(login, at: 3)
         appMenu.insertItem(NSMenuItem.separator(), at: 4)
-        let pref = NSMenuItem(title: "Open YogaSMC Preferences…", action: #selector(openPrefpane(_:)), keyEquivalent: "p")
+        let pref = NSMenuItem(title: "Open YogaSMC Preferences…", action: #selector(openPrefpane), keyEquivalent: "p")
         appMenu.insertItem(pref, at: 5)
         appMenu.insertItem(NSMenuItem.separator(), at: 6)
         loadEvents()
