@@ -373,6 +373,9 @@ func eventActuator(_ desc: eventDesc, _ data: UInt32, _ conf: UnsafePointer<shar
     case .search:
         _ = scriptHelper(desc.option ?? searchAS, desc.name)
         return
+    case .siri:
+        _ = scriptHelper(desc.option ?? siriAS, desc.name)
+        return
     case .spotlight:
         _ = scriptHelper(desc.option ?? spotlightAS, desc.name)
         return
