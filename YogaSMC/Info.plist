@@ -14,37 +14,12 @@
 	<string>$(PRODUCT_NAME)</string>
 	<key>CFBundlePackageType</key>
 	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
-	<key>CFBundleShortVersionString</key>
-	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>IOKitPersonalities</key>
 	<dict>
 		<key>IdeaVPC</key>
 		<dict>
-			<key>Sensors</key>
-			<dict>
-				<key>CPU System Agent Core</key>
-				<string>CTMP</string>
-				<key>CPU Core PECI</key>
-				<string>CPEC</string>
-				<key>Platform Controller Hub Die</key>
-				<string>RSEN</string>
-				<key>Airflow Left</key>
-				<false/>
-				<key>Airflow Right</key>
-				<false/>
-				<key>Memory Proximity</key>
-				<string>MEM1</string>
-				<key>SO-DIMM 1 Proximity</key>
-				<string>MEM1</string>
-				<key>SO-DIMM 2 Proximity</key>
-				<string>MEM2</string>
-				<key>SO-DIMM 3 Proximity</key>
-				<false/>
-				<key>SO-DIMM 4 Proximity</key>
-				<false/>
-			</dict>
 			<key>CFBundleIdentifier</key>
 			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 			<key>IOClass</key>
@@ -57,6 +32,29 @@
 			<string>IOACPIPlatformDevice</string>
 			<key>IOUserClientClass</key>
 			<string>YogaSMCUserClient</string>
+			<key>Sensors</key>
+			<dict>
+				<key>Airflow Left</key>
+				<false/>
+				<key>Airflow Right</key>
+				<false/>
+				<key>CPU Core PECI</key>
+				<string>CPEC</string>
+				<key>CPU System Agent Core</key>
+				<string>CTMP</string>
+				<key>Memory Proximity</key>
+				<string>MEM1</string>
+				<key>Platform Controller Hub Die</key>
+				<string>RSEN</string>
+				<key>SO-DIMM 1 Proximity</key>
+				<string>MEM1</string>
+				<key>SO-DIMM 2 Proximity</key>
+				<string>MEM2</string>
+				<key>SO-DIMM 3 Proximity</key>
+				<false/>
+				<key>SO-DIMM 4 Proximity</key>
+				<false/>
+			</dict>
 		</dict>
 		<key>IdeaWMI</key>
 		<dict>
@@ -73,33 +71,12 @@
 		</dict>
 		<key>ThinkVPC</key>
 		<dict>
-			<key>Sensors</key>
-			<dict>
-				<key>CPU System Agent Core</key>
-				<string>TMP0</string>
-				<key>CPU Core PECI</key>
-				<false/>
-				<key>Platform Controller Hub Die</key>
-				<string>ESTA</string>
-				<key>Airflow Left</key>
-				<false/>
-				<key>Airflow Right</key>
-				<false/>
-				<key>Memory Proximity</key>
-				<false/>
-				<key>SO-DIMM 1 Proximity</key>
-				<false/>
-				<key>SO-DIMM 2 Proximity</key>
-				<false/>
-				<key>SO-DIMM 3 Proximity</key>
-				<false/>
-				<key>SO-DIMM 4 Proximity</key>
-				<false/>
-			</dict>
 			<key>CFBundleIdentifier</key>
 			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 			<key>IOClass</key>
 			<string>ThinkVPC</string>
+			<key>IOProbeScore</key>
+			<integer>100</integer>
 			<key>IOPropertyMatch</key>
 			<array>
 				<dict>
@@ -111,12 +88,33 @@
 					<string>LEN0068</string>
 				</dict>
 			</array>
-			<key>IOProbeScore</key>
-			<integer>100</integer>
 			<key>IOProviderClass</key>
 			<string>IOACPIPlatformDevice</string>
 			<key>IOUserClientClass</key>
 			<string>YogaSMCUserClient</string>
+			<key>Sensors</key>
+			<dict>
+				<key>Airflow Left</key>
+				<false/>
+				<key>Airflow Right</key>
+				<false/>
+				<key>CPU Core PECI</key>
+				<false/>
+				<key>CPU System Agent Core</key>
+				<string>TMP0</string>
+				<key>Memory Proximity</key>
+				<false/>
+				<key>Platform Controller Hub Die</key>
+				<string>ESTA</string>
+				<key>SO-DIMM 1 Proximity</key>
+				<false/>
+				<key>SO-DIMM 2 Proximity</key>
+				<false/>
+				<key>SO-DIMM 3 Proximity</key>
+				<false/>
+				<key>SO-DIMM 4 Proximity</key>
+				<false/>
+			</dict>
 		</dict>
 		<key>ThinkWMI</key>
 		<dict>
