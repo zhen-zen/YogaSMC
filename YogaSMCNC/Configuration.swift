@@ -78,8 +78,8 @@ let IdeaEvents : Dictionary<UInt32, Dictionary<UInt32, eventDesc>> = [
             2: eventDesc("Tablet Mode"),
             3: eventDesc("Stand Mode"),
             4: eventDesc("Tent Mode")],
-    0x11 : [0: eventDesc("FnKey enabled", .FunctionKey),
-            1: eventDesc("FnKey disabled", .FunctionKey)],
+    0x11 : [0: eventDesc("FnKey Disabled", .FunctionKey),
+            1: eventDesc("FnKey Enabled", .FunctionKey)],
 ]
 
 let ThinkEvents : Dictionary<UInt32, Dictionary<UInt32, eventDesc>> = [
