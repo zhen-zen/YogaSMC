@@ -41,7 +41,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    @IBAction func openPrefpane(_ sender: NSMenuItem) {
+    @objc func openPrefpane(_ sender: NSMenuItem) {
         prefpaneHelper()
     }
 
@@ -107,22 +107,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             showOSD("YogaSMC unavailable", duration: 2000)
             NSApp.terminate(nil)
         }
-    }
-
-    func initMenu() {
-        appMenu.addItem(NSMenuItem.separator())
-        
-        let item = NSMenuItem()
-        let slider = NSSlider(value: 0, minValue: 0, maxValue: 100, target: nil, action: nil)
-        slider.isEnabled = false
-        slider.frame.size.width = 180
-        slider.frame.origin = NSPoint(x: 20, y: 5)
-
-        let view = NSView(frame: NSRect(x: 0, y: 0, width: slider.frame.width + 30, height: slider.frame.height + 10))
-        view.addSubview(slider)
-        item.view = view
-
-        appMenu.insertItem(item, at: 6)
     }
 
     func getProerty() -> Bool {
@@ -243,11 +227,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             defaults.setValue(false, forKey: "HideIcon")
             defaults.setValue(false, forKey: "StartAtLogin")
         }
-        let item = NSMenuItem(title: "Start at Login", action: #selector(toggleStartAtLogin(_:)), keyEquivalent: "S")
-        item.state = defaults.bool(forKey: "StartAtLogin") ? .on : .off
+        let login = NSMenuItem(title: "Start at Login", action: #selector(toggleStartAtLogin(_:)), keyEquivalent: "s")
+        login.state = defaults.bool(forKey: "StartAtLogin") ? .on : .off
         appMenu.insertItem(NSMenuItem.separator(), at: 2)
-        appMenu.insertItem(item, at: 3)
+        appMenu.insertItem(login, at: 3)
         appMenu.insertItem(NSMenuItem.separator(), at: 4)
+        let pref = NSMenuItem(title: "Open YogaSMC Preferences…", action: #selector(openPrefpane(_:)), keyEquivalent: "p")
+        appMenu.insertItem(pref, at: 5)
+        appMenu.insertItem(NSMenuItem.separator(), at: 6)
         loadEvents()
     }
 

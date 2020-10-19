@@ -22,13 +22,6 @@
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="Vvg-1T-VQw"/>
-                                        <menuItem title="Open YogaSMC Preferences…" id="Ms6-Nr-sPA">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="openPrefpane:" target="Voe-Tx-rLC" id="sAW-Ic-u1V"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="hNl-6o-Rsm"/>
                                         <menuItem title="Quit YogaSMCNC" keyEquivalent="q" id="4sb-4s-VLi">
                                             <connections>
                                                 <action selector="terminate:" target="Ady-hI-5gd" id="Te7-pn-YzF"/>
