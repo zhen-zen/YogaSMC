@@ -142,6 +142,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     showOSD("Unknown class", duration: 2000)
                 }
                 if !hide {
+                    appMenu.insertItem(NSMenuItem.separator(), at: 1)
                     appMenu.insertItem(withTitle: "Class: \(IOClass)", action: nil, keyEquivalent: "", at: 2)
                     appMenu.insertItem(withTitle: "Build: \(props["YogaSMC,Build"] as? NSString ?? "Unknown")", action: nil, keyEquivalent: "", at: 3)
                     appMenu.insertItem(withTitle: "Version: \(props["YogaSMC,Version"] as? NSString ?? "Unknown")", action: nil, keyEquivalent: "", at: 4)
@@ -169,9 +170,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func loadEvents() {
-        if !Bundle.main.bundlePath.hasPrefix("/Applications") {
-            showOSD("Please move the app \n into Applications")
-        }
         if let arr = defaults.object(forKey: "Events") as? [[String: Any]] {
             for v in arr {
                 if let id = v["id"] as? UInt32,
@@ -230,21 +228,29 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func loadConfig() {
-        if defaults.object(forKey: "FirstLaunch") == nil {
+        if defaults.object(forKey: "StartAtLogin") == nil {
             os_log("First launch", type: .info)
-            defaults.setValue(false, forKey: "FirstLaunch")
             defaults.setValue(false, forKey: "HideIcon")
             defaults.setValue(false, forKey: "StartAtLogin")
         }
+
         hide = defaults.bool(forKey: "HideIcon")
-        let login = NSMenuItem(title: "Start at Login", action: #selector(toggleStartAtLogin(_:)), keyEquivalent: "s")
-        login.state = defaults.bool(forKey: "StartAtLogin") ? .on : .off
-        appMenu.insertItem(NSMenuItem.separator(), at: 2)
-        appMenu.insertItem(login, at: 3)
-        appMenu.insertItem(NSMenuItem.separator(), at: 4)
-        let pref = NSMenuItem(title: "Open YogaSMC Preferences…", action: #selector(openPrefpane), keyEquivalent: "p")
-        appMenu.insertItem(pref, at: 5)
-        appMenu.insertItem(NSMenuItem.separator(), at: 6)
+
+        if !hide {
+            let login = NSMenuItem(title: "Start at Login", action: #selector(toggleStartAtLogin(_:)), keyEquivalent: "s")
+            login.state = defaults.bool(forKey: "StartAtLogin") ? .on : .off
+            appMenu.insertItem(NSMenuItem.separator(), at: 1)
+            appMenu.insertItem(login, at: 2)
+
+            let pref = NSMenuItem(title: "Open YogaSMC Preferences…", action: #selector(openPrefpane), keyEquivalent: "p")
+            appMenu.insertItem(NSMenuItem.separator(), at: 3)
+            appMenu.insertItem(pref, at: 4)
+        }
+
+        if !Bundle.main.bundlePath.hasPrefix("/Applications") {
+            showOSD("Please move the app \n into Applications")
+        }
+
         loadEvents()
     }
 
