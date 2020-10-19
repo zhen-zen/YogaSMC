@@ -80,6 +80,13 @@ The preference pane provides a graphical user interface for basic information an
 ## YogaSMCNC
 The notification application receives EC events and displays them on OSD. Corresonding actions will also be triggered for function keys. The configuration can be customized at `~/Library/Preferences/org.zhen.YogaSMC.plist` after closing the app.  
 
+## Installation
+The kext should work out-of-the-box. If you have modified `_QXX` methods before, please remove the patches.
+
+Some features may relay on methods accessing EC. Although it won't affect the core functionality, please consider patching related EC fields larger than 8-bit.
+
+The `YogaSMCAlter.kext` is a variant without SMC keys support and the dependencies of `Lilu` and `VirtualSMC`. It's designed for quick loading / unloading without reboot when debugging. 
+
 ## Credits
 - [Apple](https://www.apple.com) for macOS
 - [Linux](https://www.linux.org) for [ideapad-laptop](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/ideapad-laptop.c) and [thinkpad-acpi](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/thinkpad_acpi.c) kernel module  
