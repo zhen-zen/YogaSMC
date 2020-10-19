@@ -3,7 +3,8 @@
  */
 DefinitionBlock ("", "SSDT", 2, "hack", "Think", 0x00000000)
 {
-    External (_SB_.PCI0.LPCB.EC.HKEY, DeviceObj)
+    External (_SB.PCI0.LPCB.EC, DeviceObj)    // EC path
+    External (_SB.PCI0.LPCB.EC.HKEY, DeviceObj)    // HKEY path
 
     /*
      * Optional: Route to customized LED pattern or origin _SI._SST if differ from built in pattern.
@@ -26,8 +27,6 @@ DefinitionBlock ("", "SSDT", 2, "hack", "Think", 0x00000000)
      * Registers return 0x00 for non-implemented, 
      * and return 0x80 when not available.
      */
-    External (_SB.PCI0.LPCB.EC, DeviceObj)    // EC path
-
     Scope (_SB.PCI0.LPCB.EC)
     {
         OperationRegion (ESEN, EmbeddedControl, Zero, 0x0100)

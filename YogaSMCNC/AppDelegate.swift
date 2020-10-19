@@ -36,6 +36,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    @objc func updateMuteStatus() {
+        if let current = scriptHelper(getMicVolumeAS, "MicMute"),
+           sendNumber("MicMuteLED", current.int32Value == 0 ? 2 : 0, conf.io_service) {
+            os_log("Mic Mute LED updated", type: .info)
+        } else {
+            os_log("Failed to update Mic Mute LED", type: .error)
+        }
+    }
+
     @objc func toggleStartAtLogin(_ sender: NSMenuItem) {
         if setStartAtLogin(enabled: sender.state == .off) {
             sender.state = (sender.state == .on) ? .off : .on
@@ -139,12 +148,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     if isThink {
                         appMenu.insertItem(withTitle: "Fan", action: nil, keyEquivalent: "", at: 5)
                         updateThinkFan()
-                        if let current = scriptHelper(getMicVolumeAS, "MicMute"),
-                           sendNumber("MicMuteLED", current.int32Value == 0 ? 2 : 0, conf.io_service) {
-                            os_log("Mic Mute LED updated", type: .info)
-                        } else {
-                            os_log("Failed to update Mic Mute LED", type: .error)
-                        }
+                        updateMuteStatus()
+                        NotificationCenter.default.addObserver(self, selector: #selector(updateMuteStatus), name: NSWorkspace.didWakeNotification, object: nil)
                     }
                 }
                 return true
