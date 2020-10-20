@@ -153,6 +153,22 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
     if (i) {
         while (OSString* key = OSDynamicCast(OSString, i->getNextObject())) {
             if (key->isEqualTo(conservationPrompt)) {
+#ifdef DEBUG
+                OSNumber *raw = OSDynamicCast(OSNumber, dict->getObject(conservationPrompt));
+                if (raw != nullptr) {
+                    UInt32 result;
+
+                    OSObject* params[1] = {
+                        OSNumber::withNumber(raw->unsigned8BitValue(), 32)
+                    };
+
+                    if (vpc->evaluateInteger(setBatteryMode, &result, params, 1) != kIOReturnSuccess || result != 0)
+                        AlwaysLog(toggleFailure, conservationPrompt);
+                    else
+                        AlwaysLog(toggleSuccess, conservationPrompt, raw->unsigned32BitValue(), "see ioreg");
+                    continue;
+                }
+#endif
                 OSBoolean *value;
                 getPropertyBoolean(conservationPrompt);
                 updateBattery(false);
