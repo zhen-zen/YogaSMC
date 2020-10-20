@@ -7,6 +7,7 @@ DefinitionBlock ("", "SSDT", 2, "hack", "Think", 0x00000000)
     External (_SB.PCI0.LPCB.EC.HKEY, DeviceObj)    // HKEY path
     External (_SB.PCI0.LPCB.EC.HFSP, FieldUnitObj)    // Fan control register
     External (_SB.PCI0.LPCB.EC.HFNI, FieldUnitObj)    // Fan control register
+    External (_SB.PCI0.LPCB.EC.VRST, FieldUnitObj)    // Second fan switch register
     External (_SI._SST, MethodObj)    // Indicator
 
     /*
@@ -70,6 +71,11 @@ DefinitionBlock ("", "SSDT", 2, "hack", "Think", 0x00000000)
         Method (CFNI, 1, NotSerialized)
         {
             \_SB.PCI0.LPCB.EC.HFNI = Arg0
+        }
+
+        Method (CRST, 1, NotSerialized)
+        {
+            \_SB.PCI0.LPCB.EC.VRST = Arg0
         }
     }
 }

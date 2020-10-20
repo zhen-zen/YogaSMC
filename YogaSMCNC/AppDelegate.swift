@@ -49,20 +49,25 @@ class AppDelegate: NSObject, NSApplicationDelegate {
            outputSize == 1 {
             appMenu.items[7].title = "HFNI: \(output[0])"
         }
+        input = 0x31
+        if kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadEC), &input, 1, nil, 0, nil, nil, &output, &outputSize),
+           outputSize == 1 {
+            if ((output[0] & 0x1) != 0) {
+                showOSD("Second Fan!")
+            }
+        }
         #endif
     }
 
     @objc func setThinkFan(_ sender: NSSlider) {
-        print("Val: \(sender.intValue)")
-        text?.stringValue = "\(sender.intValue)"
+        print("Val: \(sender.integerValue)")
+        text?.stringValue = "\(sender.integerValue)"
         guard appMenu.items[2].title == "Class: ThinkVPC" else {
-            showOSD("Val: \(sender.intValue)")
+            showOSD("Val: \(sender.integerValue)")
             return
         }
 
-        var addr : UInt64 = 0x2f
-        var input = [UInt32(sender.intValue == 8 ? 0x80 : sender.intValue)]
-        if kIOReturnSuccess != IOConnectCallMethod(conf.connect, UInt32(kYSMCUCWriteEC), &addr, 1, &input, 1, nil, nil, nil, nil) {
+        if !sendNumber("CFSP", sender.integerValue == 8 ? 0x80 : sender.integerValue, conf.io_service) {
             os_log("Write Fan Speed failed!", type: .fault)
             showOSD("Write Fan Speed failed!")
         }
@@ -163,6 +168,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                         conf.events = IdeaEvents
                     }
                     _ = registerNotification()
+                    #if DEBUG
+//                    isThink = true
+                    #endif
                 case "ThinkVPC":
                     if conf.events.isEmpty {
                         conf.events = ThinkEvents
@@ -203,6 +211,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                         appMenu.insertItem(item, at: 8)
                         #endif
                         updateThinkFan()
+                        if appMenu.items[7].title == "HFNI: 7" {
+                            os_log("Might be auto mode at startup", type: .info)
+                        }
                         updateMuteStatus()
                         NotificationCenter.default.addObserver(self, selector: #selector(updateMuteStatus), name: NSWorkspace.didWakeNotification, object: nil)
                     }
