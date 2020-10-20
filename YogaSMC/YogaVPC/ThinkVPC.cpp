@@ -370,6 +370,30 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 else
                     AlwaysLog("%s evaluation failed 0x%x", "GHSL", ret);
                 params[0]->release();
+            } else if (key->isEqualTo("CFSP")) {
+                OSNumber *value;
+                getPropertyNumber("CFSP");
+                UInt32 result;
+                OSObject* params[1] = {
+                    value
+                };
+                IOReturn ret = vpc->evaluateInteger("CFSP", &result, params, 1);
+                if (ret == kIOReturnSuccess)
+                    AlwaysLog(updateSuccess, "CFSP", result);
+                else
+                    AlwaysLog("%s evaluation failed 0x%x", "CFSP", ret);
+            } else if (key->isEqualTo("CFNI")) {
+                OSNumber *value;
+                getPropertyNumber("CFNI");
+                UInt32 result;
+                OSObject* params[1] = {
+                    value
+                };
+                IOReturn ret = vpc->evaluateInteger("CFNI", &result, params, 1);
+                if (ret == kIOReturnSuccess)
+                    AlwaysLog(updateSuccess, "CFNI", result);
+                else
+                    AlwaysLog("%s evaluation failed 0x%x", "CFNI", ret);
             } else if (key->isEqualTo(mutePrompt)) {
                 OSNumber *value;
                 getPropertyNumber(mutePrompt);
