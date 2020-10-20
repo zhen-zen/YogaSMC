@@ -21,32 +21,50 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @IBOutlet weak var appMenu: NSMenu!
     var hide = false
     var isThink = false
+    var text: NSTextField?
 
     func updateThinkFan() {
-        if conf.connect != 0 {
-            var input : UInt64 = 0x84
-            var outputSize = 2
-            var output : [UInt8] = Array(repeating: 0, count: 2)
-            if kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadEC), &input, 1, nil, 0, nil, nil, &output, &outputSize),
-               outputSize == 2 {
-                let vFanSpeed = Int32(output[0]) | Int32(output[1]) << 8
-                appMenu.items[5].title = "Fan: \(vFanSpeed) rpm"
-            } else {
-                os_log("Failed to access EC", type: .error)
-            }
-            #if DEBUG
-            outputSize = 1
-            input = 0x2f
-            if kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadEC), &input, 1, nil, 0, nil, nil, &output, &outputSize),
-               outputSize == 1 {
-                appMenu.items[6].title = "HFSP: \(output[0])"
-            }
-            input = 0x83
-            if kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadEC), &input, 1, nil, 0, nil, nil, &output, &outputSize),
-               outputSize == 1 {
-                appMenu.items[7].title = "HFNI: \(output[0])"
-            }
-            #endif
+        guard conf.connect != 0 else {
+            return
+        }
+        var input : UInt64 = 0x84
+        var outputSize = 2
+        var output : [UInt8] = Array(repeating: 0, count: 2)
+        if kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadEC), &input, 1, nil, 0, nil, nil, &output, &outputSize),
+           outputSize == 2 {
+            let vFanSpeed = Int32(output[0]) | Int32(output[1]) << 8
+            appMenu.items[5].title = "Fan: \(vFanSpeed) rpm"
+        } else {
+            os_log("Failed to access EC", type: .error)
+        }
+        #if DEBUG
+        outputSize = 1
+        input = 0x2f
+        if kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadEC), &input, 1, nil, 0, nil, nil, &output, &outputSize),
+           outputSize == 1 {
+            appMenu.items[6].title = "HFSP: \(output[0])"
+        }
+        input = 0x83
+        if kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadEC), &input, 1, nil, 0, nil, nil, &output, &outputSize),
+           outputSize == 1 {
+            appMenu.items[7].title = "HFNI: \(output[0])"
+        }
+        #endif
+    }
+
+    @objc func setThinkFan(_ sender: NSSlider) {
+        print("Val: \(sender.intValue)")
+        text?.stringValue = "\(sender.intValue)"
+        guard appMenu.items[2].title == "Class: ThinkVPC" else {
+            showOSD("Val: \(sender.intValue)")
+            return
+        }
+
+        var addr : UInt64 = 0x2f
+        var input = [UInt32(sender.intValue == 8 ? 0x80 : sender.intValue)]
+        if kIOReturnSuccess != IOConnectCallMethod(conf.connect, UInt32(kYSMCUCWriteEC), &addr, 1, &input, 1, nil, nil, nil, nil) {
+            os_log("Write Fan Speed failed!", type: .fault)
+            showOSD("Write Fan Speed failed!")
         }
     }
 
@@ -165,6 +183,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                         #if DEBUG
                         appMenu.insertItem(withTitle: "HFSP", action: nil, keyEquivalent: "", at: 6)
                         appMenu.insertItem(withTitle: "HFNI", action: nil, keyEquivalent: "", at: 7)
+                        let item = NSMenuItem()
+                        let slider = NSSlider(value: 0, minValue: 1, maxValue: 8, target: nil, action: #selector(setThinkFan(_:)))
+                        slider.numberOfTickMarks = 8
+                        slider.allowsTickMarkValuesOnly = true
+                        slider.isContinuous = false
+                        slider.frame.size.width = 180
+                        slider.frame.origin = NSPoint(x: 20, y: 5)
+                        let view = NSView(frame: NSRect(x: 0, y: 0, width: slider.frame.width + 50, height: slider.frame.height + 10))
+                        view.addSubview(slider)
+                        text = NSTextField(frame: NSRect(x: slider.frame.width + 25, y: 0, width: 30, height: slider.frame.height + 5))
+                        text?.isEditable = false
+                        text?.isSelectable = false
+                        text?.isBezeled = false
+                        text?.drawsBackground = false
+                        text?.font = .systemFont(ofSize: 14)
+                        view.addSubview(text!)
+                        item.view = view
+                        appMenu.insertItem(item, at: 8)
                         #endif
                         updateThinkFan()
                         updateMuteStatus()
