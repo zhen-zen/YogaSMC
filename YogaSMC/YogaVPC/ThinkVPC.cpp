@@ -345,7 +345,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 UInt32 result;
                 ret = vpc->evaluateInteger("GMKS", &result);
                 if (ret == kIOReturnSuccess)
-                    AlwaysLog(updateSuccess, "GMKS", result);
+                    DebugLog(updateSuccess, "GMKS", result);
                 else
                     AlwaysLog("%s evaluation failed 0x%x", "GMKS", ret);
             } else if (key->isEqualTo("GSKL")) {
@@ -357,7 +357,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 };
                 ret = vpc->evaluateInteger("GSKL", &result, params, 1);
                 if (ret == kIOReturnSuccess)
-                    AlwaysLog(updateSuccess, "GSKL", result);
+                    DebugLog(updateSuccess, "GSKL", result);
                 else
                     AlwaysLog("%s evaluation failed 0x%x", "GSKL", ret);
             } else if (key->isEqualTo("GHSL")) {
@@ -367,7 +367,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 };
                 ret = vpc->evaluateInteger("GHKL", &result, params, 1);
                 if (ret == kIOReturnSuccess)
-                    AlwaysLog(updateSuccess, "GHSL", result);
+                    DebugLog(updateSuccess, "GHSL", result);
                 else
                     AlwaysLog("%s evaluation failed 0x%x", "GHSL", ret);
                 params[0]->release();
@@ -380,7 +380,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                     };
                     ret = vpc->evaluateObject("CFSP", nullptr, params, 1);
                     if (ret == kIOReturnSuccess)
-                        AlwaysLog(updateSuccess, "CFSP", value->unsigned8BitValue());
+                        DebugLog(updateSuccess, "CFSP", value->unsigned8BitValue());
                     else
                         AlwaysLog("%s evaluation failed 0x%x", "CFSP", ret);
                     continue;
@@ -418,7 +418,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 };
                 ret = vpc->evaluateObject("CRST", nullptr, params, 1);
                 if (ret == kIOReturnSuccess)
-                    AlwaysLog(updateSuccess, "CRST", value->unsigned8BitValue());
+                    DebugLog(updateSuccess, "CRST", value->unsigned8BitValue());
                 else
                     AlwaysLog("%s evaluation failed 0x%x", "CRST", ret);
 #endif

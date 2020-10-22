@@ -565,12 +565,12 @@ IOReturn YogaVPC::method_we1b(UInt32 offset, UInt32 value) {
         OSNumber::withNumber(offset, 32),
         OSNumber::withNumber(value, 32)
     };
-    UInt32 result;
 
-    IOReturn ret = ec->evaluateInteger(writeECOneByte, &result, params, 2);
+    IOReturn ret = ec->evaluateObject(writeECOneByte, nullptr, params, 2);
     if (ret != kIOReturnSuccess)
         AlwaysLog("write 0x%02x @ 0x%02x failed", value, offset);
-
+    else
+        DebugLog("write 0x%02x @ 0x%02x success", value, offset);
     return ret;
 }
 
