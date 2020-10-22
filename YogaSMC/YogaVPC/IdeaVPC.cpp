@@ -598,10 +598,8 @@ void IdeaVPC::updateVPC() {
     }
 
     vpc1 = (vpc2 << 8) | vpc1;
-#ifdef DEBUG
-    AlwaysLog("read VPC EC result: 0x%x %d", vpc1, retries);
-    setProperty("VPCstatus", vpc1, 32);
-#endif
+
+    DebugLog("read VPC EC result: 0x%x %d", vpc1, retries);
 
     if (!vpc1) {
         DebugLog("empty EC event");
@@ -618,7 +616,7 @@ void IdeaVPC::updateVPC() {
                     } else {
                         switch (result) {
                             case 0x40:
-                                AlwaysLog("Fn+Q cooling");
+                                DebugLog("Fn+Q cooling");
                                 break;
 
                             default:
@@ -630,7 +628,7 @@ void IdeaVPC::updateVPC() {
                     break;
 
                 case 1: // ENERGY_EVENT_GENERAL / ENERGY_EVENT_KEYBDLED_OLD
-                    AlwaysLog("Fn+Space keyboard backlight?");
+                    DebugLog("Fn+Space keyboard backlight?");
                     updateKeyboard(true);
                     data = backlightLevel;
                     // also on AC connect / disconnect
@@ -640,7 +638,7 @@ void IdeaVPC::updateVPC() {
                     if (!read_ec_data(VPCCMD_R_BL_POWER, &result, &retries))
                         AlwaysLog("Failed to read VPCCMD_R_BL_POWER %d", retries);
                     else
-                        AlwaysLog("Open lid? 0x%x %s", result, result ? "on" : "off");
+                        DebugLog("Open lid? 0x%x %s", result, result ? "on" : "off");
                     data = result;
                     // functional, TODO: turn off screen on demand
                     break;
@@ -649,28 +647,28 @@ void IdeaVPC::updateVPC() {
                     if (!read_ec_data(VPCCMD_R_TOUCHPAD, &result, &retries))
                         AlwaysLog("Failed to read VPCCMD_R_TOUCHPAD %d", retries);
                     else
-                        AlwaysLog("Fn+F6 touchpad 0x%x %s", result, result ? "on" : "off");
+                        DebugLog("Fn+F6 touchpad 0x%x %s", result, result ? "on" : "off");
                     data = result;
                     break;
 
                 case 7:
-                    AlwaysLog("Fn+F8 camera");
+                    DebugLog("Fn+F8 camera");
                     break;
 
                 case 8: // ENERGY_EVENT_MIC
-                    AlwaysLog("Fn+F4 mic");
+                    DebugLog("Fn+F4 mic");
                     break;
 
                 case 10:
-                    AlwaysLog("Touchpad on");
+                    DebugLog("Touchpad on");
                     break;
 
                 case 12: // ENERGY_EVENT_KEYBDLED
-                    AlwaysLog("Fn+Space keyboard backlight?");
+                    DebugLog("Fn+Space keyboard backlight?");
                     break;
 
                 case 13:
-                    AlwaysLog("Fn+F7 airplane mode");
+                    DebugLog("Fn+F7 airplane mode");
                     break;
 
                 default:
