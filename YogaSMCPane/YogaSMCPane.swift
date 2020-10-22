@@ -196,7 +196,7 @@ class YogaSMCPane : NSPreferencePane {
                 ((yogaModeCheck.state == .on) ? 1 << 1 : 0) +
                 ((indicatorCheck.state == .on) ? 1 << 2 : 0) +
                 ((muteCheck.state == .on) ? 1 << 3 : 0) +
-                ((micMuteCheck.state == .on) ? 1 << 3 : 0)
+                ((micMuteCheck.state == .on) ? 1 << 4 : 0)
         if (!sendNumber("AutoBacklight", val, io_service)) {
             let autoBacklight = getNumber("AutoBacklight", io_service)
             if (autoBacklight != -1) {
