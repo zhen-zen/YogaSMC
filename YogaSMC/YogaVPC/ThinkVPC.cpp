@@ -312,6 +312,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
 
     //    AlwaysLog("%d objects in properties", dict->getCount());
     OSCollectionIterator* i = OSCollectionIterator::withCollection(dict);
+    IOReturn ret;
 
     if (i) {
         while (OSString* key = OSDynamicCast(OSString, i->getNextObject())) {
@@ -342,7 +343,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 setConservation(setCMPeakShiftState, value->unsigned8BitValue());
             } else if (key->isEqualTo("GMKS")) {
                 UInt32 result;
-                IOReturn ret = vpc->evaluateInteger("GMKS", &result);
+                ret = vpc->evaluateInteger("GMKS", &result);
                 if (ret == kIOReturnSuccess)
                     AlwaysLog(updateSuccess, "GMKS", result);
                 else
@@ -354,7 +355,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 OSObject* params[1] = {
                     value
                 };
-                IOReturn ret = vpc->evaluateInteger("GSKL", &result, params, 1);
+                ret = vpc->evaluateInteger("GSKL", &result, params, 1);
                 if (ret == kIOReturnSuccess)
                     AlwaysLog(updateSuccess, "GSKL", result);
                 else
@@ -364,7 +365,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 OSObject* params[1] = {
                     OSNumber::withNumber(0ULL, 32)
                 };
-                IOReturn ret = vpc->evaluateInteger("GHKL", &result, params, 1);
+                ret = vpc->evaluateInteger("GHKL", &result, params, 1);
                 if (ret == kIOReturnSuccess)
                     AlwaysLog(updateSuccess, "GHSL", result);
                 else
@@ -373,38 +374,51 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
             } else if (key->isEqualTo("CFSP")) {
                 OSNumber *value;
                 getPropertyNumber("CFSP");
-                UInt32 result;
-                OSObject* params[1] = {
-                    value
-                };
-                IOReturn ret = vpc->evaluateInteger("CFSP", &result, params, 1);
+                if (vpc->validateObject("CFSP") == kIOReturnSuccess) {
+                    OSObject* params[1] = {
+                        value
+                    };
+                    ret = vpc->evaluateObject("CFSP", nullptr, params, 1);
+                    if (ret == kIOReturnSuccess)
+                        AlwaysLog(updateSuccess, "CFSP", value->unsigned8BitValue());
+                    else
+                        AlwaysLog("%s evaluation failed 0x%x", "CFSP", ret);
+                    continue;
+                }
+                ret = method_we1b(0x2F, value->unsigned8BitValue());
                 if (ret == kIOReturnSuccess)
-                    AlwaysLog(updateSuccess, "CFSP", result);
+                    DebugLog(updateSuccess, "HFSP", value->unsigned8BitValue());
                 else
-                    AlwaysLog("%s evaluation failed 0x%x", "CFSP", ret);
+                    AlwaysLog("%s evaluation failed 0x%x", "HFSP", ret);
 #ifdef DEBUG
             } else if (key->isEqualTo("CFNI")) {
                 OSNumber *value;
                 getPropertyNumber("CFNI");
-                UInt32 result;
-                OSObject* params[1] = {
-                    value
-                };
-                IOReturn ret = vpc->evaluateInteger("CFNI", &result, params, 1);
+                if (vpc->validateObject("CFNI") == kIOReturnSuccess) {
+                    OSObject* params[1] = {
+                        value
+                    };
+                    ret = vpc->evaluateObject("CFNI", nullptr, params, 1);
+                    if (ret == kIOReturnSuccess)
+                        DebugLog(updateSuccess, "CFNI", value->unsigned8BitValue());
+                    else
+                        AlwaysLog("%s evaluation failed 0x%x", "CFNI", ret);
+                    continue;
+                }
+                ret = method_we1b(0x83, value->unsigned8BitValue());
                 if (ret == kIOReturnSuccess)
-                    AlwaysLog(updateSuccess, "CFNI", result);
+                    DebugLog(updateSuccess, "HFNI", value->unsigned8BitValue());
                 else
-                    AlwaysLog("%s evaluation failed 0x%x", "CFNI", ret);
+                    AlwaysLog("%s evaluation failed 0x%x", "HFNI", ret);
             } else if (key->isEqualTo("CRST")) {
                 OSNumber *value;
                 getPropertyNumber("CRST");
-                UInt32 result;
                 OSObject* params[1] = {
                     value
                 };
-                IOReturn ret = vpc->evaluateInteger("CRST", &result, params, 1);
+                ret = vpc->evaluateObject("CRST", nullptr, params, 1);
                 if (ret == kIOReturnSuccess)
-                    AlwaysLog(updateSuccess, "CRST", result);
+                    AlwaysLog(updateSuccess, "CRST", value->unsigned8BitValue());
                 else
                     AlwaysLog("%s evaluation failed 0x%x", "CRST", ret);
 #endif
