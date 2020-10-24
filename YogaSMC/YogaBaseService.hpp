@@ -94,6 +94,8 @@ public:
 
     void dispatchMessage(int message, void* data);
 
+    virtual IOReturn setPowerState(unsigned long powerStateOrdinal, IOService * whatDevice) APPLE_KEXT_OVERRIDE;
+
 //    friend class YogaSMCUserClient;
 };
 #endif /* YogaBaseService_hpp */

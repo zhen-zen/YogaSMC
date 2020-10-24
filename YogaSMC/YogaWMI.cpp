@@ -141,11 +141,3 @@ IOReturn YogaWMI::message(UInt32 type, IOService *provider, void *argument) {
     }
     return kIOReturnSuccess;
 }
-
-IOReturn YogaWMI::setPowerState(unsigned long powerState, IOService *whatDevice){
-    DebugLog("powerState %ld : %s", powerState, powerState ? "on" : "off");
-    if (whatDevice != this)
-        return kIOReturnInvalid;
-
-    return kIOPMAckImplied;
-}
