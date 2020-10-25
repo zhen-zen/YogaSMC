@@ -46,10 +46,6 @@ bool YogaVPC::start(IOService *provider) {
 #ifndef ALTER
     smc->start(this);
 #endif
-    PMinit();
-    provider->joinPMtree(this);
-    registerPowerDriver(this, IOPMPowerStates, kIOPMNumberPowerStates);
-
     setProperty(kDeliverNotifications, kOSBooleanTrue);
     registerService();
     return true;
@@ -112,9 +108,6 @@ void YogaVPC::stop(IOService *provider) {
         smc->detach(this);
     }
 #endif
-
-    PMstop();
-
     terminate();
     detach(provider);
     super::stop(provider);
@@ -304,7 +297,7 @@ bool YogaVPC::toggleClamshell() {
 }
 
 IOReturn YogaVPC::setPowerState(unsigned long powerState, IOService *whatDevice){
-    AlwaysLog("powerState %ld : %s", powerState, powerState ? "on" : "off");
+    DebugLog("powerState %ld : %s", powerState, powerState ? "on" : "off");
 
     if (whatDevice != this)
         return kIOReturnInvalid;

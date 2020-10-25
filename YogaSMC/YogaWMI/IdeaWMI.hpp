@@ -38,6 +38,7 @@ class IdeaWMI : public YogaWMI
 
 private:
     inline const char *getVPCName() APPLE_KEXT_OVERRIDE {return PnpDeviceIdVPCIdea;};
+    inline virtual bool PMSupport() APPLE_KEXT_OVERRIDE {return true;};
 
     bool isYMC {false};
 

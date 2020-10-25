@@ -81,7 +81,7 @@ bool YogaWMI::start(IOService *provider)
     if (!super::start(provider))
         return false;
 
-    AlwaysLog("Starting");
+    DebugLog("Starting");
 
     YWMI = new WMI(provider);
     YWMI->initialize();
@@ -101,21 +101,16 @@ bool YogaWMI::start(IOService *provider)
         }
     }
 
-    PMinit();
-    provider->joinPMtree(this);
-    registerPowerDriver(this, IOPMPowerStates, kIOPMNumberPowerStates);
-
     return true;
 }
 
 void YogaWMI::stop(IOService *provider)
 {
-    AlwaysLog("Stopping");
+    DebugLog("Stopping");
 
     if (YWMI)
         delete YWMI;
 
-    PMstop();
     super::stop(provider);
 }
 

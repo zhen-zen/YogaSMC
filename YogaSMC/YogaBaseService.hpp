@@ -85,6 +85,11 @@ protected:
      */
     bool updateTopCase();
 
+    /**
+     *  Enable power management support
+     */
+    inline virtual bool PMSupport() {return false;};
+
 public:
     virtual bool init(OSDictionary *dictionary) APPLE_KEXT_OVERRIDE;
     virtual IOService *probe(IOService *provider, SInt32 *score) APPLE_KEXT_OVERRIDE;
