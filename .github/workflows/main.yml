@@ -63,7 +63,7 @@ jobs:
           build/Release/LICENSE
           build/Release/SSDTSample
     - name: Create DMG image
-      run: brew install create-dmg && create-dmg --window-size 450 450 build/YogaSMC-App-Debug.dmg build/Debug-App/ && create-dmg --window-size 450 450 build/YogaSMC-App-Release.dmg build/Release-App/
+      run: brew install create-dmg && create-dmg --no-internet-enable --sandbox-safe --window-size 450 450 build/YogaSMC-App-Debug.dmg build/Debug-App/ && create-dmg --no-internet-enable --sandbox-safe --window-size 450 450 build/YogaSMC-App-Release.dmg build/Release-App/
     - name: Upload debug app
       uses: actions/upload-artifact@v2
       with:
