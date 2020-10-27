@@ -23,6 +23,8 @@ class YogaSMC : public YogaBaseService
     OSDeclareDefaultStructors(YogaSMC)
 
 private:
+    inline virtual bool PMSupport() APPLE_KEXT_OVERRIDE {return true;};
+
     /**
      *  Current sensor reading obtained from ACPI
      */
@@ -30,6 +32,8 @@ private:
      
 
 protected:
+    bool awake {false};
+
     IOTimerEventSource* poller {nullptr};
 
     /**
@@ -74,6 +78,8 @@ protected:
 public:
     virtual bool start(IOService *provider) APPLE_KEXT_OVERRIDE;
     virtual void stop(IOService *provider) APPLE_KEXT_OVERRIDE;
+
+    virtual IOReturn setPowerState(unsigned long powerStateOrdinal, IOService * whatDevice) APPLE_KEXT_OVERRIDE;
 
     static YogaSMC *withDevice(IOService *provider, IOACPIPlatformDevice *device);
 

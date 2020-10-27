@@ -61,6 +61,7 @@ bool YogaSMC::start(IOService *provider) {
 
     DebugLog("Starting");
 
+    awake = true;
     poller = IOTimerEventSource::timerEventSource(this, [](OSObject *object, IOTimerEventSource *sender) {
         auto smc = OSDynamicCast(YogaSMC, object);
         if (smc) smc->updateEC();
@@ -83,14 +84,13 @@ bool YogaSMC::start(IOService *provider) {
 
 void YogaSMC::stop(IOService *provider)
 {
-    AlwaysLog("Stopping");
+    DebugLog("Stopping");
 
     poller->disable();
     workLoop->removeEventSource(poller);
     OSSafeReleaseNULL(poller);
 
     terminate();
-    PMstop();
 
     super::stop(provider);
 }
@@ -136,12 +136,38 @@ YogaSMC* YogaSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) 
 }
 
 void YogaSMC::updateEC() {
+    if (!awake)
+        return;
+
     UInt32 result = 0;
     for (int i = 0; i < sensorCount; i++) {
         if (ec->evaluateInteger(sensorMethod[i], &result) == kIOReturnSuccess && result != 0)
             atomic_store_explicit(&currentSensor[i], result, memory_order_release);
     }
     poller->setTimeoutMS(POLLING_INTERVAL);
+}
+
+IOReturn YogaSMC::setPowerState(unsigned long powerStateOrdinal, IOService *whatDevice){
+    DebugLog("powerState %ld : %s", powerStateOrdinal, powerStateOrdinal ? "on" : "off");
+    if (whatDevice != this)
+        return kIOReturnInvalid;
+    if (powerStateOrdinal == 0) {
+        if (awake) {
+            poller->disable();
+            workLoop->removeEventSource(poller);
+            awake = false;
+            DebugLog("Going to sleep");
+        }
+    } else {
+        if (!awake) {
+            awake = true;
+            workLoop->addEventSource(poller);
+            poller->setTimeoutMS(POLLING_INTERVAL);
+            poller->enable();
+            DebugLog("Woke up");
+        }
+    }
+    return kIOPMAckImplied;
 }
 
 EXPORT extern "C" kern_return_t ADDPR(kern_start)(kmod_info_t *, void *) {
