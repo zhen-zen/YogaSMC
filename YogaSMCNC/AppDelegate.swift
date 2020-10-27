@@ -225,14 +225,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
+        saveConfig()
+        NotificationCenter.default.removeObserver(self)
         if conf.connect != 0 {
             IOServiceClose(conf.connect)
         }
-        if !conf.events.isEmpty,
-           Bundle.main.bundlePath.hasPrefix("/Applications") {
-            saveEvents()
-        }
-        NotificationCenter.default.removeObserver(self)
     }
 
     func loadEvents() {
@@ -317,7 +314,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             showOSD("Please move the app \n into Applications")
         }
 
+        if defaults.object(forKey: "AutoBacklight") != nil {
+            _ = sendNumber("AutoBacklight", defaults.integer(forKey: "AutoBacklight"), conf.io_service)
+        }
+
         loadEvents()
+    }
+
+    func saveConfig() {
+        if !conf.events.isEmpty,
+           Bundle.main.bundlePath.hasPrefix("/Applications") {
+            saveEvents()
+        }
+        defaults.setValue(getNumber("AutoBacklight", conf.io_service), forKey: "AutoBacklight")
     }
 
     func registerNotification() -> Bool {
