@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6F0095B525455F02002C8E1F /* IOBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F8611CD253AA2FA008FB857 /* IOBluetooth.framework */; };
+		6F0095B625455F09002C8E1F /* CoreWLAN.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F8611E0253AB869008FB857 /* CoreWLAN.framework */; };
+		6F0095B725455F2C002C8E1F /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F1C709F251473CD007D1DFC /* IOKit.framework */; };
+		6F0095B825455F36002C8E1F /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F8611F1253AC075008FB857 /* ApplicationServices.framework */; };
+		6F0095BE25455F99002C8E1F /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F1C70A1251473DF007D1DFC /* CoreFoundation.framework */; };
 		6F05D7E2252E35A000471F57 /* YogaSMCUserClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F05D7E0252E35A000471F57 /* YogaSMCUserClient.cpp */; };
 		6F05D7E3252E35A000471F57 /* YogaSMCUserClientPrivate.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F05D7E1252E35A000471F57 /* YogaSMCUserClientPrivate.hpp */; };
 		6F05D7E7252E362600471F57 /* YogaSMCUserClientPrivate.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F05D7E1252E35A000471F57 /* YogaSMCUserClientPrivate.hpp */; };
@@ -43,10 +48,7 @@
 		6F81FC4825317B1300CFEDF5 /* YogaSMCUserClient.h in Headers */ = {isa = PBXBuildFile; fileRef = 6F81FC4025317AE100CFEDF5 /* YogaSMCUserClient.h */; };
 		6F83587324D0C2B50031512F /* KeyImplementations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F83587124D0C2B50031512F /* KeyImplementations.cpp */; };
 		6F83587424D0C2B50031512F /* KeyImplementations.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F83587224D0C2B50031512F /* KeyImplementations.hpp */; };
-		6F8611CE253AA2FA008FB857 /* IOBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F8611CD253AA2FA008FB857 /* IOBluetooth.framework */; };
 		6F8611D5253AB59F008FB857 /* RFHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F8611D4253AB59F008FB857 /* RFHelper.swift */; };
-		6F8611E1253AB869008FB857 /* CoreWLAN.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F8611E0253AB869008FB857 /* CoreWLAN.framework */; };
-		6F8611F2253AC075008FB857 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F8611F1253AC075008FB857 /* ApplicationServices.framework */; };
 		6F861215253AF7E4008FB857 /* BacklightLow.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 6F861212253AF7E4008FB857 /* BacklightLow.pdf */; };
 		6F861216253AF7E4008FB857 /* BacklightOff.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 6F861213253AF7E4008FB857 /* BacklightOff.pdf */; };
 		6F861217253AF7E4008FB857 /* BacklightHigh.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 6F861214253AF7E4008FB857 /* BacklightHigh.pdf */; };
@@ -285,10 +287,15 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6F984C33253E1A8A00629109 /* NotificationCenter.framework in Frameworks */,
-				6F7D487B253465DB004074C7 /* ServiceManagement.framework in Frameworks */,
-				6FD082B42537DA1A00491976 /* OSD.framework in Frameworks */,
 				6F7D488425346677004074C7 /* AppKit.framework in Frameworks */,
+				6F0095B825455F36002C8E1F /* ApplicationServices.framework in Frameworks */,
+				6F0095BE25455F99002C8E1F /* CoreFoundation.framework in Frameworks */,
+				6F0095B625455F09002C8E1F /* CoreWLAN.framework in Frameworks */,
+				6F0095B525455F02002C8E1F /* IOBluetooth.framework in Frameworks */,
+				6F0095B725455F2C002C8E1F /* IOKit.framework in Frameworks */,
+				6F984C33253E1A8A00629109 /* NotificationCenter.framework in Frameworks */,
+				6FD082B42537DA1A00491976 /* OSD.framework in Frameworks */,
+				6F7D487B253465DB004074C7 /* ServiceManagement.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -297,9 +304,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				6F1C70A4251473E7007D1DFC /* AppKit.framework in Frameworks */,
-				6F8611F2253AC075008FB857 /* ApplicationServices.framework in Frameworks */,
-				6F8611CE253AA2FA008FB857 /* IOBluetooth.framework in Frameworks */,
-				6F8611E1253AB869008FB857 /* CoreWLAN.framework in Frameworks */,
 				6F1C70A2251473DF007D1DFC /* CoreFoundation.framework in Frameworks */,
 				6F1C70A0251473CD007D1DFC /* IOKit.framework in Frameworks */,
 				6FD082B32537DA1A00491976 /* OSD.framework in Frameworks */,
@@ -661,7 +665,6 @@
 			buildPhases = (
 				6F7D483C25344C25004074C7 /* Sources */,
 				6F7D483D25344C25004074C7 /* Frameworks */,
-				6F7D483E25344C25004074C7 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -696,7 +699,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1200;
-				LastUpgradeCheck = 1200;
+				LastUpgradeCheck = 1210;
 				ORGANIZATIONNAME = zhen;
 				TargetAttributes = {
 					6F08ACE324746B8B00681A63 = {
@@ -773,13 +776,6 @@
 			files = (
 				6F1C7093251473BB007D1DFC /* YogaSMCPane.tiff in Resources */,
 				6F1C7096251473BB007D1DFC /* YogaSMCPane.xib in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		6F7D483E25344C25004074C7 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -935,6 +931,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -995,6 +992,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -1018,6 +1016,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
 			};
 			name = Release;
 		};
@@ -1148,7 +1147,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = org.zhen.YogaSMCNC;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OBJC_BRIDGING_HEADER = "YogaSMCUtils/YogaSMC-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
@@ -1262,7 +1260,6 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = org.zhen.YogaSMCNCHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 			};

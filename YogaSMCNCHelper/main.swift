@@ -11,7 +11,6 @@ import AppKit
 class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         let mainBundleID = Bundle.main.bundleIdentifier!.replacingOccurrences(of: "Helper", with: "")
-
         let bundlePath = Bundle.main.bundlePath as NSString
 
         guard NSRunningApplication.runningApplications(withBundleIdentifier: mainBundleID).isEmpty else {
