@@ -21,6 +21,8 @@ jobs:
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
     - name: Download MacKernelSDK
       run: git clone --depth 1 https://github.com/acidanthera/MacKernelSDK.git
     - name: Download Lilu / VirtualSMC SDK (script from hieplpvip/AsusSMC (Acidanthera/Lilu))
@@ -82,9 +84,11 @@ jobs:
           build/Release/*.dSYM
           build/Release/LICENSE
   analyze:
-    runs-on: macos-latest
+    runs-on: macos-11.0
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
     - name: Download MacKernelSDK
       run: git clone --depth 1 https://github.com/acidanthera/MacKernelSDK.git
     - name: Download Lilu / VirtualSMC SDK (script from hieplpvip/AsusSMC (Acidanthera/Lilu))
