@@ -43,6 +43,13 @@ YogaSMCUserClient::getTargetAndMethodForIndex(IOService **target, UInt32 index)
             kIOUCScalarIStructI,
             1,
             kIOUCVariableStructureSize
+        },
+        {    // kYSMCUCReadECName
+            NULL,    // IOService * determined at runtime below
+            (IOMethod) &YogaSMCUserClient::readECName,
+            kIOUCStructIStructO,
+            4,
+            1
         }
     };
 
@@ -89,10 +96,10 @@ IOReturn YogaSMCUserClient::userClientClose(void) {
 }
 
 IOReturn YogaSMCUserClient::readEC(UInt64 offset, UInt8* output, IOByteCount *outputSizeP) {
-    if (!fProvider->isOpen(this))
+    if (!fProvider || !fProvider->isOpen(this))
         return kIOReturnNotReady;
 
-    if (!(fProvider && output && outputSizeP)) {
+    if (!(output && outputSizeP)) {
         AlwaysLog("%s invalid arguments", __FUNCTION__);
         return kIOReturnBadArgument;
     }
@@ -123,33 +130,52 @@ IOReturn YogaSMCUserClient::readEC(UInt64 offset, UInt8* output, IOByteCount *ou
         }
         result->release();
     }
-    DebugLog("%s", __FUNCTION__);
+
+    DebugLog("%s 0x%02llx @ 0x%02llx", __FUNCTION__, *outputSizeP, offset);
     return kIOReturnSuccess;
 }
 
-IOReturn YogaSMCUserClient::writeEC(UInt64 offset, UInt8* input, IOByteCount *inputSizeP) {
-    if (!fProvider->isOpen(this))
+IOReturn YogaSMCUserClient::writeEC(UInt64 offset, UInt8* input, IOByteCount inputSizeP) {
+    if (!fProvider || !fProvider->isOpen(this))
         return kIOReturnNotReady;
 
-    if (!(fProvider && input && inputSizeP)) {
+    if (!input || !inputSizeP) {
         AlwaysLog("%s invalid arguments", __FUNCTION__);
         return kIOReturnBadArgument;
     }
 
-    if (offset + *inputSizeP > 0x100) {
+    if (offset > 0x99) {
         AlwaysLog("%s invalid range", __FUNCTION__);
         return kIOReturnBadArgument;
     }
 
-    if (*inputSizeP != 1) {
+    if (inputSizeP != 1) {
         AlwaysLog("%s bulk write is not supported yet", __FUNCTION__);
-    } else {
-        if (fProvider->method_we1b(UInt32(offset), UInt32(input[0])) != kIOReturnSuccess) {
-            AlwaysLog("%s we1b failed", __FUNCTION__);
-            return kIOReturnIOError;
-        }
+        return kIOReturnUnsupported;
     }
-    DebugLog("%s", __FUNCTION__);
+
+    if (fProvider->method_we1b(UInt32(offset), input[0]) != kIOReturnSuccess) {
+        AlwaysLog("%s we1b failed", __FUNCTION__);
+        return kIOReturnIOError;
+    }
+
+    DebugLog("%s @ 0x%02llx", __FUNCTION__, offset);
+    return kIOReturnSuccess;
+}
+
+IOReturn YogaSMCUserClient::readECName(char* name, UInt8* output) {
+    if (!fProvider || !fProvider->isOpen(this))
+        return kIOReturnNotReady;
+
+    UInt32 result = 0;
+    if (fProvider->ec->evaluateInteger(name, &result) != kIOReturnSuccess) {
+        AlwaysLog("%s read %s failed", __FUNCTION__, name);
+        return kIOReturnIOError;
+    }
+
+    *output = result;
+
+    DebugLog("%s @ %s", __FUNCTION__, name);
     return kIOReturnSuccess;
 }
 

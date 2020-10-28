@@ -550,13 +550,13 @@ IOReturn YogaVPC::method_recb(UInt32 offset, UInt32 size, OSData **data) {
     return ret;
 }
 
-IOReturn YogaVPC::method_we1b(UInt32 offset, UInt32 value) {
+IOReturn YogaVPC::method_we1b(UInt32 offset, UInt8 value) {
     if (!(ECAccessCap & BIT(1)))
         return kIOReturnUnsupported;
 
     OSObject* params[2] = {
         OSNumber::withNumber(offset, 32),
-        OSNumber::withNumber(value, 32)
+        OSNumber::withNumber(value, 8)
     };
 
     IOReturn ret = ec->evaluateObject(writeECOneByte, nullptr, params, 2);

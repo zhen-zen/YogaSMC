@@ -269,7 +269,7 @@ protected:
      *
      *  @return kIOReturnSuccess on success
      */
-    IOReturn method_we1b(UInt32 offset, UInt32 value);
+    IOReturn method_we1b(UInt32 offset, UInt8 value);
 
     /**
      *  Read custom field
