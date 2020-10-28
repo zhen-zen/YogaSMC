@@ -613,7 +613,6 @@
 				6F08ACE024746B8B00681A63 /* Sources */,
 				6F08ACE124746B8B00681A63 /* Frameworks */,
 				6F2D45CA24C9491C00A75751 /* CopyFiles */,
-				6F8984A8254941BC0016FF59 /* Add Commit Hash */,
 			);
 			buildRules = (
 			);
@@ -685,7 +684,6 @@
 				6F88067724EB575F00ACD6C8 /* Headers */,
 				6F88068424EB575F00ACD6C8 /* Sources */,
 				6F88069024EB575F00ACD6C8 /* Frameworks */,
-				6F8984A7254941B60016FF59 /* Add Commit Hash */,
 			);
 			buildRules = (
 			);
@@ -823,44 +821,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "DESC=$(git --git-dir=\"${PROJECT_DIR}/.git\" --work-tree=\"${PROJECT_DIR}\" describe --always --dirty --tags)\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $DESC\" \"${TARGET_BUILD_DIR}/${EXECUTABLE_NAME}.app/Contents/Info.plist\"\n";
-		};
-		6F8984A7254941B60016FF59 /* Add Commit Hash */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Add Commit Hash";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "DESC=$(git --git-dir=\"${PROJECT_DIR}/.git\" --work-tree=\"${PROJECT_DIR}\" describe --always --dirty --tags)\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $DESC\" \"${TARGET_BUILD_DIR}/${EXECUTABLE_NAME}.kext/Contents/Info.plist\"\n";
-		};
-		6F8984A8254941BC0016FF59 /* Add Commit Hash */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Add Commit Hash";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "DESC=$(git --git-dir=\"${PROJECT_DIR}/.git\" --work-tree=\"${PROJECT_DIR}\" describe --always --dirty --tags)\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $DESC\" \"${TARGET_BUILD_DIR}/${EXECUTABLE_NAME}.kext/Contents/Info.plist\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
