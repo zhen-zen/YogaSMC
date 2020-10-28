@@ -43,9 +43,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadECName), nil, 0, &name, 4, nil, nil, &output, &outputSize) {
             appMenu.items[6].title = "HFSP: \(output[0])"
         }
-        input = 0x83
-        if kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadEC), &input, 1, nil, 0, nil, nil, &output, &outputSize),
-           outputSize == 1 {
+        name = "HFNI" // 0x83
+        if kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadECName), nil, 0, &name, 4, nil, nil, &output, &outputSize) {
             appMenu.items[7].title = "HFNI: \(output[0])"
         }
         input = 0x31
@@ -67,7 +66,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
 
-        if !sendNumber("CFSP", sender.integerValue == 8 ? 0x80 : sender.integerValue, conf.io_service) {
+        var addr : UInt64 = 0x2f // HFSP
+        var input : [UInt8] = [sender.intValue == 8 ? 0x80 : UInt8(sender.integerValue)]
+        if kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCWriteEC), &addr, 1, &input, 1, nil, nil, nil, nil) {
             os_log("Write Fan Speed failed!", type: .fault)
             showOSD("Write Fan Speed failed!")
         }
