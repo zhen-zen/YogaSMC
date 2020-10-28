@@ -86,7 +86,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: What's going wrong?
-      run: git describe --always --dirty --tags
+      run: git --version; git describe --always --dirty --tags
     - name: Download MacKernelSDK
       run: git clone --depth 1 https://github.com/acidanthera/MacKernelSDK.git
     - name: Download Lilu / VirtualSMC SDK (script from hieplpvip/AsusSMC (Acidanthera/Lilu))
