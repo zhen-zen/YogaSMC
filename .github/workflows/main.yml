@@ -85,6 +85,7 @@ jobs:
     runs-on: macos-11.0
     steps:
     - uses: actions/checkout@v2
+      fetch-depth: 0
     - name: What's going wrong?
       run: git --version; git describe --dirty --tags
     - name: Download MacKernelSDK
