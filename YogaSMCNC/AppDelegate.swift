@@ -27,10 +27,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         guard conf.connect != 0 else {
             return
         }
-        var input : UInt64 = 0x84
+        var addr : UInt64 = 0x84
         var outputSize = 2
         var output : [UInt8] = [0, 0]
-        if kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadEC), &input, 1, nil, 0, nil, nil, &output, &outputSize),
+        if kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadEC), &addr, 1, nil, 0, nil, nil, &output, &outputSize),
            outputSize == 2 {
             let vFanSpeed = Int32(output[0]) | Int32(output[1]) << 8
             appMenu.items[5].title = "Fan: \(vFanSpeed) rpm"
@@ -47,8 +47,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadECName), nil, 0, &name, 4, nil, nil, &output, &outputSize) {
             appMenu.items[7].title = "HFNI: \(output[0])"
         }
-        input = 0x31
-        if kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadEC), &input, 1, nil, 0, nil, nil, &output, &outputSize),
+        addr = 0x31
+        if kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadEC), &addr, 1, nil, 0, nil, nil, &output, &outputSize),
            outputSize == 1 {
             if ((output[0] & 0x1) != 0) {
                 showOSD("Second Fan!")
@@ -68,7 +68,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         var addr : UInt64 = 0x2f // HFSP
         var input : [UInt8] = [sender.intValue == 8 ? 0x80 : UInt8(sender.integerValue)]
-        if kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCWriteEC), &addr, 1, &input, 1, nil, nil, nil, nil) {
+        if kIOReturnSuccess != IOConnectCallMethod(conf.connect, UInt32(kYSMCUCWriteEC), &addr, 1, &input, 1, nil, nil, nil, nil) {
             os_log("Write Fan Speed failed!", type: .fault)
             showOSD("Write Fan Speed failed!")
         }
