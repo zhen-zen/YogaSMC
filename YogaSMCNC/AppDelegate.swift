@@ -20,41 +20,87 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var statusItem: NSStatusItem?
     @IBOutlet weak var appMenu: NSMenu!
     var hide = false
-    var isThink = false
     var text: NSTextField?
+
+    var isThink = false
+    var secondThinkFan = false
+    var ThinkFanSpeed = "HFSP" // 0x2f
+//    var ThinkFanStatus : UInt64  = 0x2f
+    var ThinkFanSelect : UInt64  = 0x31
+    var ThinkFanRPM : UInt64  = 0x84
 
     func updateThinkFan() {
         guard conf.connect != 0 else {
             return
         }
-        var addr : UInt64 = 0x84
+
         var outputSize = 2
         var output : [UInt8] = [0, 0]
-        if kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadEC), &addr, 1, nil, 0, nil, nil, &output, &outputSize),
-           outputSize == 2 {
-            let vFanSpeed = Int32(output[0]) | Int32(output[1]) << 8
-            appMenu.items[5].title = "Fan: \(vFanSpeed) rpm"
-        } else {
+        guard kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadEC), &ThinkFanRPM, 1, nil, 0, nil, nil, &output, &outputSize),
+           outputSize == 2 else {
             os_log("Failed to access EC", type: .error)
+            return
         }
+
+        appMenu.items[5].title = "Fan: \(Int32(output[0]) | Int32(output[1]) << 8) rpm"
+
         #if DEBUG
         outputSize = 1
-        var name = "HFSP" // 0x2f
-        if kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadECName), nil, 0, &name, 4, nil, nil, &output, &outputSize) {
+
+        if kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadECName), nil, 0, &ThinkFanSpeed, 4, nil, nil, &output, &outputSize) {
             appMenu.items[6].title = "HFSP: \(output[0])"
         }
-        name = "HFNI" // 0x83
+
+        var name = "HFNI" // 0x83
         if kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadECName), nil, 0, &name, 4, nil, nil, &output, &outputSize) {
             appMenu.items[7].title = "HFNI: \(output[0])"
         }
-        addr = 0x31
-        if kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadEC), &addr, 1, nil, 0, nil, nil, &output, &outputSize),
-           outputSize == 1 {
-            if ((output[0] & 0x1) != 0) {
-                showOSD("Second Fan!")
-                os_log("2nd fan reg: 0x%x", type: .info, output[0])
-            }
+
+        if !secondThinkFan {
+            return
         }
+
+        guard kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadEC), &ThinkFanSelect, 1, nil, 0, nil, nil, &output, &outputSize),
+           outputSize == 1 else {
+            os_log("Failed to read current fan", type: .error)
+            return
+        }
+        os_log("2nd fan reg: 0x%x", type: .info, output[0])
+
+        var input : [UInt8] = [];
+        if (output[0] & 0x1) != 0 {
+            input[0] = output[0] & 0xfe
+        } else {
+            input[0] = output[0] | 0x1
+        }
+
+        guard kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCWriteEC), &ThinkFanSelect, 1, &input, 1, nil, nil, nil, nil) else {
+            os_log("Failed to select second fan", type: .error)
+            secondThinkFan = false
+            return
+        }
+
+        outputSize = 2
+        if kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadEC), &ThinkFanRPM, 1, nil, 0, nil, nil, &output, &outputSize),
+           outputSize == 2 {
+            appMenu.items[8].title = "Fan2: \(Int32(output[0]) | Int32(output[1]) << 8) rpm"
+        } else {
+            os_log("Failed to access second fan", type: .error)
+            secondThinkFan = false
+        }
+
+        if (input[0] & 0x1) != 0 {
+            input[0] &= 0xfe
+        } else {
+            input[0] |= 0x1
+        }
+
+        guard kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCWriteEC), &ThinkFanSelect, 1, &input, 1, nil, nil, nil, nil) else {
+            os_log("Failed to select first fan", type: .error)
+            secondThinkFan = false
+            return
+        }
+
         #endif
     }
 
@@ -188,10 +234,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     appMenu.insertItem(withTitle: "Build: \(props["YogaSMC,Build"] as? NSString ?? "Unknown")", action: nil, keyEquivalent: "", at: 3)
                     appMenu.insertItem(withTitle: "Version: \(props["YogaSMC,Version"] as? NSString ?? "Unknown")", action: nil, keyEquivalent: "", at: 4)
                     if isThink {
+                        if defaults.object(forKey: "SecondThinkFan") != nil {
+                            defaults.setValue(false, forKey: "SecondThinkFan")
+                        } else {
+                            secondThinkFan = defaults.bool(forKey: "SecondThinkFan")
+                        }
                         appMenu.insertItem(withTitle: "Fan", action: nil, keyEquivalent: "", at: 5)
                         #if DEBUG
                         appMenu.insertItem(withTitle: "HFSP", action: nil, keyEquivalent: "", at: 6)
                         appMenu.insertItem(withTitle: "HFNI", action: nil, keyEquivalent: "", at: 7)
+                        if secondThinkFan {
+                            appMenu.insertItem(withTitle: "Fan2", action: nil, keyEquivalent: "", at: 8)
+                        }
+                        #endif
+                        updateThinkFan()
+                        #if DEBUG
                         let item = NSMenuItem()
                         let slider = NSSlider(value: 0, minValue: 1, maxValue: 8, target: nil, action: #selector(setThinkFan(_:)))
                         slider.numberOfTickMarks = 8
@@ -210,11 +267,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                         view.addSubview(text!)
                         item.view = view
                         appMenu.insertItem(item, at: 8)
-                        #endif
-                        updateThinkFan()
                         if appMenu.items[7].title == "HFNI: 7" {
                             os_log("Might be auto mode at startup", type: .info)
                         }
+                        #endif
                         updateMuteStatus()
                         NotificationCenter.default.addObserver(self, selector: #selector(updateMuteStatus), name: NSWorkspace.didWakeNotification, object: nil)
                     }
