@@ -82,6 +82,7 @@ enum tpacpi_hkey_event_t : UInt32 {
     TP_HKEY_EV_THM_CSM_COMPLETED    = 0x6032, /* windows; thermal control set
                            * command completed. Related to
                            * AML DYTC */
+    TP_HKEY_EV_BACKLIGHT_CHANGED     = 0x6050, /* backlight changed */
     TP_HKEY_EV_LID_STATUS_CHANGED    = 0x60D0, /* lid status changed */
     TP_HKEY_EV_THM_TRANSFM_CHANGED   = 0x60F0, /* windows; thermal transformation
                            * changed. Related to AML GMTS */

@@ -100,5 +100,6 @@ let ThinkEvents : Dictionary<UInt32, Dictionary<UInt32, eventDesc>> = [
                                     1: eventDesc("Keyboard Enabled", .Keyboard)], // 0x1315
     TP_HKEY_EV_THM_TABLE_CHANGED.rawValue : [0: eventDesc("Thermal Table Change", display: false)], // 0x6030
     TP_HKEY_EV_AC_CHANGED.rawValue: [0: eventDesc("AC Status Change", display: false)], // 0x6040
+    TP_HKEY_EV_BACKLIGHT_CHANGED.rawValue : [0: eventDesc("Backlight Changed", display: false)], // 0x6050
     TP_HKEY_EV_KEY_FN_ESC.rawValue : [0: eventDesc("FnLock", .FunctionKey)], // 0x6060
 ]
