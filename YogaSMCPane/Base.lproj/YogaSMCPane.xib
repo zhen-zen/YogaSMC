@@ -42,6 +42,7 @@
                 <outlet property="vMfgDate" destination="q5f-L2-yxr" id="WcY-ib-6kM"/>
                 <outlet property="vPowerLEDSlider" destination="waU-W1-TYS" id="7Wx-IJ-18g"/>
                 <outlet property="vRapidChargeMode" destination="QxV-Zx-1xy" id="QQp-dH-Dad"/>
+                <outlet property="vSecondFan" destination="fz3-OS-Dwq" id="pge-jF-NeS"/>
                 <outlet property="vStandbyLEDSlider" destination="96M-Na-T3c" id="kka-T4-nLV"/>
                 <outlet property="vThinkDotSlider" destination="IMC-QI-01L" id="Jhh-3P-USI"/>
                 <outlet property="vVersion" destination="4hU-9e-sdI" id="Lpw-hX-Y1m"/>
@@ -852,16 +853,16 @@
                                             <rect key="frame" x="495" y="215" width="110" height="88"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="PZs-Dd-S3T">
-                                                    <rect key="frame" x="-2" y="66" width="102" height="22"/>
+                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="PZs-Dd-S3T">
+                                                    <rect key="frame" x="-2" y="72" width="102" height="16"/>
                                                     <textFieldCell key="cell" lineBreakMode="clipping" title="LED Automation" id="STD-Mc-vQP">
                                                         <font key="font" metaFont="system"/>
                                                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                     </textFieldCell>
                                                 </textField>
-                                                <button verticalHuggingPriority="750" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="rQA-kz-210">
-                                                    <rect key="frame" x="-2" y="42" width="76" height="18"/>
+                                                <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="rQA-kz-210">
+                                                    <rect key="frame" x="-2" y="47" width="80" height="18"/>
                                                     <buttonCell key="cell" type="check" title="Indicator" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="ZwY-an-cJo">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" metaFont="system"/>
@@ -870,8 +871,8 @@
                                                         <action selector="autoBacklightSet:" target="-2" id="56K-eW-8zC"/>
                                                     </connections>
                                                 </button>
-                                                <button verticalHuggingPriority="750" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="EC3-Nq-KoI">
-                                                    <rect key="frame" x="-2" y="20" width="53" height="18"/>
+                                                <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="EC3-Nq-KoI">
+                                                    <rect key="frame" x="-2" y="23" width="57" height="18"/>
                                                     <buttonCell key="cell" type="check" title="Mute" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="C11-DF-ZwU">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" metaFont="system"/>
@@ -880,8 +881,8 @@
                                                         <action selector="autoBacklightSet:" target="-2" id="v3m-xz-oiP"/>
                                                     </connections>
                                                 </button>
-                                                <button verticalHuggingPriority="750" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="n3n-Iq-zXz">
-                                                    <rect key="frame" x="-2" y="-2" width="75" height="18"/>
+                                                <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="n3n-Iq-zXz">
+                                                    <rect key="frame" x="-2" y="-1" width="79" height="18"/>
                                                     <buttonCell key="cell" type="check" title="MicMute" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="t1g-Vf-YH6">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" metaFont="system"/>
@@ -957,6 +958,17 @@
                                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
                                         </textField>
+                                        <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="fz3-OS-Dwq">
+                                            <rect key="frame" x="294" y="172" width="94" height="18"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <buttonCell key="cell" type="check" title="SecondFan" bezelStyle="regularSquare" imagePosition="left" enabled="NO" inset="2" id="tlt-2I-JNA">
+                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                            <connections>
+                                                <action selector="vSecondFanSet:" target="-2" id="pIe-wt-kzK"/>
+                                            </connections>
+                                        </button>
                                     </subviews>
                                 </view>
                             </tabViewItem>

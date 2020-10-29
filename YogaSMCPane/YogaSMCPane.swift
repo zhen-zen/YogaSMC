@@ -157,7 +157,11 @@ class YogaSMCPane : NSPreferencePane {
     }
 
     @IBOutlet weak var vFanSpeed: NSTextField!
-    
+    @IBOutlet weak var vSecondFan: NSButton!
+    @IBAction func vSecondFanSet(_ sender: NSButton) {
+        defaults.setValue((vSecondFan.state == .on), forKey: "SecondThinkFan")
+    }
+
     // Main
 
     @IBOutlet weak var TabView: NSTabView!
@@ -381,6 +385,12 @@ class YogaSMCPane : NSPreferencePane {
             }
         }
         updateThinkFan()
+        #if DEBUG
+        vSecondFan.isEnabled = true
+        if defaults.object(forKey: "SecondThinkFan") != nil {
+            vSecondFan.state = defaults.bool(forKey: "SecondThinkFan") ? .on : .off
+        }
+        #endif
     }
 
     override func awakeFromNib() {
