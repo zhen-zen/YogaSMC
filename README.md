@@ -80,6 +80,8 @@ The preference pane provides a graphical user interface for basic information an
 ## YogaSMCNC
 The notification application receives EC events and displays them on OSD. Corresonding actions will also be triggered for function keys. The configuration can be customized at `~/Library/Preferences/org.zhen.YogaSMC.plist` after closing the app.  
 
+For new events, feel free to submit a PR like [#40](https://github.com/zhen-zen/YogaSMC/pull/40).
+
 ## Installation
 The kext should work out-of-the-box. If you have modified `_QXX` methods before, please remove the patches.
 
