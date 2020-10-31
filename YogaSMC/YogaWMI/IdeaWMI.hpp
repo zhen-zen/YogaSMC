@@ -37,7 +37,6 @@ class IdeaWMI : public YogaWMI
     OSDeclareDefaultStructors(IdeaWMI)
 
 private:
-    inline const char *getVPCName() APPLE_KEXT_OVERRIDE {return PnpDeviceIdVPCIdea;};
     inline virtual bool PMSupport() APPLE_KEXT_OVERRIDE {return true;};
 
     bool isYMC {false};
@@ -63,6 +62,7 @@ private:
 
 public:
     void stop(IOService *provider) APPLE_KEXT_OVERRIDE;
+    static IdeaWMI *withDevice(IOService *provider);
 
     IOReturn setPowerState(unsigned long powerState, IOService * whatDevice) APPLE_KEXT_OVERRIDE;
 };

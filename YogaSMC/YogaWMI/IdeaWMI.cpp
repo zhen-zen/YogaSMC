@@ -184,3 +184,19 @@ void IdeaWMI::checkEvent(const char *cname, UInt32 id) {
             break;
     }
 }
+
+IdeaWMI* IdeaWMI::withDevice(IOService *provider) {
+    IdeaWMI* dev = OSTypeAlloc(IdeaWMI);
+
+    OSDictionary *dictionary = OSDictionary::withCapacity(1);
+
+    dev->name = provider->getName();
+
+    if (!dev->init(dictionary) ||
+        !dev->attach(provider)) {
+        OSSafeReleaseNULL(dev);
+    }
+
+    dictionary->release();
+    return dev;
+}

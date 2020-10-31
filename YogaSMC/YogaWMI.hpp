@@ -29,13 +29,6 @@ protected:
     void getNotifyID(OSString *key);
 
     /**
-     *  Get pnp id of VPC device
-     *
-     *  @return nullptr if not specified
-     */
-    inline virtual const char *getVPCName() {return nullptr;};
-
-    /**
      *  Vendor specific WMI analyze
      */
     inline virtual void processWMI() {};

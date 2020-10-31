@@ -14,15 +14,13 @@
 #define kIOACPIMessageReserved 0x80
 
 #define PnpDeviceIdEC       "PNP0C09"
-#define PnpDeviceIdVPCIdea  "VPC2004"
-#define PnpDeviceIdVPCThink "LEN0268"
+#define PnpDeviceIdWMI      "PNP0C14"
 
-#define kIOPMPowerOff              0
 #define kIOPMNumberPowerStates     2
 
 static IOPMPowerState IOPMPowerStates[kIOPMNumberPowerStates] = {
-    {1, kIOPMPowerOff, kIOPMPowerOff, kIOPMPowerOff, 0, 0, 0, 0, 0, 0, 0, 0},
-    {1, kIOPMPowerOn, kIOPMPowerOn, kIOPMPowerOn, 0, 0, 0, 0, 0, 0, 0, 0}
+    {1, kIOServicePowerCapabilityOff, kIOServicePowerCapabilityOff, kIOServicePowerCapabilityOff, 0, 0, 0, 0, 0, 0, 0, 0},
+    {1, kIOServicePowerCapabilityOn, kIOServicePowerCapabilityOn, kIOServicePowerCapabilityOn, 0, 0, 0, 0, 0, 0, 0, 0}
 };
 
 #define kDeliverNotifications   "RM,deliverNotifications"

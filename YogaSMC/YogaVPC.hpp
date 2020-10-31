@@ -124,6 +124,19 @@ protected:
      *  VPC UserClient
      */
     YogaSMCUserClient *client {nullptr};
+
+    OSOrderedSet *WMICollection {nullptr};
+    OSOrderedSet *WMIProvCollection {nullptr};
+
+    /**
+     *  Initialize WMI
+     *
+     *  @param provider WMI provider
+     *
+     *  @return Initialized YogaWMI instance
+     */
+    inline virtual IOService* initWMI(IOACPIPlatformDevice *provider) {return nullptr;};
+
 #ifndef ALTER
     /**
      *  SMC service
@@ -132,10 +145,11 @@ protected:
 
     /**
      *  Initialize SMC
-     *
-     *  @return true if success
      */
-    inline virtual void initSMC() {smc = YogaSMC::withDevice(this, ec); smc->conf = OSDynamicCast(OSDictionary, getProperty("Sensors"));};
+    inline virtual void initSMC() {
+        smc = YogaSMC::withDevice(this, ec);
+        smc->conf = OSDynamicCast(OSDictionary, getProperty("Sensors"));
+    };
 #endif
     /**
      *  Initialize VPC EC, get config and update status

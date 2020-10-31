@@ -28,6 +28,37 @@ IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
 
     if (!ec && !findPNP(PnpDeviceIdEC, &ec))
         return nullptr;
+
+    auto iterator = IORegistryIterator::iterateOver(gIOACPIPlane, kIORegistryIterateRecursively);
+    if (!iterator) {
+        AlwaysLog("findWMI failed");
+    } else {
+        auto pnp = OSString::withCString(PnpDeviceIdWMI);
+        IOACPIPlatformDevice *dev;
+        WMICollection = OSOrderedSet::withCapacity(1);
+        WMIProvCollection = OSOrderedSet::withCapacity(1);
+
+        while (auto entry = iterator->getNextObject()) {
+            if (entry->compareName(pnp) &&
+                (dev = OSDynamicCast(IOACPIPlatformDevice, entry))) {
+                if (strncmp(dev->getName(), "WTBT", sizeof("WTBT")) == 0) {
+                    DebugLog("Skip Thunderbolt interface");
+                    continue;
+                }
+                if (auto wmi = initWMI(dev)) {
+                    DebugLog("WMI available at %s", dev->getName());
+                    WMICollection->setObject(wmi);
+                    WMIProvCollection->setObject(dev);
+                    wmi->release();
+                } else {
+                    DebugLog("WMI init failed at %s", dev->getName());
+                }
+            }
+        }
+        iterator->release();
+        pnp->release();
+    }
+
 #ifndef ALTER
     initSMC();
 #endif
@@ -43,6 +74,19 @@ bool YogaVPC::start(IOService *provider) {
         return false;
 
     updateAll();
+
+    if (WMICollection) {
+        for (int i=WMICollection->getCount()-1; i >= 0; i--) {
+            IOService *wmi = OSDynamicCast(IOService, WMICollection->getObject(i));
+            IOService *prov = OSDynamicCast(IOService, WMIProvCollection->getObject(i));
+            if (!wmi->start(prov)) {
+                AlwaysLog("Failed to start WMI instance on %s", prov->getName());
+                wmi->detach(prov);
+                WMICollection->removeObject(wmi);
+                WMIProvCollection->removeObject(prov);
+            }
+        }
+    }
 #ifndef ALTER
     smc->start(this);
 #endif
@@ -102,14 +146,24 @@ bool YogaVPC::exitVPC() {
 void YogaVPC::stop(IOService *provider) {
     DebugLog("Stopping");
     exitVPC();
+
+    if (WMICollection) {
+        for (int i= WMICollection->getCount()-1; i >= 0; i--) {
+            IOService *wmi = OSDynamicCast(IOService, WMICollection->getObject(i));
+            IOService *prov = OSDynamicCast(IOService, WMIProvCollection->getObject(i));
+            wmi->stop(prov);
+            wmi->detach(prov);
+        }
+        WMICollection->release();
+        WMIProvCollection->release();
+    }
+
 #ifndef ALTER
     if (smc) {
         smc->stop(this);
         smc->detach(this);
     }
 #endif
-    terminate();
-    detach(provider);
     super::stop(provider);
 }
 

@@ -11,6 +11,7 @@
 #define IdeaVPC_hpp
 
 #include "YogaVPC.hpp"
+#include "IdeaWMI.hpp"
 #ifndef ALTER
 #include "IdeaSMC.hpp"
 #endif
@@ -143,6 +144,8 @@ private:
      *  @return true if success
      */
     bool initEC();
+
+    inline virtual IOService* initWMI(IOACPIPlatformDevice *provider) APPLE_KEXT_OVERRIDE {return IdeaWMI::withDevice(provider);};
 
 #ifndef ALTER
     /**

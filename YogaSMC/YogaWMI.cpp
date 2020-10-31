@@ -28,13 +28,6 @@ IOService *YogaWMI::probe(IOService *provider, SInt32 *score)
 
     DebugLog("Probing");
 
-    IOACPIPlatformDevice *vpc {nullptr};
-
-    if(getVPCName() && !findPNP(getVPCName(), &vpc)) {
-        AlwaysLog("Failed to find VPC");
-        return nullptr;
-    }
-
     return this;
 }
 
