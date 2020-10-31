@@ -28,6 +28,10 @@ let siriAS = """
                   end tell
                 end tell
              """
+let reloadAS = """
+                  tell application "YogaSMCNC" to quit
+                  tell application "YogaSMCNC" to activate
+               """
 
 let getAudioMutedAS = "output muted of (get volume settings)"
 let setAudioMuteAS = "set volume with output muted"
@@ -47,7 +51,7 @@ func scriptHelper(_ source: String, _ name: String) -> NSAppleEventDescriptor? {
             return ret
         }
     }
-    os_log("%s: failed to execute script", type: .error)
+    os_log("%s: failed to execute script", type: .error, name)
     return nil
 }
 

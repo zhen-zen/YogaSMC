@@ -191,8 +191,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 NSApp.terminate(nil)
                 return
             }
-            
-            button.title = "🎃"
+            if let title = defaults.string(forKey: "Title") {
+                button.title = title
+                button.toolTip = defaults.string(forKey: "ToolTip")
+            } else {
+                setHolidayIcon(button)
+            }
             button.target = self
             button.action = #selector(displayMenu)
         }
@@ -351,6 +355,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             os_log("First launch", type: .info)
             defaults.setValue(false, forKey: "HideIcon")
             defaults.setValue(false, forKey: "StartAtLogin")
+            defaults.setValue("⎇", forKey: "Title")
         }
 
         hide = defaults.bool(forKey: "HideIcon")

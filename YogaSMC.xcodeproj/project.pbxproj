@@ -83,6 +83,9 @@
 		6F88068C24EB575F00ACD6C8 /* YogaVPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F96A30A24B93D25006562EC /* YogaVPC.cpp */; };
 		6F88068D24EB575F00ACD6C8 /* ThinkWMI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F8674CB24A876E000DC2FDF /* ThinkWMI.cpp */; };
 		6F88068E24EB575F00ACD6C8 /* bmfparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6FD2BB8B247B37A20018EA36 /* bmfparser.cpp */; };
+		6F8AF130254DEDEE00438EC8 /* DateHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F8AF12F254DEDEE00438EC8 /* DateHelper.swift */; };
+		6F8AF13B254DF79100438EC8 /* ScriptHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F8B1F70253821C3003DD8A8 /* ScriptHelper.swift */; };
+		6F8AF141254DF89600438EC8 /* SystemPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F8B1FB92538C53A003DD8A8 /* SystemPreferences.swift */; };
 		6F8B1F252538083A003DD8A8 /* PropertyHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F8B1F242538083A003DD8A8 /* PropertyHelper.swift */; };
 		6F8B1F262538083A003DD8A8 /* PropertyHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F8B1F242538083A003DD8A8 /* PropertyHelper.swift */; };
 		6F8B1F2D253808DC003DD8A8 /* OSDHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F8B1F2C253808DC003DD8A8 /* OSDHelper.swift */; };
@@ -238,6 +241,7 @@
 		6F87BF7F24D26A5D00D64375 /* YogaSMC.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = YogaSMC.hpp; sourceTree = "<group>"; };
 		6F88069624EB575F00ACD6C8 /* YogaSMCAlter.kext */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = YogaSMCAlter.kext; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F88069724EB575F00ACD6C8 /* Alter-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Alter-Info.plist"; sourceTree = "<group>"; };
+		6F8AF12F254DEDEE00438EC8 /* DateHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateHelper.swift; sourceTree = "<group>"; };
 		6F8B1F242538083A003DD8A8 /* PropertyHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PropertyHelper.swift; sourceTree = "<group>"; };
 		6F8B1F2C253808DC003DD8A8 /* OSDHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSDHelper.swift; sourceTree = "<group>"; };
 		6F8B1F70253821C3003DD8A8 /* ScriptHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptHelper.swift; sourceTree = "<group>"; };
@@ -511,6 +515,7 @@
 		6F8B1F1925380748003DD8A8 /* YogaSMCUtils */ = {
 			isa = PBXGroup;
 			children = (
+				6F8AF12F254DEDEE00438EC8 /* DateHelper.swift */,
 				6F8B1F2C253808DC003DD8A8 /* OSDHelper.swift */,
 				6F8B1F242538083A003DD8A8 /* PropertyHelper.swift */,
 				6F8611D4253AB59F008FB857 /* RFHelper.swift */,
@@ -852,6 +857,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6F8B1F2E253808DC003DD8A8 /* OSDHelper.swift in Sources */,
+				6F8AF130254DEDEE00438EC8 /* DateHelper.swift in Sources */,
 				6F8B1F262538083A003DD8A8 /* PropertyHelper.swift in Sources */,
 				6F8611D5253AB59F008FB857 /* RFHelper.swift in Sources */,
 				6F8B1F71253821C3003DD8A8 /* ScriptHelper.swift in Sources */,
@@ -867,6 +873,8 @@
 			files = (
 				6F8B1F2D253808DC003DD8A8 /* OSDHelper.swift in Sources */,
 				6F8B1F252538083A003DD8A8 /* PropertyHelper.swift in Sources */,
+				6F8AF13B254DF79100438EC8 /* ScriptHelper.swift in Sources */,
+				6F8AF141254DF89600438EC8 /* SystemPreferences.swift in Sources */,
 				6F1C70A725147410007D1DFC /* YogaSMCPane.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

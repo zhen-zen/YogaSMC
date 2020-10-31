@@ -27,21 +27,24 @@ class YogaSMCPane : NSPreferencePane {
     @IBOutlet weak var vECRead: NSTextField!
     @IBOutlet weak var vHideMenubarIcon: NSButton!
     @IBAction func toggleMenubarIcon(_ sender: NSButton) {
-        defaults.setValue((vHideMenubarIcon.state == .on), forKey: "HideIcon")
-        let source = """
-                            tell application "YogaSMCNC"
-                                quit
-                            end tell
-                            tell application "YogaSMCNC" to activate
-                     """
-        if let script = NSAppleScript(source: source) {
-            var error: NSDictionary?
-            script.executeAndReturnError(&error)
-            if error != nil {
-                os_log("Failed to quit YogaSMC", type: .error)
-            }
+        if (vHideMenubarIcon.state == .on) {
+            defaults.setValue(true, forKey: "HideIcon")
+            vMenubarIcon.isEnabled = false
+        } else {
+            defaults.setValue(false, forKey: "HideIcon")
+            vMenubarIcon.isEnabled = true
         }
-
+        _ = scriptHelper(reloadAS, "Reload YogaSMC")
+    }
+    
+    @IBOutlet weak var vMenubarIcon: NSTextField!
+    @IBAction func setMenubarIcon(_ sender: NSTextField) {
+        if vMenubarIcon.stringValue == "" {
+            defaults.removeObject(forKey: "Title")
+        } else {
+            defaults.setValue(vMenubarIcon.stringValue ?? "⎇", forKey: "Title")
+        }
+        _ = scriptHelper(reloadAS, "Reload YogaSMC")
     }
     
     // Idea
@@ -472,7 +475,13 @@ class YogaSMCPane : NSPreferencePane {
 
         if defaults.object(forKey: "HideIcon") != nil {
             vHideMenubarIcon.isEnabled = true
-            vHideMenubarIcon.state = defaults.bool(forKey: "HideIcon") ? .on : .off
+            if defaults.bool(forKey: "HideIcon") {
+                vHideMenubarIcon.state = .on
+            } else {
+                vHideMenubarIcon.state = .off
+                vMenubarIcon.isEnabled = true
+            }
+            vMenubarIcon.stringValue = defaults.string(forKey: "Title") ?? ""
         }
     }
 }
