@@ -6,6 +6,7 @@
 //  Copyright © 2020 Zhen. All rights reserved.
 //
 
+#include <Headers/kern_version.hpp>
 #include "YogaBaseService.hpp"
 
 OSDefineMetaClassAndStructors(YogaBaseService, IOService)
@@ -23,10 +24,6 @@ bool YogaBaseService::init(OSDictionary *dictionary)
 
     _notificationServices = OSSet::withCapacity(1);
 
-    extern kmod_info_t kmod_info;
-    setProperty("YogaSMC,Build", __DATE__);
-    setProperty("YogaSMC,Version", kmod_info.version);
-
     return true;
 }
 
@@ -43,6 +40,8 @@ bool YogaBaseService::start(IOService *provider)
 {
     if (!super::start(provider))
         return false;
+
+    setProperty("VersionInfo", kextVersion);
 
     workLoop = IOWorkLoop::workLoop();
     commandGate = IOCommandGate::commandGate(this);

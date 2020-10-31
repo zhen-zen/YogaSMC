@@ -23,7 +23,6 @@ class YogaSMCPane : NSPreferencePane {
     var thinkBatteryNumber = 0
 
     @IBOutlet weak var vVersion: NSTextField!
-    @IBOutlet weak var vBuild: NSTextField!
     @IBOutlet weak var vClass: NSTextField!
     @IBOutlet weak var vECRead: NSTextField!
     @IBOutlet weak var vHideMenubarIcon: NSButton!
@@ -399,25 +398,16 @@ class YogaSMCPane : NSPreferencePane {
         }
 
         var CFProps : Unmanaged<CFMutableDictionary>? = nil
-        guard (kIOReturnSuccess == IORegistryEntryCreateCFProperties(io_service, &CFProps, kCFAllocatorDefault, 0) && CFProps != nil) else {
+        guard (kIOReturnSuccess == IORegistryEntryCreateCFProperties(io_service, &CFProps, kCFAllocatorDefault, 0) && CFProps != nil),
+              let props = CFProps?.takeRetainedValue() as NSDictionary? else {
+            os_log("Unable to acquire driver properties!", type: .fault)
             return
         }
 
-        guard let props = CFProps?.takeRetainedValue() as NSDictionary? else {
-            return
-        }
-
-        if let val = props["YogaSMC,Build"] as? NSString {
-            vBuild.stringValue = val as String
-        } else {
-            vBuild.stringValue = "Unknown"
-            return
-        }
-
-        if let val = props["YogaSMC,Version"] as? NSString {
+        if let val = props["VersionInfo"] as? NSString {
             vVersion.stringValue = val as String
         } else {
-            vVersion.stringValue = "Unknown"
+            os_log("Unable to identify driver version!", type: .fault)
             return
         }
 

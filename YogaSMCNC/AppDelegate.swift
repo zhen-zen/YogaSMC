@@ -42,18 +42,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
 
-        appMenu.items[5].title = "Fan: \(Int32(output[0]) | Int32(output[1]) << 8) rpm"
+        appMenu.items[4].title = "Fan: \(Int32(output[0]) | Int32(output[1]) << 8) rpm"
 
         #if DEBUG
         outputSize = 1
 
         if kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadECName), nil, 0, &ThinkFanSpeed, 4, nil, nil, &output, &outputSize) {
-            appMenu.items[6].title = "HFSP: \(output[0])"
+            appMenu.items[5].title = "HFSP: \(output[0])"
         }
 
         var name = "HFNI" // 0x83
         if kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadECName), nil, 0, &name, 4, nil, nil, &output, &outputSize) {
-            appMenu.items[7].title = "HFNI: \(output[0])"
+            appMenu.items[6].title = "HFNI: \(output[0])"
         }
 
         if !secondThinkFan {
@@ -83,7 +83,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         outputSize = 2
         if kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadEC), &ThinkFanRPM, 1, nil, 0, nil, nil, &output, &outputSize),
            outputSize == 2 {
-            appMenu.items[8].title = "Fan2: \(Int32(output[0]) | Int32(output[1]) << 8) rpm"
+            appMenu.items[7].title = "Fan2: \(Int32(output[0]) | Int32(output[1]) << 8) rpm"
         } else {
             os_log("Failed to access second fan", type: .error)
             secondThinkFan = false
@@ -231,20 +231,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 if !hide {
                     appMenu.insertItem(NSMenuItem.separator(), at: 1)
                     appMenu.insertItem(withTitle: "Class: \(IOClass)", action: nil, keyEquivalent: "", at: 2)
-                    appMenu.insertItem(withTitle: "Build: \(props["YogaSMC,Build"] as? NSString ?? "Unknown")", action: nil, keyEquivalent: "", at: 3)
-                    appMenu.insertItem(withTitle: "Version: \(props["YogaSMC,Version"] as? NSString ?? "Unknown")", action: nil, keyEquivalent: "", at: 4)
+                    appMenu.insertItem(withTitle: "\(props["VersionInfo"] as? NSString ?? "Unknown Version")", action: nil, keyEquivalent: "", at: 3)
                     if isThink {
                         if defaults.object(forKey: "SecondThinkFan") != nil {
                             defaults.setValue(false, forKey: "SecondThinkFan")
                         } else {
                             secondThinkFan = defaults.bool(forKey: "SecondThinkFan")
                         }
-                        appMenu.insertItem(withTitle: "Fan", action: nil, keyEquivalent: "", at: 5)
+                        appMenu.insertItem(withTitle: "Fan", action: nil, keyEquivalent: "", at: 4)
                         #if DEBUG
-                        appMenu.insertItem(withTitle: "HFSP", action: nil, keyEquivalent: "", at: 6)
-                        appMenu.insertItem(withTitle: "HFNI", action: nil, keyEquivalent: "", at: 7)
+                        appMenu.insertItem(withTitle: "HFSP", action: nil, keyEquivalent: "", at: 5)
+                        appMenu.insertItem(withTitle: "HFNI", action: nil, keyEquivalent: "", at: 6)
                         if secondThinkFan {
-                            appMenu.insertItem(withTitle: "Fan2", action: nil, keyEquivalent: "", at: 8)
+                            appMenu.insertItem(withTitle: "Fan2", action: nil, keyEquivalent: "", at: 7)
                         }
                         #endif
                         updateThinkFan()
@@ -267,7 +266,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                         view.addSubview(text!)
                         item.view = view
                         appMenu.insertItem(item, at: 8)
-                        if appMenu.items[7].title == "HFNI: 7" {
+                        if appMenu.items[6].title == "HFNI: 7" {
                             os_log("Might be auto mode at startup", type: .info)
                         }
                         #endif
