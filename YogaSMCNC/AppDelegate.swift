@@ -192,7 +192,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 return
             }
             
-            button.title = "⎇"
+            button.title = "🎃"
             button.target = self
             button.action = #selector(displayMenu)
         }
