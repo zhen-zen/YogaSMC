@@ -140,6 +140,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         prefpaneHelper()
     }
 
+    @objc func midnightTimer(sender: Timer) {
+        setHolidayIcon(sender.userInfo as! NSStatusBarButton)
+        let calendar = Calendar.current
+        let midnight = calendar.startOfDay(for: Date())
+        sender.fireDate = calendar.date(byAdding: .day, value: 1, to: midnight)!
+        os_log("Timer sheduled %s", type: .info, sender.fireDate.description(with: Locale.current))
+    }
+
     // from https://medium.com/@hoishing/menu-bar-apps-f2d270150660
     @objc func displayMenu() {
         guard let button = statusItem?.button else { return }
@@ -195,7 +203,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 button.title = title
                 button.toolTip = defaults.string(forKey: "ToolTip")
             } else {
-                setHolidayIcon(button)
+                _ = Timer.scheduledTimer(timeInterval: 0, target: self, selector: #selector(midnightTimer(sender:)), userInfo: button, repeats: true)
             }
             button.target = self
             button.action = #selector(displayMenu)
