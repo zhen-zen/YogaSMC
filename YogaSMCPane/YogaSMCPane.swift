@@ -40,9 +40,15 @@ class YogaSMCPane : NSPreferencePane {
     @IBOutlet weak var vMenubarIcon: NSTextField!
     @IBAction func setMenubarIcon(_ sender: NSTextField) {
         if vMenubarIcon.stringValue == "" {
+            if defaults.value(forKey: "Title") == nil {
+                return
+            }
             defaults.removeObject(forKey: "Title")
         } else {
-            defaults.setValue(vMenubarIcon.stringValue ?? "⎇", forKey: "Title")
+            if defaults.string(forKey: "Title") == vMenubarIcon.stringValue {
+                return
+            }
+            defaults.setValue(vMenubarIcon.stringValue, forKey: "Title")
         }
         _ = scriptHelper(reloadAS, "Reload YogaSMC")
     }
