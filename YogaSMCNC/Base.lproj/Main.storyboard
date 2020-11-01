@@ -15,7 +15,7 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="YogaSMCNC" systemMenu="apple" id="uQy-DD-JDr">
                                     <items>
-                                        <menuItem title="About YogaSMCNC" enabled="NO" id="HGG-QI-ARu">
+                                        <menuItem title="About YogaSMCNC" id="HGG-QI-ARu">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="orderFrontStandardAboutPanel:" target="Ady-hI-5gd" id="TtV-RG-vdW"/>

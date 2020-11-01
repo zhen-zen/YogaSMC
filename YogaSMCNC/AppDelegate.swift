@@ -151,8 +151,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // from https://medium.com/@hoishing/menu-bar-apps-f2d270150660
     @objc func displayMenu() {
         guard let button = statusItem?.button else { return }
-        let x = button.frame.origin.x
-        let y = button.frame.origin.y - 5
+        let x = button.frame.origin.x - 3
+        let y = button.frame.origin.y - 7
         let location = button.superview!.convert(NSMakePoint(x, y), to: nil)
         let w = button.window!
         let event = NSEvent.mouseEvent(with: .leftMouseUp,
@@ -164,10 +164,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                                        eventNumber: 0,
                                        clickCount: 1,
                                        pressure: 0)!
-        NSMenu.popUpContextMenu(appMenu, with: event, for: button)
         if isThink {
             updateThinkFan()
         }
+        NSMenu.popUpContextMenu(appMenu, with: event, for: button)
     }
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
