@@ -10,7 +10,7 @@ import Foundation
 import AppKit
 
 // based on https://stackoverflow.com/questions/4311930/list-of-all-american-holidays-as-nsdates
-func setHolidayIcon(_ button: NSStatusBarButton) {
+func setHolidayIcon(_ button: NSStatusItem) {
     let components = Calendar.current.dateComponents([.year, .month, .day, .weekday, .weekdayOrdinal], from: Date())
     guard let year = components.year,
         let month = components.month,

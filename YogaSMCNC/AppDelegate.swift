@@ -129,46 +129,42 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    // MARK: - Menu
+
+    @IBAction func openAboutPanel(_ sender: NSMenuItem) {
+        NSApp.activate(ignoringOtherApps: true)
+        NSApp.orderFrontStandardAboutPanel(sender)
+    }
+
     @objc func toggleStartAtLogin(_ sender: NSMenuItem) {
-        if setStartAtLogin(enabled: sender.state == .off) {
+        let identifier = "\(Bundle.main.bundleIdentifier!)Helper" as CFString
+        if SMLoginItemSetEnabled(identifier, sender.state == .off) {
             sender.state = (sender.state == .on) ? .off : .on
             defaults.setValue((sender.state == .on), forKey: "StartAtLogin")
+        } else {
+            os_log("Toggle start at login failed", type: .error)
         }
     }
 
     @objc func openPrefpane() {
         prefpaneHelper()
     }
-
+    
     @objc func midnightTimer(sender: Timer) {
-        setHolidayIcon(sender.userInfo as! NSStatusBarButton)
+        setHolidayIcon(statusItem!)
         let calendar = Calendar.current
         let midnight = calendar.startOfDay(for: Date())
         sender.fireDate = calendar.date(byAdding: .day, value: 1, to: midnight)!
-        os_log("Timer sheduled %s", type: .info, sender.fireDate.description(with: Locale.current))
+        os_log("Timer sheduled at %s", type: .info, sender.fireDate.description(with: Locale.current))
     }
 
-    // from https://medium.com/@hoishing/menu-bar-apps-f2d270150660
-    @objc func displayMenu() {
-        guard let button = statusItem?.button else { return }
-        let x = button.frame.origin.x - 3
-        let y = button.frame.origin.y - 7
-        let location = button.superview!.convert(NSMakePoint(x, y), to: nil)
-        let w = button.window!
-        let event = NSEvent.mouseEvent(with: .leftMouseUp,
-                                       location: location,
-                                       modifierFlags: NSEvent.ModifierFlags(rawValue: 0),
-                                       timestamp: 0,
-                                       windowNumber: w.windowNumber,
-                                       context: w.graphicsContext,
-                                       eventNumber: 0,
-                                       clickCount: 1,
-                                       pressure: 0)!
+    func menuNeedsUpdate(_ menu: NSMenu) {
         if isThink {
             updateThinkFan()
         }
-        NSMenu.popUpContextMenu(appMenu, with: event, for: button)
     }
+
+    // MARK: - Application
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         guard conf.io_service != 0,
@@ -193,20 +189,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if hide {
             os_log("Icon hidden", type: .info)
         } else {
-            statusItem = NSStatusBar.system.statusItem(withLength: -1)
-            guard let button = statusItem?.button else {
-                os_log("Status bar item failed. Try removing some menu bar item.", type: .fault)
-                NSApp.terminate(nil)
-                return
-            }
+            statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+            statusItem?.menu = appMenu
             if let title = defaults.string(forKey: "Title") {
-                button.title = title
-                button.toolTip = defaults.string(forKey: "ToolTip")
+                statusItem?.title = title
+                statusItem?.toolTip = defaults.string(forKey: "ToolTip")
             } else {
-                _ = Timer.scheduledTimer(timeInterval: 0, target: self, selector: #selector(midnightTimer(sender:)), userInfo: button, repeats: true)
+                _ = Timer.scheduledTimer(timeInterval: 0, target: self, selector: #selector(midnightTimer(sender:)), userInfo: nil, repeats: true)
             }
-            button.target = self
-            button.action = #selector(displayMenu)
+            appMenu.delegate = self
         }
 
         if !getProerty() {
@@ -215,6 +206,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             NSApp.terminate(nil)
         }
     }
+
+    func applicationWillTerminate(_ aNotification: Notification) {
+        saveConfig()
+        NotificationCenter.default.removeObserver(self)
+        if conf.connect != 0 {
+            IOServiceClose(conf.connect)
+        }
+    }
+
+    // MARK: - Configuration
 
     func getProerty() -> Bool {
         var CFProps : Unmanaged<CFMutableDictionary>? = nil
@@ -290,14 +291,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
         return false
-    }
-
-    func applicationWillTerminate(_ aNotification: Notification) {
-        saveConfig()
-        NotificationCenter.default.removeObserver(self)
-        if conf.connect != 0 {
-            IOServiceClose(conf.connect)
-        }
     }
 
     func loadEvents() {
@@ -398,6 +391,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         defaults.setValue(getNumber("AutoBacklight", conf.io_service), forKey: "AutoBacklight")
     }
 
+    // MARK: - Notification
+
     func registerNotification() -> Bool {
         if conf.connect != 0 {
             // fix warning per https://forums.swift.org/t/swift-5-2-pointers-and-coretext/34862
@@ -414,18 +409,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 os_log("Failed to create mach port", type: .error)
             }
         }
-        return false
-    }
-}
-
-// from https://github.com/MonitorControl/MonitorControl
-func setStartAtLogin(enabled: Bool) -> Bool {
-    let identifier = "\(Bundle.main.bundleIdentifier!)Helper" as CFString
-    if SMLoginItemSetEnabled(identifier, enabled) {
-        os_log("Toggle start at login state: %{public}@", type: .info, enabled ? "on" : "off")
-        return true
-    } else {
-        os_log("Toggle start at login failed", type: .error)
         return false
     }
 }
