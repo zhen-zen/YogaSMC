@@ -317,9 +317,9 @@ bool WMI::extractBMF()
         AlwaysLog("%s format invalid", methodName);
         return false;
     }
-
+#if DEBUG
     mDevice->setProperty("BMF size", data->getLength(), sizeof(unsigned int)*8);
-
+#endif
     uint32_t size = pin[3];
     char *pout = new char[size];
     if (ds_dec((char *)pin+16, len-16, pout, size, 0) != size) {
@@ -328,12 +328,11 @@ bool WMI::extractBMF()
     }
     pin = nullptr;
     OSSafeReleaseNULL(data);
-
+#if DEBUG
     mDevice->setProperty("MOF size", size, sizeof(uint32_t)*8);
-        
+#endif
     MOF mof(pout, size, mData, name);
     mDevice->removeProperty("MOF");
-    mDevice->removeProperty("BMF data");
     OSObject *result = mof.parse_bmf(bmf_guid_string);
     mDevice->setProperty("MOF", result);
     if (!mof.parsed)
