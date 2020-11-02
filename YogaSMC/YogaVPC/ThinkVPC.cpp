@@ -832,10 +832,14 @@ void ThinkVPC::updateVPC() {
 
                 case TP_HKEY_EV_PALM_DETECTED:
                     DebugLog("palm detected hovering the keyboard");
+                    TouchPadenabled = false;
+                    dispatchMessage(kSMC_setDisableTouchpad, &TouchPadenabled);
                     break;
 
                 case TP_HKEY_EV_PALM_UNDETECTED:
-                    DebugLog("palm undetected hovering the keyboard");
+                    DebugLog("palm removed from the keyboard");
+                    TouchPadenabled = true;
+                    dispatchMessage(kSMC_setDisableTouchpad, &TouchPadenabled);
                     break;
 
                 default:
