@@ -219,27 +219,25 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func getProerty() -> Bool {
         var CFProps : Unmanaged<CFMutableDictionary>? = nil
-        if (kIOReturnSuccess == IORegistryEntryCreateCFProperties(conf.io_service, &CFProps, kCFAllocatorDefault, 0) && CFProps != nil) {
+        if kIOReturnSuccess == IORegistryEntryCreateCFProperties(conf.io_service, &CFProps, kCFAllocatorDefault, 0),
+           CFProps != nil {
             if let props = CFProps?.takeRetainedValue() as NSDictionary?,
                let IOClass = props["IOClass"] as? NSString {
+                var isOpen = false
                 switch IOClass {
                 case "IdeaVPC":
-                    if conf.events.isEmpty {
-                        conf.events = IdeaEvents
-                    }
-                    _ = registerNotification()
-                    #if DEBUG
-//                    isThink = true
-                    #endif
+                    conf.events = IdeaEvents
+                    isOpen = registerNotification()
                 case "ThinkVPC":
-                    if conf.events.isEmpty {
-                        conf.events = ThinkEvents
-                    }
-                    _ = registerNotification()
+                    conf.events = ThinkEvents
+                    isOpen = registerNotification()
                     isThink = true
                 default:
                     os_log("Unknown class", type: .error)
                     showOSD("Unknown class", duration: 2000)
+                }
+                if isOpen {
+                    loadEvents()
                 }
                 if !hide {
                     appMenu.insertItem(NSMenuItem.separator(), at: 1)
@@ -298,20 +296,31 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             for v in arr {
                 if let id = v["id"] as? UInt32,
                    let events = v["events"] as? [[String: Any]] {
-                    var e : Dictionary<UInt32, eventDesc> = [:]
+                    var e = conf.events[id] ?? [:]
                     for event in events {
                         if let data = event["data"] as? UInt32,
-                           let name = event["name"] as? String {
-                            let action = event["action"] as? String
-                            e[data] = eventDesc(
-                                name,
-                                event["image"] as? String,
-                                action: (action != nil) ? eventAction(rawValue: action!) ?? .nothing : .nothing,
-                                display: event["display"] as? Bool ?? true,
-                                option: event["option"] as? String)
+                           let name = event["name"] as? String,
+                           let action = event["action"] as? String {
+                            let opt = event["option"] as? String
+                            if e[data] != nil,
+                               action == "nothing",
+                               (opt == "Unknown" || (opt == nil && name.hasPrefix("Event 0x"))) {
+                                os_log("Override unknown event 0x%04x : %d", type: .info, id, data)
+                            } else {
+                                e[data] = eventDesc(
+                                    name,
+                                    event["image"] as? String,
+                                    action: eventAction(rawValue: action) ?? .nothing,
+                                    display: event["display"] as? Bool ?? true,
+                                    option: opt)
+                            }
+                        } else {
+                            os_log("Invalid event for 0x%04x!", type: .info, id)
                         }
                     }
                     conf.events[id] = e
+                } else {
+                    os_log("Invalid event!", type: .info)
                 }
             }
             os_log("Loaded %d events", type: .info, conf.events.capacity)
@@ -376,11 +385,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             showOSD("Please move the app \n into Applications")
         }
 
+        // Load driver settings
         if defaults.object(forKey: "AutoBacklight") != nil {
             _ = sendNumber("AutoBacklight", defaults.integer(forKey: "AutoBacklight"), conf.io_service)
         }
-
-        loadEvents()
     }
 
     func saveConfig() {
@@ -388,6 +396,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
            Bundle.main.bundlePath.hasPrefix("/Applications") {
             saveEvents()
         }
+
+        // Save driver settings
         defaults.setValue(getNumber("AutoBacklight", conf.io_service), forKey: "AutoBacklight")
     }
 
@@ -430,7 +440,7 @@ func notificationCallback(_ port: CFMachPort?, _ msg: UnsafeMutableRawPointer?, 
             } else {
                 let name = String(format:"Event 0x%04x", notification.event)
                 showOSD(name)
-                conf.pointee?.events[notification.event] = [0: eventDesc(name, nil)]
+                conf.pointee?.events[notification.event] = [0: eventDesc(name, nil, option: "Unknown")]
                 #if DEBUG
                 os_log("Event 0x%04x", type: .debug, notification.event)
                 #endif
@@ -506,16 +516,16 @@ func eventActuator(_ desc: eventDesc, _ data: UInt32, _ conf: UnsafePointer<shar
             }
             sleep(1)
         }
-        _ = scriptHelper(desc.option ?? sleepAS, desc.name)
+        _ = scriptHelper(sleepAS, desc.name)
         return
     case .search:
-        _ = scriptHelper(desc.option ?? searchAS, desc.name)
+        _ = scriptHelper(searchAS, desc.name)
         return
     case .siri:
-        _ = scriptHelper(desc.option ?? siriAS, desc.name)
+        _ = scriptHelper(siriAS, desc.name)
         return
     case .spotlight:
-        _ = scriptHelper(desc.option ?? spotlightAS, desc.name)
+        _ = scriptHelper(spotlightAS, desc.name)
         return
     case .thermal:
         showOSD("Thermal: \(desc.name)")
