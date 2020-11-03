@@ -252,6 +252,7 @@
 		6F8B2336253CEA93005BEC5D /* Camera.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = Camera.pdf; sourceTree = "<group>"; };
 		6F8B2342253CEF97005BEC5D /* Sleep.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = Sleep.pdf; sourceTree = "<group>"; };
 		6F8B2349253CF029005BEC5D /* SecondDisplay.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = SecondDisplay.pdf; sourceTree = "<group>"; };
+		6F93458F255140B900625343 /* Changelog.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Changelog.md; sourceTree = "<group>"; };
 		6F9553B824BA515B00215EBB /* IdeaVPC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IdeaVPC.cpp; sourceTree = "<group>"; };
 		6F9553B924BA515B00215EBB /* IdeaVPC.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IdeaVPC.hpp; sourceTree = "<group>"; };
 		6F96A30A24B93D25006562EC /* YogaVPC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = YogaVPC.cpp; sourceTree = "<group>"; };
@@ -446,6 +447,7 @@
 				6F70426124D2CFE900FD5659 /* SSDTSample */,
 				6F2D45CB24C9494B00A75751 /* LICENSE */,
 				6F9B2AB124D2ADD800005C16 /* README.md */,
+				6F93458F255140B900625343 /* Changelog.md */,
 			);
 			name = Docs;
 			sourceTree = "<group>";
