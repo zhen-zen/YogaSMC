@@ -29,9 +29,9 @@ Based on [the-darkvoid/macOS-IOElectrify](https://github.com/the-darkvoid/macOS-
 
 ### IdeaWMI
 Currently available functions:
-- Yoga Mode detection and disabling keyboard/touchpad when flipped
-- Extra battery information (require same battery patch to related methods)
-- Fn+esc (obsolete paper looking function), currently assigned to Fn mode switch.
+- `WMIY` Yoga Mode detection and disabling keyboard/touchpad when flipped
+- `WBAT` Extra battery information (requires patching related methods like battery ones)
+- `WMI2` Fn+esc (obsolete paper looking function), currently assigned to Fn mode toggle.
 
 ### ThinkWMI (WIP)
 ~~Based on [lenovo/thinklmi](https://github.com/lenovo/thinklmi) ([iksaif/thinkpad-wmi](https://github.com/iksaif/thinkpad-wmi))~~
@@ -45,6 +45,21 @@ Currently available functions:
 - Automatic backlight and LED control
 - Clamshell mode (need additional patch on `_LID` like  `SSDT-RCSM.dsl` in `SSDTSample`)
 
+| Variant | IdeaVPC  | ThinkVPC |
+| ------ | --------- | -------- |
+| `_HID` | `VPC2004` | `LEN0268`<br>`LEN0068` |
+| Reference | [ideapad-laptop](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/ideapad-laptop.c) | [thinkpad_acpi](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/thinkpad_acpi.c) |
+| Hotkey polling | ✅ | ✅ |
+| Conservation mode | ✅ | ✅ |
+| Battery threshold | Not supported | ✅ |
+| Charging control | Need testing | Need testing |
+| DYTC | ✅ | ✅ |
+| Fan reading | Need testing | ✅ |
+| Fan control | Need testing | Need testing |
+| Fn lock mode | ✅ | Native |
+| LED control | Not supported | ✅ |
+| Keyboard backlight | ✅ | ✅ |
+
 ### EC reading:
 When [Rehabman's](https://www.tonymacx86.com/threads/guide-how-to-patch-dsdt-for-working-battery-status.116102/) battery patching method `RE1B` `RECB` present (or  `SSDT-ECRW.dsl` in `SSDTSample`), desired EC fields can be read using following commands:
 
@@ -53,34 +68,15 @@ When [Rehabman's](https://www.tonymacx86.com/threads/guide-how-to-patch-dsdt-for
 - Dump whole EC area: `ioio -s YogaVPC ReadECOffset 0x10000`
 - Known EC field name: `ioio -s YogaVPC ReadECName B1CY` (no larger than 1 byte due to OS constraint)
 
-### IdeaVPC
-Based on [linux/drivers/platform/x86/ideapad-laptop.c](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/ideapad-laptop.c), targets `VPC0` using `_HID` `VPC2004`.
-
-Currently available functions:
-- Hotkey polling
-- Battery conservation mode
-- Quick charge mode (need testing)
-- Fn lock mode
-- …
-
-### ThinkVPC
-Based on [linux/drivers/platform/x86/thinkpad_acpi.c](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/thinkpad_acpi.c), targets `HKEY` using `_HID` `LEN0268`.
-
-Currently available functions:
-- Hotkey polling
-- Battery conservation mode
-- Basic Fan control (WIP)
-- HW Mute status (read-only)
-- Audio / Mic Mute LED
-- …
-
 ## YogaSMCPane
 The preference pane provides a graphical user interface for basic information and settings, such as battery conservation mode and backlight.
 
 ## YogaSMCNC
-The notification application receives EC events and displays them on OSD. Corresonding actions will also be triggered for function keys. The configuration can be customized at `~/Library/Preferences/org.zhen.YogaSMC.plist` after closing the app.  
+The notification application receives EC events and displays them on OSD. Corresonding actions will also be triggered for function keys. The configuration can be customized at `~/Library/Preferences/org.zhen.YogaSMC.plist` after closing the app.
 
-For new events, feel free to submit a PR like [#40](https://github.com/zhen-zen/YogaSMC/pull/40).
+For unknown events in preset, feel free to submit a PR like [#40](https://github.com/zhen-zen/YogaSMC/pull/40).
+
+If you want to add new actions, the easiest approach is to use the `script` action and fill the AppleScript in `option` field. [be295da](https://github.com/zhen-zen/YogaSMC/commit/be295dad333866cf23466d7e068354bc4c1f02ea) is a good example to add it as a built-in action, which may be replaced with native one later.
 
 ## Installation
 The kext should work out-of-the-box. If you have modified `_QXX` methods before, please remove the patches.
