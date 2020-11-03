@@ -5,6 +5,20 @@ on:
       - "*"
 
 jobs:
+  prep:
+    name: Prepare Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Changelog
+        uses: scottbrenner/generate-changelog-action@master
+        id: Changelog
+        env:
+          REPO: ${{ github.repository }}
+
   build:
     runs-on: macos-latest
     steps:
@@ -32,11 +46,6 @@ jobs:
         configuration: Release
         build-settings: -target BuildAll
         action: build
-    - name: Changelog
-      uses: scottbrenner/generate-changelog-action@master
-      id: Changelog
-      env:
-        REPO: ${{ github.repository }}
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
@@ -46,7 +55,7 @@ jobs:
         tag_name: ${{ github.ref }}
         release_name: Release ${{ github.ref }}
         body: |
-          ${{ steps.Changelog.outputs.changelog }}
+          ${{ jobs.prep.steps.Changelog.outputs.changelog }}
         draft: false
         prerelease: false
     - name: Prepare release image
