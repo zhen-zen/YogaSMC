@@ -221,18 +221,20 @@ IOReturn YogaBaseService::readECName(const char* name, UInt32 *result) {
     return ret;
 }
 
-IOReturn YogaBaseService::method_re1b(UInt32 offset, UInt32 *result) {
+IOReturn YogaBaseService::method_re1b(UInt32 offset, UInt8 *result) {
     if (!ec || !(ECAccessCap & BIT(0)))
         return kIOReturnUnsupported;
 
+    UInt32 raw;
     OSObject* params[1] = {
         OSNumber::withNumber(offset, 32)
     };
 
-    IOReturn ret = ec->evaluateInteger(readECOneByte, result, params, 1);
+    IOReturn ret = ec->evaluateInteger(readECOneByte, &raw, params, 1);
     if (ret != kIOReturnSuccess)
         AlwaysLog("read 0x%02x failed", offset);
 
+    *result = raw;
     return ret;
 }
 
@@ -282,6 +284,8 @@ IOReturn YogaBaseService::method_we1b(UInt32 offset, UInt8 value) {
 }
 
 void YogaBaseService::validateEC() {
+    if (!ec)
+        return;
     if (ec->validateObject(readECOneByte) == kIOReturnSuccess &&
         ec->validateObject(readECBytes) == kIOReturnSuccess) {
         ECAccessCap |= BIT(0);

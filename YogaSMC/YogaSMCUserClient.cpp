@@ -110,12 +110,12 @@ IOReturn YogaSMCUserClient::readEC(UInt64 offset, UInt8* output, IOByteCount *ou
     }
 
     if (*outputSizeP == 1) {
-        UInt32 result;
+        UInt8 result;
         if (fProvider->method_re1b(UInt32(offset), &result) != kIOReturnSuccess) {
             AlwaysLog("%s re1b failed", __FUNCTION__);
             return kIOReturnIOError;
         }
-        *output = UInt8(result);
+        *output = result;
     } else {
         OSData *result;
         if (fProvider->method_recb(UInt32(offset), UInt32(*outputSizeP), &result) != kIOReturnSuccess) {

@@ -123,7 +123,7 @@ protected:
      *
      *  @return kIOReturnSuccess on success
      */
-    IOReturn method_re1b(UInt32 offset, UInt32 *result);
+    IOReturn method_re1b(UInt32 offset, UInt8 *result);
 
     /**
      *  Wrapper for RECB

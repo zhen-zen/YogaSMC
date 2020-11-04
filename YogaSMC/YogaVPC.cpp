@@ -567,9 +567,9 @@ bool YogaVPC::dumpECOffset(UInt32 value) {
             }
         }
     } else {
-        UInt32 integer;
-        if (method_re1b(value, &integer) == kIOReturnSuccess) {
-            AlwaysLog("0x%02x: %02x", value, integer);
+        UInt8 byte;
+        if (method_re1b(value, &byte) == kIOReturnSuccess) {
+            AlwaysLog("0x%02x: %02x", value, byte);
             ret = true;
         }
     }
