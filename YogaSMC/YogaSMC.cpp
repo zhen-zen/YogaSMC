@@ -14,18 +14,12 @@ bool ADDPR(debugEnabled) = false;
 uint32_t ADDPR(debugPrintDelay) = 0;
 
 void YogaSMC::addVSMCKey() {
-    // Message-based
-    VirtualSMCAPI::addKey(KeyBDVT, vsmcPlugin.data, VirtualSMCAPI::valueWithFlag(true, new BDVT(this), SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_WRITE));
-    VirtualSMCAPI::addKey(KeyCH0B, vsmcPlugin.data, VirtualSMCAPI::valueWithData(nullptr, 1, SmcKeyTypeHex, new CH0B, SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_WRITE));
-
     // ACPI-based
     if (!conf || !ec)
         return;
 
     OSDictionary *status = OSDictionary::withCapacity(8);
     OSString *method;
-
-    // WARNING: watch out, key addition is sorted here!
 
     addECKeySp(KeyTCSA, "CPU System Agent Core");
     addECKeySp(KeyTCXC, "CPU Core PECI");
@@ -48,10 +42,7 @@ void YogaSMC::addVSMCKey() {
     addECKeySp(KeyTs0p(0), "Palm Rest");
     addECKeySp(KeyTs0p(1), "Trackpad Actuator");
 
-    qsort(const_cast<VirtualSMCKeyValue *>(vsmcPlugin.data.data()), vsmcPlugin.data.size(), sizeof(VirtualSMCKeyValue), VirtualSMCKeyValue::compare);
-
     setProperty("DirectECKey", status);
-    setProperty("Status", vsmcPlugin.data.size(), 32);
     status->release();
 }
 
@@ -64,18 +55,24 @@ bool YogaSMC::start(IOService *provider) {
     validateEC();
 
     awake = true;
-    poller = IOTimerEventSource::timerEventSource(this, [](OSObject *object, IOTimerEventSource *sender) {
-        auto smc = OSDynamicCast(YogaSMC, object);
-        if (smc) smc->updateEC();
-    });
 
-    if (!poller ||
+    if (!(poller = initPoller()) ||
         (workLoop->addEventSource(poller) != kIOReturnSuccess)) {
         AlwaysLog("Failed to add poller");
         return false;
     }
 
+    // WARNING: watch out, key addition is sorted here!
+
+    // Add message-based key
+    VirtualSMCAPI::addKey(KeyBDVT, vsmcPlugin.data, VirtualSMCAPI::valueWithFlag(true, new BDVT(this), SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_WRITE));
+    VirtualSMCAPI::addKey(KeyCH0B, vsmcPlugin.data, VirtualSMCAPI::valueWithData(nullptr, 1, SmcKeyTypeHex, new CH0B, SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_WRITE));
+
     addVSMCKey();
+
+    qsort(const_cast<VirtualSMCKeyValue *>(vsmcPlugin.data.data()), vsmcPlugin.data.size(), sizeof(VirtualSMCKeyValue), VirtualSMCKeyValue::compare);
+    setProperty("Status", vsmcPlugin.data.size(), 32);
+
     vsmcNotifier = VirtualSMCAPI::registerHandler(vsmcNotificationHandler, this);
 
     poller->setTimeoutMS(POLLING_INTERVAL);
@@ -137,7 +134,7 @@ YogaSMC* YogaSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) 
     return dev;
 }
 
-void YogaSMC::updateEC() {
+void YogaSMC::updateEC(OSObject* owner, IOTimerEventSource* timer) {
     if (!awake)
         return;
 

@@ -68,8 +68,13 @@ protected:
     /**
      *  Poll EC field for sensor data
      */
-    virtual void updateEC();
+    virtual void updateEC(OSObject* owner, IOTimerEventSource* timer);
 
+    /**
+     *  Initialize Poller
+     */
+    virtual inline IOTimerEventSource *initPoller() {return IOTimerEventSource::timerEventSource(this, OSMemberFunctionCast(IOTimerEventSource::Action, this, &YogaSMC::updateEC));};
+    
 public:
     virtual bool start(IOService *provider) APPLE_KEXT_OVERRIDE;
     virtual void stop(IOService *provider) APPLE_KEXT_OVERRIDE;
