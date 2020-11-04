@@ -777,14 +777,13 @@ void ThinkVPC::updateVPC() {
         case 6:
             switch (result) {
                 case TP_HKEY_EV_THM_TABLE_CHANGED:
-                    AlwaysLog("Thermal Table has changed");
+                    DebugLog("Thermal Table has changed");
                     break;
 
                 case TP_HKEY_EV_THM_CSM_COMPLETED:
-                    if (DYTCLapmodeCap && !DYTCLock) {
-                        AlwaysLog("Thermal Control Command set completed (DYTC)");
+                    DebugLog("Thermal Control Command set completed (DYTC)");
+                    if (DYTCLapmodeCap && !DYTCLock)
                         updateDYTC();
-                    }
                     break;
 
                 case TP_HKEY_EV_THM_TRANSFM_CHANGED:
