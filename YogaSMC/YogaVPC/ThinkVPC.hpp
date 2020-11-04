@@ -342,8 +342,6 @@ private:
      */
     bool setSSTStatus(UInt32 value);
 
-    friend class ThinkWMI;
-
 public:
     IOReturn message(UInt32 type, IOService *provider, void *argument) APPLE_KEXT_OVERRIDE;
     IOReturn setPowerState(unsigned long powerState, IOService * whatDevice) APPLE_KEXT_OVERRIDE;

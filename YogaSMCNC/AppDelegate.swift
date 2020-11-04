@@ -249,6 +249,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                         } else {
                             secondThinkFan = defaults.bool(forKey: "SecondThinkFan")
                         }
+                        if getBoolean("Dual fan", conf.io_service) {
+                            secondThinkFan = false
+                        }
                         appMenu.insertItem(withTitle: "Fan", action: nil, keyEquivalent: "", at: 4)
                         #if DEBUG
                         appMenu.insertItem(withTitle: "HFSP", action: nil, keyEquivalent: "", at: 5)
