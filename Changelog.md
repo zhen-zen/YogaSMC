@@ -3,9 +3,11 @@ YogaSMC Changelog
 
 #### v1.2.1
 - Pane: fix loading prior to 10.14.4 with embedded swift runtime
-- NC: update presets
+- NC: update presets, thx @junaedahmed @Sniki @tylernguyen
 - NC: support fan speed reading and control (debug) for think variant  
 - NC: support dual fan (debug) for think variant
+- Pane: fix LED Automation, thx @junaedahmed
+- Build: fix short version display
 - YogaSMC: pause polling during sleep
 - UserClient: recover write and read by name support
 - Build: use commit hash as CFBundleVersion

@@ -40,11 +40,11 @@ void ThinkSMC::addVSMCKey() {
     super::addVSMCKey();
 }
 
-void ThinkSMC::updateEC(OSObject* owner, IOTimerEventSource* timer) {
+void ThinkSMC::updateEC() {
     if (!awake)
         return;
     if (!(ECAccessCap & BIT(0))) {
-        super::updateEC(owner, timer);
+        super::updateEC();
         return;
     }
 
@@ -56,7 +56,7 @@ void ThinkSMC::updateEC(OSObject* owner, IOTimerEventSource* timer) {
     }
 
     if (!dualFan) {
-        super::updateEC(owner, timer);
+        super::updateEC();
         return;
     }
 
@@ -83,5 +83,5 @@ void ThinkSMC::updateEC(OSObject* owner, IOTimerEventSource* timer) {
     } else {
         dualFan = false;
     }
-    super::updateEC(owner, timer);
+    super::updateEC();
 }

@@ -134,7 +134,7 @@ YogaSMC* YogaSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) 
     return dev;
 }
 
-void YogaSMC::updateEC(OSObject* owner, IOTimerEventSource* timer) {
+void YogaSMC::updateEC() {
     if (!awake)
         return;
 
