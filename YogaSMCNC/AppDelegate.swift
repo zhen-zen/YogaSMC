@@ -263,8 +263,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                         updateThinkFan()
                         #if DEBUG
                         let item = NSMenuItem()
-                        let slider = NSSlider(value: 0, minValue: 1, maxValue: 8, target: nil, action: #selector(setThinkFan(_:)))
-                        slider.numberOfTickMarks = 8
+                        let slider = NSSlider(value: 0, minValue: 0, maxValue: 8, target: nil, action: #selector(setThinkFan(_:)))
+                        slider.numberOfTickMarks = 9
                         slider.allowsTickMarkValuesOnly = true
                         slider.isContinuous = false
                         slider.frame.size.width = 180
