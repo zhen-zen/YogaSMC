@@ -55,6 +55,10 @@ IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
                 }
             }
         }
+        if (WMICollection->getCount() == 0) {
+            OSSafeReleaseNULL(WMICollection);
+            OSSafeReleaseNULL(WMIProvCollection);
+        }
         iterator->release();
         pnp->release();
     }
@@ -143,8 +147,8 @@ void YogaVPC::stop(IOService *provider) {
             wmi->stop(prov);
             wmi->detach(prov);
         }
-        WMICollection->release();
-        WMIProvCollection->release();
+        OSSafeReleaseNULL(WMICollection);
+        OSSafeReleaseNULL(WMIProvCollection);
     }
 
 #ifndef ALTER
