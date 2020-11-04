@@ -394,7 +394,7 @@ class YogaSMCPane : NSPreferencePane {
         }
         updateThinkFan()
         #if DEBUG
-        if !getBoolean("Dual fan", conf.io_service) {
+        if !getBoolean("Dual fan", io_service) {
             vSecondFan.isEnabled = true
             if defaults.object(forKey: "SecondThinkFan") != nil {
                 vSecondFan.state = defaults.bool(forKey: "SecondThinkFan") ? .on : .off
