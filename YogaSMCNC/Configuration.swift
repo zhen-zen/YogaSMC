@@ -102,4 +102,6 @@ let ThinkEvents : Dictionary<UInt32, Dictionary<UInt32, eventDesc>> = [
     TP_HKEY_EV_AC_CHANGED.rawValue: [0: eventDesc("AC Status Change", display: false)], // 0x6040
     TP_HKEY_EV_BACKLIGHT_CHANGED.rawValue : [0: eventDesc("Backlight Changed", display: false)], // 0x6050
     TP_HKEY_EV_KEY_FN_ESC.rawValue : [0: eventDesc("FnLock", .FunctionKey)], // 0x6060
+    TP_HKEY_EV_PALM_DETECTED.rawValue : [0: eventDesc("Palm Detected", display: false)], // 0x60B0
+    TP_HKEY_EV_PALM_UNDETECTED.rawValue : [0: eventDesc("Palm Undetected", display: false)], // 0x60B1
 ]
