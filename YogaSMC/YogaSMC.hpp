@@ -51,11 +51,6 @@ protected:
     };
 
     /**
-     *  EC device
-     */
-    IOACPIPlatformDevice *ec {nullptr};
-
-    /**
      *  Add available SMC keys
      */
     virtual void addVSMCKey();
@@ -73,7 +68,7 @@ protected:
     /**
      *  Poll EC field for sensor data
      */
-    void updateEC();
+    virtual void updateEC();
 
 public:
     virtual bool start(IOService *provider) APPLE_KEXT_OVERRIDE;

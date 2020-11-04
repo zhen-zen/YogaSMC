@@ -61,6 +61,8 @@ bool YogaSMC::start(IOService *provider) {
 
     DebugLog("Starting");
 
+    validateEC();
+
     awake = true;
     poller = IOTimerEventSource::timerEventSource(this, [](OSObject *object, IOTimerEventSource *sender) {
         auto smc = OSDynamicCast(YogaSMC, object);

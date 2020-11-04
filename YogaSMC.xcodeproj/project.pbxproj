@@ -445,9 +445,9 @@
 			isa = PBXGroup;
 			children = (
 				6F70426124D2CFE900FD5659 /* SSDTSample */,
+				6F93458F255140B900625343 /* Changelog.md */,
 				6F2D45CB24C9494B00A75751 /* LICENSE */,
 				6F9B2AB124D2ADD800005C16 /* README.md */,
-				6F93458F255140B900625343 /* Changelog.md */,
 			);
 			name = Docs;
 			sourceTree = "<group>";

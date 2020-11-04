@@ -64,14 +64,6 @@ private:
     bool toggleClamshell();
 
     /**
-     *  Related ACPI methods
-     */
-    static constexpr const char *readECOneByte      = "RE1B";
-    static constexpr const char *readECBytes        = "RECB";
-    static constexpr const char *writeECOneByte     = "WE1B";
-    static constexpr const char *writeECBytes       = "WECB";
-
-    /**
      *  Dump desired EC field
      *
      *  @param value = offset | size << 8
@@ -111,20 +103,10 @@ private:
 protected:
 
     /**
-     *  EC device
-     */
-    IOACPIPlatformDevice *ec {nullptr};
-
-    /**
      *  VPC device
      */
     IOACPIPlatformDevice *vpc {nullptr};
     
-    /**
-     *  VPC UserClient
-     */
-    YogaSMCUserClient *client {nullptr};
-
     OSOrderedSet *WMICollection {nullptr};
     OSOrderedSet *WMIProvCollection {nullptr};
 
@@ -247,54 +229,6 @@ protected:
      */
     bool setDYTC(int perfmode);
 
-    /**
-     *  EC access capability, will be update on init
-     *  BIT 0 Read
-     *  BIT 1 Write
-     */
-    UInt8 ECAccessCap {0};
-
-    /**
-     *  Wrapper for RE1B
-     *
-     *  @param offset EC field offset
-     *  @param result EC field value
-     *
-     *  @return kIOReturnSuccess on success
-     */
-    IOReturn method_re1b(UInt32 offset, UInt32 *result);
-
-    /**
-     *  Wrapper for RECB
-     *
-     *  @param offset EC field offset
-     *  @param size EC field length in bytes
-     *  @param data EC field value
-     *
-     *  @return kIOReturnSuccess on success
-     */
-    IOReturn method_recb(UInt32 offset, UInt32 size, OSData **data);
-
-    /**
-     *  Wrapper for WE1B
-     *
-     *  @param offset EC field offset
-     *  @param value EC field value
-     *
-     *  @return kIOReturnSuccess on success
-     */
-    IOReturn method_we1b(UInt32 offset, UInt8 value);
-
-    /**
-     *  Read custom field
-     *
-     *  @param name EC field name
-     *  @param result EC field value
-     *
-     *  @return kIOReturnSuccess on success
-     */
-    IOReturn readECName(const char* name, UInt32 *result);
-
 public:
     virtual IOService *probe(IOService *provider, SInt32 *score) APPLE_KEXT_OVERRIDE;
 
@@ -304,7 +238,11 @@ public:
     virtual IOReturn setProperties(OSObject* props) APPLE_KEXT_OVERRIDE;
     virtual IOReturn message(UInt32 type, IOService *provider, void *argument) APPLE_KEXT_OVERRIDE;
     virtual IOReturn setPowerState(unsigned long powerState, IOService * whatDevice) APPLE_KEXT_OVERRIDE;
-    friend class YogaSMCUserClient;
+
+    /**
+     *  VPC UserClient
+     */
+    YogaSMCUserClient *client {nullptr};
 };
 
 #endif /* YogaVPC_hpp */

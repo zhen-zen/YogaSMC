@@ -73,6 +73,8 @@ bool YogaVPC::start(IOService *provider) {
     if (!initVPC())
         return false;
 
+    validateEC();
+
     updateAll();
 
     if (WMICollection) {
@@ -99,19 +101,6 @@ bool YogaVPC::initVPC() {
     if (vpc->validateObject(getClamshellMode) == kIOReturnSuccess &&
         vpc->validateObject(setClamshellMode) == kIOReturnSuccess)
         clamshellCap = true;
-
-    if (ec->validateObject(readECOneByte) == kIOReturnSuccess &&
-        ec->validateObject(readECBytes) == kIOReturnSuccess) {
-        ECAccessCap |= BIT(0);
-        if (ec->validateObject(writeECOneByte) == kIOReturnSuccess) {
-            setProperty("EC Capability", "RW");
-            ECAccessCap |= BIT(1);
-        } else {
-            setProperty("EC Capability", "RO");
-        }
-    } else {
-        setProperty("EC Capability", "False");
-    }
 
     if (vpc->validateObject(setThermalControl) == kIOReturnSuccess) {
         DYTC_RESULT result;
@@ -542,83 +531,6 @@ bool YogaVPC::setDYTC(int perfmode) {
         }
     }
     return parseDYTC(result);
-}
-
-IOReturn YogaVPC::readECName(const char* name, UInt32 *result) {
-    IOReturn ret = ec->evaluateInteger(name, result);
-    switch (ret) {
-        case kIOReturnSuccess:
-            break;
-
-        case kIOReturnBadArgument:
-            AlwaysLog("read %s failed, bad argument (field size too large?)", name);
-            break;
-            
-        default:
-            AlwaysLog("read %s failed %x", name, ret);
-            break;
-    }
-    return ret;
-}
-
-IOReturn YogaVPC::method_re1b(UInt32 offset, UInt32 *result) {
-    if (!(ECAccessCap & BIT(0)))
-        return kIOReturnUnsupported;
-
-    OSObject* params[1] = {
-        OSNumber::withNumber(offset, 32)
-    };
-
-    IOReturn ret = ec->evaluateInteger(readECOneByte, result, params, 1);
-    if (ret != kIOReturnSuccess)
-        AlwaysLog("read 0x%02x failed", offset);
-
-    return ret;
-}
-
-IOReturn YogaVPC::method_recb(UInt32 offset, UInt32 size, OSData **data) {
-    if (!(ECAccessCap & BIT(0)))
-        return kIOReturnUnsupported;
-
-    // Arg0 - offset in bytes from zero-based EC
-    // Arg1 - size of buffer in bits
-    OSObject* params[2] = {
-        OSNumber::withNumber(offset, 32),
-        OSNumber::withNumber(size * 8, 32)
-    };
-    OSObject* result;
-
-    IOReturn ret = ec->evaluateObject(readECBytes, &result, params, 2);
-    if (ret != kIOReturnSuccess || !(*data = OSDynamicCast(OSData, result))) {
-        AlwaysLog("read %d bytes @ 0x%02x failed", size, offset);
-        OSSafeReleaseNULL(result);
-        return kIOReturnInvalid;
-    }
-
-    if ((*data)->getLength() != size) {
-        AlwaysLog("read %d bytes @ 0x%02x, got %d bytes", size, offset, (*data)->getLength());
-        OSSafeReleaseNULL(result);
-        return kIOReturnNoBandwidth;
-    }
-
-    return ret;
-}
-
-IOReturn YogaVPC::method_we1b(UInt32 offset, UInt8 value) {
-    if (!(ECAccessCap & BIT(1)))
-        return kIOReturnUnsupported;
-
-    OSObject* params[2] = {
-        OSNumber::withNumber(offset, 32),
-        OSNumber::withNumber(value, 8)
-    };
-
-    IOReturn ret = ec->evaluateObject(writeECOneByte, nullptr, params, 2);
-    if (ret != kIOReturnSuccess)
-        AlwaysLog("write 0x%02x @ 0x%02x failed", value, offset);
-    else
-        DebugLog("write 0x%02x @ 0x%02x success", value, offset);
-    return ret;
 }
 
 bool YogaVPC::dumpECOffset(UInt32 value) {

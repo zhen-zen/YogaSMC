@@ -15,5 +15,6 @@ YogaSMC Changelog
 - YogaVPC: handle WMI probing
 - NC: optimize menu handling
 - NC: override unknown events with updated presets
+- BaseService: support extended EC operation
 
 Change of earlier versions may be tracked in [commits](https://github.com/zhen-zen/YogaSMC/commits/master) and [releases](https://github.com/zhen-zen/YogaSMC/releases).

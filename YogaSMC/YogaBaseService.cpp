@@ -202,3 +202,96 @@ IOReturn YogaBaseService::setPowerState(unsigned long powerStateOrdinal, IOServi
 
     return kIOPMAckImplied;
 }
+
+IOReturn YogaBaseService::readECName(const char* name, UInt32 *result) {
+    if (!ec) return kIOReturnNoDevice;
+    IOReturn ret = ec->evaluateInteger(name, result);
+    switch (ret) {
+        case kIOReturnSuccess:
+            break;
+
+        case kIOReturnBadArgument:
+            AlwaysLog("read %s failed, bad argument (field size too large?)", name);
+            break;
+            
+        default:
+            AlwaysLog("read %s failed %x", name, ret);
+            break;
+    }
+    return ret;
+}
+
+IOReturn YogaBaseService::method_re1b(UInt32 offset, UInt32 *result) {
+    if (!ec || !(ECAccessCap & BIT(0)))
+        return kIOReturnUnsupported;
+
+    OSObject* params[1] = {
+        OSNumber::withNumber(offset, 32)
+    };
+
+    IOReturn ret = ec->evaluateInteger(readECOneByte, result, params, 1);
+    if (ret != kIOReturnSuccess)
+        AlwaysLog("read 0x%02x failed", offset);
+
+    return ret;
+}
+
+IOReturn YogaBaseService::method_recb(UInt32 offset, UInt32 size, OSData **data) {
+    if (!ec || !(ECAccessCap & BIT(0)))
+        return kIOReturnUnsupported;
+
+    // Arg0 - offset in bytes from zero-based EC
+    // Arg1 - size of buffer in bits
+    OSObject* params[2] = {
+        OSNumber::withNumber(offset, 32),
+        OSNumber::withNumber(size * 8, 32)
+    };
+    OSObject* result;
+
+    IOReturn ret = ec->evaluateObject(readECBytes, &result, params, 2);
+    if (ret != kIOReturnSuccess || !(*data = OSDynamicCast(OSData, result))) {
+        AlwaysLog("read %d bytes @ 0x%02x failed", size, offset);
+        OSSafeReleaseNULL(result);
+        return kIOReturnInvalid;
+    }
+
+    if ((*data)->getLength() != size) {
+        AlwaysLog("read %d bytes @ 0x%02x, got %d bytes", size, offset, (*data)->getLength());
+        OSSafeReleaseNULL(result);
+        return kIOReturnNoBandwidth;
+    }
+
+    return ret;
+}
+
+IOReturn YogaBaseService::method_we1b(UInt32 offset, UInt8 value) {
+    if (!ec || !(ECAccessCap & BIT(1)))
+        return kIOReturnUnsupported;
+
+    OSObject* params[2] = {
+        OSNumber::withNumber(offset, 32),
+        OSNumber::withNumber(value, 8)
+    };
+
+    IOReturn ret = ec->evaluateObject(writeECOneByte, nullptr, params, 2);
+    if (ret != kIOReturnSuccess)
+        AlwaysLog("write 0x%02x @ 0x%02x failed", value, offset);
+    else
+        DebugLog("write 0x%02x @ 0x%02x success", value, offset);
+    return ret;
+}
+
+void YogaBaseService::validateEC() {
+    if (ec->validateObject(readECOneByte) == kIOReturnSuccess &&
+        ec->validateObject(readECBytes) == kIOReturnSuccess) {
+        ECAccessCap |= BIT(0);
+        if (ec->validateObject(writeECOneByte) == kIOReturnSuccess) {
+            setProperty("EC Capability", "RW");
+            ECAccessCap |= BIT(1);
+        } else {
+            setProperty("EC Capability", "RO");
+        }
+    } else {
+        setProperty("EC Capability", "False");
+    }
+}

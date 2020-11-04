@@ -90,6 +90,72 @@ protected:
      */
     inline virtual bool PMSupport() {return false;};
 
+    /**
+     *  Related ACPI methods
+     */
+    static constexpr const char *readECOneByte      = "RE1B";
+    static constexpr const char *readECBytes        = "RECB";
+    static constexpr const char *writeECOneByte     = "WE1B";
+    static constexpr const char *writeECBytes       = "WECB";
+
+    /**
+     *  EC device
+     */
+    IOACPIPlatformDevice *ec {nullptr};
+
+    /**
+     *  Test EC capability
+     */
+    void validateEC();
+    
+    /**
+     *  EC access capability, will be update on init
+     *  BIT 0 Read
+     *  BIT 1 Write
+     */
+    UInt8 ECAccessCap {0};
+
+    /**
+     *  Wrapper for RE1B
+     *
+     *  @param offset EC field offset
+     *  @param result EC field value
+     *
+     *  @return kIOReturnSuccess on success
+     */
+    IOReturn method_re1b(UInt32 offset, UInt32 *result);
+
+    /**
+     *  Wrapper for RECB
+     *
+     *  @param offset EC field offset
+     *  @param size EC field length in bytes
+     *  @param data EC field value
+     *
+     *  @return kIOReturnSuccess on success
+     */
+    IOReturn method_recb(UInt32 offset, UInt32 size, OSData **data);
+
+    /**
+     *  Wrapper for WE1B
+     *
+     *  @param offset EC field offset
+     *  @param value EC field value
+     *
+     *  @return kIOReturnSuccess on success
+     */
+    IOReturn method_we1b(UInt32 offset, UInt8 value);
+
+    /**
+     *  Read custom field
+     *
+     *  @param name EC field name
+     *  @param result EC field value
+     *
+     *  @return kIOReturnSuccess on success
+     */
+    IOReturn readECName(const char* name, UInt32 *result);
+
 public:
     virtual bool init(OSDictionary *dictionary) APPLE_KEXT_OVERRIDE;
     virtual IOService *probe(IOService *provider, SInt32 *score) APPLE_KEXT_OVERRIDE;
@@ -101,6 +167,6 @@ public:
 
     virtual IOReturn setPowerState(unsigned long powerStateOrdinal, IOService * whatDevice) APPLE_KEXT_OVERRIDE;
 
-//    friend class YogaSMCUserClient;
+    friend class YogaSMCUserClient;
 };
 #endif /* YogaBaseService_hpp */
