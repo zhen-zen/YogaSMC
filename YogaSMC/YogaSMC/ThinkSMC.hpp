@@ -19,6 +19,11 @@ class ThinkSMC : public YogaSMC
 
 private:
     void addVSMCKey() APPLE_KEXT_OVERRIDE;
+    void updateEC(OSObject* owner, IOTimerEventSource* timer) APPLE_KEXT_OVERRIDE;
+    virtual inline IOTimerEventSource *initPoller() APPLE_KEXT_OVERRIDE {return IOTimerEventSource::timerEventSource(this, OSMemberFunctionCast(IOTimerEventSource::Action, this, &ThinkSMC::updateEC));};
+
+    _Atomic(uint16_t) fanSpeed[2];
+    bool dualFan {false};
 
 public:
     static ThinkSMC *withDevice(IOService *provider, IOACPIPlatformDevice *device);
