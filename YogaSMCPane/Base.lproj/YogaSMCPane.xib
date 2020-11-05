@@ -34,6 +34,7 @@
                 <outlet property="vDYTCRevision" destination="W8B-pr-Ckq" id="JAI-9h-llK"/>
                 <outlet property="vECRead" destination="w0X-ID-3TJ" id="8MX-ad-Owg"/>
                 <outlet property="vFanSpeed" destination="uDk-6Z-gTN" id="2iO-3w-kaE"/>
+                <outlet property="vFanStop" destination="IDX-pC-nEt" id="Wby-GI-i2A"/>
                 <outlet property="vFnKeyRadio" destination="So0-Nv-cHB" id="SOX-xb-H38"/>
                 <outlet property="vFxKeyRadio" destination="TKw-8Y-61F" id="GaD-1g-5iH"/>
                 <outlet property="vGraphics" destination="sb9-CF-7V3" id="doH-V8-XzT"/>
@@ -952,8 +953,19 @@
                                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
                                         </textField>
+                                        <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="IDX-pC-nEt">
+                                            <rect key="frame" x="294" y="172" width="109" height="18"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <buttonCell key="cell" type="check" title="AllowFanStop" bezelStyle="regularSquare" imagePosition="left" inset="2" id="RSJ-p8-h9e">
+                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                            <connections>
+                                                <action selector="vFanStopSet:" target="-2" id="eve-Vb-UaG"/>
+                                            </connections>
+                                        </button>
                                         <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="fz3-OS-Dwq">
-                                            <rect key="frame" x="294" y="172" width="94" height="18"/>
+                                            <rect key="frame" x="294" y="147" width="94" height="18"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="check" title="SecondFan" bezelStyle="regularSquare" imagePosition="left" enabled="NO" inset="2" id="tlt-2I-JNA">
                                                 <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>

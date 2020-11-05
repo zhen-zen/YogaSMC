@@ -169,7 +169,11 @@ class YogaSMCPane : NSPreferencePane {
     @IBAction func vSecondFanSet(_ sender: NSButton) {
         defaults.setValue((vSecondFan.state == .on), forKey: "SecondThinkFan")
     }
-
+    @IBOutlet weak var vFanStop: NSButton!
+    @IBAction func vFanStopSet(_ sender: NSButton) {
+        defaults.setValue((vFanStop.state == .on), forKey: "AllowFanStop")
+    }
+    
     // Main
 
     @IBOutlet weak var TabView: NSTabView!
@@ -401,6 +405,7 @@ class YogaSMCPane : NSPreferencePane {
             }
         }
         #endif
+        vFanStop.state = defaults.bool(forKey: "AllowFanStop") ? .on : .off
     }
 
     override func awakeFromNib() {
