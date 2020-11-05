@@ -232,6 +232,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                     conf.events = ThinkEvents
                     isOpen = registerNotification()
                     isThink = true
+                case "YogaHIDD":
+                    conf.events = HIDDEvents
+                    isOpen = registerNotification()
                 default:
                     os_log("Unknown class", type: .error)
                     showOSD("Unknown class", duration: 2000)

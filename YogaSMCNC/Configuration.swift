@@ -106,3 +106,14 @@ let ThinkEvents : Dictionary<UInt32, Dictionary<UInt32, eventDesc>> = [
     TP_HKEY_EV_PALM_DETECTED.rawValue : [0: eventDesc("Palm Detected", display: false)], // 0x60B0
     TP_HKEY_EV_PALM_UNDETECTED.rawValue : [0: eventDesc("Palm Undetected", display: false)], // 0x60B1
 ]
+
+let HIDDEvents : Dictionary<UInt32, Dictionary<UInt32, eventDesc>> = [
+    0x08 : [0: eventDesc("Airplane Mode", action: .airplane)],
+    0x0B : [0: eventDesc("Sleep", action: .sleep, display: false)],
+    0x0E : [0: eventDesc("STOPCD")],
+    0xC8 : [0: eventDesc("Rotate Lock")], // Down
+    0xC9 : [0: eventDesc("Rotate Lock", display: false)], // Up
+    0xCC : [0: eventDesc("Convertible")], // Down
+    0xCD : [0: eventDesc("Convertible", display: false)], // Up
+]
+
