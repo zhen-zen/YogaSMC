@@ -236,7 +236,6 @@ public:
     virtual void stop(IOService *provider) APPLE_KEXT_OVERRIDE;
 
     virtual IOReturn setProperties(OSObject* props) APPLE_KEXT_OVERRIDE;
-    virtual IOReturn message(UInt32 type, IOService *provider, void *argument) APPLE_KEXT_OVERRIDE;
     virtual IOReturn setPowerState(unsigned long powerState, IOService * whatDevice) APPLE_KEXT_OVERRIDE;
 
     /**

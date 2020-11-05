@@ -64,7 +64,8 @@ IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
     }
 
 #ifndef ALTER
-    initSMC();
+    if (getProperty("Sensors") != nullptr)
+        initSMC();
 #endif
     return this;
 }
@@ -94,7 +95,8 @@ bool YogaVPC::start(IOService *provider) {
         }
     }
 #ifndef ALTER
-    smc->start(this);
+    if (smc)
+        smc->start(this);
 #endif
     setProperty(kDeliverNotifications, kOSBooleanTrue);
     registerService();
@@ -287,16 +289,6 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
 
 IOReturn YogaVPC::setProperties(OSObject *props) {
     commandGate->runAction(OSMemberFunctionCast(IOCommandGate::Action, this, &YogaVPC::setPropertiesGated), props);
-    return kIOReturnSuccess;
-}
-
-IOReturn YogaVPC::message(UInt32 type, IOService *provider, void *argument) {
-    if (argument) {
-        AlwaysLog("message: type=%x, provider=%s, argument=0x%04x", type, provider->getName(), *((UInt32 *) argument));
-        updateAll();
-    } else {
-        AlwaysLog("message: type=%x, provider=%s", type, provider->getName());
-    }
     return kIOReturnSuccess;
 }
 
