@@ -59,7 +59,6 @@ func wirelessHelper() {
         showOSDRes("Wireless Toggle failed", .Wifi)
         os_log("Wireless toggle failed!", type: .error)
     }
-    os_log("%d", iface.interfaceMode().rawValue)
 }
 
 func airplaneModeHelper() {
