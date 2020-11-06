@@ -59,9 +59,6 @@ class ThinkFanHelper {
         #if DEBUG
         appMenu.insertItem(withTitle: "HFNI", action: nil, keyEquivalent: "", at: secondThinkFan ? 7 : 6)
         #endif
-//        if appMenu.items[7].title == "HFNI: 7" {
-//            os_log("Might be auto mode at startup", type: .info)
-//        }
     }
 
     @objc func valueChanged(_ sender: NSSlider) {
@@ -97,7 +94,7 @@ class ThinkFanHelper {
         outputSize = 1
 
         if kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadECName), nil, 0, &ThinkFanSpeed, 4, nil, nil, &output, &outputSize) {
-            slider.integerValue = (output[0] == 0x80 ? Int(output[0]) : 8)
+            slider.integerValue = (output[0] == 0x80 ? 8 : Int(output[0]))
             fanLevel.integerValue = Int(output[0])
         } else {
             fanLevel.stringValue = "?"
