@@ -244,11 +244,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                     appMenu.insertItem(withTitle: "Class: \(IOClass)", action: nil, keyEquivalent: "", at: 2)
                     appMenu.insertItem(withTitle: "\(props["VersionInfo"] as? NSString ?? "Unknown Version")", action: nil, keyEquivalent: "", at: 3)
                     if isThink {
-                        if defaults.object(forKey: "SecondThinkFan") != nil {
-                            defaults.setValue(false, forKey: "SecondThinkFan")
-                        } else {
-                            secondThinkFan = defaults.bool(forKey: "SecondThinkFan")
-                        }
+                        secondThinkFan = defaults.bool(forKey: "SecondThinkFan")
                         if getBoolean("Dual fan", conf.io_service) {
                             secondThinkFan = false
                         }
