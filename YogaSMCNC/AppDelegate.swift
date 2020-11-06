@@ -20,9 +20,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var statusItem: NSStatusItem?
     @IBOutlet weak var appMenu: NSMenu!
     var hide = false
-    var text: NSTextField?
+    var ECCap = 0
 
     var isThink = false
+    var fanLevel: NSTextField?
     var secondThinkFan = false
     var ThinkFanSpeed = "HFSP" // 0x2f
 //    var ThinkFanStatus : UInt64  = 0x2f
@@ -56,7 +57,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             appMenu.items[6].title = "HFNI: \(output[0])"
         }
 
-        if !secondThinkFan {
+        guard (ECCap == 3), secondThinkFan else {
             return
         }
 
@@ -67,7 +68,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
         os_log("2nd fan reg: 0x%x", type: .info, output[0])
 
-        var input : [UInt8] = [];
+        var input : [UInt8] = [0];
         if (output[0] & 0x1) != 0 {
             input[0] = output[0] & 0xfe
         } else {
@@ -106,7 +107,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @objc func setThinkFan(_ sender: NSSlider) {
         print("Val: \(sender.integerValue)")
-        text?.stringValue = "\(sender.integerValue)"
+        fanLevel?.stringValue = "\(sender.integerValue)"
         guard appMenu.items[2].title == "Class: ThinkVPC" else {
             showOSD("Val: \(sender.integerValue)")
             return
@@ -224,6 +225,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             if let props = CFProps?.takeRetainedValue() as NSDictionary?,
                let IOClass = props["IOClass"] as? NSString {
                 var isOpen = false
+                switch getString("EC Capability", conf.io_service) {
+                case "RW":
+                    ECCap = 3
+                case "RO":
+                    ECCap = 1
+                default:
+                    break
+                }
                 switch IOClass {
                 case "IdeaVPC":
                     conf.events = IdeaEvents
@@ -231,7 +240,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 case "ThinkVPC":
                     conf.events = ThinkEvents
                     isOpen = registerNotification()
-                    isThink = true
+                    isThink = (ECCap != 0) ? true : false
                 default:
                     os_log("Unknown class", type: .error)
                     showOSD("Unknown class", duration: 2000)
@@ -244,20 +253,26 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                     appMenu.insertItem(withTitle: "Class: \(IOClass)", action: nil, keyEquivalent: "", at: 2)
                     appMenu.insertItem(withTitle: "\(props["VersionInfo"] as? NSString ?? "Unknown Version")", action: nil, keyEquivalent: "", at: 3)
                     if isThink {
-                        secondThinkFan = defaults.bool(forKey: "SecondThinkFan")
-                        if getBoolean("Dual fan", conf.io_service) {
-                            secondThinkFan = false
+                        updateMuteStatus()
+                        NotificationCenter.default.addObserver(self, selector: #selector(updateMuteStatus), name: NSWorkspace.didWakeNotification, object: nil)
+                        if defaults.bool(forKey: "SecondThinkFan"),
+                           !getBoolean("Dual fan", conf.io_service) {
+                            secondThinkFan = true
                         }
                         appMenu.insertItem(withTitle: "Fan", action: nil, keyEquivalent: "", at: 4)
                         #if DEBUG
                         appMenu.insertItem(withTitle: "HFSP", action: nil, keyEquivalent: "", at: 5)
                         appMenu.insertItem(withTitle: "HFNI", action: nil, keyEquivalent: "", at: 6)
-                        if secondThinkFan {
-                            appMenu.insertItem(withTitle: "Fan2", action: nil, keyEquivalent: "", at: 7)
-                        }
                         #endif
                         updateThinkFan()
                         #if DEBUG
+                        if (ECCap != 3) {
+                            showOSD("EC write unsupported! \n See `SSDT-ECRW.dsl`")
+                            return true
+                        }
+                        if secondThinkFan {
+                            appMenu.insertItem(withTitle: "Fan2", action: nil, keyEquivalent: "", at: 7)
+                        }
                         let item = NSMenuItem()
                         let slider = NSSlider(value: 0, minValue: 1, maxValue: 8, target: nil, action: #selector(setThinkFan(_:)))
                         if defaults.bool(forKey: "AllowFanStop") {
@@ -272,21 +287,19 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                         slider.frame.origin = NSPoint(x: 20, y: 5)
                         let view = NSView(frame: NSRect(x: 0, y: 0, width: slider.frame.width + 50, height: slider.frame.height + 10))
                         view.addSubview(slider)
-                        text = NSTextField(frame: NSRect(x: slider.frame.width + 25, y: 0, width: 30, height: slider.frame.height + 5))
-                        text?.isEditable = false
-                        text?.isSelectable = false
-                        text?.isBezeled = false
-                        text?.drawsBackground = false
-                        text?.font = .systemFont(ofSize: 14)
-                        view.addSubview(text!)
+                        fanLevel = NSTextField(frame: NSRect(x: slider.frame.width + 25, y: 0, width: 30, height: slider.frame.height + 5))
+                        fanLevel?.isEditable = false
+                        fanLevel?.isSelectable = false
+                        fanLevel?.isBezeled = false
+                        fanLevel?.drawsBackground = false
+                        fanLevel?.font = .systemFont(ofSize: 14)
+                        view.addSubview(fanLevel!)
                         item.view = view
                         appMenu.insertItem(item, at: 8)
                         if appMenu.items[6].title == "HFNI: 7" {
                             os_log("Might be auto mode at startup", type: .info)
                         }
                         #endif
-                        updateMuteStatus()
-                        NotificationCenter.default.addObserver(self, selector: #selector(updateMuteStatus), name: NSWorkspace.didWakeNotification, object: nil)
                     }
                 }
                 return true
