@@ -276,7 +276,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                         let item = NSMenuItem()
                         var slider : NSSlider!
                         if defaults.bool(forKey: "AllowFanStop") {
-                            slider = NSSlider(value: 0, minValue: 1, maxValue: 9, target: nil, action: #selector(setThinkFan(_:)))
+                            slider = NSSlider(value: 0, minValue: 0, maxValue: 8, target: nil, action: #selector(setThinkFan(_:)))
                             slider.numberOfTickMarks = 9
                         } else {
                             slider = NSSlider(value: 0, minValue: 1, maxValue: 8, target: nil, action: #selector(setThinkFan(_:)))
