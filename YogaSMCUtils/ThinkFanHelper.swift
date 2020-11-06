@@ -104,6 +104,7 @@ class ThinkFanHelper {
         var name = "HFNI" // 0x83
         if kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadECName), nil, 0, &name, 4, nil, nil, &output, &outputSize) {
             appMenu.items[secondThinkFan ? 7 : 6].title = "HFNI: \(output[0])"
+            os_log("HFNI: %d", type: .info, output[0])
         }
         #endif
 
@@ -139,6 +140,12 @@ class ThinkFanHelper {
             os_log("Failed to access second fan", type: .error)
             secondThinkFan = false
         }
+
+        #if DEBUG
+        if kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadECName), nil, 0, &name, 4, nil, nil, &output, &outputSize) {
+            os_log("HFNI?: %d", type: .info, output[0])
+        }
+        #endif
 
         if (input[0] & 0x1) != 0 {
             input[0] &= 0xfe
