@@ -306,14 +306,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 }
 
 func notificationCallback(_ port: CFMachPort?, _ msg: UnsafeMutableRawPointer?, _ size: CFIndex, _ info: UnsafeMutableRawPointer?) {
-    let conf = info!.assumingMemoryBound(to: sharedConfig?.self)
-    if conf.pointee != nil  {
+    if let raw = info?.assumingMemoryBound(to: sharedConfig?.self),
+       var conf = raw.pointee  {
         if let notification = msg?.load(as: SMCNotificationMessage.self) {
-            if let events = conf.pointee?.events[notification.event] {
+            if let events = conf.events[notification.event] {
                 if let desc = events[notification.data] {
-                    eventActuator(desc, notification.data, conf)
+                    eventActuator(desc, notification.data, &conf)
                 } else if let desc = events[0]{
-                    eventActuator(desc, notification.data, conf)
+                    eventActuator(desc, notification.data, &conf)
                 } else {
                     let name = String(format:"Event 0x%04x", notification.event)
                     showOSD(name)
@@ -322,21 +322,21 @@ func notificationCallback(_ port: CFMachPort?, _ msg: UnsafeMutableRawPointer?, 
             } else {
                 let name = String(format:"Event 0x%04x", notification.event)
                 showOSD(name)
-                conf.pointee?.events[notification.event] = [0: eventDesc(name, nil, option: "Unknown")]
+                conf.events[notification.event] = [0: eventDesc(name, nil, option: "Unknown")]
                 #if DEBUG
-                os_log("Event 0x%04x", type: .debug, notification.event)
+                os_log("Event 0x%04x:%d", type: .debug, notification.event, notification.data)
                 #endif
             }
         } else {
-            showOSD("Null Event")
-            os_log("Null Event", type: .error)
+            showOSD("Invalid Notification")
+            os_log("Invalid notification", type: .error)
         }
     } else {
         os_log("Invalid conf", type: .error)
     }
 }
 
-func eventActuator(_ desc: eventDesc, _ data: UInt32, _ conf: UnsafePointer<sharedConfig?>) {
+func eventActuator(_ desc: eventDesc, _ data: UInt32, _ conf: UnsafePointer<sharedConfig>) {
     switch desc.action {
     case .nothing:
         #if DEBUG
@@ -372,7 +372,7 @@ func eventActuator(_ desc: eventDesc, _ data: UInt32, _ conf: UnsafePointer<shar
             showOSDRes("Backlight \(data)", .BacklightLow)
         }
     case .micmute:
-        micMuteHelper(conf.pointee!.io_service)
+        micMuteHelper(conf.pointee.io_service)
         return
     case .desktop:
         CoreDockSendNotification("com.apple.showdesktop.awake" as CFString, nil)

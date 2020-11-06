@@ -69,6 +69,7 @@ let IdeaEvents : Dictionary<UInt32, Dictionary<UInt32, eventDesc>> = [
             1: eventDesc("Screen On")],
     0x05 : [0: eventDesc("TouchPad Off"),
             1: eventDesc("TouchPad On")],
+    0x06 : [0: eventDesc("Switch Video")],
     0x07 : [0: eventDesc("Camera", .Camera, action: .camera)],
     0x08 : [0: eventDesc("Mic Mute", action: .micmute, display: false)],
     0x0A : [0: eventDesc("TouchPad On", display: false)],
