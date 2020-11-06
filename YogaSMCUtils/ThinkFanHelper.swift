@@ -57,8 +57,7 @@ class ThinkFanHelper {
             appMenu.insertItem(withTitle: "Fan2", action: nil, keyEquivalent: "", at: 6)
         }
         #if DEBUG
-        appMenu.insertItem(withTitle: "HFSP", action: nil, keyEquivalent: "", at: secondThinkFan ? 7 : 6)
-        appMenu.insertItem(withTitle: "HFNI", action: nil, keyEquivalent: "", at: secondThinkFan ? 8 : 7)
+        appMenu.insertItem(withTitle: "HFNI", action: nil, keyEquivalent: "", at: secondThinkFan ? 7 : 6)
         #endif
 //        if appMenu.items[7].title == "HFNI: 7" {
 //            os_log("Might be auto mode at startup", type: .info)
@@ -100,9 +99,6 @@ class ThinkFanHelper {
         if kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadECName), nil, 0, &ThinkFanSpeed, 4, nil, nil, &output, &outputSize) {
             slider.integerValue = (output[0] == 0x80 ? Int(output[0]) : 8)
             fanLevel.integerValue = Int(output[0])
-            #if DEBUG
-            appMenu.items[secondThinkFan ? 7 : 6].title = "HFSP: \(output[0])"
-            #endif
         } else {
             fanLevel.stringValue = "?"
         }
@@ -110,7 +106,7 @@ class ThinkFanHelper {
         #if DEBUG
         var name = "HFNI" // 0x83
         if kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadECName), nil, 0, &name, 4, nil, nil, &output, &outputSize) {
-            appMenu.items[secondThinkFan ? 8 : 7].title = "HFNI: \(output[0])"
+            appMenu.items[secondThinkFan ? 7 : 6].title = "HFNI: \(output[0])"
         }
         #endif
 
