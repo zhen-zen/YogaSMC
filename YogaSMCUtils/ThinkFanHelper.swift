@@ -66,14 +66,14 @@ class ThinkFanHelper {
     }
 
     @objc func valueChanged(_ sender: NSSlider) {
-        fanLevel.integerValue = sender.integerValue
+        fanLevel.integerValue = sender.integerValue == 8 ? 0x80 : sender.integerValue
         guard appMenu.items[2].title == "Class: ThinkVPC" else {
             showOSD("Val: \(sender.integerValue)")
             return
         }
 
         var addr : UInt64 = 0x2f // HFSP
-        var input : [UInt8] = [sender.intValue == 8 ? 0x80 : UInt8(sender.integerValue)]
+        var input : [UInt8] = [UInt8(fanLevel.integerValue)]
         if kIOReturnSuccess != IOConnectCallMethod(connect, UInt32(kYSMCUCWriteEC), &addr, 1, &input, 1, nil, nil, nil, nil) {
             os_log("Write Fan Speed failed!", type: .fault)
             showOSD("Write Fan Speed failed!")
@@ -99,7 +99,7 @@ class ThinkFanHelper {
 
         if kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadECName), nil, 0, &ThinkFanSpeed, 4, nil, nil, &output, &outputSize) {
             slider.integerValue = (output[0] == 0x80 ? Int(output[0]) : 8)
-            fanLevel.integerValue = slider.integerValue
+            fanLevel.integerValue = Int(output[0])
             #if DEBUG
             appMenu.items[secondThinkFan ? 7 : 6].title = "HFSP: \(output[0])"
             #endif
