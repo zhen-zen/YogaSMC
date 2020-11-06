@@ -643,6 +643,14 @@ void IdeaVPC::updateVPC() {
                     // functional, TODO: turn off screen on demand
                     break;
 
+                case 4:
+                    if (!read_ec_data(VPCCMD_R_BL, &result, &retries))
+                        AlwaysLog("Failed to read VPCCMD_R_BL %d", retries);
+                    else
+                        DebugLog("Brightness changed? 0x%x %s", result, result ? "on" : "off");
+                    data = result;
+                    break;
+
                 case 5:
                     if (!read_ec_data(VPCCMD_R_TOUCHPAD, &result, &retries))
                         AlwaysLog("Failed to read VPCCMD_R_TOUCHPAD %d", retries);
