@@ -16,7 +16,7 @@ class ThinkFanHelper {
     let defaults = UserDefaults(suiteName: "org.zhen.YogaSMC")!
 
     var slider : NSSlider!
-    var fanLevel: NSTextField?
+    var fanLevel: NSTextField!
 
     var secondThinkFan = false
     var ThinkFanSpeed = "HFSP" // 0x2f
@@ -24,21 +24,17 @@ class ThinkFanHelper {
     var ThinkFanSelect : UInt64  = 0x31
     var ThinkFanRPM : UInt64  = 0x84
 
-    init(_ menu: NSMenu, _ connect: io_connect_t) {
+    public init(_ menu: NSMenu, _ connect: io_connect_t) {
         self.appMenu = menu
         self.connect = connect
 
         appMenu.insertItem(withTitle: "Fan", action: nil, keyEquivalent: "", at: 4)
-        if defaults.bool(forKey: "SecondThinkFan") {
-            secondThinkFan = true
-            appMenu.insertItem(withTitle: "Fan2", action: nil, keyEquivalent: "", at: 5)
-        }
         let item = NSMenuItem()
         if defaults.bool(forKey: "AllowFanStop") {
-            slider = NSSlider(value: 0, minValue: 0, maxValue: 8, target: nil, action: #selector(valueChanged(_:)))
+            slider = NSSlider(value: 0, minValue: 0, maxValue: 8, target: self, action: #selector(valueChanged))
             slider.numberOfTickMarks = 9
         } else {
-            slider = NSSlider(value: 0, minValue: 1, maxValue: 8, target: nil, action: #selector(valueChanged(_:)))
+            slider = NSSlider(value: 0, minValue: 1, maxValue: 8, target: self, action: #selector(valueChanged))
             slider.numberOfTickMarks = 8
         }
         slider.allowsTickMarkValuesOnly = true
@@ -48,17 +44,21 @@ class ThinkFanHelper {
         let view = NSView(frame: NSRect(x: 0, y: 0, width: slider.frame.width + 50, height: slider.frame.height + 10))
         view.addSubview(slider)
         fanLevel = NSTextField(frame: NSRect(x: slider.frame.width + 25, y: 0, width: 30, height: slider.frame.height + 5))
-        fanLevel?.isEditable = false
-        fanLevel?.isSelectable = false
-        fanLevel?.isBezeled = false
-        fanLevel?.drawsBackground = false
-        fanLevel?.font = .systemFont(ofSize: 14)
+        fanLevel.isEditable = false
+        fanLevel.isSelectable = false
+        fanLevel.isBezeled = false
+        fanLevel.drawsBackground = false
+        fanLevel.font = .systemFont(ofSize: 14)
         view.addSubview(fanLevel!)
         item.view = view
-        appMenu.insertItem(item, at: 6)
+        appMenu.insertItem(item, at: 5)
+        if defaults.bool(forKey: "SecondThinkFan") {
+            secondThinkFan = true
+            appMenu.insertItem(withTitle: "Fan2", action: nil, keyEquivalent: "", at: 6)
+        }
         #if DEBUG
-        appMenu.insertItem(withTitle: "HFSP", action: nil, keyEquivalent: "", at: 7)
-        appMenu.insertItem(withTitle: "HFNI", action: nil, keyEquivalent: "", at: 8)
+        appMenu.insertItem(withTitle: "HFSP", action: nil, keyEquivalent: "", at: secondThinkFan ? 7 : 6)
+        appMenu.insertItem(withTitle: "HFNI", action: nil, keyEquivalent: "", at: secondThinkFan ? 8 : 7)
         #endif
 //        if appMenu.items[7].title == "HFNI: 7" {
 //            os_log("Might be auto mode at startup", type: .info)
@@ -66,8 +66,7 @@ class ThinkFanHelper {
     }
 
     @objc func valueChanged(_ sender: NSSlider) {
-        print("Val: \(sender.integerValue)")
-        fanLevel?.stringValue = "\(sender.integerValue)"
+        fanLevel.integerValue = sender.integerValue
         guard appMenu.items[2].title == "Class: ThinkVPC" else {
             showOSD("Val: \(sender.integerValue)")
             return
@@ -100,16 +99,18 @@ class ThinkFanHelper {
 
         if kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadECName), nil, 0, &ThinkFanSpeed, 4, nil, nil, &output, &outputSize) {
             slider.integerValue = (output[0] == 0x80 ? Int(output[0]) : 8)
-            fanLevel?.stringValue = "\(slider.integerValue)"
+            fanLevel.integerValue = slider.integerValue
             #if DEBUG
-            appMenu.items[secondThinkFan ? 6 : 7].title = "HFSP: \(output[0])"
+            appMenu.items[secondThinkFan ? 7 : 6].title = "HFSP: \(output[0])"
             #endif
+        } else {
+            fanLevel.stringValue = "?"
         }
 
         #if DEBUG
         var name = "HFNI" // 0x83
         if kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadECName), nil, 0, &name, 4, nil, nil, &output, &outputSize) {
-            appMenu.items[secondThinkFan ? 7 : 8].title = "HFNI: \(output[0])"
+            appMenu.items[secondThinkFan ? 8 : 7].title = "HFNI: \(output[0])"
         }
         #endif
 
@@ -140,7 +141,7 @@ class ThinkFanHelper {
         outputSize = 2
         if kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadEC), &ThinkFanRPM, 1, nil, 0, nil, nil, &output, &outputSize),
            outputSize == 2 {
-            appMenu.items[5].title = "Fan2: \(Int32(output[0]) | Int32(output[1]) << 8) rpm"
+            appMenu.items[6].title = "Fan2: \(Int32(output[0]) | Int32(output[1]) << 8) rpm"
         } else {
             os_log("Failed to access second fan", type: .error)
             secondThinkFan = false
