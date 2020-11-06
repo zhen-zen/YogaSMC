@@ -274,11 +274,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                             appMenu.insertItem(withTitle: "Fan2", action: nil, keyEquivalent: "", at: 7)
                         }
                         let item = NSMenuItem()
-                        let slider = NSSlider(value: 0, minValue: 1, maxValue: 8, target: nil, action: #selector(setThinkFan(_:)))
+                        var slider : NSSlider!
                         if defaults.bool(forKey: "AllowFanStop") {
-                            slider.minValue = 0
+                            slider = NSSlider(value: 0, minValue: 1, maxValue: 9, target: nil, action: #selector(setThinkFan(_:)))
                             slider.numberOfTickMarks = 9
                         } else {
+                            slider = NSSlider(value: 0, minValue: 1, maxValue: 8, target: nil, action: #selector(setThinkFan(_:)))
                             slider.numberOfTickMarks = 8
                         }
                         slider.allowsTickMarkValuesOnly = true
