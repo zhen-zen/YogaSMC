@@ -70,7 +70,7 @@ bool IdeaVPC::initVPC() {
 
     initEC();
 
-    if (checkKernelArgument("-ysmcbr")) {
+    if (checkKernelArgument("-ideabr")) {
         brightnessPoller = IOTimerEventSource::timerEventSource(this, [](OSObject *object, IOTimerEventSource *sender) {
             auto vpc = OSDynamicCast(IdeaVPC, object);
             if (vpc) vpc->updateVPC();
