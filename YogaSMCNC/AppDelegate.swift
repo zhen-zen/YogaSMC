@@ -24,6 +24,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     var isThink = false
     var fanHelper: ThinkFanHelper?
+    var fanHelper2: ThinkFanHelper?
 
     @objc func updateMuteStatus() {
         if let current = scriptHelper(getMicVolumeAS, "MicMute"),
@@ -66,6 +67,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     func menuNeedsUpdate(_ menu: NSMenu) {
         if isThink, ECCap == 3 {
             fanHelper?.update()
+            if fanHelper2 != nil {
+                fanHelper2?.update()
+            }
         }
     }
 
@@ -160,6 +164,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                         updateMuteStatus()
                         NotificationCenter.default.addObserver(self, selector: #selector(updateMuteStatus), name: NSWorkspace.didWakeNotification, object: nil)
                         if ECCap == 3 {
+                            if !getBoolean("Dual fan", conf.io_service),
+                               defaults.bool(forKey: "SecondThinkFan") {
+                                fanHelper2 = ThinkFanHelper(appMenu, conf.connect, false)
+                                fanHelper2?.update()
+                            }
                             fanHelper = ThinkFanHelper(appMenu, conf.connect)
                             fanHelper?.update()
                         } else {

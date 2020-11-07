@@ -11,26 +11,32 @@ import Foundation
 import os.log
 
 class ThinkFanHelper {
-    var appMenu: NSMenu
-    var connect : io_connect_t
+    let menu: NSMenu
+    let connect : io_connect_t
+    let main : Bool
     let defaults = UserDefaults(suiteName: "org.zhen.YogaSMC")!
+    var enable = false
 
     let slider = NSSlider()
     let fanLevel = NSTextField()
     let autoMode = NSButton()
     let fullMode = NSButton()
 
-    var secondThinkFan = false
     var ThinkFanSpeed = "HFSP" // 0x2f
     var ThinkFanStatus : UInt64  = 0x2f
     var ThinkFanSelect : UInt64  = 0x31
     var ThinkFanRPM : UInt64  = 0x84
 
-    public init(_ menu: NSMenu, _ connect: io_connect_t) {
-        self.appMenu = menu
+    public init(_ menu: NSMenu, _ connect: io_connect_t, _ main: Bool = true) {
+        self.menu = menu
         self.connect = connect
+        self.main = main
 
-        slider.frame = NSRect(x: 20, y: 5, width: 200, height: 30)
+        if menu.items[2].title == "Class: ThinkVPC" {
+            enable = true
+        }
+
+        slider.frame = NSRect(x: 15, y: 5, width: 200, height: 30)
         slider.maxValue = 7
         if defaults.bool(forKey: "AllowFanStop") {
             slider.minValue = 0
@@ -44,12 +50,13 @@ class ThinkFanHelper {
         slider.allowsTickMarkValuesOnly = true
         slider.isContinuous = false
 
-        fanLevel.frame = NSRect(x: 22, y: 30, width: 100, height: 30)
+        fanLevel.frame = NSRect(x: 12, y: 30, width: 110, height: 30)
         fanLevel.isEditable = false
         fanLevel.isSelectable = false
         fanLevel.isBezeled = false
         fanLevel.drawsBackground = false
-        fanLevel.stringValue = "Fan: 1234 rpm"
+        fanLevel.stringValue = main ? "Main: 12345 rpm" : "Alt: 12345 rpm"
+        fanLevel.font = menu.font
 
         autoMode.frame = NSRect(x: 125, y: 35, width: 45, height: 30)
         autoMode.title = "Auto"
@@ -73,43 +80,51 @@ class ThinkFanHelper {
 
         let item = NSMenuItem()
         item.view = view
-        appMenu.insertItem(item, at: 4)
-
-        if defaults.bool(forKey: "SecondThinkFan") {
-            secondThinkFan = true
-            appMenu.insertItem(withTitle: "Fan2", action: nil, keyEquivalent: "", at: 5)
-        }
-        #if DEBUG
-        appMenu.insertItem(withTitle: "HFNI", action: nil, keyEquivalent: "", at: secondThinkFan ? 6 : 5)
-        #endif
+        menu.insertItem(item, at: 4)
     }
 
     @objc func buttonChanged(_ sender: NSButton) {
         var input : [UInt8] = [0]
         if (sender == autoMode) {
+            autoMode.state = .on
             fullMode.state = .off
             input[0] = 0x84 // safety min speed 4
         } else if (sender == fullMode) {
             autoMode.state = .off
+            fullMode.state = .on
             input[0] = 0x47 // safety min speed 7
         }
 
-        guard appMenu.items[2].title == "Class: ThinkVPC" else {
-            showOSD("Val: \(sender.title)")
+        if !enable {
+            return
+        }
+
+        if !main, !switchFan(false) {
+            enable = false
             return
         }
 
         if kIOReturnSuccess != IOConnectCallMethod(connect, UInt32(kYSMCUCWriteEC), &ThinkFanStatus, 1, &input, 1, nil, nil, nil, nil) {
             os_log("Write Fan Speed failed!", type: .fault)
             showOSD("Write Fan Speed failed!")
+            enable = false
+        }
+
+        if !main, !switchFan(true) {
+            enable = false
         }
     }
 
     @objc func sliderChanged(_ sender: NSSlider) {
         autoMode.state = .off
         fullMode.state = .off
-        guard appMenu.items[2].title == "Class: ThinkVPC" else {
+        if !enable {
             showOSD("Val: \(sender.intValue)")
+            return
+        }
+
+        if !main, !switchFan(false) {
+            enable = false
             return
         }
 
@@ -117,23 +132,74 @@ class ThinkFanHelper {
         if kIOReturnSuccess != IOConnectCallMethod(connect, UInt32(kYSMCUCWriteEC), &ThinkFanStatus, 1, &input, 1, nil, nil, nil, nil) {
             os_log("Write Fan Speed failed!", type: .fault)
             showOSD("Write Fan Speed failed!")
+            enable = false
+        }
+
+        if !main, !switchFan(true) {
+            enable = false
         }
     }
 
     @objc func update() {
-        guard connect != 0 else {
+        guard enable, connect != 0 else {
             return
         }
 
+        if !main, !switchFan(false) {
+            enable = false
+            return
+        }
+
+        if !readFan() {
+            enable = false
+        }
+
+        if !main, !switchFan(true) {
+            enable = false
+        }
+    }
+
+    func switchFan(_ main: Bool) -> Bool {
+        var current : [UInt8] = [0]
+        var outputSize = 1
+        guard kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadEC), &ThinkFanSelect, 1, nil, 0, nil, nil, &current, &outputSize),
+           outputSize == 1 else {
+            os_log("Failed to read current fan", type: .error)
+            return false
+        }
+        os_log("2nd fan reg: 0x%x", type: .info, current[0])
+
+        if (current[0] & 0x1) != 0 {
+            if (!main) {
+                os_log("Already selected second fan")
+                return true
+            }
+            current[0] &= 0xfe
+        } else {
+            if (main) {
+                os_log("Already selected main fan")
+                return true
+            }
+            current[0] |= 0x1
+        }
+
+        guard kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCWriteEC), &ThinkFanSelect, 1, &current, 1, nil, nil, nil, nil) else {
+            os_log("Failed to select second fan", type: .error)
+            return false
+        }
+        return true
+    }
+
+    func readFan() -> Bool {
         var outputSize = 2
         var output : [UInt8] = [0, 0]
         guard kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadEC), &ThinkFanRPM, 1, nil, 0, nil, nil, &output, &outputSize),
            outputSize == 2 else {
             os_log("Failed to access EC", type: .error)
-            return
+            return false
         }
 
-        fanLevel.stringValue = "Fan: \(Int32(output[0]) | Int32(output[1]) << 8) rpm"
+        fanLevel.stringValue = String(format: main ? "Main: %d rpm" : "Alt: %d rpm", Int32(output[0]) | Int32(output[1]) << 8)
 
         outputSize = 1
 
@@ -157,66 +223,15 @@ class ThinkFanHelper {
         } else {
             showOSD("Failed to read fan level!")
             os_log("Failed to read fan level!", type: .error)
-            return
+            return false
         }
 
         #if DEBUG
         var name = "HFNI" // 0x83
         if kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadECName), nil, 0, &name, 4, nil, nil, &output, &outputSize) {
-            appMenu.items[secondThinkFan ? 6 : 5].title = "HFNI: \(output[0])"
-            os_log("HFNI: %d", type: .info, output[0])
+            os_log(main ? "HFNI: %d" : "HFNI2: %d", type: .info, output[0])
         }
         #endif
-
-        if !secondThinkFan {
-            return
-        }
-
-        guard kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadEC), &ThinkFanSelect, 1, nil, 0, nil, nil, &output, &outputSize),
-           outputSize == 1 else {
-            os_log("Failed to read current fan", type: .error)
-            return
-        }
-        os_log("2nd fan reg: 0x%x", type: .info, output[0])
-
-        var input : [UInt8] = [0];
-        if (output[0] & 0x1) != 0 {
-            input[0] = output[0] & 0xfe
-        } else {
-            input[0] = output[0] | 0x1
-        }
-
-        guard kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCWriteEC), &ThinkFanSelect, 1, &input, 1, nil, nil, nil, nil) else {
-            os_log("Failed to select second fan", type: .error)
-            secondThinkFan = false
-            return
-        }
-
-        outputSize = 2
-        if kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadEC), &ThinkFanRPM, 1, nil, 0, nil, nil, &output, &outputSize),
-           outputSize == 2 {
-            appMenu.items[5].title = "Fan2: \(Int32(output[0]) | Int32(output[1]) << 8) rpm"
-        } else {
-            os_log("Failed to access second fan", type: .error)
-            secondThinkFan = false
-        }
-
-        #if DEBUG
-        if kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadECName), nil, 0, &name, 4, nil, nil, &output, &outputSize) {
-            os_log("HFNI?: %d", type: .info, output[0])
-        }
-        #endif
-
-        if (input[0] & 0x1) != 0 {
-            input[0] &= 0xfe
-        } else {
-            input[0] |= 0x1
-        }
-
-        guard kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCWriteEC), &ThinkFanSelect, 1, &input, 1, nil, nil, nil, nil) else {
-            os_log("Failed to select first fan", type: .error)
-            secondThinkFan = false
-            return
-        }
+        return true
     }
 }
