@@ -9,7 +9,6 @@
 #ifndef YogaSMC_hpp
 #define YogaSMC_hpp
 
-#include <IOKit/IOTimerEventSource.h>
 #include <VirtualSMCSDK/kern_vsmcapi.hpp>
 #include "KeyImplementations.hpp"
 #include "YogaBaseService.hpp"

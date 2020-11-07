@@ -16,6 +16,8 @@
 #include "IdeaSMC.hpp"
 #endif
 
+#define BR_POLLING_INTERVAL 2000
+
 // from linux/drivers/platform/x86/ideapad-laptop.c
 
 #define BM_RAPIDCHARGE_BIT   (2)
@@ -107,6 +109,17 @@ private:
     void setPropertiesGated(OSObject* props) APPLE_KEXT_OVERRIDE;
     void updateAll() APPLE_KEXT_OVERRIDE;
     void updateVPC() APPLE_KEXT_OVERRIDE;
+    bool exitVPC() APPLE_KEXT_OVERRIDE;
+
+    /**
+     *  Saved brightness level
+     */
+    UInt32 brightnessSaved {0};
+
+    /**
+     *  Dirty hack for brightness issues
+     */
+    IOTimerEventSource* brightnessPoller {nullptr};
 
     /**
      *  Battery conservation mode status

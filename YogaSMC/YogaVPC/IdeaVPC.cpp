@@ -69,7 +69,30 @@ bool IdeaVPC::initVPC() {
     capabilities->release();
 
     initEC();
+
+    if (checkKernelArgument("-ysmcbr")) {
+        brightnessPoller = IOTimerEventSource::timerEventSource(this, [](OSObject *object, IOTimerEventSource *sender) {
+            auto vpc = OSDynamicCast(IdeaVPC, object);
+            if (vpc) vpc->updateVPC();
+        });
+        if (!brightnessPoller ||
+            workLoop->addEventSource(brightnessPoller) != kIOReturnSuccess) {
+            AlwaysLog("Failed to add brightnessPoller");
+            OSSafeReleaseNULL(brightnessPoller);
+        } else {
+            brightnessPoller->setTimeoutMS(BR_POLLING_INTERVAL);
+            brightnessPoller->enable();
+            AlwaysLog("BrightnessPoller enabled");
+        }
+    }
     return true;
+}
+
+bool IdeaVPC::exitVPC() {
+    brightnessPoller->disable();
+    workLoop->removeEventSource(brightnessPoller);
+    OSSafeReleaseNULL(brightnessPoller);
+    return super::exitVPC();
 }
 
 IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
@@ -602,7 +625,8 @@ void IdeaVPC::updateVPC() {
     DebugLog("read VPC EC result: 0x%x %d", vpc1, retries);
 
     if (!vpc1) {
-        DebugLog("empty EC event");
+        if (!brightnessPoller)
+            DebugLog("empty EC event");
         return;
     }
 
@@ -646,9 +670,18 @@ void IdeaVPC::updateVPC() {
                 case 4:
                     if (!read_ec_data(VPCCMD_R_BL, &result, &retries))
                         AlwaysLog("Failed to read VPCCMD_R_BL %d", retries);
-                    else
-                        DebugLog("Brightness changed? 0x%x %s", result, result ? "on" : "off");
-                    data = result;
+                    else {
+                        if (result == 0 || result < brightnessSaved) {
+                            DebugLog("Brightness down? 0x%x -> 0x%x", brightnessSaved, result);
+                            // Pending merge of YogaHIDD branch and reuse some utilities
+                        } else {
+                            DebugLog("Brightness up? 0x%x -> 0x%x", brightnessSaved, result);
+                        }
+                        if (brightnessPoller)
+                            brightnessPoller->setTimeoutMS(BR_POLLING_INTERVAL);
+                        brightnessSaved = result;
+                        data = result;
+                    }
                     break;
 
                 case 5:
