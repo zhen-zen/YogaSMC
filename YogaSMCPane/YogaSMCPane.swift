@@ -447,9 +447,15 @@ class YogaSMCPane : NSPreferencePane {
             autoSleepCheck.isEnabled = false
             yogaModeCheck.isEnabled = false
             indicatorCheck.isEnabled = false
-            muteCheck.isEnabled = false
             micMuteCheck.isEnabled = false
         }
+        #if !DEBUG
+        muteCheck.isEnabled = false
+        if muteCheck.state == .on {
+            muteCheck.state = .off
+            autoBacklightSet(nil)
+        }
+        #endif
 
         if let val = props["BacklightLevel"] as? NSNumber {
             backlightSlider.integerValue = val as! Int
