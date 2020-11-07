@@ -453,7 +453,7 @@ class YogaSMCPane : NSPreferencePane {
         muteCheck.isEnabled = false
         if muteCheck.state == .on {
             muteCheck.state = .off
-            autoBacklightSet(nil)
+            autoBacklightSet(muteCheck)
         }
         #endif
 
