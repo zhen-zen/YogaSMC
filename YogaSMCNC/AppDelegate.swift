@@ -124,7 +124,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func applicationWillTerminate(_ aNotification: Notification) {
         saveConfig()
-        NotificationCenter.default.removeObserver(self)
+        NSWorkspace.shared.notificationCenter.removeObserver(self)
         if conf.connect != 0 {
             IOServiceClose(conf.connect)
         }
@@ -177,7 +177,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                             showOSD("EC access unavailable! \n See `SSDT-ECRW.dsl`")
                         }
                         thinkWakeup()
-                        NotificationCenter.default.addObserver(self, selector: #selector(thinkWakeup), name: NSWorkspace.didWakeNotification, object: nil)
+                        NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(thinkWakeup), name: NSWorkspace.didWakeNotification, object: nil)
                     }
                 }
                 return true
@@ -266,7 +266,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         hide = defaults.bool(forKey: "HideIcon")
 
         if !hide {
-            let login = NSMenuItem(title: "Start at Login", action: #selector(toggleStartAtLogin(_:)), keyEquivalent: "s")
+            let login = NSMenuItem(title: "Start at Login", action: #selector(toggleStartAtLogin), keyEquivalent: "s")
             login.state = defaults.bool(forKey: "StartAtLogin") ? .on : .off
             appMenu.insertItem(NSMenuItem.separator(), at: 1)
             appMenu.insertItem(login, at: 2)

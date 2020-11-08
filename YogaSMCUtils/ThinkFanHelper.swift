@@ -154,7 +154,7 @@ class ThinkFanHelper {
             return
         }
 
-        os_log("Speed output: %x", output[0])
+        os_log("Speed output: %x", type: .info, output[0])
         if ((output[0] & 0x40) != 0) {
             autoMode.state = .off
             fullMode.state = .on
