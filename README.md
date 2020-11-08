@@ -2,7 +2,7 @@
 
 This driver consists of YogaSMC, YogaWMI and YogaVPC.
 
-Each component can be derived for different targets. Currently ThinkPad and IdeaPad series (all other consumer brands) are supported.
+Each component can be derived for different targets. Currently ThinkPad and IdeaPad series (all other consumer brands) are supported. Support for generic Intel HID event & 5 button array is experimental.
 
 Command to driver can be sent with [ioio](https://github.com/RehabMan/OS-X-ioio), e.g. `ioio -s IdeaVPC ConservationMode true`.
 
@@ -49,13 +49,13 @@ Currently available functions:
 | ---- | ---- | ---- | ---- |
 | `_HID` | `VPC2004` | `LEN0268`<br>`LEN0068` | `INT33D5`<br>`INTC1051` |
 | Reference | [ideapad-laptop](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/ideapad-laptop.c) | [thinkpad_acpi](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/thinkpad_acpi.c) | [intel-hid](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/intel-hid.c) |
-| Hotkey polling | ✅ | ✅ | ✅ |
+| Hotkey polling | ✅ | ✅ | ✅ (beta) |
 | Conservation mode | ✅ | ✅ | N/A |
 | Battery threshold | Not supported | ✅ | N/A |
 | Charging control | Need testing | Need testing | N/A |
 | DYTC | ✅ | ✅ | N/A |
 | Fan reading | Need testing | ✅ | N/A |
-| Fan control | Need testing | Need testing | N/A |
+| Fan control | Need testing | ✅ | N/A |
 | Fn lock mode | ✅ | Native | N/A |
 | LED control | Not supported | ✅ | N/A |
 | Keyboard backlight | ✅ | ✅ | N/A |

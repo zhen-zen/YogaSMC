@@ -299,3 +299,11 @@ void YogaBaseService::validateEC() {
         setProperty("EC Capability", "False");
     }
 }
+
+void YogaBaseService::dispatchKeyEvent(UInt16 keyCode, bool goingDown, bool time) {
+    PS2KeyInfo info = {.adbKeyCode = keyCode, .goingDown = goingDown, .eatKey = false};
+    clock_get_uptime(&info.time);
+    if (time)
+        dispatchMessage(kPS2M_notifyKeyTime, &info.time);
+    dispatchMessage(kSMC_notifyKeystroke, &info);
+}

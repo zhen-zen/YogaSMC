@@ -298,10 +298,3 @@ void YogaHIDD::initButtonArray() {
     if (kIOReturnSuccess != evaluateHIDD(INTEL_HID_DSM_BTNL_FN, nullptr, 0))
         AlwaysLog("Failed to enable HID power button");
 }
-
-void YogaHIDD::dispatchKeyEvent(UInt16 keyCode, bool goingDown) {
-    PS2KeyInfo info = {.adbKeyCode = keyCode, .goingDown = goingDown, .eatKey = false};
-    clock_get_uptime(&info.time);
-    dispatchMessage(kPS2M_notifyKeyTime, &info.time);
-    dispatchMessage(kSMC_notifyKeystroke, &info);
-}

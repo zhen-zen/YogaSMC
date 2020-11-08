@@ -43,30 +43,6 @@ static const char *intel_hid_dsm_fn_to_method[INTEL_HID_DSM_FN_MAX] = {
     "HEBC"
 };
 
-typedef struct PS2KeyInfo
-{
-    uint64_t time;
-    UInt16  adbKeyCode;
-    bool    goingDown;
-    bool    eatKey;
-} PS2KeyInfo;
-
-enum hid_adb_codes {
-    ADB_PLAY_PAUSE        =  0x34,
-    ADB_LEFT_META         =  0x37,
-    ADB_NUM_LOCK          =  0x47,
-    ADB_VOLUME_UP         =  0x48,
-    ADB_VOLUME_DOWN       =  0x49,
-    ADB_MUTE              =  0x4a,
-    ADB_BRIGHTNESS_DOWN   =  0x6b,
-    ADB_BRIGHTNESS_UP     =  0x71,
-    ADB_HOME              =  0x73,
-    ADB_PAGE_UP           =  0x74,
-    ADB_END               =  0x77,
-    ADB_PAGE_DOWN         =  0x79,
-    ADB_POWER             =  0x7f,
-};
-
 class YogaHIDD : public YogaVPC
 {
     typedef YogaVPC super;
@@ -109,13 +85,6 @@ class YogaHIDD : public YogaVPC
      */
     void initButtonArray();
     
-    /**
-     *  Send key event through VoodooPS2
-     * @param keyCode event
-     * @param goingDown pressed
-     */
-    void dispatchKeyEvent(UInt16 keyCode, bool goingDown);
-
 public:
     virtual bool start(IOService *provider) APPLE_KEXT_OVERRIDE;
     virtual void stop(IOService *provider) APPLE_KEXT_OVERRIDE;

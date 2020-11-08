@@ -156,6 +156,14 @@ protected:
      */
     IOReturn readECName(const char* name, UInt32 *result);
 
+    /**
+     *  Send key event through VoodooPS2
+     * @param keyCode event
+     * @param goingDown pressed
+     * @param time notify key time
+     */
+    void dispatchKeyEvent(UInt16 keyCode, bool goingDown, bool time=true);
+
 public:
     virtual bool init(OSDictionary *dictionary) APPLE_KEXT_OVERRIDE;
     virtual IOService *probe(IOService *provider, SInt32 *score) APPLE_KEXT_OVERRIDE;
