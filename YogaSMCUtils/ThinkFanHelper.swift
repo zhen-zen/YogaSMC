@@ -91,10 +91,12 @@ class ThinkFanHelper {
             autoMode.state = .on
             fullMode.state = .off
             input[0] = 0x84 // safety min speed 4
+            slider.intValue = 4
         } else if (sender == fullMode) {
             autoMode.state = .off
             fullMode.state = .on
             input[0] = 0x47 // safety min speed 7
+            slider.intValue = 7
         }
 
         guard enable, switchFan(main) else {
