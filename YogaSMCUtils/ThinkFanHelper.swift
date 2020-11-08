@@ -16,6 +16,7 @@ class ThinkFanHelper {
     let main : Bool
     let defaults = UserDefaults(suiteName: "org.zhen.YogaSMC")!
     var enable = false
+    var single : Bool
 
     let slider = NSSlider()
     let fanLevel = NSTextField()
@@ -27,10 +28,11 @@ class ThinkFanHelper {
     var ThinkFanSelect : UInt64  = 0x31
     var ThinkFanRPM : UInt64  = 0x84
 
-    public init(_ menu: NSMenu, _ connect: io_connect_t, _ main: Bool = true) {
+    public init(_ menu: NSMenu, _ connect: io_connect_t, _ main: Bool, _ single: Bool) {
         self.menu = menu
         self.connect = connect
         self.main = main
+        self.single = single
 
         if menu.items[2].title == "Class: ThinkVPC" {
             enable = true
@@ -137,7 +139,7 @@ class ThinkFanHelper {
         }
         fanLevel.stringValue = String(format: main ? "Main: %d rpm" : "Alt: %d rpm", Int32(output[0]) | Int32(output[1]) << 8)
 
-        if !updateLevel {
+        if !single, !updateLevel {
             return
         }
 
@@ -170,6 +172,9 @@ class ThinkFanHelper {
     }
 
     func switchFan(_ main: Bool) -> Bool {
+        if single {
+            return true
+        }
         var current : [UInt8] = [0]
         var outputSize = 1
         guard kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadEC), &ThinkFanSelect, 1, nil, 0, nil, nil, &current, &outputSize),
