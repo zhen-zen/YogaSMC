@@ -167,10 +167,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                             if !getBoolean("Dual fan", conf.io_service),
                                defaults.bool(forKey: "SecondThinkFan") {
                                 fanHelper2 = ThinkFanHelper(appMenu, conf.connect, false)
-                                fanHelper2?.update()
+                                fanHelper2?.update(true)
                             }
                             fanHelper = ThinkFanHelper(appMenu, conf.connect)
-                            fanHelper?.update()
+                            fanHelper?.update(true)
                         } else {
                             showOSD("EC access unavailable! \n See `SSDT-ECRW.dsl`")
                         }

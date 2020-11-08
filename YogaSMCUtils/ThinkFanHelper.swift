@@ -95,12 +95,7 @@ class ThinkFanHelper {
             input[0] = 0x47 // safety min speed 7
         }
 
-        if !enable {
-            return
-        }
-
-        if !main, !switchFan(false) {
-            enable = false
+        guard enable, switchFan(main) else {
             return
         }
 
@@ -109,22 +104,13 @@ class ThinkFanHelper {
             showOSD("Write Fan Speed failed!")
             enable = false
         }
-
-        if !main, !switchFan(true) {
-            enable = false
-        }
     }
 
     @objc func sliderChanged(_ sender: NSSlider) {
         autoMode.state = .off
         fullMode.state = .off
-        if !enable {
-            showOSD("Val: \(sender.intValue)")
-            return
-        }
 
-        if !main, !switchFan(false) {
-            enable = false
+        guard enable, switchFan(main) else {
             return
         }
 
@@ -134,28 +120,52 @@ class ThinkFanHelper {
             showOSD("Write Fan Speed failed!")
             enable = false
         }
-
-        if !main, !switchFan(true) {
-            enable = false
-        }
     }
 
-    @objc func update() {
-        guard enable, connect != 0 else {
+    @objc func update(_ updateLevel: Bool = false) {
+        guard enable, connect != 0, switchFan(main) else {
             return
         }
 
-        if !main, !switchFan(false) {
+        var outputSize = 2
+        var output : [UInt8] = [0, 0]
+        guard kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadEC), &ThinkFanRPM, 1, nil, 0, nil, nil, &output, &outputSize),
+           outputSize == 2 else {
+            os_log("Failed to access EC", type: .error)
+            enable = false
+            return
+        }
+        fanLevel.stringValue = String(format: main ? "Main: %d rpm" : "Alt: %d rpm", Int32(output[0]) | Int32(output[1]) << 8)
+
+        if !updateLevel {
+            return
+        }
+
+        outputSize = 1
+
+        guard kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadECName), nil, 0, &ThinkFanSpeed, 4, nil, nil, &output, &outputSize) else {
+            showOSD("Failed to read fan level!")
+            os_log("Failed to read fan level!", type: .error)
             enable = false
             return
         }
 
-        if !readFan() {
-            enable = false
-        }
-
-        if !main, !switchFan(true) {
-            enable = false
+        os_log("Speed output: %x", output[0])
+        if ((output[0] & 0x40) != 0) {
+            autoMode.state = .off
+            fullMode.state = .on
+        } else if ((output[0] & 0x80) != 0) {
+            autoMode.state = .on
+            fullMode.state = .off
+        } else {
+            autoMode.state = .off
+            fullMode.state = .off
+            if (output[0] > 7) {
+                os_log("Unknown level 0x%02x", type: .error, output[0])
+                slider.intValue = 7
+            } else {
+                slider.intValue = Int32(output[0])
+            }
         }
     }
 
@@ -165,73 +175,30 @@ class ThinkFanHelper {
         guard kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadEC), &ThinkFanSelect, 1, nil, 0, nil, nil, &current, &outputSize),
            outputSize == 1 else {
             os_log("Failed to read current fan", type: .error)
+            enable = false
             return false
         }
-        os_log("2nd fan reg: 0x%x", type: .info, current[0])
+        os_log("fan reg: 0x%x", type: .info, current[0])
 
         if (current[0] & 0x1) != 0 {
             if (!main) {
-                os_log("Already selected second fan")
+                os_log("Already selected second fan", type: .info)
                 return true
             }
             current[0] &= 0xfe
         } else {
             if (main) {
-                os_log("Already selected main fan")
+                os_log("Already selected main fan", type: .info)
                 return true
             }
             current[0] |= 0x1
         }
 
         guard kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCWriteEC), &ThinkFanSelect, 1, &current, 1, nil, nil, nil, nil) else {
-            os_log("Failed to select second fan", type: .error)
+            os_log("Failed to select another fan", type: .error)
+            enable = false
             return false
         }
-        return true
-    }
-
-    func readFan() -> Bool {
-        var outputSize = 2
-        var output : [UInt8] = [0, 0]
-        guard kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadEC), &ThinkFanRPM, 1, nil, 0, nil, nil, &output, &outputSize),
-           outputSize == 2 else {
-            os_log("Failed to access EC", type: .error)
-            return false
-        }
-
-        fanLevel.stringValue = String(format: main ? "Main: %d rpm" : "Alt: %d rpm", Int32(output[0]) | Int32(output[1]) << 8)
-
-        outputSize = 1
-
-        if kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadECName), nil, 0, &ThinkFanSpeed, 4, nil, nil, &output, &outputSize) {
-            if ((output[0] & 0x40) != 0) {
-                autoMode.state = .off
-                fullMode.state = .on
-            } else if ((output[0] & 0x80) != 0) {
-                autoMode.state = .on
-                fullMode.state = .off
-            } else {
-                autoMode.state = .off
-                fullMode.state = .off
-                if (output[0] > 7) {
-                    os_log("Unknown level 0x%02x", type: .error, output[0])
-                    slider.intValue = 7
-                } else {
-                    slider.intValue = Int32(output[0])
-                }
-            }
-        } else {
-            showOSD("Failed to read fan level!")
-            os_log("Failed to read fan level!", type: .error)
-            return false
-        }
-
-        #if DEBUG
-        var name = "HFNI" // 0x83
-        if kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadECName), nil, 0, &name, 4, nil, nil, &output, &outputSize) {
-            os_log(main ? "HFNI: %d" : "HFNI2: %d", type: .info, output[0])
-        }
-        #endif
         return true
     }
 }
