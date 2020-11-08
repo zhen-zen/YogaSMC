@@ -99,6 +99,7 @@ class ThinkFanHelper {
             savedLevel = 0x47 // safety min speed 7
             slider.intValue = 7
         } else {
+            os_log("Unknown fan mode: %s", type: .error, sender.title)
             return
         }
 
@@ -131,14 +132,15 @@ class ThinkFanHelper {
             return
         }
 
-        var outputSize = 2
         var output : [UInt8] = [0, 0]
+        var outputSize = 2
         guard kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadEC), &ThinkFanRPM, 1, nil, 0, nil, nil, &output, &outputSize),
            outputSize == 2 else {
             os_log("Failed to access EC", type: .error)
             enable = false
             return
         }
+
         fanLevel.stringValue = String(format: main ? "Main: %d rpm" : "Alt: %d rpm", Int32(output[0]) | Int32(output[1]) << 8)
 
         if !updateLevel {
@@ -146,7 +148,6 @@ class ThinkFanHelper {
         }
 
         outputSize = 1
-
         guard kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadECName), nil, 0, &ThinkFanSpeed, 4, nil, nil, &output, &outputSize) else {
             showOSD("Failed to read fan level!")
             os_log("Failed to read fan level!", type: .error)
@@ -154,7 +155,6 @@ class ThinkFanHelper {
             return
         }
 
-        os_log("Speed output: %x", type: .info, output[0])
         if ((output[0] & 0x40) != 0) {
             autoMode.state = .off
             fullMode.state = .on
@@ -170,11 +170,11 @@ class ThinkFanHelper {
             fullMode.state = .off
             if (output[0] > 7) {
                 os_log("Unknown level 0x%02x", type: .error, output[0])
-                slider.intValue = 7
+                savedLevel = 7
             } else {
-                slider.intValue = Int32(output[0])
+                savedLevel = output[0]
             }
-            savedLevel = UInt8(slider.intValue)
+            slider.intValue = Int32(savedLevel)
         }
     }
 
@@ -182,6 +182,7 @@ class ThinkFanHelper {
         if single {
             return true
         }
+
         var current : [UInt8] = [0]
         var outputSize = 1
         guard kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadEC), &ThinkFanSelect, 1, nil, 0, nil, nil, &current, &outputSize),
