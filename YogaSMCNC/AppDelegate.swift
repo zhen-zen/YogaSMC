@@ -20,105 +20,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var statusItem: NSStatusItem?
     @IBOutlet weak var appMenu: NSMenu!
     var hide = false
-    var text: NSTextField?
+    var ECCap = 0
 
     var isThink = false
-    var secondThinkFan = false
-    var ThinkFanSpeed = "HFSP" // 0x2f
-//    var ThinkFanStatus : UInt64  = 0x2f
-    var ThinkFanSelect : UInt64  = 0x31
-    var ThinkFanRPM : UInt64  = 0x84
-
-    func updateThinkFan() {
-        guard conf.connect != 0 else {
-            return
-        }
-
-        var outputSize = 2
-        var output : [UInt8] = [0, 0]
-        guard kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadEC), &ThinkFanRPM, 1, nil, 0, nil, nil, &output, &outputSize),
-           outputSize == 2 else {
-            os_log("Failed to access EC", type: .error)
-            return
-        }
-
-        appMenu.items[4].title = "Fan: \(Int32(output[0]) | Int32(output[1]) << 8) rpm"
-
-        #if DEBUG
-        outputSize = 1
-
-        if kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadECName), nil, 0, &ThinkFanSpeed, 4, nil, nil, &output, &outputSize) {
-            appMenu.items[5].title = "HFSP: \(output[0])"
-        }
-
-        var name = "HFNI" // 0x83
-        if kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadECName), nil, 0, &name, 4, nil, nil, &output, &outputSize) {
-            appMenu.items[6].title = "HFNI: \(output[0])"
-        }
-
-        if !secondThinkFan {
-            return
-        }
-
-        guard kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadEC), &ThinkFanSelect, 1, nil, 0, nil, nil, &output, &outputSize),
-           outputSize == 1 else {
-            os_log("Failed to read current fan", type: .error)
-            return
-        }
-        os_log("2nd fan reg: 0x%x", type: .info, output[0])
-
-        var input : [UInt8] = [];
-        if (output[0] & 0x1) != 0 {
-            input[0] = output[0] & 0xfe
-        } else {
-            input[0] = output[0] | 0x1
-        }
-
-        guard kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCWriteEC), &ThinkFanSelect, 1, &input, 1, nil, nil, nil, nil) else {
-            os_log("Failed to select second fan", type: .error)
-            secondThinkFan = false
-            return
-        }
-
-        outputSize = 2
-        if kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadEC), &ThinkFanRPM, 1, nil, 0, nil, nil, &output, &outputSize),
-           outputSize == 2 {
-            appMenu.items[7].title = "Fan2: \(Int32(output[0]) | Int32(output[1]) << 8) rpm"
-        } else {
-            os_log("Failed to access second fan", type: .error)
-            secondThinkFan = false
-        }
-
-        if (input[0] & 0x1) != 0 {
-            input[0] &= 0xfe
-        } else {
-            input[0] |= 0x1
-        }
-
-        guard kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCWriteEC), &ThinkFanSelect, 1, &input, 1, nil, nil, nil, nil) else {
-            os_log("Failed to select first fan", type: .error)
-            secondThinkFan = false
-            return
-        }
-
-        #endif
-    }
-
-    @objc func setThinkFan(_ sender: NSSlider) {
-        print("Val: \(sender.integerValue)")
-        text?.stringValue = "\(sender.integerValue)"
-        guard appMenu.items[2].title == "Class: ThinkVPC" else {
-            showOSD("Val: \(sender.integerValue)")
-            return
-        }
-
-        var addr : UInt64 = 0x2f // HFSP
-        var input : [UInt8] = [sender.intValue == 8 ? 0x80 : UInt8(sender.integerValue)]
-        if kIOReturnSuccess != IOConnectCallMethod(conf.connect, UInt32(kYSMCUCWriteEC), &addr, 1, &input, 1, nil, nil, nil, nil) {
-            os_log("Write Fan Speed failed!", type: .fault)
-            showOSD("Write Fan Speed failed!")
-        }
-    }
+    var fanHelper: ThinkFanHelper?
 
     @objc func updateMuteStatus() {
         if let current = scriptHelper(getMicVolumeAS, "MicMute"),
@@ -159,8 +64,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     func menuNeedsUpdate(_ menu: NSMenu) {
-        if isThink {
-            updateThinkFan()
+        if isThink, ECCap == 3 {
+            fanHelper?.update()
         }
     }
 
@@ -224,6 +129,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             if let props = CFProps?.takeRetainedValue() as NSDictionary?,
                let IOClass = props["IOClass"] as? NSString {
                 var isOpen = false
+                switch getString("EC Capability", conf.io_service) {
+                case "RW":
+                    ECCap = 3
+                case "RO":
+                    ECCap = 1
+                default:
+                    break
+                }
                 switch IOClass {
                 case "IdeaVPC":
                     conf.events = IdeaEvents
@@ -231,7 +144,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 case "ThinkVPC":
                     conf.events = ThinkEvents
                     isOpen = registerNotification()
-                    isThink = true
+                    isThink = (ECCap != 0) ? true : false
                 case "YogaHIDD":
                     conf.events = HIDDEvents
                     isOpen = registerNotification()
@@ -247,53 +160,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                     appMenu.insertItem(withTitle: "Class: \(IOClass)", action: nil, keyEquivalent: "", at: 2)
                     appMenu.insertItem(withTitle: "\(props["VersionInfo"] as? NSString ?? "Unknown Version")", action: nil, keyEquivalent: "", at: 3)
                     if isThink {
-                        if defaults.object(forKey: "SecondThinkFan") != nil {
-                            defaults.setValue(false, forKey: "SecondThinkFan")
-                        } else {
-                            secondThinkFan = defaults.bool(forKey: "SecondThinkFan")
-                        }
-                        if getBoolean("Dual fan", conf.io_service) {
-                            secondThinkFan = false
-                        }
-                        appMenu.insertItem(withTitle: "Fan", action: nil, keyEquivalent: "", at: 4)
-                        #if DEBUG
-                        appMenu.insertItem(withTitle: "HFSP", action: nil, keyEquivalent: "", at: 5)
-                        appMenu.insertItem(withTitle: "HFNI", action: nil, keyEquivalent: "", at: 6)
-                        if secondThinkFan {
-                            appMenu.insertItem(withTitle: "Fan2", action: nil, keyEquivalent: "", at: 7)
-                        }
-                        #endif
-                        updateThinkFan()
-                        #if DEBUG
-                        let item = NSMenuItem()
-                        let slider = NSSlider(value: 0, minValue: 1, maxValue: 8, target: nil, action: #selector(setThinkFan(_:)))
-                        if defaults.bool(forKey: "AllowFanStop") {
-                            slider.minValue = 0
-                            slider.numberOfTickMarks = 9
-                        } else {
-                            slider.numberOfTickMarks = 8
-                        }
-                        slider.allowsTickMarkValuesOnly = true
-                        slider.isContinuous = false
-                        slider.frame.size.width = 180
-                        slider.frame.origin = NSPoint(x: 20, y: 5)
-                        let view = NSView(frame: NSRect(x: 0, y: 0, width: slider.frame.width + 50, height: slider.frame.height + 10))
-                        view.addSubview(slider)
-                        text = NSTextField(frame: NSRect(x: slider.frame.width + 25, y: 0, width: 30, height: slider.frame.height + 5))
-                        text?.isEditable = false
-                        text?.isSelectable = false
-                        text?.isBezeled = false
-                        text?.drawsBackground = false
-                        text?.font = .systemFont(ofSize: 14)
-                        view.addSubview(text!)
-                        item.view = view
-                        appMenu.insertItem(item, at: 8)
-                        if appMenu.items[6].title == "HFNI: 7" {
-                            os_log("Might be auto mode at startup", type: .info)
-                        }
-                        #endif
                         updateMuteStatus()
                         NotificationCenter.default.addObserver(self, selector: #selector(updateMuteStatus), name: NSWorkspace.didWakeNotification, object: nil)
+                        if ECCap == 3 {
+                            fanHelper = ThinkFanHelper(appMenu, conf.connect)
+                            fanHelper?.update()
+                        } else {
+                            showOSD("EC access unavailable! \n See `SSDT-ECRW.dsl`")
+                        }
                     }
                 }
                 return true
@@ -435,14 +309,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 }
 
 func notificationCallback(_ port: CFMachPort?, _ msg: UnsafeMutableRawPointer?, _ size: CFIndex, _ info: UnsafeMutableRawPointer?) {
-    let conf = info!.assumingMemoryBound(to: sharedConfig?.self)
-    if conf.pointee != nil  {
+    if let raw = info?.assumingMemoryBound(to: sharedConfig?.self),
+       var conf = raw.pointee  {
         if let notification = msg?.load(as: SMCNotificationMessage.self) {
-            if let events = conf.pointee?.events[notification.event] {
+            if let events = conf.events[notification.event] {
                 if let desc = events[notification.data] {
-                    eventActuator(desc, notification.data, conf)
+                    eventActuator(desc, notification.data, &conf)
                 } else if let desc = events[0]{
-                    eventActuator(desc, notification.data, conf)
+                    eventActuator(desc, notification.data, &conf)
                 } else {
                     let name = String(format:"Event 0x%04x", notification.event)
                     showOSD(name)
@@ -451,21 +325,21 @@ func notificationCallback(_ port: CFMachPort?, _ msg: UnsafeMutableRawPointer?, 
             } else {
                 let name = String(format:"Event 0x%04x", notification.event)
                 showOSD(name)
-                conf.pointee?.events[notification.event] = [0: eventDesc(name, nil, option: "Unknown")]
+                conf.events[notification.event] = [0: eventDesc(name, nil, option: "Unknown")]
                 #if DEBUG
-                os_log("Event 0x%04x", type: .debug, notification.event)
+                os_log("Event 0x%04x:%d", type: .debug, notification.event, notification.data)
                 #endif
             }
         } else {
-            showOSD("Null Event")
-            os_log("Null Event", type: .error)
+            showOSD("Invalid Notification")
+            os_log("Invalid notification", type: .error)
         }
     } else {
         os_log("Invalid conf", type: .error)
     }
 }
 
-func eventActuator(_ desc: eventDesc, _ data: UInt32, _ conf: UnsafePointer<sharedConfig?>) {
+func eventActuator(_ desc: eventDesc, _ data: UInt32, _ conf: UnsafePointer<sharedConfig>) {
     switch desc.action {
     case .nothing:
         #if DEBUG
@@ -501,7 +375,7 @@ func eventActuator(_ desc: eventDesc, _ data: UInt32, _ conf: UnsafePointer<shar
             showOSDRes("Backlight \(data)", .BacklightLow)
         }
     case .micmute:
-        micMuteHelper(conf.pointee!.io_service)
+        micMuteHelper(conf.pointee.io_service)
         return
     case .desktop:
         CoreDockSendNotification("com.apple.showdesktop.awake" as CFString, nil)

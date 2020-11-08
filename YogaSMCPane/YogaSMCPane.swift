@@ -34,7 +34,7 @@ class YogaSMCPane : NSPreferencePane {
             defaults.setValue(false, forKey: "HideIcon")
             vMenubarIcon.isEnabled = true
         }
-        _ = scriptHelper(reloadAS, "Reload YogaSMC")
+        _ = scriptHelper(reloadAS, "Reload YogaSMCNC")
     }
     
     @IBOutlet weak var vMenubarIcon: NSTextField!
@@ -50,7 +50,7 @@ class YogaSMCPane : NSPreferencePane {
             }
             defaults.setValue(vMenubarIcon.stringValue, forKey: "Title")
         }
-        _ = scriptHelper(reloadAS, "Reload YogaSMC")
+        _ = scriptHelper(reloadAS, "Reload YogaSMCNC")
     }
     
     // Idea
@@ -168,10 +168,12 @@ class YogaSMCPane : NSPreferencePane {
     @IBOutlet weak var vSecondFan: NSButton!
     @IBAction func vSecondFanSet(_ sender: NSButton) {
         defaults.setValue((vSecondFan.state == .on), forKey: "SecondThinkFan")
+        _ = scriptHelper(reloadAS, "Reload YogaSMCNC")
     }
     @IBOutlet weak var vFanStop: NSButton!
     @IBAction func vFanStopSet(_ sender: NSButton) {
         defaults.setValue((vFanStop.state == .on), forKey: "AllowFanStop")
+        _ = scriptHelper(reloadAS, "Reload YogaSMCNC")
     }
     
     // Main

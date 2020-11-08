@@ -2,7 +2,7 @@
 
 This driver consists of YogaSMC, YogaWMI and YogaVPC.
 
-Each component can be derived for different targets. Currently IdeaPad and ThinkPad series are supported.
+Each component can be derived for different targets. Currently ThinkPad and IdeaPad series (all other consumer brands) are supported.
 
 Command to driver can be sent with [ioio](https://github.com/RehabMan/OS-X-ioio), e.g. `ioio -s IdeaVPC ConservationMode true`.
 
@@ -84,6 +84,11 @@ The kext should work out-of-the-box. If you have modified `_QXX` methods before,
 Some features may relay on methods accessing EC. Although it won't affect the core functionality, please consider patching related EC fields larger than 8-bit.
 
 The `YogaSMCAlter.kext` is a variant without SMC keys support and the dependencies of `Lilu` and `VirtualSMC`. It's designed for quick loading / unloading without reboot when debugging. 
+
+## Building
+1. Copy latest debug version of [Lilu.kext](https://github.com/acidanthera/Lilu/releases/latest) and [VirtualSMC.kext](https://github.com/acidanthera/VirtualSMC/releases/latest) into the folder
+2. `git clone --depth 1 https://github.com/acidanthera/MacKernelSDK`
+3. In Xcode, Select build target on upper left and click the button on the left
 
 ## Credits
 - [Apple](https://www.apple.com) for macOS

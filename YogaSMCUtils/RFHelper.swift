@@ -47,9 +47,10 @@ func wirelessHelper() {
         os_log("Wireless unavailable!", type: .error)
         return
     }
+    let status = !iface.powerOn()
     do {
-        try iface.setPower(!iface.powerOn())
-        if iface.powerOn() {
+        try iface.setPower(status)
+        if status {
             showOSDRes("Wireless On", .Wifi)
         } else {
             showOSDRes("Wireless Off", .WifiOff)
@@ -58,7 +59,6 @@ func wirelessHelper() {
         showOSDRes("Wireless Toggle failed", .Wifi)
         os_log("Wireless toggle failed!", type: .error)
     }
-    os_log("%d", iface.interfaceMode().rawValue)
 }
 
 func airplaneModeHelper() {
