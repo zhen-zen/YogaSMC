@@ -22,7 +22,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var hide = false
     var ECCap = 0
 
-    var isThink = false
     var fanHelper: ThinkFanHelper?
     var fanHelper2: ThinkFanHelper?
 
@@ -138,7 +137,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
            CFProps != nil {
             if let props = CFProps?.takeRetainedValue() as NSDictionary?,
                let IOClass = props["IOClass"] as? NSString {
-                var isOpen = false
+                if !hide {
+                    appMenu.insertItem(NSMenuItem.separator(), at: 1)
+                    appMenu.insertItem(withTitle: "Class: \(IOClass)", action: nil, keyEquivalent: "", at: 2)
+                    appMenu.insertItem(withTitle: "\(props["VersionInfo"] as? NSString ?? "Unknown Version")", action: nil, keyEquivalent: "", at: 3)
+                }
+
                 switch getString("EC Capability", conf.io_service) {
                 case "RW":
                     ECCap = 3
@@ -147,6 +151,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 default:
                     break
                 }
+
+                var isOpen = false
                 switch IOClass {
                 case "IdeaVPC":
                     conf.events = IdeaEvents
@@ -154,19 +160,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 case "ThinkVPC":
                     conf.events = ThinkEvents
                     isOpen = registerNotification()
-                    isThink = (ECCap != 0) ? true : false
-                default:
-                    os_log("Unknown class", type: .error)
-                    showOSD("Unknown class", duration: 2000)
-                }
-                if isOpen {
-                    loadEvents()
-                }
-                if !hide {
-                    appMenu.insertItem(NSMenuItem.separator(), at: 1)
-                    appMenu.insertItem(withTitle: "Class: \(IOClass)", action: nil, keyEquivalent: "", at: 2)
-                    appMenu.insertItem(withTitle: "\(props["VersionInfo"] as? NSString ?? "Unknown Version")", action: nil, keyEquivalent: "", at: 3)
-                    if isThink {
+                    if !hide {
                         if ECCap == 3 {
                             if !getBoolean("Dual fan", conf.io_service),
                                defaults.bool(forKey: "SecondThinkFan") {
@@ -176,9 +170,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                         } else {
                             showOSD("EC access unavailable! \n See `SSDT-ECRW.dsl`")
                         }
-                        thinkWakeup()
-                        NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(thinkWakeup), name: NSWorkspace.didWakeNotification, object: nil)
                     }
+                    thinkWakeup()
+                    NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(thinkWakeup), name: NSWorkspace.didWakeNotification, object: nil)
+                default:
+                    os_log("Unknown class", type: .error)
+                    showOSD("Unknown class", duration: 2000)
+                }
+                if isOpen {
+                    loadEvents()
                 }
                 return true
             }
