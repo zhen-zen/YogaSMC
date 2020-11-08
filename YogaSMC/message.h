@@ -73,6 +73,7 @@ enum
     // from sensor to keyboard
     kSMC_setKeyboardStatus  = iokit_vendor_specific_msg(200),   // set disable/enable keyboard (data is bool*)
     kSMC_getKeyboardStatus  = iokit_vendor_specific_msg(201),   // get disable/enable keyboard (data is bool*)
+    kSMC_notifyKeystroke    = iokit_vendor_specific_msg(202),   // notify of key press (data is PS2KeyInfo*)
 
     // SMC message types
     kSMC_VPCType            = iokit_vendor_specific_msg(500),   // set loaded VPC type (data is UInt32*)

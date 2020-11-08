@@ -105,6 +105,30 @@
 				<false/>
 			</dict>
 		</dict>
+		<key>YogaHIDD</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>YogaHIDD</string>
+			<key>IOPropertyMatch</key>
+			<array>
+				<dict>
+					<key>name</key>
+					<string>INT33D5</string>
+				</dict>
+				<dict>
+					<key>name</key>
+					<string>INTC1051</string>
+				</dict>
+			</array>
+			<key>IOProbeScore</key>
+			<integer>200</integer>
+			<key>IOProviderClass</key>
+			<string>IOACPIPlatformDevice</string>
+			<key>IOUserClientClass</key>
+			<string>YogaSMCUserClient</string>
+		</dict>
 		<key>YogaWMI</key>
 		<dict>
 			<key>CFBundleIdentifier</key>

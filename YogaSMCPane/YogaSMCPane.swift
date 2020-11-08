@@ -478,6 +478,10 @@ class YogaSMCPane : NSPreferencePane {
             #if !DEBUG
             TabView.removeTabViewItem(IdeaViewItem)
             #endif
+        case "YogaHIDD":
+            vClass.stringValue = "HIDD"
+            TabView.removeTabViewItem(IdeaViewItem)
+            TabView.removeTabViewItem(ThinkViewItem)
         case "YogaVPC":
             vClass.stringValue = "Generic"
             TabView.removeTabViewItem(IdeaViewItem)
