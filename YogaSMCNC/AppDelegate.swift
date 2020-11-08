@@ -26,12 +26,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var fanHelper: ThinkFanHelper?
     var fanHelper2: ThinkFanHelper?
 
-    @objc func updateMuteStatus() {
+    @objc func thinkWakeup() {
         if let current = scriptHelper(getMicVolumeAS, "MicMute"),
            sendNumber("MicMuteLED", current.int32Value == 0 ? 2 : 0, conf.io_service) {
             os_log("Mic Mute LED updated", type: .info)
         } else {
             os_log("Failed to update Mic Mute LED", type: .error)
+        }
+        if fanHelper != nil {
+            fanHelper?.update(true)
+        }
+        if fanHelper2 != nil {
+            fanHelper2?.update(true)
         }
     }
 
@@ -65,11 +71,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     func menuNeedsUpdate(_ menu: NSMenu) {
-        if isThink, ECCap == 3 {
+        if fanHelper != nil {
             fanHelper?.update()
-            if fanHelper2 != nil {
-                fanHelper2?.update()
-            }
+        }
+        if fanHelper2 != nil {
+            fanHelper2?.update()
         }
     }
 
@@ -161,19 +167,17 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                     appMenu.insertItem(withTitle: "Class: \(IOClass)", action: nil, keyEquivalent: "", at: 2)
                     appMenu.insertItem(withTitle: "\(props["VersionInfo"] as? NSString ?? "Unknown Version")", action: nil, keyEquivalent: "", at: 3)
                     if isThink {
-                        updateMuteStatus()
-                        NotificationCenter.default.addObserver(self, selector: #selector(updateMuteStatus), name: NSWorkspace.didWakeNotification, object: nil)
                         if ECCap == 3 {
                             if !getBoolean("Dual fan", conf.io_service),
                                defaults.bool(forKey: "SecondThinkFan") {
                                 fanHelper2 = ThinkFanHelper(appMenu, conf.connect, false, false)
-                                fanHelper2?.update(true)
                             }
                             fanHelper = ThinkFanHelper(appMenu, conf.connect, true, fanHelper2 == nil)
-                            fanHelper?.update(true)
                         } else {
                             showOSD("EC access unavailable! \n See `SSDT-ECRW.dsl`")
                         }
+                        thinkWakeup()
+                        NotificationCenter.default.addObserver(self, selector: #selector(thinkWakeup), name: NSWorkspace.didWakeNotification, object: nil)
                     }
                 }
                 return true
