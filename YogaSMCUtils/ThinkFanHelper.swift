@@ -23,6 +23,8 @@ class ThinkFanHelper {
     let autoMode = NSButton()
     let fullMode = NSButton()
 
+    var savedLevel : UInt8 = 0x80
+
     var ThinkFanSpeed = "HFSP" // 0x2f
     var ThinkFanStatus : UInt64  = 0x2f
     var ThinkFanSelect : UInt64  = 0x31
@@ -86,39 +88,37 @@ class ThinkFanHelper {
     }
 
     @objc func buttonChanged(_ sender: NSButton) {
-        var input : [UInt8] = [0]
         if (sender == autoMode) {
             autoMode.state = .on
             fullMode.state = .off
-            input[0] = 0x84 // safety min speed 4
+            savedLevel = 0x84 // safety min speed 4
             slider.intValue = 4
         } else if (sender == fullMode) {
             autoMode.state = .off
             fullMode.state = .on
-            input[0] = 0x47 // safety min speed 7
+            savedLevel = 0x47 // safety min speed 7
             slider.intValue = 7
-        }
-
-        guard enable, switchFan(main) else {
+        } else {
             return
         }
 
-        if kIOReturnSuccess != IOConnectCallMethod(connect, UInt32(kYSMCUCWriteEC), &ThinkFanStatus, 1, &input, 1, nil, nil, nil, nil) {
-            os_log("Write Fan Speed failed!", type: .fault)
-            showOSD("Write Fan Speed failed!")
-            enable = false
-        }
+        setFanLevel()
     }
 
     @objc func sliderChanged(_ sender: NSSlider) {
         autoMode.state = .off
         fullMode.state = .off
+        savedLevel = UInt8(sender.intValue)
 
+        setFanLevel()
+    }
+
+    func setFanLevel() {
         guard enable, switchFan(main) else {
             return
         }
 
-        var input : [UInt8] = [UInt8(sender.intValue)]
+        var input = [savedLevel]
         if kIOReturnSuccess != IOConnectCallMethod(connect, UInt32(kYSMCUCWriteEC), &ThinkFanStatus, 1, &input, 1, nil, nil, nil, nil) {
             os_log("Write Fan Speed failed!", type: .fault)
             showOSD("Write Fan Speed failed!")
@@ -141,7 +141,7 @@ class ThinkFanHelper {
         }
         fanLevel.stringValue = String(format: main ? "Main: %d rpm" : "Alt: %d rpm", Int32(output[0]) | Int32(output[1]) << 8)
 
-        if !single, !updateLevel {
+        if !updateLevel {
             return
         }
 
@@ -158,9 +158,13 @@ class ThinkFanHelper {
         if ((output[0] & 0x40) != 0) {
             autoMode.state = .off
             fullMode.state = .on
+            savedLevel = 0x47
+            slider.intValue = 7
         } else if ((output[0] & 0x80) != 0) {
             autoMode.state = .on
             fullMode.state = .off
+            savedLevel = 0x84
+            slider.intValue = 4
         } else {
             autoMode.state = .off
             fullMode.state = .off
@@ -170,6 +174,7 @@ class ThinkFanHelper {
             } else {
                 slider.intValue = Int32(output[0])
             }
+            savedLevel = UInt8(slider.intValue)
         }
     }
 

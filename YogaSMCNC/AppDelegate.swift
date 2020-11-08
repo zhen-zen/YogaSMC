@@ -22,6 +22,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var hide = false
     var ECCap = 0
 
+    // MARK: - Think
+
     var fanHelper: ThinkFanHelper?
     var fanHelper2: ThinkFanHelper?
 
@@ -32,11 +34,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         } else {
             os_log("Failed to update Mic Mute LED", type: .error)
         }
-        if fanHelper != nil {
-            fanHelper?.update(true)
-        }
+
         if fanHelper2 != nil {
-            fanHelper2?.update(true)
+            fanHelper2?.setFanLevel()
+        }
+        if fanHelper != nil {
+            fanHelper?.setFanLevel()
         }
     }
 
@@ -70,11 +73,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     func menuNeedsUpdate(_ menu: NSMenu) {
-        if fanHelper != nil {
-            fanHelper?.update()
-        }
         if fanHelper2 != nil {
             fanHelper2?.update()
+        }
+        if fanHelper != nil {
+            fanHelper?.update()
         }
     }
 
@@ -160,18 +163,20 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 case "ThinkVPC":
                     conf.events = ThinkEvents
                     isOpen = registerNotification()
+                    thinkWakeup()
                     if !hide {
                         if ECCap == 3 {
                             if !getBoolean("Dual fan", conf.io_service),
                                defaults.bool(forKey: "SecondThinkFan") {
                                 fanHelper2 = ThinkFanHelper(appMenu, conf.connect, false, false)
+                                fanHelper2?.update(true)
                             }
                             fanHelper = ThinkFanHelper(appMenu, conf.connect, true, fanHelper2 == nil)
+                            fanHelper?.update(true)
                         } else {
                             showOSD("EC access unavailable! \n See `SSDT-ECRW.dsl`")
                         }
                     }
-                    thinkWakeup()
                     NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(thinkWakeup), name: NSWorkspace.didWakeNotification, object: nil)
                 default:
                     os_log("Unknown class", type: .error)
