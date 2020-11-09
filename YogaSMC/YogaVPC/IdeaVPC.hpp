@@ -122,6 +122,11 @@ private:
     IOTimerEventSource* brightnessPoller {nullptr};
 
     /**
+     *  Action for brightness poller
+     */
+    void brightnessAction(OSObject* owner, IOTimerEventSource* timer);
+
+    /**
      *  Battery conservation mode status
      */
     bool conservationMode;

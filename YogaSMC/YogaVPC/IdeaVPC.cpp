@@ -71,10 +71,7 @@ bool IdeaVPC::initVPC() {
     initEC();
 
     if (checkKernelArgument("-ideabr")) {
-        brightnessPoller = IOTimerEventSource::timerEventSource(this, [](OSObject *object, IOTimerEventSource *sender) {
-            auto vpc = OSDynamicCast(IdeaVPC, object);
-            if (vpc) vpc->updateVPC();
-        });
+        brightnessPoller = IOTimerEventSource::timerEventSource(this, OSMemberFunctionCast(IOTimerEventSource::Action, this, &IdeaVPC::brightnessAction));
         if (!brightnessPoller ||
             workLoop->addEventSource(brightnessPoller) != kIOReturnSuccess) {
             AlwaysLog("Failed to add brightnessPoller");
@@ -88,9 +85,19 @@ bool IdeaVPC::initVPC() {
     return true;
 }
 
+void IdeaVPC::brightnessAction(OSObject *owner, IOTimerEventSource *timer) {
+    updateVPC();
+    if (brightnessPoller->setTimeoutMS(BR_POLLING_INTERVAL) != kIOReturnSuccess)
+        AlwaysLog("Failed to set poller");
+    else
+        DebugLog("Poller set");
+}
+
 bool IdeaVPC::exitVPC() {
-    brightnessPoller->disable();
-    workLoop->removeEventSource(brightnessPoller);
+    if (brightnessPoller) {
+        brightnessPoller->disable();
+        workLoop->removeEventSource(brightnessPoller);
+    }
     OSSafeReleaseNULL(brightnessPoller);
     return super::exitVPC();
 }
@@ -622,13 +629,14 @@ void IdeaVPC::updateVPC() {
 
     vpc1 = (vpc2 << 8) | vpc1;
 
-    DebugLog("read VPC EC result: 0x%x %d", vpc1, retries);
-
     if (!vpc1) {
         if (!brightnessPoller)
-            DebugLog("empty EC event");
+            DebugLog("empty EC event: %d", retries);
         return;
     }
+
+    if (!brightnessPoller)
+        DebugLog("read VPC EC result: 0x%x %d", vpc1, retries);
 
     for (int vpc_bit = 0; vpc_bit < 16; vpc_bit++) {
         if (BIT(vpc_bit) & vpc1) {
@@ -677,8 +685,6 @@ void IdeaVPC::updateVPC() {
                         } else {
                             DebugLog("Brightness up? 0x%x -> 0x%x", brightnessSaved, result);
                         }
-                        if (brightnessPoller)
-                            brightnessPoller->setTimeoutMS(BR_POLLING_INTERVAL);
                         brightnessSaved = result;
                         data = result;
                     }
