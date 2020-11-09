@@ -681,9 +681,16 @@ void IdeaVPC::updateVPC() {
                     else {
                         if (result == 0 || result < brightnessSaved) {
                             DebugLog("Brightness down? 0x%x -> 0x%x", brightnessSaved, result);
-                            // Pending merge of YogaHIDD branch and reuse some utilities
+                            if (brightnessPoller) {
+                                dispatchKeyEvent(ADB_BRIGHTNESS_DOWN, true, false);
+                                dispatchKeyEvent(ADB_BRIGHTNESS_DOWN, false, false);
+                            }
                         } else {
                             DebugLog("Brightness up? 0x%x -> 0x%x", brightnessSaved, result);
+                            if (brightnessPoller) {
+                                dispatchKeyEvent(ADB_BRIGHTNESS_UP, true, false);
+                                dispatchKeyEvent(ADB_BRIGHTNESS_UP, false, false);
+                            }
                         }
                         brightnessSaved = result;
                         data = result;
