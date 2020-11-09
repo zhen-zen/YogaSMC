@@ -9,8 +9,10 @@
 #ifndef YogaBaseService_hpp
 #define YogaBaseService_hpp
 
+#include <Headers/kern_version.hpp>
 #include <IOKit/IOCommandGate.h>
 #include <IOKit/IOService.h>
+#include <IOKit/IOTimerEventSource.h>
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
 #include "common.h"
 #include "message.h"
@@ -155,6 +157,14 @@ protected:
      *  @return kIOReturnSuccess on success
      */
     IOReturn readECName(const char* name, UInt32 *result);
+
+    /**
+     *  Send key event through VoodooPS2
+     * @param keyCode event
+     * @param goingDown pressed
+     * @param time notify key time
+     */
+    void dispatchKeyEvent(UInt16 keyCode, bool goingDown, bool time=true);
 
 public:
     virtual bool init(OSDictionary *dictionary) APPLE_KEXT_OVERRIDE;

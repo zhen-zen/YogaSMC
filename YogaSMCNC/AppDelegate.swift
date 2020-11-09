@@ -178,6 +178,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                         }
                     }
                     NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(thinkWakeup), name: NSWorkspace.didWakeNotification, object: nil)
+                case "YogaHIDD":
+                    conf.events = HIDDEvents
+                    isOpen = registerNotification()
                 default:
                     os_log("Unknown class", type: .error)
                     showOSD("Unknown class", duration: 2000)
@@ -333,12 +336,12 @@ func notificationCallback(_ port: CFMachPort?, _ msg: UnsafeMutableRawPointer?, 
                 } else if let desc = events[0]{
                     eventActuator(desc, notification.data, &conf)
                 } else {
-                    let name = String(format:"Event 0x%04x", notification.event)
+                    let name = String(format:"Event 0x%04x:%d", notification.event, notification.data)
                     showOSD(name)
                     os_log("Event 0x%04x default data not found", type: .error, notification.event)
                 }
             } else {
-                let name = String(format:"Event 0x%04x", notification.event)
+                let name = String(format:"Event 0x%04x:%d", notification.event, notification.data)
                 showOSD(name)
                 conf.events[notification.event] = [0: eventDesc(name, nil, option: "Unknown")]
                 #if DEBUG

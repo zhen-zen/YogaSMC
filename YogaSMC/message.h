@@ -73,6 +73,7 @@ enum
     // from sensor to keyboard
     kSMC_setKeyboardStatus  = iokit_vendor_specific_msg(200),   // set disable/enable keyboard (data is bool*)
     kSMC_getKeyboardStatus  = iokit_vendor_specific_msg(201),   // get disable/enable keyboard (data is bool*)
+    kSMC_notifyKeystroke    = iokit_vendor_specific_msg(202),   // notify of key press (data is PS2KeyInfo*)
 
     // SMC message types
     kSMC_VPCType            = iokit_vendor_specific_msg(500),   // set loaded VPC type (data is UInt32*)
@@ -92,4 +93,29 @@ enum
 
     kPS2M_resetTouchpad = iokit_vendor_specific_msg(151),        // Force touchpad reset (data is int*)
 };
+
+typedef struct PS2KeyInfo
+{
+    uint64_t time;
+    UInt16  adbKeyCode;
+    bool    goingDown;
+    bool    eatKey;
+} PS2KeyInfo;
+
+enum hid_adb_codes {
+    ADB_PLAY_PAUSE        =  0x34,
+    ADB_LEFT_META         =  0x37,
+    ADB_NUM_LOCK          =  0x47,
+    ADB_VOLUME_UP         =  0x48,
+    ADB_VOLUME_DOWN       =  0x49,
+    ADB_MUTE              =  0x4a,
+    ADB_BRIGHTNESS_DOWN   =  0x6b,
+    ADB_BRIGHTNESS_UP     =  0x71,
+    ADB_HOME              =  0x73,
+    ADB_PAGE_UP           =  0x74,
+    ADB_END               =  0x77,
+    ADB_PAGE_DOWN         =  0x79,
+    ADB_POWER             =  0x7f,
+};
+
 #endif /* message_h */

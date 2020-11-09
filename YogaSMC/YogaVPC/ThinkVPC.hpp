@@ -138,8 +138,6 @@ private:
     UInt32 micMuteLEDstate {0};
     UInt32 micMuteLEDstateSaved {0};
 
-    UInt32 mutestate_orig {0};
-
     UInt32 thermalstate {0};
 
     UInt32 batnum {BAT_ANY};
@@ -157,7 +155,7 @@ private:
      *
      *  @return true if success
      */
-    IOReturn setNotificationMask(UInt32 i, UInt32 all_mask, UInt32 offset, bool enable=true);
+    bool setNotificationMask(UInt32 i, UInt32 all_mask, UInt32 offset, bool enable=true);
 
     /**
      *  Get notification mask

@@ -19,6 +19,9 @@ YogaSMC Changelog
 - NC: override unknown events with updated presets
 - BaseService: support extended EC operation
 - YogaSMC: add constants for fan support
-- ThinkSMC: support fan speed reading
+- ThinkSMC: support fan speed reading, thx @1Revenger1
+- NC: Using cached wireless status, thx @H15teve
+- YogaHIDD: experimental support for Intel HID event & 5 button array driver 
+- BaseService: support sending key to primary keyboard and palm rejection
 
 Change of earlier versions may be tracked in [commits](https://github.com/zhen-zen/YogaSMC/commits/master) and [releases](https://github.com/zhen-zen/YogaSMC/releases).

@@ -447,9 +447,15 @@ class YogaSMCPane : NSPreferencePane {
             autoSleepCheck.isEnabled = false
             yogaModeCheck.isEnabled = false
             indicatorCheck.isEnabled = false
-            muteCheck.isEnabled = false
             micMuteCheck.isEnabled = false
         }
+        #if !DEBUG
+        muteCheck.isEnabled = false
+        if muteCheck.state == .on {
+            muteCheck.state = .off
+            autoBacklightSet(muteCheck)
+        }
+        #endif
 
         if let val = props["BacklightLevel"] as? NSNumber {
             backlightSlider.integerValue = val as! Int
@@ -478,6 +484,10 @@ class YogaSMCPane : NSPreferencePane {
             #if !DEBUG
             TabView.removeTabViewItem(IdeaViewItem)
             #endif
+        case "YogaHIDD":
+            vClass.stringValue = "HIDD"
+            TabView.removeTabViewItem(IdeaViewItem)
+            TabView.removeTabViewItem(ThinkViewItem)
         case "YogaVPC":
             vClass.stringValue = "Generic"
             TabView.removeTabViewItem(IdeaViewItem)

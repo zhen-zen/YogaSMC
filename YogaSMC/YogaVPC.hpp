@@ -165,7 +165,7 @@ protected:
      *  BIT 3 Mute LED
      *  BIT 4 Mic Mute LED
      */
-    UInt32 automaticBacklightMode {0x1f};
+    UInt32 automaticBacklightMode {0x17};
 
     /**
      *  Backlight mode capability, will be update on init

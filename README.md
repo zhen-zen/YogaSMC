@@ -2,7 +2,7 @@
 
 This driver consists of YogaSMC, YogaWMI and YogaVPC.
 
-Each component can be derived for different targets. Currently IdeaPad and ThinkPad series are supported.
+Each component can be derived for different targets. Currently ThinkPad and IdeaPad series (all other consumer brands) are supported. Support for generic Intel HID event & 5 button array is experimental.
 
 Command to driver can be sent with [ioio](https://github.com/RehabMan/OS-X-ioio), e.g. `ioio -s IdeaVPC ConservationMode true`.
 
@@ -45,20 +45,20 @@ Currently available functions:
 - Automatic backlight and LED control
 - Clamshell mode (need additional patch on `_LID` like  `SSDT-RCSM.dsl` in `SSDTSample`)
 
-| Variant | IdeaVPC  | ThinkVPC |
-| ------ | --------- | -------- |
-| `_HID` | `VPC2004` | `LEN0268`<br>`LEN0068` |
-| Reference | [ideapad-laptop](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/ideapad-laptop.c) | [thinkpad_acpi](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/thinkpad_acpi.c) |
-| Hotkey polling | ✅ | ✅ |
-| Conservation mode | ✅ | ✅ |
-| Battery threshold | Not supported | ✅ |
-| Charging control | Need testing | Need testing |
-| DYTC | ✅ | ✅ |
-| Fan reading | Need testing | ✅ |
-| Fan control | Need testing | Need testing |
-| Fn lock mode | ✅ | Native |
-| LED control | Not supported | ✅ |
-| Keyboard backlight | ✅ | ✅ |
+| Variant | IdeaVPC  | ThinkVPC | YogaHIDD |
+| ---- | ---- | ---- | ---- |
+| `_HID` | `VPC2004` | `LEN0268`<br>`LEN0068` | `INT33D5`<br>`INTC1051` |
+| Reference | [ideapad-laptop](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/ideapad-laptop.c) | [thinkpad_acpi](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/thinkpad_acpi.c) | [intel-hid](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/intel-hid.c) |
+| Hotkey polling | ✅ | ✅ | ✅ (beta) |
+| Conservation mode | ✅ | ✅ | N/A |
+| Battery threshold | Not supported | ✅ | N/A |
+| Charging control | Need testing | Need testing | N/A |
+| DYTC | ✅ | ✅ | N/A |
+| Fan reading | Need testing | ✅ | N/A |
+| Fan control | Need testing | ✅ | N/A |
+| Fn lock mode | ✅ | Native | N/A |
+| LED control | Not supported | ✅ | N/A |
+| Keyboard backlight | ✅ | ✅ | N/A |
 
 ### EC reading:
 When [Rehabman's](https://www.tonymacx86.com/threads/guide-how-to-patch-dsdt-for-working-battery-status.116102/) battery patching method `RE1B` `RECB` present (or  `SSDT-ECRW.dsl` in `SSDTSample`), desired EC fields can be read using following commands:
@@ -84,6 +84,11 @@ The kext should work out-of-the-box. If you have modified `_QXX` methods before,
 Some features may relay on methods accessing EC. Although it won't affect the core functionality, please consider patching related EC fields larger than 8-bit.
 
 The `YogaSMCAlter.kext` is a variant without SMC keys support and the dependencies of `Lilu` and `VirtualSMC`. It's designed for quick loading / unloading without reboot when debugging. 
+
+## Building
+1. Copy latest debug version of [Lilu.kext](https://github.com/acidanthera/Lilu/releases/latest) and [VirtualSMC.kext](https://github.com/acidanthera/VirtualSMC/releases/latest) into the folder
+2. `git clone --depth 1 https://github.com/acidanthera/MacKernelSDK`
+3. In Xcode, Select build target on upper left and click the button on the left
 
 ## Credits
 - [Apple](https://www.apple.com) for macOS
