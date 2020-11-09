@@ -155,7 +155,7 @@ private:
      *
      *  @return true if success
      */
-    IOReturn setNotificationMask(UInt32 i, UInt32 all_mask, UInt32 offset, bool enable=true);
+    bool setNotificationMask(UInt32 i, UInt32 all_mask, UInt32 offset, bool enable=true);
 
     /**
      *  Get notification mask
