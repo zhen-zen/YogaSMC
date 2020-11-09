@@ -22,15 +22,24 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var hide = false
     var ECCap = 0
 
-    var isThink = false
-    var fanHelper: ThinkFanHelper?
+    // MARK: - Think
 
-    @objc func updateMuteStatus() {
+    var fanHelper: ThinkFanHelper?
+    var fanHelper2: ThinkFanHelper?
+
+    @objc func thinkWakeup() {
         if let current = scriptHelper(getMicVolumeAS, "MicMute"),
            sendNumber("MicMuteLED", current.int32Value == 0 ? 2 : 0, conf.io_service) {
             os_log("Mic Mute LED updated", type: .info)
         } else {
             os_log("Failed to update Mic Mute LED", type: .error)
+        }
+
+        if fanHelper2 != nil {
+            fanHelper2?.setFanLevel()
+        }
+        if fanHelper != nil {
+            fanHelper?.setFanLevel()
         }
     }
 
@@ -64,7 +73,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     func menuNeedsUpdate(_ menu: NSMenu) {
-        if isThink, ECCap == 3 {
+        if fanHelper2 != nil {
+            fanHelper2?.update()
+        }
+        if fanHelper != nil {
             fanHelper?.update()
         }
     }
@@ -114,7 +126,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func applicationWillTerminate(_ aNotification: Notification) {
         saveConfig()
-        NotificationCenter.default.removeObserver(self)
+        NSWorkspace.shared.notificationCenter.removeObserver(self)
         if conf.connect != 0 {
             IOServiceClose(conf.connect)
         }
@@ -128,7 +140,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
            CFProps != nil {
             if let props = CFProps?.takeRetainedValue() as NSDictionary?,
                let IOClass = props["IOClass"] as? NSString {
-                var isOpen = false
+                if !hide {
+                    appMenu.insertItem(NSMenuItem.separator(), at: 1)
+                    appMenu.insertItem(withTitle: "Class: \(IOClass)", action: nil, keyEquivalent: "", at: 2)
+                    appMenu.insertItem(withTitle: "\(props["VersionInfo"] as? NSString ?? "Unknown Version")", action: nil, keyEquivalent: "", at: 3)
+                }
+
                 switch getString("EC Capability", conf.io_service) {
                 case "RW":
                     ECCap = 3
@@ -137,6 +154,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 default:
                     break
                 }
+
+                var isOpen = false
                 switch IOClass {
                 case "IdeaVPC":
                     conf.events = IdeaEvents
@@ -144,7 +163,21 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 case "ThinkVPC":
                     conf.events = ThinkEvents
                     isOpen = registerNotification()
-                    isThink = (ECCap != 0) ? true : false
+                    thinkWakeup()
+                    if !hide {
+                        if ECCap == 3 {
+                            if !getBoolean("Dual fan", conf.io_service),
+                               defaults.bool(forKey: "SecondThinkFan") {
+                                fanHelper2 = ThinkFanHelper(appMenu, conf.connect, false, false)
+                                fanHelper2?.update(true)
+                            }
+                            fanHelper = ThinkFanHelper(appMenu, conf.connect, true, fanHelper2 == nil)
+                            fanHelper?.update(true)
+                        } else {
+                            showOSD("EC access unavailable! \n See `SSDT-ECRW.dsl`")
+                        }
+                    }
+                    NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(thinkWakeup), name: NSWorkspace.didWakeNotification, object: nil)
                 case "YogaHIDD":
                     conf.events = HIDDEvents
                     isOpen = registerNotification()
@@ -154,21 +187,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 }
                 if isOpen {
                     loadEvents()
-                }
-                if !hide {
-                    appMenu.insertItem(NSMenuItem.separator(), at: 1)
-                    appMenu.insertItem(withTitle: "Class: \(IOClass)", action: nil, keyEquivalent: "", at: 2)
-                    appMenu.insertItem(withTitle: "\(props["VersionInfo"] as? NSString ?? "Unknown Version")", action: nil, keyEquivalent: "", at: 3)
-                    if isThink {
-                        updateMuteStatus()
-                        NotificationCenter.default.addObserver(self, selector: #selector(updateMuteStatus), name: NSWorkspace.didWakeNotification, object: nil)
-                        if ECCap == 3 {
-                            fanHelper = ThinkFanHelper(appMenu, conf.connect)
-                            fanHelper?.update()
-                        } else {
-                            showOSD("EC access unavailable! \n See `SSDT-ECRW.dsl`")
-                        }
-                    }
                 }
                 return true
             }
@@ -256,7 +274,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         hide = defaults.bool(forKey: "HideIcon")
 
         if !hide {
-            let login = NSMenuItem(title: "Start at Login", action: #selector(toggleStartAtLogin(_:)), keyEquivalent: "s")
+            let login = NSMenuItem(title: "Start at Login", action: #selector(toggleStartAtLogin), keyEquivalent: "s")
             login.state = defaults.bool(forKey: "StartAtLogin") ? .on : .off
             appMenu.insertItem(NSMenuItem.separator(), at: 1)
             appMenu.insertItem(login, at: 2)
