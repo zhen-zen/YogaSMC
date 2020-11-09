@@ -138,8 +138,6 @@ private:
     UInt32 micMuteLEDstate {0};
     UInt32 micMuteLEDstateSaved {0};
 
-    UInt32 mutestate_orig {0};
-
     UInt32 thermalstate {0};
 
     UInt32 batnum {BAT_ANY};
