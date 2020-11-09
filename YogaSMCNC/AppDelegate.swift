@@ -21,6 +21,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @IBOutlet weak var appMenu: NSMenu!
     var hide = false
     var ECCap = 0
+    var fanTimer: Timer?
 
     // MARK: - Think
 
@@ -71,14 +72,40 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         sender.fireDate = calendar.date(byAdding: .day, value: 1, to: midnight)!
         os_log("Timer sheduled at %s", type: .info, sender.fireDate.description(with: Locale.current))
     }
-
-    func menuNeedsUpdate(_ menu: NSMenu) {
-        if fanHelper2 != nil {
-            fanHelper2?.update()
+    
+    @objc func update () {
+        DispatchQueue.main.async {
+            if (self.fanHelper2 != nil) {
+                self.fanHelper2!.update()
+            }
+            if (self.fanHelper != nil) {
+                self.fanHelper!.update()
+            }
         }
-        if fanHelper != nil {
-            fanHelper?.update()
+    }
+    
+    func menuWillOpen(_ menu: NSMenu) {
+        update()
+        DispatchQueue.global(qos: .default).async {
+            self.fanTimer = Timer.scheduledTimer(
+                timeInterval: 1,
+                target: self,
+                selector: #selector(self.update),
+                userInfo: nil,
+                repeats: true)
+            
+            if (self.fanTimer == nil) {
+                return
+            }
+            self.fanTimer?.tolerance = 0.2
+            let currentRunLoop = RunLoop.current
+            currentRunLoop.add(self.fanTimer!, forMode: .common)
+            currentRunLoop.run()
         }
+    }
+    
+    func menuDidClose(_ menu: NSMenu) {
+        self.fanTimer?.invalidate()
     }
 
     // MARK: - Application
