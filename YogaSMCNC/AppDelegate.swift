@@ -318,12 +318,12 @@ func notificationCallback(_ port: CFMachPort?, _ msg: UnsafeMutableRawPointer?, 
                 } else if let desc = events[0]{
                     eventActuator(desc, notification.data, &conf)
                 } else {
-                    let name = String(format:"Event 0x%04x", notification.event)
+                    let name = String(format:"Event 0x%04x:%d", notification.event, notification.data)
                     showOSD(name)
                     os_log("Event 0x%04x default data not found", type: .error, notification.event)
                 }
             } else {
-                let name = String(format:"Event 0x%04x", notification.event)
+                let name = String(format:"Event 0x%04x:%d", notification.event, notification.data)
                 showOSD(name)
                 conf.events[notification.event] = [0: eventDesc(name, nil, option: "Unknown")]
                 #if DEBUG

@@ -9,8 +9,10 @@
 #ifndef YogaBaseService_hpp
 #define YogaBaseService_hpp
 
+#include <Headers/kern_version.hpp>
 #include <IOKit/IOCommandGate.h>
 #include <IOKit/IOService.h>
+#include <IOKit/IOTimerEventSource.h>
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
 #include "common.h"
 #include "message.h"

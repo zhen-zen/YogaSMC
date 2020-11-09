@@ -6,7 +6,6 @@
 //  Copyright © 2020 Zhen. All rights reserved.
 //
 
-#include <Headers/kern_version.hpp>
 #include "YogaBaseService.hpp"
 
 OSDefineMetaClassAndStructors(YogaBaseService, IOService)

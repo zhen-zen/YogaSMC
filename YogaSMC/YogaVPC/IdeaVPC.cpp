@@ -69,7 +69,37 @@ bool IdeaVPC::initVPC() {
     capabilities->release();
 
     initEC();
+
+    if (checkKernelArgument("-ideabr")) {
+        brightnessPoller = IOTimerEventSource::timerEventSource(this, OSMemberFunctionCast(IOTimerEventSource::Action, this, &IdeaVPC::brightnessAction));
+        if (!brightnessPoller ||
+            workLoop->addEventSource(brightnessPoller) != kIOReturnSuccess) {
+            AlwaysLog("Failed to add brightnessPoller");
+            OSSafeReleaseNULL(brightnessPoller);
+        } else {
+            brightnessPoller->setTimeoutMS(BR_POLLING_INTERVAL);
+            brightnessPoller->enable();
+            AlwaysLog("BrightnessPoller enabled");
+        }
+    }
     return true;
+}
+
+void IdeaVPC::brightnessAction(OSObject *owner, IOTimerEventSource *timer) {
+    updateVPC();
+    if (brightnessPoller->setTimeoutMS(BR_POLLING_INTERVAL) != kIOReturnSuccess)
+        AlwaysLog("Failed to set poller");
+    else
+        DebugLog("Poller set");
+}
+
+bool IdeaVPC::exitVPC() {
+    if (brightnessPoller) {
+        brightnessPoller->disable();
+        workLoop->removeEventSource(brightnessPoller);
+    }
+    OSSafeReleaseNULL(brightnessPoller);
+    return super::exitVPC();
 }
 
 IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
@@ -599,12 +629,14 @@ void IdeaVPC::updateVPC() {
 
     vpc1 = (vpc2 << 8) | vpc1;
 
-    DebugLog("read VPC EC result: 0x%x %d", vpc1, retries);
-
     if (!vpc1) {
-        DebugLog("empty EC event");
+        if (!brightnessPoller)
+            DebugLog("empty EC event: %d", retries);
         return;
     }
+
+    if (!brightnessPoller)
+        DebugLog("read VPC EC result: 0x%x %d", vpc1, retries);
 
     for (int vpc_bit = 0; vpc_bit < 16; vpc_bit++) {
         if (BIT(vpc_bit) & vpc1) {
@@ -641,6 +673,21 @@ void IdeaVPC::updateVPC() {
                         DebugLog("Open lid? 0x%x %s", result, result ? "on" : "off");
                     data = result;
                     // functional, TODO: turn off screen on demand
+                    break;
+
+                case 4:
+                    if (!read_ec_data(VPCCMD_R_BL, &result, &retries))
+                        AlwaysLog("Failed to read VPCCMD_R_BL %d", retries);
+                    else {
+                        if (result == 0 || result < brightnessSaved) {
+                            DebugLog("Brightness down? 0x%x -> 0x%x", brightnessSaved, result);
+                            // Pending merge of YogaHIDD branch and reuse some utilities
+                        } else {
+                            DebugLog("Brightness up? 0x%x -> 0x%x", brightnessSaved, result);
+                        }
+                        brightnessSaved = result;
+                        data = result;
+                    }
                     break;
 
                 case 5:
