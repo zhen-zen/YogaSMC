@@ -694,6 +694,7 @@ IOReturn ThinkVPC::message(UInt32 type, IOService *provider, void *argument) {
         case kPS2M_resetTouchpad:
         case kSMC_setKeyboardStatus:
         case kSMC_getKeyboardStatus:
+        case kSMC_notifyKeystroke:
             break;
 
         case kSMC_FnlockEvent:
