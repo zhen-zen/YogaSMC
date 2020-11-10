@@ -99,6 +99,8 @@ let ThinkEvents : Dictionary<UInt32, Dictionary<UInt32, eventDesc>> = [
     TP_HKEY_EV_BLUETOOTH.rawValue : [0: eventDesc("Bluetooth", action: .bluetooth)], // 0x1314
     TP_HKEY_EV_KEYBOARD.rawValue : [0: eventDesc("Keyboard Disabled", .KeyboardOff),
                                     1: eventDesc("Keyboard Enabled", .Keyboard)], // 0x1315
+    TP_HKEY_EV_LID_CLOSE.rawValue : [0: eventDesc("LID Close", display: false)], // 0x5001
+    TP_HKEY_EV_LID_OPEN.rawValue : [0: eventDesc("LID Open", display: false)], // 0x5002
     TP_HKEY_EV_THM_TABLE_CHANGED.rawValue : [0: eventDesc("Thermal Table Change", display: false)], // 0x6030
     TP_HKEY_EV_THM_CSM_COMPLETED.rawValue : [0: eventDesc("Thermal Control Change", display: false)], // 0x6032
     TP_HKEY_EV_AC_CHANGED.rawValue: [0: eventDesc("AC Status Change", display: false)], // 0x6040
