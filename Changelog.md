@@ -1,7 +1,7 @@
 YogaSMC Changelog
 ============================
 
-#### v1.2.1
+#### v1.3.0
 - Pane: fix loading prior to 10.14.4 with embedded swift runtime, thx @Charlyo
 - NC: update presets, thx @junaedahmed @Sniki @tylernguyen
 - NC: support dual fan speed reading and control for think variant, thx @1Revenger1
