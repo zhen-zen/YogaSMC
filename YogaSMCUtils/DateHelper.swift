@@ -74,7 +74,8 @@ func dateComponentsForEaster(year: Int) -> DateComponents? {
     dateComponents.month = Int(floor(Double(h + L - 7*m + 114) / 31))
     dateComponents.day = ((h + L - 7*m + 114) % 31) + 1
     dateComponents.year = year
-    guard let easter = Calendar.current.date(from: dateComponents) else { return nil } // Convert to calculate weekday, weekdayOrdinal
+
+    guard let easter = Calendar.current.date(from: dateComponents) else { return nil }
+    // Convert to calculate weekday, weekdayOrdinal
     return Calendar.current.dateComponents([.year, .month, .day, .weekday, .weekdayOrdinal], from: easter)
 }
-

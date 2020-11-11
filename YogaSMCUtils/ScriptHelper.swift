@@ -40,7 +40,7 @@ let setAudioUnmuteAS = "set volume without output muted"
 let getMicVolumeAS = "input volume of (get volume settings)"
 let setMicVolumeAS = "set volume input volume %d"
 
-var volume : Int32 = 50
+var volume: Int32 = 50
 
 // based on https://medium.com/macoclock/everything-you-need-to-do-to-launch-an-applescript-from-appkit-on-macos-catalina-with-swift-1ba82537f7c3
 func scriptHelper(_ source: String, _ name: String) -> NSAppleEventDescriptor? {
@@ -55,10 +55,8 @@ func scriptHelper(_ source: String, _ name: String) -> NSAppleEventDescriptor? {
     return nil
 }
 
-func micMuteHelper(_ io_service : io_service_t) {
-    guard let current = scriptHelper(getMicVolumeAS, "MicMute") else {
-        return
-    }
+func micMuteHelper(_ io_service: io_service_t) {
+    guard let current = scriptHelper(getMicVolumeAS, "MicMute") else { return}
     if current.int32Value != 0 {
         if scriptHelper(String(format: setMicVolumeAS, 0), "MicMute") != nil {
             volume = current.int32Value
@@ -74,19 +72,11 @@ func micMuteHelper(_ io_service : io_service_t) {
     }
 }
 
-func prefpaneHelper() {
-    guard let application : SystemPreferencesApplication = SBApplication(bundleIdentifier: "com.apple.systempreferences") else {
-        return
-    }
-    let panes = application.panes!().reduce([String: SystemPreferencesPane](), { (dictionary, object) -> [String: SystemPreferencesPane] in
-        let pane = object as! SystemPreferencesPane
-        var dictionary = dictionary
-        if let name = pane.name {
-            dictionary[name] = pane
-        }
-        return dictionary
-    })
-    guard panes.count != 0 else {
+func prefpaneHelper(_ identifier: String = "YogaSMCPane") {
+    guard let application: SystemPreferencesApplication = SBApplication(bundleIdentifier: "com.apple.systempreferences"),
+          let paneArray = application.panes?() else { return }
+
+    guard paneArray.count != 0 else {
         #if DEBUG
         showOSD("Please grant access \n to Apple Event")
         #endif
@@ -100,15 +90,25 @@ func prefpaneHelper() {
         }
         return
     }
-    guard let pane = panes["YogaSMCPane"] else {
+
+    var target: SystemPreferencesPane?
+    for object in paneArray {
+        if let pane = object as? SystemPreferencesPane,
+           pane.name == identifier {
+            target = pane
+            break
+        }
+    }
+
+    if target == nil {
         let alert = NSAlert()
-        alert.messageText = "YogaSMCPane not installed"
+        alert.messageText = "Failed to open Preferences"
+        alert.informativeText = "Please install YogaSMCPane"
         alert.alertStyle = .warning
         alert.addButton(withTitle: "OK")
         alert.runModal()
         return
     }
-    _ = pane.reveal?()
+    _ = target?.reveal?()
     application.activate()
 }
-

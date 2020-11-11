@@ -15,7 +15,7 @@ import ServiceManagement
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     let defaults = UserDefaults(suiteName: "org.zhen.YogaSMC")!
-    var conf = sharedConfig()
+    var conf = SharedConfig()
 
     var statusItem: NSStatusItem?
     @IBOutlet weak var appMenu: NSMenu!
@@ -64,7 +64,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc func openPrefpane() {
         prefpaneHelper()
     }
-    
+
     @objc func midnightTimer(sender: Timer) {
         setHolidayIcon(statusItem!)
         let calendar = Calendar.current
@@ -72,18 +72,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         sender.fireDate = calendar.date(byAdding: .day, value: 1, to: midnight)!
         os_log("Timer sheduled at %s", type: .info, sender.fireDate.description(with: Locale.current))
     }
-    
+
     @objc func update () {
         DispatchQueue.main.async {
-            if (self.fanHelper2 != nil) {
+            if self.fanHelper2 != nil {
                 self.fanHelper2!.update()
             }
-            if (self.fanHelper != nil) {
+            if self.fanHelper != nil {
                 self.fanHelper!.update()
             }
         }
     }
-    
+
     func menuWillOpen(_ menu: NSMenu) {
         update()
         DispatchQueue.global(qos: .default).async {
@@ -93,8 +93,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 selector: #selector(self.update),
                 userInfo: nil,
                 repeats: true)
-            
-            if (self.fanTimer == nil) {
+
+            if self.fanTimer == nil {
                 return
             }
             self.fanTimer?.tolerance = 0.2
@@ -103,7 +103,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             currentRunLoop.run()
         }
     }
-    
+
     func menuDidClose(_ menu: NSMenu) {
         self.fanTimer?.invalidate()
     }
@@ -129,7 +129,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         os_log("Connected to YogaSMC", type: .info)
 
         loadConfig()
-        
+
         if hide {
             os_log("Icon hidden", type: .info)
         } else {
@@ -162,7 +162,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     // MARK: - Configuration
 
     func getProerty() -> Bool {
-        var CFProps : Unmanaged<CFMutableDictionary>? = nil
+        var CFProps: Unmanaged<CFMutableDictionary>?
         if kIOReturnSuccess == IORegistryEntryCreateCFProperties(conf.io_service, &CFProps, kCFAllocatorDefault, 0),
            CFProps != nil {
             if let props = CFProps?.takeRetainedValue() as NSDictionary?,
@@ -185,10 +185,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 var isOpen = false
                 switch IOClass {
                 case "IdeaVPC":
-                    conf.events = IdeaEvents
+                    conf.events = ideaEvents
                     isOpen = registerNotification()
                 case "ThinkVPC":
-                    conf.events = ThinkEvents
+                    conf.events = thinkEvents
                     isOpen = registerNotification()
                     thinkWakeup()
                     if !hide {
@@ -237,12 +237,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                                (opt == "Unknown" || (opt == nil && name.hasPrefix("Event 0x"))) {
                                 os_log("Override unknown event 0x%04x : %d", type: .info, id, data)
                             } else {
-                                e[data] = eventDesc(
+                                e[data] = EventDesc(
                                     name,
                                     event["image"] as? String,
-                                    action: eventAction(rawValue: action) ?? .nothing,
+                                    act: EventAction(rawValue: action) ?? .nothing,
                                     display: event["display"] as? Bool ?? true,
-                                    option: opt)
+                                    opt: opt)
                             }
                         } else {
                             os_log("Invalid event for 0x%04x!", type: .info, id)
@@ -260,13 +260,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     func saveEvents() {
-        var array : [[String: Any]] = []
+        var array: [[String: Any]] = []
         for (k, v) in conf.events {
-            var events : [[String: Any]] = []
-            var dict : [String: Any] = [:]
+            var events: [[String: Any]] = []
+            var dict: [String: Any] = [:]
             dict["id"] = Int(k)
             for (data, e) in v {
-                var event : [String: Any] = [:]
+                var event: [String: Any] = [:]
                 event["data"] = Int(data)
                 event["name"] = e.name
                 if let res = e.image {
@@ -289,7 +289,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
         defaults.setValue(array, forKey: "Events")
     }
-    
+
     func loadConfig() {
         if defaults.object(forKey: "StartAtLogin") == nil {
             os_log("First launch", type: .info)
@@ -336,10 +336,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     func registerNotification() -> Bool {
         if conf.connect != 0 {
             // fix warning per https://forums.swift.org/t/swift-5-2-pointers-and-coretext/34862
-            var portContext : CFMachPortContext = withUnsafeMutableBytes(of: &conf) { conf in
+            var portContext: CFMachPortContext = withUnsafeMutableBytes(of: &conf) { conf in
                 CFMachPortContext(version: 0, info: conf.baseAddress, retain: nil, release: nil, copyDescription: nil)
             }
-            if let notificationPort = CFMachPortCreate(kCFAllocatorDefault, notificationCallback, &portContext, nil)  {
+            if let notificationPort = CFMachPortCreate(kCFAllocatorDefault, notificationCallback, &portContext, nil) {
                 if let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, notificationPort, 0) {
                     CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .defaultMode)
                 }
@@ -354,23 +354,23 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 }
 
 func notificationCallback(_ port: CFMachPort?, _ msg: UnsafeMutableRawPointer?, _ size: CFIndex, _ info: UnsafeMutableRawPointer?) {
-    if let raw = info?.assumingMemoryBound(to: sharedConfig?.self),
-       var conf = raw.pointee  {
+    if let raw = info?.assumingMemoryBound(to: SharedConfig?.self),
+       var conf = raw.pointee {
         if let notification = msg?.load(as: SMCNotificationMessage.self) {
             if let events = conf.events[notification.event] {
                 if let desc = events[notification.data] {
                     eventActuator(desc, notification.data, &conf)
-                } else if let desc = events[0]{
+                } else if let desc = events[0] {
                     eventActuator(desc, notification.data, &conf)
                 } else {
-                    let name = String(format:"Event 0x%04x:%d", notification.event, notification.data)
+                    let name = String(format: "Event 0x%04x:%d", notification.event, notification.data)
                     showOSD(name)
                     os_log("Event 0x%04x default data not found", type: .error, notification.event)
                 }
             } else {
-                let name = String(format:"Event 0x%04x:%d", notification.event, notification.data)
+                let name = String(format: "Event 0x%04x:%d", notification.event, notification.data)
                 showOSD(name)
-                conf.events[notification.event] = [0: eventDesc(name, nil, option: "Unknown")]
+                conf.events[notification.event] = [0: EventDesc(name, nil, opt: "Unknown")]
                 #if DEBUG
                 os_log("Event 0x%04x:%d", type: .debug, notification.event, notification.data)
                 #endif
@@ -384,7 +384,7 @@ func notificationCallback(_ port: CFMachPort?, _ msg: UnsafeMutableRawPointer?, 
     }
 }
 
-func eventActuator(_ desc: eventDesc, _ data: UInt32, _ conf: UnsafePointer<sharedConfig>) {
+func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<SharedConfig>) {
     switch desc.action {
     case .nothing:
         #if DEBUG
@@ -392,9 +392,7 @@ func eventActuator(_ desc: eventDesc, _ data: UInt32, _ conf: UnsafePointer<shar
         #endif
     case .script:
         if let scpt = desc.option {
-            guard scriptHelper(scpt, desc.name) != nil else {
-                return
-            }
+            guard scriptHelper(scpt, desc.name) != nil else { return }
         } else {
             os_log("%s: script not found", type: .error)
             return
@@ -474,8 +472,8 @@ func eventActuator(_ desc: eventDesc, _ data: UInt32, _ conf: UnsafePointer<shar
     }
 }
 
-struct sharedConfig {
-    var connect : io_connect_t = 0
-    var events : Dictionary<UInt32, Dictionary<UInt32, eventDesc>> = [:]
-    let io_service : io_service_t = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("YogaVPC"))
+struct SharedConfig {
+    var connect: io_connect_t = 0
+    var events: [UInt32: [UInt32: EventDesc]] = [:]
+    let io_service: io_service_t = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("YogaVPC"))
 }

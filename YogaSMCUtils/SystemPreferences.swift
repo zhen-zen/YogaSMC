@@ -19,14 +19,14 @@ import ScriptingBridge
 }
 
 // MARK: SystemPreferencesSaveOptions
-@objc public enum SystemPreferencesSaveOptions : AEKeyword {
+@objc public enum SystemPreferencesSaveOptions: AEKeyword {
     case yes = 0x79657320 /* 'yes ' */
     case no = 0x6e6f2020 /* 'no  ' */
     case ask = 0x61736b20 /* 'ask ' */
 }
 
 // MARK: SystemPreferencesPrintingErrorHandling
-@objc public enum SystemPreferencesPrintingErrorHandling : AEKeyword {
+@objc public enum SystemPreferencesPrintingErrorHandling: AEKeyword {
     case standard = 0x6c777374 /* 'lwst' */
     case detailed = 0x6c776474 /* 'lwdt' */
 }
@@ -103,4 +103,3 @@ extension SBObject: SystemPreferencesPane {}
     @objc optional func reveal() -> Any // Reveals an anchor within a preference pane or preference pane itself
 }
 extension SBObject: SystemPreferencesAnchor {}
-

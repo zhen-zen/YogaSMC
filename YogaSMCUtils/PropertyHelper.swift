@@ -9,34 +9,33 @@
 import Foundation
 
 func getBoolean(_ key: String, _ io_service: io_service_t) -> Bool {
-    guard let rvalue = IORegistryEntryCreateCFProperty(io_service, key as CFString, kCFAllocatorDefault, 0) else {
+    guard let rvalue = IORegistryEntryCreateCFProperty(io_service, key as CFString, kCFAllocatorDefault, 0),
+          let val = rvalue.takeRetainedValue() as? Bool else {
         return false
     }
-
-    return rvalue.takeRetainedValue() as! Bool
+    return val
 }
 
 func getNumber(_ key: String, _ io_service: io_service_t) -> Int {
-    guard let rvalue = IORegistryEntryCreateCFProperty(io_service, key as CFString, kCFAllocatorDefault, 0) else {
+    guard let rvalue = IORegistryEntryCreateCFProperty(io_service, key as CFString, kCFAllocatorDefault, 0),
+          let val = rvalue.takeRetainedValue() as? Int else {
         return -1
     }
-
-    return rvalue.takeRetainedValue() as! Int
+    return val
 }
 
 func getString(_ key: String, _ io_service: io_service_t) -> String? {
-    guard let rvalue = IORegistryEntryCreateCFProperty(io_service, key as CFString, kCFAllocatorDefault, 0) else {
+    guard let rvalue = IORegistryEntryCreateCFProperty(io_service, key as CFString, kCFAllocatorDefault, 0),
+          let val = rvalue.takeRetainedValue() as? NSString else {
         return nil
     }
-
-    return rvalue.takeRetainedValue() as! NSString as String
+    return val as String
 }
 
 func getDictionary(_ key: String, _ io_service: io_service_t) -> NSDictionary? {
     guard let rvalue = IORegistryEntryCreateCFProperty(io_service, key as CFString, kCFAllocatorDefault, 0) else {
         return nil
     }
-
     return rvalue.takeRetainedValue() as? NSDictionary
 }
 
@@ -51,4 +50,3 @@ func sendNumber(_ key: String, _ value: Int, _ io_service: io_service_t) -> Bool
 func sendString(_ key: String, _ value: String, _ io_service: io_service_t) -> Bool {
     return (kIOReturnSuccess == IORegistryEntrySetCFProperty(io_service, key as CFString, value as CFString))
 }
-

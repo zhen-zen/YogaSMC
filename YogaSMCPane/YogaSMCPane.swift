@@ -16,7 +16,7 @@ let DYTCCommand = ["L", "M", "H"]
 let thinkLEDCommand = [0, 0x80, 0xA0, 0xC0]
 let thinkBatteryName = ["BAT_ANY", "BAT_PRIMARY", "BAT_SECONDARY"]
 
-class YogaSMCPane : NSPreferencePane {
+class YogaSMCPane: NSPreferencePane {
     let io_service = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("YogaVPC"))
     let defaults = UserDefaults(suiteName: "org.zhen.YogaSMC")!
 
@@ -27,7 +27,7 @@ class YogaSMCPane : NSPreferencePane {
     @IBOutlet weak var vECRead: NSTextField!
     @IBOutlet weak var vHideMenubarIcon: NSButton!
     @IBAction func toggleMenubarIcon(_ sender: NSButton) {
-        if (vHideMenubarIcon.state == .on) {
+        if vHideMenubarIcon.state == .on {
             defaults.setValue(true, forKey: "HideIcon")
             vMenubarIcon.isEnabled = false
         } else {
@@ -36,7 +36,7 @@ class YogaSMCPane : NSPreferencePane {
         }
         _ = scriptHelper(reloadAS, "Reload YogaSMCNC")
     }
-    
+
     @IBOutlet weak var vMenubarIcon: NSTextField!
     @IBAction func setMenubarIcon(_ sender: NSTextField) {
         if vMenubarIcon.stringValue == "" {
@@ -52,7 +52,7 @@ class YogaSMCPane : NSPreferencePane {
         }
         _ = scriptHelper(reloadAS, "Reload YogaSMCNC")
     }
-    
+
     // Idea
     @IBOutlet weak var FunctionKey: NSStackView!
     @IBOutlet weak var vFnKeyRadio: NSButton!
@@ -90,8 +90,8 @@ class YogaSMCPane : NSPreferencePane {
     @IBAction func vChargeThresholdStartSet(_ sender: NSTextFieldCell) {
         if let dict = getDictionary(thinkBatteryName[thinkBatteryNumber], io_service) {
             if let vStart = dict["BCTG"] as? NSNumber {
-                let old = (vStart as! Int32) & 0xff
-                if (old < 0 || old > 99) {
+                let old = (vStart.intValue) & 0xff
+                if old < 0 || old > 99 {
                     vChargeThresholdStart.isEnabled = false
                     return
                 }
@@ -99,8 +99,7 @@ class YogaSMCPane : NSPreferencePane {
                     return
                 }
                 #if DEBUG
-                let prompt = String(format:"Start %d", vChargeThresholdStart.integerValue)
-                showOSD(prompt)
+                showOSD(String(format: "Start %d", vChargeThresholdStart.integerValue))
                 #endif
                 _ = sendNumber("setCMstart", vChargeThresholdStart.integerValue, io_service)
             }
@@ -110,8 +109,8 @@ class YogaSMCPane : NSPreferencePane {
     @IBAction func vChargeThresholdStopSet(_ sender: NSTextField) {
         if let dict = getDictionary(thinkBatteryName[thinkBatteryNumber], io_service) {
             if let vStop = dict["BCSG"] as? NSNumber {
-                var old = (vStop as! Int32) & 0xff
-                if (old < 0 || old > 99) {
+                var old = (vStop.intValue) & 0xff
+                if old < 0 || old > 99 {
                     vChargeThresholdStop.isEnabled = false
                     return
                 }
@@ -122,8 +121,7 @@ class YogaSMCPane : NSPreferencePane {
                     return
                 }
                 #if DEBUG
-                let prompt = String(format:"Stop %d", vChargeThresholdStop.integerValue)
-                showOSD(prompt)
+                showOSD(String(format: "Stop %d", vChargeThresholdStop.integerValue))
                 #endif
                 _ = sendNumber("setCMstop", vChargeThresholdStop.integerValue == 100 ? 0 : vChargeThresholdStop.integerValue, io_service)
             }
@@ -132,21 +130,21 @@ class YogaSMCPane : NSPreferencePane {
 
     @IBOutlet weak var vPowerLEDSlider: NSSlider!
     @IBAction func vPowerLEDSet(_ sender: NSSlider) {
-        if (!sendNumber("LED", thinkLEDCommand[vPowerLEDSlider.integerValue] + 0x00, io_service)) {
+        if !sendNumber("LED", thinkLEDCommand[vPowerLEDSlider.integerValue] + 0x00, io_service) {
             return
         }
     }
 
     @IBOutlet weak var vStandbyLEDSlider: NSSlider!
     @IBAction func vStandbyLEDSet(_ sender: NSSlider) {
-        if (!sendNumber("LED", thinkLEDCommand[vStandbyLEDSlider.integerValue] + 0x07, io_service)) {
+        if !sendNumber("LED", thinkLEDCommand[vStandbyLEDSlider.integerValue] + 0x07, io_service) {
             return
         }
     }
 
     @IBOutlet weak var vThinkDotSlider: NSSliderCell!
     @IBAction func vThinkDotSet(_ sender: NSSlider) {
-        if (!sendNumber("LED", thinkLEDCommand[vThinkDotSlider.integerValue] + 0x0A, io_service)) {
+        if !sendNumber("LED", thinkLEDCommand[vThinkDotSlider.integerValue] + 0x0A, io_service) {
             return
         }
     }
@@ -156,10 +154,9 @@ class YogaSMCPane : NSPreferencePane {
     @IBAction func vCustomLEDSet(_ sender: NSSlider) {
         let value = thinkLEDCommand[vCustomLEDSlider.integerValue] + vCustomLEDList.indexOfSelectedItem
         #if DEBUG
-        let prompt = String(format:"LED 0x%02X", value)
-        showOSD(prompt)
+        showOSD(String(format: "LED 0x%02X", value))
         #endif
-        if (!sendNumber("LED", value, io_service)) {
+        if !sendNumber("LED", value, io_service) {
             return
         }
     }
@@ -175,7 +172,7 @@ class YogaSMCPane : NSPreferencePane {
         defaults.setValue((vFanStop.state == .on), forKey: "AllowFanStop")
         _ = scriptHelper(reloadAS, "Reload YogaSMCNC")
     }
-    
+
     // Main
 
     @IBOutlet weak var TabView: NSTabView!
@@ -196,7 +193,7 @@ class YogaSMCPane : NSPreferencePane {
     @IBAction func backlightSet(_ sender: NSSlider) {
         if !sendNumber("BacklightLevel", backlightSlider.integerValue, io_service) {
             let backlightLevel = getNumber("BacklightLevel", io_service)
-            if (backlightLevel != -1) {
+            if backlightLevel != -1 {
                 backlightSlider.integerValue = backlightLevel
             } else {
                 backlightSlider.isEnabled = false
@@ -215,9 +212,9 @@ class YogaSMCPane : NSPreferencePane {
                 ((indicatorCheck.state == .on) ? 1 << 2 : 0) +
                 ((muteCheck.state == .on) ? 1 << 3 : 0) +
                 ((micMuteCheck.state == .on) ? 1 << 4 : 0)
-        if (!sendNumber("AutoBacklight", val, io_service)) {
+        if !sendNumber("AutoBacklight", val, io_service) {
             let autoBacklight = getNumber("AutoBacklight", io_service)
-            if (autoBacklight != -1) {
+            if autoBacklight != -1 {
                 autoSleepCheck.state = ((autoBacklight & (1 << 0)) != 0) ? .on : .off
                 yogaModeCheck.state =  ((autoBacklight & (1 << 1)) != 0) ? .on : .off
                 indicatorCheck.state =  ((autoBacklight & (1 << 2)) != 0) ? .on : .off
@@ -242,7 +239,7 @@ class YogaSMCPane : NSPreferencePane {
     func updateDYTC(_ dict: NSDictionary) {
         if let ver = dict["Revision"] as? NSNumber,
            let subver = dict["SubRevision"] as? NSNumber {
-            vDYTCRevision.stringValue = "\(ver as! Int).\(subver as! Int)"
+            vDYTCRevision.stringValue = "\(ver.intValue).\(subver.intValue)"
         } else {
             vDYTCRevision.stringValue = "Unknown"
         }
@@ -271,26 +268,10 @@ class YogaSMCPane : NSPreferencePane {
     func updateIdeaBattery() {
         _ = sendBoolean("Battery", true, io_service)
         if let dict = getDictionary("Battery 0", io_service) {
-            if let ID = dict["ID"] as? String {
-                vBatteryID.stringValue = ID
-            } else {
-                vBatteryID.stringValue = "Unknown"
-            }
-            if let count = dict["Cycle count"] as? String {
-                vCycleCount.stringValue = count
-            } else {
-                vCycleCount.stringValue = "Unknown"
-            }
-            if let temp = dict["Temperature"] as? String {
-                vBatteryTemperature.stringValue = temp
-            } else {
-                vBatteryTemperature.stringValue = "Unknown"
-            }
-            if let mfgDate = dict["Manufacture date"] as? String {
-                vMfgDate.stringValue = mfgDate
-            } else {
-                vMfgDate.stringValue = "Unknown"
-            }
+            vBatteryID.stringValue = dict["ID"] as? String ?? "Unknown"
+            vCycleCount.stringValue = dict["Cycle count"] as? String ?? "Unknown"
+            vBatteryTemperature.stringValue = dict["Temperature"] as? String ?? "Unknown"
+            vMfgDate.stringValue = dict["Manufacture date"] as? String ?? "Unknown"
         }
     }
 
@@ -356,33 +337,27 @@ class YogaSMCPane : NSPreferencePane {
 
     func updateThinkBattery() -> Bool {
         _ = sendNumber("Battery", thinkBatteryNumber, io_service)
-        if let dict = getDictionary(thinkBatteryName[thinkBatteryNumber], io_service) {
-            if let vStart = dict["BCTG"] as? NSNumber,
-               let vStop = dict["BCSG"] as? NSNumber {
-                let rStart = vStart as! Int32
-                let rStop = vStop as! Int32
-                if rStart >= 0,
-                   rStop >= 0 {
-                    vChargeThresholdStart.isEnabled = true
-                    vChargeThresholdStop.isEnabled = true
-                    vChargeThresholdStart.intValue = rStart & 0xff
-                    vChargeThresholdStop.intValue = (rStop & 0xff) == 0 ? 100 : rStop & 0xff
-                    return true
-                }
-            }
+        if let dict = getDictionary(thinkBatteryName[thinkBatteryNumber], io_service),
+           let vStart = dict["BCTG"] as? NSNumber,
+           let vStop = dict["BCSG"] as? NSNumber {
+            vChargeThresholdStart.isEnabled = true
+            vChargeThresholdStop.isEnabled = true
+            vChargeThresholdStart.integerValue = vStart.intValue & 0xff
+            vChargeThresholdStop.integerValue = (vStop.intValue & 0xff) == 0 ? 100 : vStop.intValue & 0xff
+            return true
         }
         thinkBatteryNumber += 1
         return false
     }
 
     func updateThinkFan() {
-        var connect : io_connect_t = 0
+        var connect: io_connect_t = 0
         if kIOReturnSuccess == IOServiceOpen(io_service, mach_task_self_, 0, &connect),
            connect != 0 {
             if kIOReturnSuccess == IOConnectCallScalarMethod(connect, UInt32(kYSMCUCOpen), nil, 0, nil, nil) {
-                var input : UInt64 = 0x84
+                var input: UInt64 = 0x84
                 var outputSize = 2
-                var output : [UInt8] = Array(repeating: 0, count: 2)
+                var output: [UInt8] = Array(repeating: 0, count: 2)
                 if kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadEC), &input, 1, nil, 0, nil, nil, &output, &outputSize),
                    outputSize == 2 {
                     vFanSpeed.intValue = Int32(output[0]) | Int32(output[1]) << 8
@@ -411,12 +386,11 @@ class YogaSMCPane : NSPreferencePane {
     }
 
     override func awakeFromNib() {
-        if (io_service == 0 || !sendBoolean("Update", true, io_service)) {
-            return
-        }
+        guard io_service != 0, sendBoolean("Update", true, io_service) else { return }
 
-        var CFProps : Unmanaged<CFMutableDictionary>? = nil
-        guard (kIOReturnSuccess == IORegistryEntryCreateCFProperties(io_service, &CFProps, kCFAllocatorDefault, 0) && CFProps != nil),
+        var CFProps: Unmanaged<CFMutableDictionary>?
+        guard kIOReturnSuccess == IORegistryEntryCreateCFProperties(io_service, &CFProps, kCFAllocatorDefault, 0),
+              CFProps != nil,
               let props = CFProps?.takeRetainedValue() as NSDictionary? else {
             os_log("Unable to acquire driver properties!", type: .fault)
             return
@@ -432,12 +406,12 @@ class YogaSMCPane : NSPreferencePane {
         if let val = props["EC Capability"] as? NSString {
             vECRead.stringValue = val as String
         } else {
-            vECRead.stringValue = "Unknown"
+            os_log("Unable to identify EC capability!", type: .fault)
             return
         }
 
         if let val = props["AutoBacklight"] as? NSNumber {
-            let autoBacklight = val as! Int
+            let autoBacklight = val.intValue
             autoSleepCheck.state = ((autoBacklight & (1 << 0)) != 0) ? .on : .off
             yogaModeCheck.state =  ((autoBacklight & (1 << 1)) != 0) ? .on : .off
             indicatorCheck.state =  ((autoBacklight & (1 << 2)) != 0) ? .on : .off
@@ -458,7 +432,7 @@ class YogaSMCPane : NSPreferencePane {
         #endif
 
         if let val = props["BacklightLevel"] as? NSNumber {
-            backlightSlider.integerValue = val as! Int
+            backlightSlider.integerValue = val.intValue
         } else {
             backlightSlider.isEnabled = false
         }

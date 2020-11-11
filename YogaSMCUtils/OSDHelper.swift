@@ -25,7 +25,7 @@ import os.log
     case kBrightOff = 12
     case kBright13 = 13
     case kBrightOff14 = 14
-    case Ajar = 15
+    case ajar = 15
     case mute16 = 16
     case volume17 = 17
     case empty18 = 18
@@ -42,10 +42,10 @@ import os.log
     /* and more cases from 1 to 28 (except 18 and 24) */
 }
 
-let defaultImage : NSString = "/System/Library/CoreServices/OSDUIHelper.app/Contents/Resources/kBrightOff.pdf"
+let defaultImage: NSString = "/System/Library/CoreServices/OSDUIHelper.app/Contents/Resources/kBrightOff.pdf"
 
 // Bundled resources
-enum eventImage : String {
+enum EventImage: String {
     case AirplaneMode, Antenna, BacklightHigh, BacklightLow, BacklightOff, Bluetooth, Camera, FunctionKey, Mic, MicOff, Keyboard, KeyboardOff, SecondDisplay, Sleep, Star, Wifi, WifiOff
 }
 
@@ -64,13 +64,13 @@ func showOSD(_ prompt: String, _ img: NSString? = nil, duration: UInt32 = 1000, 
         withText: prompt as NSString)
 }
 
-func showOSDRes(_ prompt: String, _ img: eventImage, duration: UInt32 = 1000, priority: UInt32 = 0x1f4) {
+func showOSDRes(_ prompt: String, _ img: EventImage, duration: UInt32 = 1000, priority: UInt32 = 0x1f4) {
     guard let manager = OSDManager.sharedManager() as? OSDManager else {
         os_log("OSDManager unavailable", type: .error)
         return
     }
 
-    var image : NSString?
+    var image: NSString?
     if let path = Bundle.main.pathForImageResource(img.rawValue),
               path.hasPrefix("/Applications") {
         image = path as NSString
