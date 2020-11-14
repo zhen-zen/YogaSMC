@@ -299,6 +299,9 @@ class YogaSMCPane: NSPreferencePane {
 
         if let val = props["RapidChargeMode"] as? Bool {
             vRapidChargeMode.state = val ? .on : .off
+            #if DEBUG
+            vRapidChargeMode.isEnabled = true
+            #endif
         } else {
             vRapidChargeMode.isEnabled = false
         }
