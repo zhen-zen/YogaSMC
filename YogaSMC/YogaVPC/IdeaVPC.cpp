@@ -677,21 +677,19 @@ void IdeaVPC::updateVPC() {
                     break;
 
                 case 4:
-                    if (!read_ec_data(VPCCMD_R_BL, &result, &retries))
+                    if (!brightnessPoller) 
+                        break;
+                    if (!read_ec_data(VPCCMD_R_BL, &result, &retries)) {
                         AlwaysLog("Failed to read VPCCMD_R_BL %d", retries);
-                    else {
+                    } else {
                         if (result == 0 || result < brightnessSaved) {
                             DebugLog("Brightness down? 0x%x -> 0x%x", brightnessSaved, result);
-                            if (brightnessPoller) {
-                                dispatchKeyEvent(ADB_BRIGHTNESS_DOWN, true, false);
-                                dispatchKeyEvent(ADB_BRIGHTNESS_DOWN, false, false);
-                            }
+                            dispatchKeyEvent(ADB_BRIGHTNESS_DOWN, true, false);
+                            dispatchKeyEvent(ADB_BRIGHTNESS_DOWN, false, false);
                         } else {
                             DebugLog("Brightness up? 0x%x -> 0x%x", brightnessSaved, result);
-                            if (brightnessPoller) {
-                                dispatchKeyEvent(ADB_BRIGHTNESS_UP, true, false);
-                                dispatchKeyEvent(ADB_BRIGHTNESS_UP, false, false);
-                            }
+                            dispatchKeyEvent(ADB_BRIGHTNESS_UP, true, false);
+                            dispatchKeyEvent(ADB_BRIGHTNESS_UP, false, false);
                         }
                         brightnessSaved = result;
                         data = result;
