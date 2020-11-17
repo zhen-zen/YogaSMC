@@ -623,12 +623,16 @@ void IdeaVPC::updateVPC() {
     UInt32 vpc1, vpc2, result;
     UInt32 retries = 0;
 
-    if (!read_ec_data(VPCCMD_R_VPC1, &vpc1, &retries) || !read_ec_data(VPCCMD_R_VPC2, &vpc2, &retries)) {
-        AlwaysLog("Failed to read VPC %d", retries);
+    if (!read_ec_data(VPCCMD_R_VPC1, &vpc1, &retries)) {
+        AlwaysLog("Failed to read VPC1 after %d attempts", retries);
         return;
     }
 
-    vpc1 = (vpc2 << 8) | vpc1;
+    if (!read_ec_data(VPCCMD_R_VPC2, &vpc2, &retries)) {
+        AlwaysLog("Failed to read VPC2 after %d attempts", retries);
+    } else {
+        vpc1 = (vpc2 << 8) | vpc1;
+    }
 
     if (!vpc1) {
         if (!brightnessPoller)
