@@ -297,7 +297,7 @@ private:
      *
      *  @return true if success
      */
-    bool read_ec_data(UInt32 cmd, UInt32 *result, UInt8 *retries);
+    bool read_ec_data(UInt32 cmd, UInt32 *result, UInt32 *retries);
 
     /**
      *  Write EC data
@@ -308,7 +308,7 @@ private:
      *
      *  @return true if success
      */
-    bool write_ec_data(UInt32 cmd, UInt32 value, UInt8 *retries);
+    bool write_ec_data(UInt32 cmd, UInt32 value, UInt32 *retries);
 
     /**
      *  Write EC data

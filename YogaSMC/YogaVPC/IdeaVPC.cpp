@@ -241,7 +241,7 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                 getPropertyNumber(readECPrompt);
 
                 UInt32 result;
-                UInt8 retries = 0;
+                UInt32 retries = 0;
 
                 if (read_ec_data(value->unsigned32BitValue(), &result, &retries))
                     AlwaysLog("%s 0x%x result: 0x%x %d", readECPrompt, value->unsigned32BitValue(), result, retries);
@@ -254,7 +254,7 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                 getPropertyNumber(writeECPrompt);
 
                 UInt32 command, data;
-                UInt8 retries = 0;
+                UInt32 retries = 0;
                 command = value->unsigned32BitValue() >> 8;
                 data = value->unsigned32BitValue() & 0xff;
 
@@ -621,7 +621,7 @@ bool IdeaVPC::toggleFnlock() {
 
 void IdeaVPC::updateVPC() {
     UInt32 vpc1, vpc2, result;
-    UInt8 retries = 0;
+    UInt32 retries = 0;
 
     if (!read_ec_data(VPCCMD_R_VPC1, &vpc1, &retries) || !read_ec_data(VPCCMD_R_VPC2, &vpc2, &retries)) {
         AlwaysLog("Failed to read VPC %d", retries);
@@ -735,31 +735,31 @@ void IdeaVPC::updateVPC() {
     }
 }
 
-bool IdeaVPC::read_ec_data(UInt32 cmd, UInt32 *result, UInt8 *retries) {
+// Write VCMD -> VCMD is cleared -> Read VDAT
+bool IdeaVPC::read_ec_data(UInt32 cmd, UInt32 *result, UInt32 *retries) {
     if (!method_vpcw(1, cmd))
         return false;
 
     AbsoluteTime abstime, deadline, now_abs;
-    nanoseconds_to_absolutetime(IDEAPAD_EC_TIMEOUT * 1000 * 1000, &abstime);
-    clock_absolutetime_interval_to_deadline(abstime, &deadline);
+    nanoseconds_to_absolutetime(IDEAPAD_EC_TIMEOUT * 1000000ULL, &abstime);
+    clock_get_uptime(&now_abs);
 
-    do {
+    for (clock_absolutetime_interval_to_deadline(abstime, &deadline);
+         now_abs < deadline; ) {
         if (!method_vpcr(1, result))
             return false;
-
         if (*result == 0)
             return method_vpcr(0, result);
-
         *retries = *retries + 1;
-        IODelay(250);
         clock_get_uptime(&now_abs);
-    } while (now_abs < deadline || *retries < 5);
+    }
 
     AlwaysLog(timeoutPrompt, readECPrompt, cmd);
     return false;
 }
 
-bool IdeaVPC::write_ec_data(UInt32 cmd, UInt32 value, UInt8 *retries) {
+// Write VDAT -> Write VCMD -> VDAT is cleared
+bool IdeaVPC::write_ec_data(UInt32 cmd, UInt32 value, UInt32 *retries) {
     UInt32 result;
 
     if (!method_vpcw(0, value))
@@ -769,20 +769,18 @@ bool IdeaVPC::write_ec_data(UInt32 cmd, UInt32 value, UInt8 *retries) {
         return false;
 
     AbsoluteTime abstime, deadline, now_abs;
-    nanoseconds_to_absolutetime(IDEAPAD_EC_TIMEOUT * 1000 * 1000, &abstime);
-    clock_absolutetime_interval_to_deadline(abstime, &deadline);
+    nanoseconds_to_absolutetime(IDEAPAD_EC_TIMEOUT * 1000000ULL, &abstime);
+    clock_get_uptime(&now_abs);
 
-    do {
+    for (clock_absolutetime_interval_to_deadline(abstime, &deadline);
+         now_abs < deadline; ) {
         if (!method_vpcr(1, &result))
             return false;
-
         if (result == 0)
             return true;
-
         *retries = *retries + 1;
-        IODelay(250);
         clock_get_uptime(&now_abs);
-    } while (now_abs < deadline || *retries < 5);
+    }
 
     AlwaysLog(timeoutPrompt, writeECPrompt, cmd);
     return false;
