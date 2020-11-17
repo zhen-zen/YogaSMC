@@ -11,9 +11,12 @@
 #define IdeaVPC_hpp
 
 #include "YogaVPC.hpp"
+#include "IdeaWMI.hpp"
 #ifndef ALTER
 #include "IdeaSMC.hpp"
 #endif
+
+#define BR_POLLING_INTERVAL 2000
 
 // from linux/drivers/platform/x86/ideapad-laptop.c
 
@@ -106,6 +109,22 @@ private:
     void setPropertiesGated(OSObject* props) APPLE_KEXT_OVERRIDE;
     void updateAll() APPLE_KEXT_OVERRIDE;
     void updateVPC() APPLE_KEXT_OVERRIDE;
+    bool exitVPC() APPLE_KEXT_OVERRIDE;
+
+    /**
+     *  Saved brightness level
+     */
+    UInt32 brightnessSaved {0};
+
+    /**
+     *  Dirty hack for brightness issues
+     */
+    IOTimerEventSource* brightnessPoller {nullptr};
+
+    /**
+     *  Action for brightness poller
+     */
+    void brightnessAction(OSObject* owner, IOTimerEventSource* timer);
 
     /**
      *  Battery conservation mode status
@@ -143,6 +162,8 @@ private:
      *  @return true if success
      */
     bool initEC();
+
+    inline virtual IOService* initWMI(IOACPIPlatformDevice *provider) APPLE_KEXT_OVERRIDE {return IdeaWMI::withDevice(provider);};
 
 #ifndef ALTER
     /**
@@ -241,9 +262,9 @@ private:
      *
      *  @return true if success
      */
-    bool updateKeyboard(bool update=true);
+    bool updateKeyboard(bool update=false);
 
-    inline bool updateBacklight(bool update=true) APPLE_KEXT_OVERRIDE {return updateKeyboard(update);};
+    inline bool updateBacklight(bool update=false) APPLE_KEXT_OVERRIDE {return updateKeyboard(update);};
     bool setBacklight(UInt32 level) APPLE_KEXT_OVERRIDE;
 
     /**
@@ -276,7 +297,7 @@ private:
      *
      *  @return true if success
      */
-    bool read_ec_data(UInt32 cmd, UInt32 *result, UInt8 *retries);
+    bool read_ec_data(UInt32 cmd, UInt32 *result, UInt32 *retries);
 
     /**
      *  Write EC data
@@ -287,7 +308,7 @@ private:
      *
      *  @return true if success
      */
-    bool write_ec_data(UInt32 cmd, UInt32 value, UInt8 *retries);
+    bool write_ec_data(UInt32 cmd, UInt32 value, UInt32 *retries);
 
     /**
      *  Write EC data

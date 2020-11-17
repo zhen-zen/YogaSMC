@@ -1,6 +1,9 @@
 /*
- * Sample DSDT for EC read / write access in case you don't have battery patch
- * Taken from Rehabmman's guide: https://www.tonymacx86.com/threads/guide-how-to-patch-dsdt-for-working-battery-status.116102/
+ * Sample DSDT for EC read / write access
+ *
+ * Check for conflict if you have patched battery reading
+ * Taken from RehabMan's battery patch guide:
+ * https://www.tonymacx86.com/threads/guide-how-to-patch-dsdt-for-working-battery-status.116102/
  */
 DefinitionBlock ("", "SSDT", 2, "hack", "ECRW", 0x00000000)
 {

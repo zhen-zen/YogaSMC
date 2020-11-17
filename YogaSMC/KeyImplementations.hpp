@@ -12,14 +12,14 @@
 #include <libkern/libkern.h>
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
 #include <VirtualSMCSDK/kern_vsmcapi.hpp>
-#include "YogaSMC.hpp"
+#include "YogaBaseService.hpp"
 
 #define addECKeySp(key, name) \
     do { \
         if (sensorCount < MAX_SENSOR && (method = OSDynamicCast(OSString, conf->getObject(name))) && (method->getLength() == 4)) { \
             if (ec->validateObject(method->getCStringNoCopy()) == kIOReturnSuccess) { \
                 atomic_init(&currentSensor[sensorCount], 0); \
-                VirtualSMCAPI::addKey(key, vsmcPlugin.data, VirtualSMCAPI::valueWithSp(0, SmcKeyTypeSp78, new atomicECKey(&currentSensor[sensorCount]))); \
+                VirtualSMCAPI::addKey(key, vsmcPlugin.data, VirtualSMCAPI::valueWithSp(0, SmcKeyTypeSp78, new atomicSpKey(&currentSensor[sensorCount]))); \
                 sensorMethod[sensorCount] = method->getCStringNoCopy(); \
                 status->setObject(name, kOSBooleanTrue); \
                 sensorCount++; \
@@ -44,21 +44,60 @@ static constexpr SMC_KEY KeyTaRC = SMC_MAKE_IDENTIFIER('T','a','R','C');
 static constexpr SMC_KEY KeyTh0H(size_t i) { return SMC_MAKE_IDENTIFIER('T','h',KeyIndexes[i],'H'); }
 static constexpr SMC_KEY KeyTs0p(size_t i) { return SMC_MAKE_IDENTIFIER('T','s',KeyIndexes[i],'p'); }
 
-class YogaSMC;
+// Fan related keys, from SMCDellSensors
 
-class atomicECKey : public VirtualSMCValue {
+static constexpr SMC_KEY KeyFNum = SMC_MAKE_IDENTIFIER('F','N','u','m'); // Number of supported fans
+static constexpr SMC_KEY KeyF0Ac(size_t i) { return SMC_MAKE_IDENTIFIER('F',KeyIndexes[i],'A','c'); } // Actual RPM
+static constexpr SMC_KEY KeyF0ID(size_t i) { return SMC_MAKE_IDENTIFIER('F',KeyIndexes[i],'I','D'); } // Description
+static constexpr SMC_KEY KeyF0Md(size_t i) { return SMC_MAKE_IDENTIFIER('F',KeyIndexes[i],'M','d'); } // Manual Mode (New)
+static constexpr SMC_KEY KeyF0Mn(size_t i) { return SMC_MAKE_IDENTIFIER('F',KeyIndexes[i],'M','n'); } // Minimum RPM
+static constexpr SMC_KEY KeyF0Mx(size_t i) { return SMC_MAKE_IDENTIFIER('F',KeyIndexes[i],'M','x'); } // Maximum RPM
+static constexpr SMC_KEY KeyF0Sf(size_t i) { return SMC_MAKE_IDENTIFIER('F',KeyIndexes[i],'S','f'); } // Safe RPM
+static constexpr SMC_KEY KeyF0Tg(size_t i) { return SMC_MAKE_IDENTIFIER('F',KeyIndexes[i],'T','g'); } // Target speed
+static constexpr SMC_KEY KeyFS__ = SMC_MAKE_IDENTIFIER('F','S','!',' '); // Fan force bits. FS![15:0] Setting bit to 1 allows for external control over fan speed target and prevents thermal manager from actively overidding value set via key access.
+
+typedef enum { FAN_PWM_TACH, FAN_RPM, PUMP_PWM, PUMP_RPM, FAN_PWM_NOTACH, EMPTY_PLACEHOLDER } FanType;
+
+typedef enum {
+    LEFT_LOWER_FRONT, CENTER_LOWER_FRONT, RIGHT_LOWER_FRONT,
+    LEFT_MID_FRONT,   CENTER_MID_FRONT,   RIGHT_MID_FRONT,
+    LEFT_UPPER_FRONT, CENTER_UPPER_FRONT, RIGHT_UPPER_FRONT,
+    LEFT_LOWER_REAR,  CENTER_LOWER_REAR,  RIGHT_LOWER_REAR,
+    LEFT_MID_REAR,    CENTER_MID_REAR,    RIGHT_MID_REAR,
+    LEFT_UPPER_REAR,  CENTER_UPPER_REAR,  RIGHT_UPPER_REAR
+} LocationType;
+
+static constexpr int32_t DiagFunctionStrLen = 12;
+
+typedef struct fanTypeDescStruct {
+    UInt8 type         {FAN_PWM_TACH};
+    UInt8 ui8Zone     {1};
+    UInt8 location     {LEFT_MID_REAR};
+    UInt8 rsvd        {0}; // padding to get us to 16 bytes
+    char  strFunction[DiagFunctionStrLen];
+} FanTypeDescStruct;
+
+class atomicSpKey : public VirtualSMCValue {
     _Atomic(uint32_t) *currentSensor;
 protected:
     SMC_RESULT readAccess() override;
 public:
-    atomicECKey(_Atomic(uint32_t) *currentSensor) : currentSensor(currentSensor) {};
+    atomicSpKey(_Atomic(uint32_t) *currentSensor) : currentSensor(currentSensor) {};
+};
+
+class atomicFpKey : public VirtualSMCValue {
+    _Atomic(uint16_t) *currentSensor;
+protected:
+    SMC_RESULT readAccess() override;
+public:
+    atomicFpKey(_Atomic(uint16_t) *currentSensor) : currentSensor(currentSensor) {};
 };
 
 class messageKey : public VirtualSMCValue {
 protected:
-    YogaSMC *drv;
+    YogaBaseService *drv;
 public:
-    messageKey(YogaSMC *src=nullptr) : drv(src) {};
+    messageKey(YogaBaseService *src=nullptr) : drv(src) {};
 };
 
 class BDVT : public messageKey { using messageKey::messageKey; protected: SMC_RESULT writeAccess() override; SMC_RESULT update(const SMC_DATA *src) override;};

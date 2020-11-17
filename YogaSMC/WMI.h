@@ -20,6 +20,8 @@
 #ifndef WMI_h
 #define WMI_h
 
+#include <IOKit/acpi/IOACPIPlatformDevice.h>
+
 #define kWMIGuid "guid"
 #define kWMIObjectId "object-id"
 #define kWMINotifyId "notify-id"

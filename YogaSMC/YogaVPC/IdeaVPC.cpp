@@ -69,7 +69,37 @@ bool IdeaVPC::initVPC() {
     capabilities->release();
 
     initEC();
+
+    if (checkKernelArgument("-ideabr")) {
+        brightnessPoller = IOTimerEventSource::timerEventSource(this, OSMemberFunctionCast(IOTimerEventSource::Action, this, &IdeaVPC::brightnessAction));
+        if (!brightnessPoller ||
+            workLoop->addEventSource(brightnessPoller) != kIOReturnSuccess) {
+            AlwaysLog("Failed to add brightnessPoller");
+            OSSafeReleaseNULL(brightnessPoller);
+        } else {
+            brightnessPoller->setTimeoutMS(BR_POLLING_INTERVAL);
+            brightnessPoller->enable();
+            AlwaysLog("BrightnessPoller enabled");
+        }
+    }
     return true;
+}
+
+void IdeaVPC::brightnessAction(OSObject *owner, IOTimerEventSource *timer) {
+    updateVPC();
+    if (brightnessPoller->setTimeoutMS(BR_POLLING_INTERVAL) != kIOReturnSuccess)
+        AlwaysLog("Failed to set poller");
+    else
+        DebugLog("Poller set");
+}
+
+bool IdeaVPC::exitVPC() {
+    if (brightnessPoller) {
+        brightnessPoller->disable();
+        workLoop->removeEventSource(brightnessPoller);
+    }
+    OSSafeReleaseNULL(brightnessPoller);
+    return super::exitVPC();
 }
 
 IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
@@ -82,19 +112,25 @@ IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
         case kPS2M_resetTouchpad:
         case kSMC_setKeyboardStatus:
         case kSMC_getKeyboardStatus:
+        case kSMC_notifyKeystroke:
             break;
 
         case kSMC_YogaEvent:
-            DebugLog("message: %s Yoga mode 0x%x", provider->getName(), *((UInt32 *) argument));
-            if (backlightCap && automaticBacklightMode & BIT(1)) {
-                updateKeyboard();
-                if (*((UInt32 *) argument) != 1) {
-                    backlightLevelSaved = backlightLevel;
-                    if (backlightLevel)
-                        setBacklight(0);
-                } else {
-                    if (backlightLevelSaved != backlightLevel)
-                        setBacklight(backlightLevelSaved);
+            {
+                UInt32 mode = *((UInt32 *) argument);
+                DebugLog("message: %s Yoga mode 0x%x", provider->getName(), mode);
+                if (client)
+                    client->sendNotification(0x10, mode); // Since vpc_bit is less than 16
+                if (backlightCap && automaticBacklightMode & BIT(1)) {
+                    updateKeyboard();
+                    if (mode != 1) {
+                        backlightLevelSaved = backlightLevel;
+                        if (backlightLevel)
+                            setBacklight(0);
+                    } else {
+                        if (backlightLevelSaved != backlightLevel)
+                            setBacklight(backlightLevelSaved);
+                    }
                 }
             }
             break;
@@ -148,6 +184,22 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
     if (i) {
         while (OSString* key = OSDynamicCast(OSString, i->getNextObject())) {
             if (key->isEqualTo(conservationPrompt)) {
+#ifdef DEBUG
+                OSNumber *raw = OSDynamicCast(OSNumber, dict->getObject(conservationPrompt));
+                if (raw != nullptr) {
+                    UInt32 result;
+
+                    OSObject* params[1] = {
+                        OSNumber::withNumber(raw->unsigned8BitValue(), 32)
+                    };
+
+                    if (vpc->evaluateInteger(setBatteryMode, &result, params, 1) != kIOReturnSuccess || result != 0)
+                        AlwaysLog(toggleFailure, conservationPrompt);
+                    else
+                        AlwaysLog(toggleSuccess, conservationPrompt, raw->unsigned32BitValue(), "see ioreg");
+                    continue;
+                }
+#endif
                 OSBoolean *value;
                 getPropertyBoolean(conservationPrompt);
                 updateBattery(false);
@@ -189,7 +241,7 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                 getPropertyNumber(readECPrompt);
 
                 UInt32 result;
-                UInt8 retries = 0;
+                UInt32 retries = 0;
 
                 if (read_ec_data(value->unsigned32BitValue(), &result, &retries))
                     AlwaysLog("%s 0x%x result: 0x%x %d", readECPrompt, value->unsigned32BitValue(), result, retries);
@@ -202,7 +254,7 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                 getPropertyNumber(writeECPrompt);
 
                 UInt32 command, data;
-                UInt8 retries = 0;
+                UInt32 retries = 0;
                 command = value->unsigned32BitValue() >> 8;
                 data = value->unsigned32BitValue() & 0xff;
 
@@ -459,8 +511,13 @@ bool IdeaVPC::updateKeyboard(bool update) {
 
     if (FnlockCap)
         FnlockMode = BIT(HA_FNLOCK_BIT) & state;
-    if (backlightCap)
-        backlightLevel = (BIT(HA_BACKLIGHT_BIT) & state) ? 1 : 0;
+    if (backlightCap) {
+        // Preserve low / high level on non keyboard triggered events
+        if (!update && backlightLevel)
+            backlightLevel -= 1;
+        // Inference from brightness cycle: 0 -> 1 -> 2 -> 0
+        backlightLevel = (BIT(HA_BACKLIGHT_BIT) & state) ? (backlightLevel ? 2 : 1) : 0;
+    }
 
     if (update) {
         DebugLog(updateSuccess, KeyboardPrompt, state);
@@ -530,10 +587,11 @@ bool IdeaVPC::setBacklight(UInt32 level) {
         return false;
     }
 
-    backlightLevel = level;
+    if (level && backlightLevel)
+        // Preserve low / high level on non keyboard triggered events
+        backlightLevel -= 1;
+    // Don't update internal value since it will trigger another event
     DebugLog(toggleSuccess, backlightPrompt, (backlightLevel ? HACMD_BACKLIGHT_ON : HACMD_BACKLIGHT_OFF), (backlightLevel ? "on" : "off"));
-    setProperty(backlightPrompt, backlightLevel);
-
     return true;
 }
 
@@ -556,12 +614,14 @@ bool IdeaVPC::toggleFnlock() {
     DebugLog(toggleSuccess, FnKeyPrompt, (FnlockMode ? HACMD_FNLOCK_ON : HACMD_FNLOCK_OFF), (FnlockMode ? "on" : "off"));
     setProperty(FnKeyPrompt, FnlockMode);
 
+    if (client)
+        client->sendNotification(0x11, FnlockMode);
     return true;
 }
 
 void IdeaVPC::updateVPC() {
-    UInt32 vpc1, vpc2, result, notifier;
-    UInt8 retries = 0;
+    UInt32 vpc1, vpc2, result;
+    UInt32 retries = 0;
 
     if (!read_ec_data(VPCCMD_R_VPC1, &vpc1, &retries)) {
         AlwaysLog("Failed to read VPC1 after %d attempts", retries);
@@ -574,19 +634,18 @@ void IdeaVPC::updateVPC() {
         vpc1 = (vpc2 << 8) | vpc1;
     }
 
-#ifdef DEBUG
-    AlwaysLog("read VPC EC result: 0x%x %d", vpc1, retries);
-    setProperty("VPCstatus", vpc1, 32);
-#endif
-
     if (!vpc1) {
-        DebugLog("empty EC event");
+        if (!brightnessPoller)
+            DebugLog("empty EC event: %d", retries);
         return;
     }
 
+    if (!brightnessPoller)
+        DebugLog("read VPC EC result: 0x%x %d", vpc1, retries);
+
     for (int vpc_bit = 0; vpc_bit < 16; vpc_bit++) {
         if (BIT(vpc_bit) & vpc1) {
-            notifier = vpc_bit << 8;
+            UInt32 data = 0;
             switch (vpc_bit) {
                 case 0:
                     if (!read_ec_data(VPCCMD_R_SPECIAL_BUTTONS, &result, &retries)) {
@@ -594,20 +653,21 @@ void IdeaVPC::updateVPC() {
                     } else {
                         switch (result) {
                             case 0x40:
-                                AlwaysLog("Fn+Q cooling");
+                                DebugLog("Fn+Q cooling");
                                 break;
 
                             default:
                                 AlwaysLog("Special button 0x%x", result);
                                 break;
                         }
-                        notifier |= result;
+                        data = result;
                     }
                     break;
 
                 case 1: // ENERGY_EVENT_GENERAL / ENERGY_EVENT_KEYBDLED_OLD
-                    AlwaysLog("Fn+Space keyboard backlight?");
-                    updateKeyboard();
+                    DebugLog("Fn+Space keyboard backlight?");
+                    updateKeyboard(true);
+                    data = backlightLevel;
                     // also on AC connect / disconnect
                     break;
 
@@ -615,74 +675,95 @@ void IdeaVPC::updateVPC() {
                     if (!read_ec_data(VPCCMD_R_BL_POWER, &result, &retries))
                         AlwaysLog("Failed to read VPCCMD_R_BL_POWER %d", retries);
                     else
-                        AlwaysLog("Open lid? 0x%x %s", result, result ? "on" : "off");
-                    notifier |= result;
+                        DebugLog("Open lid? 0x%x %s", result, result ? "on" : "off");
+                    data = result;
                     // functional, TODO: turn off screen on demand
+                    break;
+
+                case 4:
+                    if (!brightnessPoller) 
+                        break;
+                    if (!read_ec_data(VPCCMD_R_BL, &result, &retries)) {
+                        AlwaysLog("Failed to read VPCCMD_R_BL %d", retries);
+                    } else {
+                        if (result == 0 || result < brightnessSaved) {
+                            DebugLog("Brightness down? 0x%x -> 0x%x", brightnessSaved, result);
+                            dispatchKeyEvent(ADB_BRIGHTNESS_DOWN, true, false);
+                            dispatchKeyEvent(ADB_BRIGHTNESS_DOWN, false, false);
+                        } else {
+                            DebugLog("Brightness up? 0x%x -> 0x%x", brightnessSaved, result);
+                            dispatchKeyEvent(ADB_BRIGHTNESS_UP, true, false);
+                            dispatchKeyEvent(ADB_BRIGHTNESS_UP, false, false);
+                        }
+                        brightnessSaved = result;
+                        data = result;
+                    }
                     break;
 
                 case 5:
                     if (!read_ec_data(VPCCMD_R_TOUCHPAD, &result, &retries))
                         AlwaysLog("Failed to read VPCCMD_R_TOUCHPAD %d", retries);
                     else
-                        AlwaysLog("Fn+F6 touchpad 0x%x %s", result, result ? "on" : "off");
-                    notifier |= result;
+                        DebugLog("Fn+F6 touchpad 0x%x %s", result, result ? "on" : "off");
+                    data = result;
                     break;
 
                 case 7:
-                    AlwaysLog("Fn+F8 camera");
+                    DebugLog("Fn+F8 camera");
                     break;
 
                 case 8: // ENERGY_EVENT_MIC
-                    AlwaysLog("Fn+F4 mic");
+                    DebugLog("Fn+F4 mic");
                     break;
 
                 case 10:
-                    AlwaysLog("Touchpad on");
+                    DebugLog("Touchpad on");
                     break;
 
                 case 12: // ENERGY_EVENT_KEYBDLED
-                    AlwaysLog("Fn+Space keyboard backlight?");
+                    DebugLog("Fn+Space keyboard backlight?");
                     break;
 
                 case 13:
-                    AlwaysLog("Fn+F7 airplane mode");
+                    DebugLog("Fn+F7 airplane mode");
                     break;
 
                 default:
                     AlwaysLog("Unknown VPC event %d", vpc_bit);
                     break;
             }
+
             if (client != nullptr)
-                client->sendNotification(notifier);
+                client->sendNotification(vpc_bit, data);
         }
     }
 }
 
-bool IdeaVPC::read_ec_data(UInt32 cmd, UInt32 *result, UInt8 *retries) {
+// Write VCMD -> VCMD is cleared -> Read VDAT
+bool IdeaVPC::read_ec_data(UInt32 cmd, UInt32 *result, UInt32 *retries) {
     if (!method_vpcw(1, cmd))
         return false;
 
     AbsoluteTime abstime, deadline, now_abs;
-    nanoseconds_to_absolutetime(IDEAPAD_EC_TIMEOUT * 1000 * 1000, &abstime);
-    clock_absolutetime_interval_to_deadline(abstime, &deadline);
+    nanoseconds_to_absolutetime(IDEAPAD_EC_TIMEOUT * 1000000ULL, &abstime);
+    clock_get_uptime(&now_abs);
 
-    do {
+    for (clock_absolutetime_interval_to_deadline(abstime, &deadline);
+         now_abs < deadline; ) {
         if (!method_vpcr(1, result))
             return false;
-
         if (*result == 0)
             return method_vpcr(0, result);
-
         *retries = *retries + 1;
-        IODelay(250);
         clock_get_uptime(&now_abs);
-    } while (now_abs < deadline || *retries < 5);
+    }
 
     AlwaysLog(timeoutPrompt, readECPrompt, cmd);
     return false;
 }
 
-bool IdeaVPC::write_ec_data(UInt32 cmd, UInt32 value, UInt8 *retries) {
+// Write VDAT -> Write VCMD -> VDAT is cleared
+bool IdeaVPC::write_ec_data(UInt32 cmd, UInt32 value, UInt32 *retries) {
     UInt32 result;
 
     if (!method_vpcw(0, value))
@@ -692,20 +773,18 @@ bool IdeaVPC::write_ec_data(UInt32 cmd, UInt32 value, UInt8 *retries) {
         return false;
 
     AbsoluteTime abstime, deadline, now_abs;
-    nanoseconds_to_absolutetime(IDEAPAD_EC_TIMEOUT * 1000 * 1000, &abstime);
-    clock_absolutetime_interval_to_deadline(abstime, &deadline);
+    nanoseconds_to_absolutetime(IDEAPAD_EC_TIMEOUT * 1000000ULL, &abstime);
+    clock_get_uptime(&now_abs);
 
-    do {
+    for (clock_absolutetime_interval_to_deadline(abstime, &deadline);
+         now_abs < deadline; ) {
         if (!method_vpcr(1, &result))
             return false;
-
         if (result == 0)
             return true;
-
         *retries = *retries + 1;
-        IODelay(250);
         clock_get_uptime(&now_abs);
-    } while (now_abs < deadline || *retries < 5);
+    }
 
     AlwaysLog(timeoutPrompt, writeECPrompt, cmd);
     return false;

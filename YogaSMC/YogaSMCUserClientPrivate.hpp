@@ -36,15 +36,14 @@ public:
     virtual IOReturn clientClose(void) APPLE_KEXT_OVERRIDE;
     virtual IOReturn clientDied(void) APPLE_KEXT_OVERRIDE;
 
-    IOReturn sendNotification(UInt32 event);
+    IOReturn sendNotification(UInt32 event, UInt32 data=0);
 
     // Externally accessible methods
     IOReturn userClientOpen(void);
     IOReturn userClientClose(void);
     IOReturn readEC(UInt64 offset, UInt8 *output, IOByteCount *outputSizeP);
-    IOReturn writeEC(UInt64 offset, UInt8 *input, IOByteCount *inputSizeP);
-//    IOReturn write( void *inStruct, void *outStruct, void *inCount, void *outCount, void *p5, void *p6 );
-//    IOReturn notify( void *inStruct, void *inCount, void *p3, void *p4, void *p5, void *p6 );
+    IOReturn writeEC(UInt64 offset, UInt8 *input, IOByteCount inputSizeP);
+    IOReturn readECName(char* name, UInt8* output);
 
 };
 #endif /* YogaSMCUserClientPrivate_hpp */

@@ -7,201 +7,251 @@
 //
 
 import AppKit
+import ApplicationServices
+import NotificationCenter
 import os.log
 import ServiceManagement
 
 @NSApplicationMain
-class AppDelegate: NSObject, NSApplicationDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     let defaults = UserDefaults(suiteName: "org.zhen.YogaSMC")!
-    var conf = notificationConfig()
+    var conf = SharedConfig()
 
     var statusItem: NSStatusItem?
     @IBOutlet weak var appMenu: NSMenu!
-    @IBOutlet weak var vBuild: NSMenuItem!
-    @IBOutlet weak var vVersion: NSMenuItem!
-    @IBOutlet weak var vClass: NSMenuItem!
-    @IBOutlet weak var vFan: NSMenuItem!
+    var hide = false
+    var ECCap = 0
+    var fanTimer: Timer?
 
-    func updateFan() {
-        if conf.connect != 0 {
-            var input : UInt64 = 0x84
-            var outputSize = 2;
-            var output : [UInt8] = Array(repeating: 0, count: 2)
-            if kIOReturnSuccess == IOConnectCallMethod(conf.connect, UInt32(kYSMCUCReadEC), &input, 1, nil, 0, nil, nil, &output, &outputSize),
-               outputSize == 2 {
-                let vFanSpeed = Int32(output[0]) | Int32(output[1]) << 8
-                vFan.title = "Fan: \(vFanSpeed) rpm"
-            } else {
-                os_log("Failed to access EC", type: .error)
-            }
-        }
-    }
+    // MARK: - Think
 
-    @IBOutlet weak var vStartAtLogin: NSMenuItem!
-    @IBAction func toggleStartAtLogin(_ sender: NSMenuItem) {
-        if setStartAtLogin(enabled: vStartAtLogin.state == .off) {
-            vStartAtLogin.state = (vStartAtLogin.state == .on) ? .off : .on
-            defaults.setValue((vStartAtLogin.state == .on), forKey: "StartAtLogin")
-        }
-    }
+    var fanHelper: ThinkFanHelper?
+    var fanHelper2: ThinkFanHelper?
 
-    @IBAction func openPrefpane(_ sender: NSMenuItem) {
-        // from https://medium.com/macoclock/everything-you-need-to-do-to-launch-an-applescript-from-appkit-on-macos-catalina-with-swift-1ba82537f7c3
-        let source = """
-                            tell application "System Preferences"
-                                reveal pane "org.zhen.YogaSMCPane"
-                                activate
-                            end tell
-                     """
-        if let script = NSAppleScript(source: source) {
-            var error: NSDictionary?
-            script.executeAndReturnError(&error)
-            if error != nil {
-                os_log("Failed to open prefpane", type: .error)
-                let alert = NSAlert()
-                alert.messageText = "Failed to open Preferences"
-                alert.informativeText = "Please install YogaSMCPane"
-                alert.alertStyle = .warning
-                alert.addButton(withTitle: "OK")
-                alert.runModal()
-            }
-        }
-    }
-
-    // from https://medium.com/@hoishing/menu-bar-apps-f2d270150660
-    @objc func displayMenu() {
-        guard let button = statusItem?.button else { return }
-        let x = button.frame.origin.x
-        let y = button.frame.origin.y - 5
-        let location = button.superview!.convert(NSMakePoint(x, y), to: nil)
-        let w = button.window!
-        let event = NSEvent.mouseEvent(with: .leftMouseUp,
-                                       location: location,
-                                       modifierFlags: NSEvent.ModifierFlags(rawValue: 0),
-                                       timestamp: 0,
-                                       windowNumber: w.windowNumber,
-                                       context: w.graphicsContext,
-                                       eventNumber: 0,
-                                       clickCount: 1,
-                                       pressure: 0)!
-        NSMenu.popUpContextMenu(appMenu, with: event, for: button)
-        if vClass.title == "Class: Think" {
-            updateFan()
-        }
-    }
-
-    func applicationDidFinishLaunching(_ aNotification: Notification) {
-        // from https://ffried.codes/2018/01/20/the-internals-of-the-macos-hud/
-        let conn = NSXPCConnection(machServiceName: "com.apple.OSDUIHelper", options: [])
-        conn.remoteObjectInterface = NSXPCInterface(with: OSDUIHelperProtocol.self)
-        conn.interruptionHandler = { os_log("Interrupted!", type: .error) }
-        conn.invalidationHandler = { os_log("Invalidated!", type: .error) }
-        conn.resume()
-
-        let target = conn.remoteObjectProxyWithErrorHandler { os_log("Failed: %@", type: .error, $0 as CVarArg) }
-        conf.helper = target as? OSDUIHelperProtocol
-        if conf.helper == nil {
-            os_log("Wrong type %@", type: .fault, target as! CVarArg)
-            let alert = NSAlert()
-            alert.messageText = "Failed to init OSD helper"
-            alert.alertStyle = .critical
-            alert.addButton(withTitle: "Quit")
-            alert.runModal()
-            NSApp.terminate(nil)
-        }
-
-        conf.io_service = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("YogaVPC"))
-        if kIOReturnSuccess != IOServiceOpen(conf.io_service, mach_task_self_, 0, &conf.connect) {
-            os_log("Failed to connect to YogaSMC", type: .fault)
-            conf.helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 2000, withText: "Failed to connect \n to YogaSMC")
-            NSApp.terminate(nil)
+    @objc func thinkWakeup() {
+        if let current = scriptHelper(getMicVolumeAS, "MicMute"),
+           sendNumber("MicMuteLED", current.int32Value == 0 ? 2 : 0, conf.io_service) {
+            os_log("Mic Mute LED updated", type: .info)
         } else {
-            if kIOReturnSuccess == IOConnectCallScalarMethod(conf.connect, UInt32(kYSMCUCOpen), nil, 0, nil, nil) {
-                os_log("Connected to YogaSMC", type: .info)
-            } else {
-                os_log("Another instance have connected to YogaSMC", type: .error)
-                conf.helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: "Another instance have \n connected to YogaSMC")
-                NSApp.terminate(nil)
-            }
+            os_log("Failed to update Mic Mute LED", type: .error)
         }
 
-        loadConfig()
-        
-        if defaults.bool(forKey: "HideIcon") {
-            os_log("Icon hidden", type: .info)
+        if fanHelper2 != nil {
+            fanHelper2?.setFanLevel()
+        }
+        if fanHelper != nil {
+            fanHelper?.setFanLevel()
+        }
+    }
+
+    // MARK: - Menu
+
+    @IBAction func openAboutPanel(_ sender: NSMenuItem) {
+        NSApp.activate(ignoringOtherApps: true)
+        NSApp.orderFrontStandardAboutPanel(sender)
+    }
+
+    @objc func toggleStartAtLogin(_ sender: NSMenuItem) {
+        let identifier = "\(Bundle.main.bundleIdentifier!)Helper" as CFString
+        if SMLoginItemSetEnabled(identifier, sender.state == .off) {
+            sender.state = (sender.state == .on) ? .off : .on
+            defaults.setValue((sender.state == .on), forKey: "StartAtLogin")
         } else {
-            statusItem = NSStatusBar.system.statusItem(withLength: -1)
-            guard let button = statusItem?.button else {
-                os_log("Status bar item failed. Try removing some menu bar item.", type: .fault)
-                NSApp.terminate(nil)
+            os_log("Toggle start at login failed", type: .error)
+        }
+    }
+
+    @objc func openPrefpane() {
+        prefpaneHelper()
+    }
+
+    @objc func midnightTimer(sender: Timer) {
+        setHolidayIcon(statusItem!)
+        let calendar = Calendar.current
+        let midnight = calendar.startOfDay(for: Date())
+        sender.fireDate = calendar.date(byAdding: .day, value: 1, to: midnight)!
+        os_log("Timer sheduled at %s", type: .info, sender.fireDate.description(with: Locale.current))
+    }
+
+    @objc func update () {
+        DispatchQueue.main.async {
+            if self.fanHelper2 != nil {
+                self.fanHelper2!.update()
+            }
+            if self.fanHelper != nil {
+                self.fanHelper!.update()
+            }
+        }
+    }
+
+    func menuWillOpen(_ menu: NSMenu) {
+        update()
+        DispatchQueue.global(qos: .default).async {
+            self.fanTimer = Timer.scheduledTimer(
+                timeInterval: 1,
+                target: self,
+                selector: #selector(self.update),
+                userInfo: nil,
+                repeats: true)
+
+            if self.fanTimer == nil {
                 return
             }
-            
-            button.title = "⎇"
-            button.target = self
-            button.action = #selector(displayMenu)
+            self.fanTimer?.tolerance = 0.2
+            let currentRunLoop = RunLoop.current
+            currentRunLoop.add(self.fanTimer!, forMode: .common)
+            currentRunLoop.run()
+        }
+    }
+
+    func menuDidClose(_ menu: NSMenu) {
+        self.fanTimer?.invalidate()
+    }
+
+    // MARK: - Application
+
+    func applicationDidFinishLaunching(_ aNotification: Notification) {
+        guard conf.io_service != 0,
+              kIOReturnSuccess == IOServiceOpen(conf.io_service, mach_task_self_, 0, &conf.connect) else {
+            os_log("Failed to connect to YogaSMC", type: .fault)
+            showOSD("Failed to connect \n to YogaSMC", duration: 2000)
+            NSApp.terminate(nil)
+            return
+        }
+
+        guard kIOReturnSuccess == IOConnectCallScalarMethod(conf.connect, UInt32(kYSMCUCOpen), nil, 0, nil, nil) else {
+            os_log("Another instance has connected to YogaSMC", type: .error)
+            showOSD("Another instance has \n connected to YogaSMC", duration: 2000)
+            NSApp.terminate(nil)
+            return
+        }
+
+        os_log("Connected to YogaSMC", type: .info)
+
+        loadConfig()
+
+        if hide {
+            os_log("Icon hidden", type: .info)
+        } else {
+            statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+            statusItem?.menu = appMenu
+            if let title = defaults.string(forKey: "Title") {
+                statusItem?.title = title
+                statusItem?.toolTip = defaults.string(forKey: "ToolTip")
+            } else {
+                _ = Timer.scheduledTimer(timeInterval: 0, target: self, selector: #selector(midnightTimer(sender:)), userInfo: nil, repeats: true)
+            }
+            appMenu.delegate = self
         }
 
         if !getProerty() {
-            os_log("YogaSMC not installed", type: .error)
-            conf.helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: "YogaSMC Unavailable")
+            os_log("YogaSMC unavailable", type: .error)
+            showOSD("YogaSMC unavailable", duration: 2000)
             NSApp.terminate(nil)
         }
     }
 
+    func applicationWillTerminate(_ aNotification: Notification) {
+        saveConfig()
+        NSWorkspace.shared.notificationCenter.removeObserver(self)
+        if conf.connect != 0 {
+            IOServiceClose(conf.connect)
+        }
+    }
+
+    // MARK: - Configuration
+
     func getProerty() -> Bool {
-        if conf.io_service != 0 {
-            var CFProps : Unmanaged<CFMutableDictionary>? = nil
-            if (kIOReturnSuccess == IORegistryEntryCreateCFProperties(conf.io_service, &CFProps, kCFAllocatorDefault, 0) && CFProps != nil) {
-                if let props = CFProps?.takeRetainedValue() as NSDictionary? {
-                    let build = props["YogaSMC,Build"] as? NSString
-                    vBuild.title = "Build: \(build ?? "Unknown")"
-                    let version = props["YogaSMC,Version"] as? NSString
-                    vVersion.title = "Version: \(version ?? "Unknown")"
-                    switch props["IOClass"] as? NSString {
-                    case "IdeaVPC":
-                        if conf.events.isEmpty {
-                            conf.events = IdeaEvents
-                        }
-                        _ = registerNotification()
-                        vClass.title = "Class: Idea"
-                    case "ThinkVPC":
-                        if conf.events.isEmpty {
-                            conf.events = ThinkEvents
-                        }
-                        _ = registerNotification()
-                        vFan.isHidden = false
-                        updateFan()
-                        vClass.title = "Class: Think"
-                    default:
-                        vClass.title = "Class: Unknown"
-                        os_log("Unknown class", type: .error)
-                        conf.helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: "Unknown class")
-                    }
-                    return true
+        var CFProps: Unmanaged<CFMutableDictionary>?
+        if kIOReturnSuccess == IORegistryEntryCreateCFProperties(conf.io_service, &CFProps, kCFAllocatorDefault, 0),
+           CFProps != nil {
+            if let props = CFProps?.takeRetainedValue() as NSDictionary?,
+               let IOClass = props["IOClass"] as? NSString {
+                if !hide {
+                    appMenu.insertItem(NSMenuItem.separator(), at: 1)
+                    appMenu.insertItem(withTitle: "Class: \(IOClass)", action: nil, keyEquivalent: "", at: 2)
+                    appMenu.insertItem(withTitle: "\(props["VersionInfo"] as? NSString ?? "Unknown Version")", action: nil, keyEquivalent: "", at: 3)
                 }
+
+                switch getString("EC Capability", conf.io_service) {
+                case "RW":
+                    ECCap = 3
+                case "RO":
+                    ECCap = 1
+                default:
+                    break
+                }
+
+                var isOpen = false
+                switch IOClass {
+                case "IdeaVPC":
+                    conf.events = ideaEvents
+                    isOpen = registerNotification()
+                case "ThinkVPC":
+                    conf.events = thinkEvents
+                    isOpen = registerNotification()
+                    thinkWakeup()
+                    if !hide {
+                        if ECCap == 3 {
+                            if !getBoolean("Dual fan", conf.io_service),
+                               defaults.bool(forKey: "SecondThinkFan") {
+                                fanHelper2 = ThinkFanHelper(appMenu, conf.connect, false, false)
+                                fanHelper2?.update(true)
+                            }
+                            fanHelper = ThinkFanHelper(appMenu, conf.connect, true, fanHelper2 == nil)
+                            fanHelper?.update(true)
+                        } else {
+                            showOSD("EC access unavailable! \n See `SSDT-ECRW.dsl`")
+                        }
+                    }
+                    NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(thinkWakeup), name: NSWorkspace.didWakeNotification, object: nil)
+                case "YogaHIDD":
+                    conf.events = HIDDEvents
+                    isOpen = registerNotification()
+                default:
+                    os_log("Unknown class", type: .error)
+                    showOSD("Unknown class", duration: 2000)
+                }
+                if isOpen {
+                    loadEvents()
+                }
+                return true
             }
         }
         return false
     }
 
-    func applicationWillTerminate(_ aNotification: Notification) {
-        if conf.connect != 0 {
-            IOServiceClose(conf.connect);
-        }
-        if !conf.events.isEmpty,
-           Bundle.main.bundlePath.hasPrefix("/Applications") {
-            saveEvents()
-        }
-    }
-
     func loadEvents() {
-        if !Bundle.main.bundlePath.hasPrefix("/Applications") {
-            conf.helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 2000, withText: "Please move the app \n into Applications")
-        }
         if let arr = defaults.object(forKey: "Events") as? [[String: Any]] {
             for v in arr {
-                conf.events[v["id"] as! UInt32] = eventDesc(v["name"] as! String, v["image"] as? String, eventAction(rawValue: v["action"] as! Int) ?? .nothing, v["display"] as? Bool ?? true)
+                if let id = v["id"] as? UInt32,
+                   let events = v["events"] as? [[String: Any]] {
+                    var e = conf.events[id] ?? [:]
+                    for event in events {
+                        if let data = event["data"] as? UInt32,
+                           let name = event["name"] as? String,
+                           let action = event["action"] as? String {
+                            let opt = event["option"] as? String
+                            if e[data] != nil,
+                               action == "nothing",
+                               (opt == "Unknown" || (opt == nil && name.hasPrefix("Event 0x"))) {
+                                os_log("Override unknown event 0x%04x : %d", type: .info, id, data)
+                            } else {
+                                e[data] = EventDesc(
+                                    name,
+                                    event["image"] as? String,
+                                    act: EventAction(rawValue: action) ?? .nothing,
+                                    display: event["display"] as? Bool ?? true,
+                                    opt: opt)
+                            }
+                        } else {
+                            os_log("Invalid event for 0x%04x!", type: .info, id)
+                        }
+                    }
+                    conf.events[id] = e
+                } else {
+                    os_log("Invalid event!", type: .info)
+                }
             }
             os_log("Loaded %d events", type: .info, conf.events.capacity)
         } else {
@@ -210,44 +260,90 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func saveEvents() {
-        var array : [[String: Any]] = []
+        var array: [[String: Any]] = []
         for (k, v) in conf.events {
-            var dict : [String: Any] = [:]
+            var events: [[String: Any]] = []
+            var dict: [String: Any] = [:]
             dict["id"] = Int(k)
-            dict["name"] = v.name
-            if v.image != nil {
-                dict["image"] = v.image
+            for (data, e) in v {
+                var event: [String: Any] = [:]
+                event["data"] = Int(data)
+                event["name"] = e.name
+                if let res = e.image {
+                    if let path = Bundle.main.resourcePath,
+                       res.hasPrefix(path) {
+                        event["image"] = res.lastPathComponent
+                   } else {
+                        event["image"] = res
+                   }
+                }
+                event["action"] = e.action.rawValue
+                event["display"] = e.display
+                if e.option != nil {
+                    event["option"] = e.option
+                }
+                events.append(event)
             }
-            dict["action"] = v.action.rawValue
-            dict["display"] = v.display
+            dict["events"] = events
             array.append(dict)
         }
         defaults.setValue(array, forKey: "Events")
-        os_log("Default events saved", type: .info)
     }
-    
+
     func loadConfig() {
-        if defaults.object(forKey: "FirstLaunch") == nil {
+        if defaults.object(forKey: "StartAtLogin") == nil {
             os_log("First launch", type: .info)
-            defaults.setValue(false, forKey: "FirstLaunch")
             defaults.setValue(false, forKey: "HideIcon")
             defaults.setValue(false, forKey: "StartAtLogin")
+            defaults.setValue("⎇", forKey: "Title")
         }
-        vStartAtLogin.state = defaults.bool(forKey: "StartAtLogin") ? .on : .off
-        loadEvents()
+
+        hide = defaults.bool(forKey: "HideIcon")
+
+        if !hide {
+            let login = NSMenuItem(title: "Start at Login", action: #selector(toggleStartAtLogin), keyEquivalent: "s")
+            login.state = defaults.bool(forKey: "StartAtLogin") ? .on : .off
+            appMenu.insertItem(NSMenuItem.separator(), at: 1)
+            appMenu.insertItem(login, at: 2)
+
+            let pref = NSMenuItem(title: "Open YogaSMC Preferences…", action: #selector(openPrefpane), keyEquivalent: "p")
+            appMenu.insertItem(NSMenuItem.separator(), at: 3)
+            appMenu.insertItem(pref, at: 4)
+        }
+
+        if !Bundle.main.bundlePath.hasPrefix("/Applications") {
+            showOSD("Please move the app \n into Applications")
+        }
+
+        // Load driver settings
+        if defaults.object(forKey: "AutoBacklight") != nil {
+            _ = sendNumber("AutoBacklight", defaults.integer(forKey: "AutoBacklight"), conf.io_service)
+        }
     }
+
+    func saveConfig() {
+        if !conf.events.isEmpty,
+           Bundle.main.bundlePath.hasPrefix("/Applications") {
+            saveEvents()
+        }
+
+        // Save driver settings
+        defaults.setValue(getNumber("AutoBacklight", conf.io_service), forKey: "AutoBacklight")
+    }
+
+    // MARK: - Notification
 
     func registerNotification() -> Bool {
         if conf.connect != 0 {
             // fix warning per https://forums.swift.org/t/swift-5-2-pointers-and-coretext/34862
-            var portContext : CFMachPortContext = withUnsafeMutableBytes(of: &conf) { conf in
+            var portContext: CFMachPortContext = withUnsafeMutableBytes(of: &conf) { conf in
                 CFMachPortContext(version: 0, info: conf.baseAddress, retain: nil, release: nil, copyDescription: nil)
             }
-            if let notificationPort = CFMachPortCreate(kCFAllocatorDefault, notificationCallback, &portContext, nil)  {
+            if let notificationPort = CFMachPortCreate(kCFAllocatorDefault, notificationCallback, &portContext, nil) {
                 if let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, notificationPort, 0) {
-                    CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .defaultMode);
+                    CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .defaultMode)
                 }
-                IOConnectSetNotificationPort(conf.connect, 0, CFMachPortGetPort(notificationPort), 0);
+                IOConnectSetNotificationPort(conf.connect, 0, CFMachPortGetPort(notificationPort), 0)
                 return true
             } else {
                 os_log("Failed to create mach port", type: .error)
@@ -255,152 +351,129 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         return false
     }
-
-    // from https://github.com/MonitorControl/MonitorControl
-    func setStartAtLogin(enabled: Bool) -> Bool {
-        let identifier = "\(Bundle.main.bundleIdentifier!)Helper" as CFString
-        if SMLoginItemSetEnabled(identifier, enabled) {
-            os_log("Toggle start at login state: %{public}@", type: .info, enabled ? "on" : "off")
-            return true
-        } else {
-            os_log("Toggle start at login failed", type: .error)
-            return false
-        }
-    }
-}
-
-let defaultImage : NSString = "/System/Library/CoreServices/OSDUIHelper.app/Contents/Resources/kBrightOff.pdf"
-
-// from https://ffried.codes/2018/01/20/the-internals-of-the-macos-hud/
-@objc enum OSDImage: CLongLong {
-    case kBrightness = 1
-    case brightness2 = 2
-    case kVolume = 3
-    case kMute = 4
-    case volume5 = 5
-    case kEject = 6
-    case brightness7 = 7
-    case brightness8 = 8
-    case kAirportRange = 9
-    case wireless2Forbid = 10
-    case kBright = 11
-    case kBrightOff = 12
-    case kBright13 = 13
-    case kBrightOff14 = 14
-    case Ajar = 15
-    case mute16 = 16
-    case volume17 = 17
-    case empty18 = 18
-    case kRemoteLinkedGeneric = 19
-    case kRemoteSleepGeneric = 20 // will put into sleep
-    case muteForbid = 21
-    case volumeForbid = 22
-    case volume23 = 23
-    case empty24 = 24
-    case kBright25 = 25
-    case kBrightOff26 = 26
-    case backlightonForbid = 27
-    case backlightoffForbid = 28
-    /* and more cases from 1 to 28 (except 18 and 24) */
-}
-
-// from https://github.com/w0lfschild/macOS_headers/blob/master/macOS/CoreServices/OSDUIHelper/1/OSDUIHelperProtocol-Protocol.h
-
-@objc protocol OSDUIHelperProtocol {
-
-    @objc func showFullScreenImage(_ img: OSDImage, onDisplayID: CGDirectDisplayID, priority: CUnsignedInt, msecToAnimate: CUnsignedInt)
-
-    @objc func fadeClassicImageOnDisplay(_ img: CUnsignedInt)
-
-    @objc func showImageAtPath(_ img: NSString, onDisplayID: CGDirectDisplayID, priority: CUnsignedInt, msecUntilFade: CUnsignedInt, withText: NSString)
-
-    @objc func showImage(_ img: OSDImage, onDisplayID: CGDirectDisplayID, priority: CUnsignedInt, msecUntilFade: CUnsignedInt, filledChiclets: CUnsignedInt, totalChiclets: CUnsignedInt, locked: CBool)
-
-    @objc func showImage(_ img: OSDImage, onDisplayID: CGDirectDisplayID, priority: CUnsignedInt, msecUntilFade: CUnsignedInt, withText: NSString)
-
-    @objc func showImage(_ img: OSDImage, onDisplayID: CGDirectDisplayID, priority: CUnsignedInt, msecUntilFade: CUnsignedInt)
 }
 
 func notificationCallback(_ port: CFMachPort?, _ msg: UnsafeMutableRawPointer?, _ size: CFIndex, _ info: UnsafeMutableRawPointer?) {
-    let conf = info!.assumingMemoryBound(to: notificationConfig?.self)
-    if conf.pointee != nil  {
+    if let raw = info?.assumingMemoryBound(to: SharedConfig?.self),
+       var conf = raw.pointee {
         if let notification = msg?.load(as: SMCNotificationMessage.self) {
-            if let desc = conf.pointee?.events[notification.event] {
-                if desc.display {
-                    conf.pointee?.helper.showImageAtPath(desc.image ?? defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: desc.name)
+            if let events = conf.events[notification.event] {
+                if let desc = events[notification.data] {
+                    eventActuator(desc, notification.data, &conf)
+                } else if let desc = events[0] {
+                    eventActuator(desc, notification.data, &conf)
+                } else {
+                    let name = String(format: "Event 0x%04x:%d", notification.event, notification.data)
+                    showOSD(name)
+                    os_log("Event 0x%04x default data not found", type: .error, notification.event)
                 }
-                eventActuator(desc, conf)
             } else {
-                let name = String(format:"Event 0x%04x", notification.event)
-                conf.pointee?.helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: name as NSString)
-                conf.pointee?.events[notification.event] = eventDesc(name, nil)
+                let name = String(format: "Event 0x%04x:%d", notification.event, notification.data)
+                showOSD(name)
+                conf.events[notification.event] = [0: EventDesc(name, nil, opt: "Unknown")]
                 #if DEBUG
-                os_log("Event 0x%04x", type: .debug, notification.event)
+                os_log("Event 0x%04x:%d", type: .debug, notification.event, notification.data)
                 #endif
             }
         } else {
-            conf.pointee?.helper.showImageAtPath(defaultImage, onDisplayID: CGMainDisplayID(), priority: 0x1f4, msecUntilFade: 1000, withText: "Null Event")
-            os_log("Null Event", type: .error)
+            showOSD("Invalid Notification")
+            os_log("Invalid notification", type: .error)
         }
     } else {
         os_log("Invalid conf", type: .error)
     }
 }
 
-enum eventAction : Int {
-    case nothing, micMute, camera, wireless, thermal
-}
-
-func eventActuator(_ desc: eventDesc, _ conf: UnsafePointer<notificationConfig?>) {
+func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<SharedConfig>) {
     switch desc.action {
     case .nothing:
+        #if DEBUG
         os_log("%s: Do nothing", type: .info, desc.name)
-    default:
-        os_log("%s: Not implmented", type: .info, desc.name)
-    }
-}
-
-struct eventDesc {
-    let name : NSString
-    let image : NSString?
-    let action : eventAction
-    let display : Bool
-    init(_ name: String, _ image: String?, _ action: eventAction = .nothing, _ display: Bool = true) {
-        self.name = name as NSString
-        if let path = Bundle.main.resourcePath,
-           path.hasPrefix("/Applications"),
-            let img = image {
-            self.image = "\(path)/\(img)" as NSString
+        #endif
+    case .script:
+        if let scpt = desc.option {
+            guard scriptHelper(scpt, desc.name) != nil else { return }
         } else {
-            self.image = nil
+            os_log("%s: script not found", type: .error)
+            return
         }
-        self.action = action
-        self.display = display
+    case .airplane:
+        airplaneModeHelper()
+        return
+    case .bluetooth:
+        bluetoothHelper()
+        return
+    case .bluetoothdiscoverable:
+        bluetoothDiscoverableHelper()
+        return
+    case .backlight:
+        switch data {
+        case 0:
+            showOSDRes("Backlight Off", .BacklightOff)
+        case 1:
+            showOSDRes("Backlight Low", .BacklightLow)
+        case 2:
+            showOSDRes("Backlight High", .BacklightHigh)
+        default:
+            showOSDRes("Backlight \(data)", .BacklightLow)
+        }
+    case .micmute:
+        micMuteHelper(conf.pointee.io_service)
+        return
+    case .desktop:
+        CoreDockSendNotification("com.apple.showdesktop.awake" as CFString, nil)
+        return
+    case .expose:
+        CoreDockSendNotification("com.apple.expose.front.awake" as CFString, nil)
+        return
+    case .mission:
+        CoreDockSendNotification("com.apple.expose.awake" as CFString, nil)
+        return
+    case .launchpad:
+        CoreDockSendNotification("com.apple.launchpad.toggle" as CFString, nil)
+        return
+    case .prefpane:
+        prefpaneHelper()
+        return
+    case .sleep:
+        if desc.display {
+            if let img = desc.image {
+                showOSD(desc.name, img)
+            } else {
+                showOSDRes(desc.name, .Sleep)
+            }
+            sleep(1)
+        }
+        _ = scriptHelper(sleepAS, desc.name)
+        return
+    case .search:
+        _ = scriptHelper(searchAS, desc.name)
+        return
+    case .siri:
+        _ = scriptHelper(siriAS, desc.name)
+        return
+    case .spotlight:
+        _ = scriptHelper(spotlightAS, desc.name)
+        return
+    case .thermal:
+        showOSD("Thermal: \(desc.name)")
+        os_log("%s: thermal event", type: .info, desc.name)
+    case .wireless:
+        wirelessHelper()
+        return
+    default:
+        #if DEBUG
+        os_log("%s: Not implmented", type: .info, desc.name)
+        #endif
+    }
+
+    if desc.display {
+        showOSD(desc.name, desc.image)
     }
 }
 
-struct notificationConfig {
-    var connect : io_connect_t = 0
-    var events : Dictionary<UInt32, eventDesc> = [:]
-    var helper : OSDUIHelperProtocol!
-    var io_service : io_service_t = 0
+struct SharedConfig {
+    var connect: io_connect_t = 0
+    var events: [UInt32: [UInt32: EventDesc]] = [:]
+    let io_service: io_service_t = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("YogaVPC"))
 }
-
-let IdeaEvents : Dictionary<UInt32, eventDesc> = [
-    0x0040 : eventDesc("Fn-Q Cooling", nil, .thermal),
-    0x0100 : eventDesc("Keyboard Backlight", "kBright.pdf"),
-    0x0200 : eventDesc("Screen Off", nil),
-    0x0201 : eventDesc("Screen On", nil),
-    0x0500 : eventDesc("TouchPad Off", nil), // Off
-    0x0501 : eventDesc("TouchPad On", nil), // Same as 0x0A00
-    0x0700 : eventDesc("Camera", nil, .camera),
-    0x0800 : eventDesc("Mic Mute", nil, .micMute),
-    0x0A00 : eventDesc("TouchPad On", nil, .nothing, false),
-    0x0D00 : eventDesc("Airplane Mode", nil, .wireless)
-]
-
-let ThinkEvents : Dictionary<UInt32, eventDesc> = [
-    0x1005 : eventDesc("Network", nil, .wireless),
-    0x1012 : eventDesc("Keyboard Backlight", "kBright.pdf"),
-    0x101B : eventDesc("Mic Mute", nil, .micMute)
-]

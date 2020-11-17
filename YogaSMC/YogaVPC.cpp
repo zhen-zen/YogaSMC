@@ -9,25 +9,12 @@
 
 #include "YogaVPC.hpp"
 
-OSDefineMetaClassAndStructors(YogaVPC, IOService);
-
-bool YogaVPC::init(OSDictionary *dictionary)
-{
-    if (!super::init(dictionary))
-        return false;
-
-    DebugLog("Initializing");
-
-    extern kmod_info_t kmod_info;
-    setProperty("YogaSMC,Build", __DATE__);
-    setProperty("YogaSMC,Version", kmod_info.version);
-
-    return true;
-}
+OSDefineMetaClassAndStructors(YogaVPC, YogaBaseService);
 
 IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
 {
-    name = provider->getName();
+    if (!super::probe(provider, score))
+        return nullptr;
  
     DebugLog("Probing");
 
@@ -41,10 +28,46 @@ IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
 
     if (!ec && !findPNP(PnpDeviceIdEC, &ec))
         return nullptr;
+
+    auto iterator = IORegistryIterator::iterateOver(gIOACPIPlane, kIORegistryIterateRecursively);
+    if (!iterator) {
+        AlwaysLog("findWMI failed");
+    } else {
+        auto pnp = OSString::withCString(PnpDeviceIdWMI);
+        IOACPIPlatformDevice *dev;
+        WMICollection = OSOrderedSet::withCapacity(1);
+        WMIProvCollection = OSOrderedSet::withCapacity(1);
+
+        while (auto entry = iterator->getNextObject()) {
+            if (entry->compareName(pnp) &&
+                (dev = OSDynamicCast(IOACPIPlatformDevice, entry))) {
+                if (strncmp(dev->getName(), "WTBT", sizeof("WTBT")) == 0) {
+                    DebugLog("Skip Thunderbolt interface");
+                    continue;
+                }
+                if (auto wmi = initWMI(dev)) {
+                    DebugLog("WMI available at %s", dev->getName());
+                    WMICollection->setObject(wmi);
+                    WMIProvCollection->setObject(dev);
+                    wmi->release();
+                } else {
+                    DebugLog("WMI init failed at %s", dev->getName());
+                }
+            }
+        }
+        if (WMICollection->getCount() == 0) {
+            OSSafeReleaseNULL(WMICollection);
+            OSSafeReleaseNULL(WMIProvCollection);
+        }
+        iterator->release();
+        pnp->release();
+    }
+
 #ifndef ALTER
-    initSMC();
+    if (getProperty("Sensors") != nullptr)
+        initSMC();
 #endif
-    return super::probe(provider, score);
+    return this;
 }
 
 bool YogaVPC::start(IOService *provider) {
@@ -52,24 +75,29 @@ bool YogaVPC::start(IOService *provider) {
         return false;
     DebugLog("Starting");
 
-    workLoop = IOWorkLoop::workLoop();
-    commandGate = IOCommandGate::commandGate(this);
-    if (!workLoop || !commandGate || (workLoop->addEventSource(commandGate) != kIOReturnSuccess)) {
-        AlwaysLog("Failed to add commandGate");
-        return false;
-    }
-
     if (!initVPC())
         return false;
 
-    updateAll();
-#ifndef ALTER
-    smc->start(this);
-#endif
-    PMinit();
-    provider->joinPMtree(this);
-    registerPowerDriver(this, IOPMPowerStates, kIOPMNumberPowerStates);
+    validateEC();
 
+    updateAll();
+
+    if (WMICollection) {
+        for (int i=WMICollection->getCount()-1; i >= 0; i--) {
+            IOService *wmi = OSDynamicCast(IOService, WMICollection->getObject(i));
+            IOService *prov = OSDynamicCast(IOService, WMIProvCollection->getObject(i));
+            if (!wmi->start(prov)) {
+                AlwaysLog("Failed to start WMI instance on %s", prov->getName());
+                wmi->detach(prov);
+                WMICollection->removeObject(wmi);
+                WMIProvCollection->removeObject(prov);
+            }
+        }
+    }
+#ifndef ALTER
+    if (smc)
+        smc->start(this);
+#endif
     setProperty(kDeliverNotifications, kOSBooleanTrue);
     registerService();
     return true;
@@ -79,19 +107,6 @@ bool YogaVPC::initVPC() {
     if (vpc->validateObject(getClamshellMode) == kIOReturnSuccess &&
         vpc->validateObject(setClamshellMode) == kIOReturnSuccess)
         clamshellCap = true;
-
-    if (ec->validateObject(readECOneByte) == kIOReturnSuccess &&
-        ec->validateObject(readECBytes) == kIOReturnSuccess) {
-        ECAccessCap |= BIT(0);
-        if (ec->validateObject(writeECOneByte) == kIOReturnSuccess) {
-            setProperty("EC Capability", "RW");
-            ECAccessCap |= BIT(1);
-        } else {
-            setProperty("EC Capability", "RO");
-        }
-    } else {
-        setProperty("EC Capability", "False");
-    }
 
     if (vpc->validateObject(setThermalControl) == kIOReturnSuccess) {
         DYTC_RESULT result;
@@ -126,20 +141,24 @@ bool YogaVPC::exitVPC() {
 void YogaVPC::stop(IOService *provider) {
     DebugLog("Stopping");
     exitVPC();
+
+    if (WMICollection) {
+        for (int i= WMICollection->getCount()-1; i >= 0; i--) {
+            IOService *wmi = OSDynamicCast(IOService, WMICollection->getObject(i));
+            IOService *prov = OSDynamicCast(IOService, WMIProvCollection->getObject(i));
+            wmi->stop(prov);
+            wmi->detach(prov);
+        }
+        OSSafeReleaseNULL(WMICollection);
+        OSSafeReleaseNULL(WMIProvCollection);
+    }
+
 #ifndef ALTER
     if (smc) {
         smc->stop(this);
         smc->detach(this);
     }
 #endif
-    workLoop->removeEventSource(commandGate);
-    OSSafeReleaseNULL(commandGate);
-    OSSafeReleaseNULL(workLoop);
-
-    PMstop();
-
-    terminate();
-    detach(provider);
     super::stop(provider);
 }
 
@@ -172,7 +191,7 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
             } else if (key->isEqualTo(backlightPrompt)) {
                 OSNumber *value;
                 getPropertyNumber(backlightPrompt);
-                updateBacklight(false);
+                updateBacklight();
                 if (value->unsigned32BitValue() == backlightLevel)
                     DebugLog(valueMatched, backlightPrompt, backlightLevel);
                 else
@@ -273,16 +292,6 @@ IOReturn YogaVPC::setProperties(OSObject *props) {
     return kIOReturnSuccess;
 }
 
-IOReturn YogaVPC::message(UInt32 type, IOService *provider, void *argument) {
-    if (argument) {
-        AlwaysLog("message: type=%x, provider=%s, argument=0x%04x", type, provider->getName(), *((UInt32 *) argument));
-        updateAll();
-    } else {
-        AlwaysLog("message: type=%x, provider=%s", type, provider->getName());
-    }
-    return kIOReturnSuccess;
-}
-
 bool YogaVPC::updateClamshell(bool update) {
     if (!clamshellCap)
         return true;
@@ -327,7 +336,7 @@ bool YogaVPC::toggleClamshell() {
 }
 
 IOReturn YogaVPC::setPowerState(unsigned long powerState, IOService *whatDevice){
-    AlwaysLog("powerState %ld : %s", powerState, powerState ? "on" : "off");
+    DebugLog("powerState %ld : %s", powerState, powerState ? "on" : "off");
 
     if (whatDevice != this)
         return kIOReturnInvalid;
@@ -520,106 +529,6 @@ bool YogaVPC::setDYTC(int perfmode) {
     return parseDYTC(result);
 }
 
-bool YogaVPC::findPNP(const char *id, IOACPIPlatformDevice **dev) {
-    auto iterator = IORegistryIterator::iterateOver(gIOACPIPlane, kIORegistryIterateRecursively);
-    if (!iterator) {
-        AlwaysLog("findPNP failed");
-        return nullptr;
-    }
-    auto pnp = OSString::withCString(id);
-
-    while (auto entry = iterator->getNextObject()) {
-        if (entry->compareName(pnp)) {
-            *dev = OSDynamicCast(IOACPIPlatformDevice, entry);
-            if (*dev) {
-                AlwaysLog("%s available at %s", id, (*dev)->getName());
-                break;
-            }
-        }
-    }
-    iterator->release();
-    pnp->release();
-
-    return !!(*dev);
-}
-
-IOReturn YogaVPC::readECName(const char* name, UInt32 *result) {
-    IOReturn ret = ec->evaluateInteger(name, result);
-    switch (ret) {
-        case kIOReturnSuccess:
-            break;
-
-        case kIOReturnBadArgument:
-            AlwaysLog("read %s failed, bad argument (field size too large?)", name);
-            break;
-            
-        default:
-            AlwaysLog("read %s failed %x", name, ret);
-            break;
-    }
-    return ret;
-}
-
-IOReturn YogaVPC::method_re1b(UInt32 offset, UInt32 *result) {
-    if (!(ECAccessCap & BIT(0)))
-        return kIOReturnUnsupported;
-
-    OSObject* params[1] = {
-        OSNumber::withNumber(offset, 32)
-    };
-
-    IOReturn ret = ec->evaluateInteger(readECOneByte, result, params, 1);
-    if (ret != kIOReturnSuccess)
-        AlwaysLog("read 0x%02x failed", offset);
-
-    return ret;
-}
-
-IOReturn YogaVPC::method_recb(UInt32 offset, UInt32 size, OSData **data) {
-    if (!(ECAccessCap & BIT(0)))
-        return kIOReturnUnsupported;
-
-    // Arg0 - offset in bytes from zero-based EC
-    // Arg1 - size of buffer in bits
-    OSObject* params[2] = {
-        OSNumber::withNumber(offset, 32),
-        OSNumber::withNumber(size * 8, 32)
-    };
-    OSObject* result;
-
-    IOReturn ret = ec->evaluateObject(readECBytes, &result, params, 2);
-    if (ret != kIOReturnSuccess || !(*data = OSDynamicCast(OSData, result))) {
-        AlwaysLog("read %d bytes @ 0x%02x failed", size, offset);
-        OSSafeReleaseNULL(result);
-        return kIOReturnInvalid;
-    }
-
-    if ((*data)->getLength() != size) {
-        AlwaysLog("read %d bytes @ 0x%02x, got %d bytes", size, offset, (*data)->getLength());
-        OSSafeReleaseNULL(result);
-        return kIOReturnNoBandwidth;
-    }
-
-    return ret;
-}
-
-IOReturn YogaVPC::method_we1b(UInt32 offset, UInt32 value) {
-    if (!(ECAccessCap & BIT(1)))
-        return kIOReturnUnsupported;
-
-    OSObject* params[2] = {
-        OSNumber::withNumber(offset, 32),
-        OSNumber::withNumber(value, 32)
-    };
-    UInt32 result;
-
-    IOReturn ret = ec->evaluateInteger(writeECOneByte, &result, params, 2);
-    if (ret != kIOReturnSuccess)
-        AlwaysLog("write 0x%02x @ 0x%02x failed", value, offset);
-
-    return ret;
-}
-
 bool YogaVPC::dumpECOffset(UInt32 value) {
     bool ret = false;
     UInt32 size = value >> 8;
@@ -654,9 +563,9 @@ bool YogaVPC::dumpECOffset(UInt32 value) {
             }
         }
     } else {
-        UInt32 integer;
-        if (method_re1b(value, &integer) == kIOReturnSuccess) {
-            AlwaysLog("0x%02x: %02x", value, integer);
+        UInt8 byte;
+        if (method_re1b(value, &byte) == kIOReturnSuccess) {
+            AlwaysLog("0x%02x: %02x", value, byte);
             ret = true;
         }
     }

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="17156" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
-        <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17156"/>
     </dependencies>
     <scenes>
@@ -15,39 +14,13 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="YogaSMCNC" systemMenu="apple" id="uQy-DD-JDr">
                                     <items>
-                                        <menuItem title="About YogaSMCNC" enabled="NO" id="HGG-QI-ARu">
+                                        <menuItem title="About YogaSMCNC" id="HGG-QI-ARu">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
-                                                <action selector="orderFrontStandardAboutPanel:" target="Ady-hI-5gd" id="TtV-RG-vdW"/>
+                                                <action selector="openAboutPanel:" target="Voe-Tx-rLC" id="3jz-aH-gzR"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="Vvg-1T-VQw"/>
-                                        <menuItem title="Build" enabled="NO" id="5kV-Vb-QxS">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                        </menuItem>
-                                        <menuItem title="Version" enabled="NO" id="0Vw-zm-tOX">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                        </menuItem>
-                                        <menuItem title="Class" enabled="NO" id="367-Jc-c8P">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                        </menuItem>
-                                        <menuItem title="Fan" hidden="YES" id="d6r-fx-TSY">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                        </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="kCx-OE-vgT"/>
-                                        <menuItem title="Start at Login" keyEquivalent="s" id="tiv-Dv-7v4">
-                                            <connections>
-                                                <action selector="toggleStartAtLogin:" target="Voe-Tx-rLC" id="tJf-Mr-fP8"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="hg4-9L-fLI"/>
-                                        <menuItem title="Open YogaSMC Preferences…" id="Ms6-Nr-sPA">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="openPrefpane:" target="Voe-Tx-rLC" id="sAW-Ic-u1V"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="hNl-6o-Rsm"/>
                                         <menuItem title="Quit YogaSMCNC" keyEquivalent="q" id="4sb-4s-VLi">
                                             <connections>
                                                 <action selector="terminate:" target="Ady-hI-5gd" id="Te7-pn-YzF"/>
@@ -65,11 +38,6 @@
                 <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="YogaSMCNC" customModuleProvider="target">
                     <connections>
                         <outlet property="appMenu" destination="uQy-DD-JDr" id="xRW-0W-h6J"/>
-                        <outlet property="vBuild" destination="5kV-Vb-QxS" id="fjR-T6-s1b"/>
-                        <outlet property="vClass" destination="367-Jc-c8P" id="nG4-aW-ng9"/>
-                        <outlet property="vFan" destination="d6r-fx-TSY" id="dgl-7k-8IY"/>
-                        <outlet property="vStartAtLogin" destination="tiv-Dv-7v4" id="171-MC-yqw"/>
-                        <outlet property="vVersion" destination="0Vw-zm-tOX" id="45q-y6-g9N"/>
                     </connections>
                 </customObject>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>

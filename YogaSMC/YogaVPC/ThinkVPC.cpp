@@ -7,17 +7,27 @@
 //  Copyright © 2020 Zhen. All rights reserved.
 //
 
+#include "ThinkEvents.h"
 #include "ThinkVPC.hpp"
 
 OSDefineMetaClassAndStructors(ThinkVPC, YogaVPC);
 
 void ThinkVPC::updateAll() {
-    OSDictionary *KBDPresent = OSDictionary::withCapacity(3);
-    getNotificationMask(1, KBDPresent);
-    getNotificationMask(2, KBDPresent);
-    getNotificationMask(3, KBDPresent);
-    setProperty("HKEY Setting", KBDPresent);
-    KBDPresent->release();
+    if (hotkey_legacy) {
+        OSObject* result;
+        if (vpc->evaluateObject(getHKEYmask, &result) != kIOReturnSuccess)
+            AlwaysLog(toggleFailure, "LegacyNotificationMask");
+        else
+            setProperty("HKEY Setting", result);
+        OSSafeReleaseNULL(result);
+    } else {
+        OSDictionary *KBDPresent = OSDictionary::withCapacity(3);
+        getNotificationMask(1, KBDPresent);
+        getNotificationMask(2, KBDPresent);
+        getNotificationMask(3, KBDPresent);
+        setProperty("HKEY Setting", KBDPresent);
+        KBDPresent->release();
+    }
     updateBattery(BAT_ANY);
     updateMutestatus();
     updateMuteLEDStatus();
@@ -33,7 +43,9 @@ bool ThinkVPC::updateConservation(const char * method, OSDictionary *bat, bool u
         OSNumber::withNumber(batnum, 32)
     };
 
-    if (vpc->evaluateInteger(method, &result, params, 1) != kIOReturnSuccess) {
+    IOReturn ret = vpc->evaluateInteger(method, &result, params, 1);
+    params[0]->release();
+    if (ret != kIOReturnSuccess) {
         AlwaysLog(updateFailure, method);
         return false;
     }
@@ -54,7 +66,9 @@ bool ThinkVPC::setConservation(const char * method, UInt8 value) {
         OSNumber::withNumber((batnum << 8) + value, 32)
     };
 
-    if (vpc->evaluateInteger(method, &result, params, 1) != kIOReturnSuccess) {
+    IOReturn ret = vpc->evaluateInteger(method, &result, params, 1);
+    params[0]->release();
+    if (ret != kIOReturnSuccess) {
         AlwaysLog(updateFailure, method);
         return false;
     }
@@ -91,7 +105,9 @@ bool ThinkVPC::setMutestatus(UInt32 value) {
         OSNumber::withNumber(value, 32)
     };
 
-    if (vpc->evaluateInteger(setAudioMutestatus, &result, params, 1) != kIOReturnSuccess) {
+    IOReturn ret = vpc->evaluateInteger(setAudioMutestatus, &result, params, 1);
+    params[0]->release();
+    if (ret != kIOReturnSuccess) {
         AlwaysLog(toggleFailure, __func__);
         return false;
     }
@@ -108,7 +124,9 @@ void ThinkVPC::getNotificationMask(UInt32 index, OSDictionary *KBDPresent) {
         OSNumber::withNumber(index, 32),
     };
 
-    if (vpc->evaluateInteger(getHKEYmask, &result, params, 1) != kIOReturnSuccess) {
+    IOReturn ret = vpc->evaluateInteger(getHKEYmask, &result, params, 1);
+    params[0]->release();
+    if (ret != kIOReturnSuccess) {
         AlwaysLog(toggleFailure, __func__);
         return;
     }
@@ -132,19 +150,20 @@ void ThinkVPC::getNotificationMask(UInt32 index, OSDictionary *KBDPresent) {
     }
 }
 
-IOReturn ThinkVPC::setNotificationMask(UInt32 i, UInt32 all_mask, UInt32 offset, bool enable) {
-    IOReturn ret = kIOReturnSuccess;
+bool ThinkVPC::setNotificationMask(UInt32 i, UInt32 all_mask, UInt32 offset, bool enable) {
     OSObject* params[] = {
         OSNumber::withNumber(i + offset + 1, 32),
         OSNumber::withNumber(enable, 32),
     };
-    if (all_mask & BIT(i)) {
-        ret = vpc->evaluateObject(setHKEYmask, nullptr, params, 2);
-        AlwaysLog("setting HKEY mask BIT %x", i);
-    }
+    IOReturn ret = vpc->evaluateObject(setHKEYmask, nullptr, params, 2);
     params[0]->release();
     params[1]->release();
-    return ret;
+    if (ret != kIOReturnSuccess) {
+        AlwaysLog("set HKEY mask BIT %x failed", i);
+        return false;
+    }
+    DebugLog("set HKEY mask BIT %x", i);
+    return true;
 }
 
 bool ThinkVPC::initVPC() {
@@ -163,7 +182,6 @@ bool ThinkVPC::initVPC() {
     setPropertyNumber(KBDProperty, "Version", version, 32);
     switch (version >> 8) {
         case 1:
-            AlwaysLog("HKEY version 0x100 not implemented");
             hotkey_legacy = true;
             updateAdaptiveKBD(0);
             break;
@@ -181,7 +199,8 @@ bool ThinkVPC::initVPC() {
 
     if (hotkey_all_mask) {
         for (UInt32 i = 0; i < 0x20; i++) {
-            if (setNotificationMask(i, hotkey_all_mask, DHKN_MASK_offset) != kIOReturnSuccess)
+            if ((hotkey_all_mask & BIT(i)) &&
+                !setNotificationMask(i, hotkey_all_mask, DHKN_MASK_offset))
                 break;
         }
     } else {
@@ -192,9 +211,6 @@ bool ThinkVPC::initVPC() {
 
     updateAll();
 
-    mutestate_orig = mutestate;
-    AlwaysLog("Initial HAUM setting was %d", mutestate_orig);
-    setMutestatus(TP_EC_MUTE_BTN_NONE);
     setHotkeyStatus(true);
 
     UInt32 state;
@@ -202,7 +218,9 @@ bool ThinkVPC::initVPC() {
         OSNumber::withNumber(0ULL, 32)
     };
 
-    if (vpc->evaluateInteger(getKBDBacklightLevel, &state, params, 1) == kIOReturnSuccess)
+    IOReturn ret = vpc->evaluateInteger(getKBDBacklightLevel, &state, params, 1);
+    params[0]->release();
+    if (ret == kIOReturnSuccess)
         backlightCap = BIT(KBD_BACKLIGHT_CAP_BIT) & state;
 
     if (!backlightCap)
@@ -214,7 +232,6 @@ bool ThinkVPC::initVPC() {
 
 bool ThinkVPC::exitVPC() {
     setHotkeyStatus(false);
-    setMutestatus(mutestate_orig);
     return super::exitVPC();
 }
 
@@ -231,7 +248,9 @@ bool ThinkVPC::updateAdaptiveKBD(int arg) {
             OSNumber::withNumber(arg, 32)
         };
 
-        if (vpc->evaluateInteger(getHKEYAdaptive, &result, params, 1) != kIOReturnSuccess) {
+        IOReturn ret = vpc->evaluateInteger(getHKEYAdaptive, &result, params, 1);
+        params[0]->release();
+        if (ret != kIOReturnSuccess) {
             AlwaysLog(updateFailure, __func__);
             return false;
         }
@@ -311,6 +330,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
 
     //    AlwaysLog("%d objects in properties", dict->getCount());
     OSCollectionIterator* i = OSCollectionIterator::withCollection(dict);
+    IOReturn ret;
 
     if (i) {
         while (OSString* key = OSDynamicCast(OSString, i->getNextObject())) {
@@ -341,9 +361,9 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 setConservation(setCMPeakShiftState, value->unsigned8BitValue());
             } else if (key->isEqualTo("GMKS")) {
                 UInt32 result;
-                IOReturn ret = vpc->evaluateInteger("GMKS", &result);
+                ret = vpc->evaluateInteger("GMKS", &result);
                 if (ret == kIOReturnSuccess)
-                    AlwaysLog(updateSuccess, "GMKS", result);
+                    DebugLog(updateSuccess, "GMKS", result);
                 else
                     AlwaysLog("%s evaluation failed 0x%x", "GMKS", ret);
             } else if (key->isEqualTo("GSKL")) {
@@ -353,9 +373,9 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 OSObject* params[1] = {
                     value
                 };
-                IOReturn ret = vpc->evaluateInteger("GSKL", &result, params, 1);
+                ret = vpc->evaluateInteger("GSKL", &result, params, 1);
                 if (ret == kIOReturnSuccess)
-                    AlwaysLog(updateSuccess, "GSKL", result);
+                    DebugLog(updateSuccess, "GSKL", result);
                 else
                     AlwaysLog("%s evaluation failed 0x%x", "GSKL", ret);
             } else if (key->isEqualTo("GHSL")) {
@@ -363,12 +383,63 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 OSObject* params[1] = {
                     OSNumber::withNumber(0ULL, 32)
                 };
-                IOReturn ret = vpc->evaluateInteger("GHKL", &result, params, 1);
+                ret = vpc->evaluateInteger("GHKL", &result, params, 1);
                 if (ret == kIOReturnSuccess)
-                    AlwaysLog(updateSuccess, "GHSL", result);
+                    DebugLog(updateSuccess, "GHSL", result);
                 else
                     AlwaysLog("%s evaluation failed 0x%x", "GHSL", ret);
                 params[0]->release();
+            } else if (key->isEqualTo("CFSP")) {
+                OSNumber *value;
+                getPropertyNumber("CFSP");
+                if (vpc->validateObject("CFSP") == kIOReturnSuccess) {
+                    OSObject* params[1] = {
+                        value
+                    };
+                    ret = vpc->evaluateObject("CFSP", nullptr, params, 1);
+                    if (ret == kIOReturnSuccess)
+                        DebugLog(updateSuccess, "CFSP", value->unsigned8BitValue());
+                    else
+                        AlwaysLog("%s evaluation failed 0x%x", "CFSP", ret);
+                    continue;
+                }
+                ret = method_we1b(0x2F, value->unsigned8BitValue());
+                if (ret == kIOReturnSuccess)
+                    DebugLog(updateSuccess, "HFSP", value->unsigned8BitValue());
+                else
+                    AlwaysLog("%s evaluation failed 0x%x", "HFSP", ret);
+#ifdef DEBUG
+            } else if (key->isEqualTo("CFNI")) {
+                OSNumber *value;
+                getPropertyNumber("CFNI");
+                if (vpc->validateObject("CFNI") == kIOReturnSuccess) {
+                    OSObject* params[1] = {
+                        value
+                    };
+                    ret = vpc->evaluateObject("CFNI", nullptr, params, 1);
+                    if (ret == kIOReturnSuccess)
+                        DebugLog(updateSuccess, "CFNI", value->unsigned8BitValue());
+                    else
+                        AlwaysLog("%s evaluation failed 0x%x", "CFNI", ret);
+                    continue;
+                }
+                ret = method_we1b(0x83, value->unsigned8BitValue());
+                if (ret == kIOReturnSuccess)
+                    DebugLog(updateSuccess, "HFNI", value->unsigned8BitValue());
+                else
+                    AlwaysLog("%s evaluation failed 0x%x", "HFNI", ret);
+            } else if (key->isEqualTo("CRST")) {
+                OSNumber *value;
+                getPropertyNumber("CRST");
+                OSObject* params[1] = {
+                    value
+                };
+                ret = vpc->evaluateObject("CRST", nullptr, params, 1);
+                if (ret == kIOReturnSuccess)
+                    DebugLog(updateSuccess, "CRST", value->unsigned8BitValue());
+                else
+                    AlwaysLog("%s evaluation failed 0x%x", "CRST", ret);
+#endif
             } else if (key->isEqualTo(mutePrompt)) {
                 OSNumber *value;
                 getPropertyNumber(mutePrompt);
@@ -433,7 +504,9 @@ bool ThinkVPC::updateFanControl(UInt32 status, bool update) {
         OSNumber::withNumber(status, 32)
     };
 
-    if (vpc->evaluateInteger(getThermalControl, &thermalstate, params, 1) != kIOReturnSuccess) {
+    IOReturn ret = vpc->evaluateInteger(getThermalControl, &thermalstate, params, 1);
+    params[0]->release();
+    if (ret != kIOReturnSuccess) {
         AlwaysLog(updateFailure, __func__);
         return false;
     }
@@ -452,7 +525,9 @@ bool ThinkVPC::setFanControl(int level) {
         OSNumber::withNumber((level ? BIT(18) : 0), 32)
     };
 
-    if (vpc->evaluateInteger(setThermalControl, &result, params, 1) != kIOReturnSuccess) {
+    IOReturn ret = vpc->evaluateInteger(setThermalControl, &result, params, 1);
+    params[0]->release();
+    if (ret != kIOReturnSuccess) {
         AlwaysLog(toggleFailure, fanControlPrompt);
         return false;
     }
@@ -471,7 +546,9 @@ bool ThinkVPC::updateMuteLEDStatus(bool update) {
         OSNumber::withNumber(0ULL, 32)
     };
 
-    if (vpc->evaluateInteger(getAudioMuteLED, &muteLEDstate, params, 1) != kIOReturnSuccess) {
+    IOReturn ret = vpc->evaluateInteger(getAudioMuteLED, &muteLEDstate, params, 1);
+    params[0]->release();
+    if (ret != kIOReturnSuccess) {
         AlwaysLog(updateFailure, __func__);
         return false;
     }
@@ -490,7 +567,9 @@ bool ThinkVPC::setMuteSupport(bool support) {
         OSNumber::withNumber(support, 32)
     };
 
-    if (vpc->evaluateInteger(setAudioMuteSupport, &result, params, 1) != kIOReturnSuccess || result & TPACPI_AML_MUTE_ERROR_STATE_MASK) {
+    IOReturn ret = vpc->evaluateInteger(setAudioMuteSupport, &result, params, 1);
+    params[0]->release();
+    if (ret != kIOReturnSuccess || result & TPACPI_AML_MUTE_ERROR_STATE_MASK) {
         AlwaysLog(toggleFailure, muteSupportPrompt);
         return false;
     }
@@ -505,7 +584,9 @@ bool ThinkVPC::setBeepStatus(UInt8 status) {
         OSNumber::withNumber(status, 32)
     };
 
-    if (ec->evaluateObject(setBeep, nullptr, params, 1) != kIOReturnSuccess) {
+    IOReturn ret = ec->evaluateObject(setBeep, nullptr, params, 1);
+    params[0]->release();
+    if (ret != kIOReturnSuccess) {
         AlwaysLog(toggleFailure, beepPrompt);
         return false;
     }
@@ -520,7 +601,9 @@ bool ThinkVPC::enableBeep(bool enable) {
         OSNumber::withNumber(enable, 32)
     };
 
-    if (vpc->evaluateObject(setHKEYBeep, nullptr, params, 1) != kIOReturnSuccess) {
+    IOReturn ret = vpc->evaluateObject(setHKEYBeep, nullptr, params, 1);
+    params[0]->release();
+    if (ret != kIOReturnSuccess) {
         AlwaysLog(toggleFailure, beepPrompt);
         return false;
     }
@@ -536,7 +619,10 @@ bool ThinkVPC::setLEDStatus(UInt8 status) {
         OSNumber::withNumber(status & 0xf0, 32),
     };
 
-    if (ec->evaluateObject(setLED, nullptr, params, 2) != kIOReturnSuccess) {
+    IOReturn ret = ec->evaluateObject(setLED, nullptr, params, 2);
+    params[0]->release();
+    params[1]->release();
+    if (ret != kIOReturnSuccess) {
         AlwaysLog(toggleFailure, LEDPrompt);
         return false;
     }
@@ -552,7 +638,9 @@ bool ThinkVPC::setMuteLEDStatus(bool status) {
         OSNumber::withNumber(status, 32)
     };
 
-    if (vpc->evaluateInteger(setAudioMuteLED, &result, params, 1) != kIOReturnSuccess) {
+    IOReturn ret = vpc->evaluateInteger(setAudioMuteLED, &result, params, 1);
+    params[0]->release();
+    if (ret != kIOReturnSuccess) {
         AlwaysLog(toggleFailure, muteLEDPrompt);
         return false;
     }
@@ -583,7 +671,9 @@ bool ThinkVPC::setMicMuteLEDStatus(UInt32 status) {
         OSNumber::withNumber(status, 32)
     };
 
-    if (vpc->evaluateObject(setMicMuteLED, nullptr, params, 1) != kIOReturnSuccess) {
+    IOReturn ret = vpc->evaluateObject(setMicMuteLED, nullptr, params, 1);
+    params[0]->release();
+    if (ret != kIOReturnSuccess) {
         AlwaysLog(toggleFailure, micMuteLEDPrompt);
         return false;
     }
@@ -604,6 +694,7 @@ IOReturn ThinkVPC::message(UInt32 type, IOService *provider, void *argument) {
         case kPS2M_resetTouchpad:
         case kSMC_setKeyboardStatus:
         case kSMC_getKeyboardStatus:
+        case kSMC_notifyKeystroke:
             break;
 
         case kSMC_FnlockEvent:
@@ -645,24 +736,28 @@ void ThinkVPC::updateVPC() {
         return;
     }
 
-    if (client != nullptr)
-        client->sendNotification(result);
-
+    UInt32 data = 0;
     switch (result >> 0xC) {
         case 1:
             switch (result) {
                 case TP_HKEY_EV_KBD_LIGHT:
-                    updateBacklight();
-
-                case TP_HKEY_EV_BRGHT_UP:
-                case TP_HKEY_EV_BRGHT_DOWN:
+                    updateBacklight(true);
+                    data = backlightLevel;
                     break;
+
+                case TP_HKEY_EV_SLEEP:
+                    if (!client)
+                        vpc->evaluateObject(setHKEYsleep);
 
                 case TP_HKEY_EV_MIC_MUTE:
-                    if (!hotkey_legacy)
+                    if (!client)
                         setMicMuteLEDStatus(micMuteLEDstate ? 0 : 2);
                     break;
-                    
+
+                case TP_HKEY_EV_KEYBOARD:
+                    toggleKeyboard();
+                    data = Keyboardenabled;
+
                 default:
                     DebugLog("Hotkey(MHKP) key presses event: 0x%x", result);
                     break;
@@ -720,14 +815,13 @@ void ThinkVPC::updateVPC() {
         case 6:
             switch (result) {
                 case TP_HKEY_EV_THM_TABLE_CHANGED:
-                    AlwaysLog("Thermal Table has changed");
+                    DebugLog("Thermal Table has changed");
                     break;
 
                 case TP_HKEY_EV_THM_CSM_COMPLETED:
-                    if (DYTCLapmodeCap && !DYTCLock) {
-                        AlwaysLog("Thermal Control Command set completed (DYTC)");
+                    DebugLog("Thermal Control Command set completed (DYTC)");
+                    if (DYTCLapmodeCap && !DYTCLock)
                         updateDYTC();
-                    }
                     break;
 
                 case TP_HKEY_EV_THM_TRANSFM_CHANGED:
@@ -795,6 +889,9 @@ void ThinkVPC::updateVPC() {
             DebugLog("Hotkey(MHKP) unknown event: 0x%x", result);
             break;
     }
+
+    if (client)
+        client->sendNotification(result, data);
 }
 
 bool ThinkVPC::setHotkeyStatus(bool enable) {
@@ -804,7 +901,9 @@ bool ThinkVPC::setHotkeyStatus(bool enable) {
         OSNumber::withNumber(enable, 32)
     };
 
-    if (vpc->evaluateInteger(setHKEYstatus, &result, params, 1) != kIOReturnSuccess) {
+    IOReturn ret = vpc->evaluateInteger(setHKEYstatus, &result, params, 1);
+    params[0]->release();
+    if (ret != kIOReturnSuccess) {
         AlwaysLog(toggleFailure, HotKeyPrompt);
         return false;
     }
@@ -823,18 +922,19 @@ bool ThinkVPC::updateBacklight(bool update) {
         OSNumber::withNumber(0ULL, 32)
     };
 
-    if (vpc->evaluateInteger(getKBDBacklightLevel, &state, params, 1) != kIOReturnSuccess) {
-        AlwaysLog(updateFailure, KeyboardPrompt);
+    IOReturn ret = vpc->evaluateInteger(getKBDBacklightLevel, &state, params, 1);
+    params[0]->release();
+    if (ret != kIOReturnSuccess) {
+        AlwaysLog(updateFailure, backlightPrompt);
         return false;
     }
 
     backlightLevel = state & 0x3;
 
     if (update) {
-        DebugLog(updateSuccess, KeyboardPrompt, state);
-        if (backlightCap)
-            setProperty(backlightPrompt, backlightLevel, 32);
+        DebugLog(updateSuccess, backlightPrompt, state);
     }
+    setProperty(backlightPrompt, backlightLevel, 32);
 
     return true;
 }
@@ -870,12 +970,14 @@ bool ThinkVPC::setSSTStatus(UInt32 value) {
             OSNumber::withNumber(value, 32)
         };
         
-        if (vpc->evaluateObject("CSSI", nullptr, params, 1) != kIOReturnSuccess) {
-            AlwaysLog(toggleFailure, SSTPrompt);
+        IOReturn ret = vpc->evaluateObject("CSSI", nullptr, params, 1);
+        params[0]->release();
+        if (ret != kIOReturnSuccess) {
+            AlwaysLog(toggleFailure, "SST Proxy");
             return false;
         }
 
-        DebugLog(toggleSuccess, SSTPrompt, value, property[value]);
+        DebugLog(toggleSuccess, "SST Proxy", value, property[value]);
         return true;
     }
     // Replicate of _SI._SST

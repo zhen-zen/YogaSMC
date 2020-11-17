@@ -19,6 +19,7 @@ IdeaSMC* IdeaSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) 
     dictionary->setObject("Sensors", dev->conf);
 
     dev->ec = device;
+    dev->name = device->getName();
 
     if (!dev->init(dictionary) ||
         !dev->attach(provider)) {
@@ -30,5 +31,9 @@ IdeaSMC* IdeaSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) 
 }
 
 void IdeaSMC::addVSMCKey() {
+    // Add message-based key
+    VirtualSMCAPI::addKey(KeyBDVT, vsmcPlugin.data, VirtualSMCAPI::valueWithFlag(true, new BDVT(this), SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_WRITE));
+    VirtualSMCAPI::addKey(KeyCH0B, vsmcPlugin.data, VirtualSMCAPI::valueWithData(nullptr, 1, SmcKeyTypeHex, new CH0B, SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_WRITE));
+
     super::addVSMCKey();
 }

@@ -1,7 +1,9 @@
 .DS_Store
+._*
 *.aml
 *.kext
 xcuserdata/
 xcshareddata/
 build/
 /MacKernelSDK
+/Index

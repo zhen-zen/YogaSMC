@@ -8,44 +8,18 @@
 
 #include "YogaSMC.hpp"
 
-OSDefineMetaClassAndStructors(YogaSMC, IOService);
+OSDefineMetaClassAndStructors(YogaSMC, YogaBaseService);
 
 bool ADDPR(debugEnabled) = false;
 uint32_t ADDPR(debugPrintDelay) = 0;
 
-bool YogaSMC::init(OSDictionary *dictionary)
-{
-    if (!super::init(dictionary))
-        return false;
-
-    DebugLog("Initializing");
-
-    _deliverNotification = OSSymbol::withCString(kDeliverNotifications);
-     if (!_deliverNotification)
-        return false;
-
-    _notificationServices = OSSet::withCapacity(1);
-
-    extern kmod_info_t kmod_info;
-    setProperty("YogaSMC,Build", __DATE__);
-    setProperty("YogaSMC,Version", kmod_info.version);
-
-    return true;
-}
-
 void YogaSMC::addVSMCKey() {
-    // Message-based
-    VirtualSMCAPI::addKey(KeyBDVT, vsmcPlugin.data, VirtualSMCAPI::valueWithFlag(true, new BDVT(this), SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_WRITE));
-    VirtualSMCAPI::addKey(KeyCH0B, vsmcPlugin.data, VirtualSMCAPI::valueWithData(nullptr, 1, SmcKeyTypeHex, new CH0B, SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_WRITE));
-
     // ACPI-based
     if (!conf || !ec)
         return;
 
     OSDictionary *status = OSDictionary::withCapacity(8);
     OSString *method;
-
-    // WARNING: watch out, key addition is sorted here!
 
     addECKeySp(KeyTCSA, "CPU System Agent Core");
     addECKeySp(KeyTCXC, "CPU Core PECI");
@@ -68,10 +42,7 @@ void YogaSMC::addVSMCKey() {
     addECKeySp(KeyTs0p(0), "Palm Rest");
     addECKeySp(KeyTs0p(1), "Trackpad Actuator");
 
-    qsort(const_cast<VirtualSMCKeyValue *>(vsmcPlugin.data.data()), vsmcPlugin.data.size(), sizeof(VirtualSMCKeyValue), VirtualSMCKeyValue::compare);
-
     setProperty("DirectECKey", status);
-    setProperty("Status", vsmcPlugin.data.size(), 32);
     status->release();
 }
 
@@ -79,49 +50,23 @@ bool YogaSMC::start(IOService *provider) {
     if (!super::start(provider))
         return false;
 
-    if (ec)
-        name = ec->getName();
-
     DebugLog("Starting");
 
-    workLoop = IOWorkLoop::workLoop();
-    commandGate = IOCommandGate::commandGate(this);
-    poller = IOTimerEventSource::timerEventSource(this, [](OSObject *object, IOTimerEventSource *sender) {
-        auto smc = OSDynamicCast(YogaSMC, object);
-        if (smc) smc->updateEC();
-    });
+    validateEC();
 
-    if (!workLoop || !commandGate || !poller ||
-        (workLoop->addEventSource(commandGate) != kIOReturnSuccess) ||
+    awake = true;
+
+    if (!(poller = initPoller()) ||
         (workLoop->addEventSource(poller) != kIOReturnSuccess)) {
-        AlwaysLog("Failed to add commandGate and poller");
+        AlwaysLog("Failed to add poller");
         return false;
     }
 
-    OSDictionary * propertyMatch = propertyMatching(_deliverNotification, kOSBooleanTrue);
-    if (propertyMatch) {
-        IOServiceMatchingNotificationHandler notificationHandler = OSMemberFunctionCast(IOServiceMatchingNotificationHandler, this, &YogaSMC::notificationHandler);
-
-        //
-        // Register notifications for availability of any IOService objects wanting to consume our message events
-        //
-        _publishNotify = addMatchingNotification(gIOFirstPublishNotification,
-                                             propertyMatch,
-                                             notificationHandler,
-                                             this,
-                                             0, 10000);
-
-        _terminateNotify = addMatchingNotification(gIOTerminatedNotification,
-                                               propertyMatch,
-                                               notificationHandler,
-                                               this,
-                                               0, 10000);
-
-        propertyMatch->release();
-
-    }
-
+    // WARNING: watch out, key addition is sorted here!
     addVSMCKey();
+    qsort(const_cast<VirtualSMCKeyValue *>(vsmcPlugin.data.data()), vsmcPlugin.data.size(), sizeof(VirtualSMCKeyValue), VirtualSMCKeyValue::compare);
+    setProperty("Status", vsmcPlugin.data.size(), 32);
+
     vsmcNotifier = VirtualSMCAPI::registerHandler(vsmcNotificationHandler, this);
 
     poller->setTimeoutMS(POLLING_INTERVAL);
@@ -132,23 +77,13 @@ bool YogaSMC::start(IOService *provider) {
 
 void YogaSMC::stop(IOService *provider)
 {
-    AlwaysLog("Stopping");
+    DebugLog("Stopping");
 
-    _publishNotify->remove();
-    _terminateNotify->remove();
-    _notificationServices->flushCollection();
-    OSSafeReleaseNULL(_notificationServices);
-    OSSafeReleaseNULL(_deliverNotification);
-
-    workLoop->removeEventSource(commandGate);
     poller->disable();
     workLoop->removeEventSource(poller);
-    OSSafeReleaseNULL(commandGate);
     OSSafeReleaseNULL(poller);
-    OSSafeReleaseNULL(workLoop);
 
     terminate();
-    PMstop();
 
     super::stop(provider);
 }
@@ -173,46 +108,6 @@ bool YogaSMC::vsmcNotificationHandler(void *sensors, void *refCon, IOService *vs
     return false;
 }
 
-void YogaSMC::dispatchMessageGated(int* message, void* data)
-{
-    OSCollectionIterator* i = OSCollectionIterator::withCollection(_notificationServices);
-
-    if (i) {
-        while (IOService* service = OSDynamicCast(IOService, i->getNextObject())) {
-            service->message(*message, this, data);
-        }
-        i->release();
-    }
-}
-
-void YogaSMC::dispatchMessage(int message, void* data)
-{
-    if (_notificationServices->getCount() == 0) {
-        AlwaysLog("No available notification consumer");
-        return;
-    }
-    commandGate->runAction(OSMemberFunctionCast(IOCommandGate::Action, this, &YogaSMC::dispatchMessageGated), &message, data);
-}
-
-void YogaSMC::notificationHandlerGated(IOService *newService, IONotifier *notifier)
-{
-    if (notifier == _publishNotify) {
-        DebugLog("Notification consumer published: %s", newService->getName());
-        _notificationServices->setObject(newService);
-    }
-
-    if (notifier == _terminateNotify) {
-        DebugLog("Notification consumer terminated: %s", newService->getName());
-        _notificationServices->removeObject(newService);
-    }
-}
-
-bool YogaSMC::notificationHandler(void *refCon, IOService *newService, IONotifier *notifier)
-{
-    commandGate->runAction(OSMemberFunctionCast(IOCommandGate::Action, this, &YogaSMC::notificationHandlerGated), newService, notifier);
-    return true;
-}
-
 YogaSMC* YogaSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) {
     YogaSMC* dev = OSTypeAlloc(YogaSMC);
 
@@ -222,6 +117,7 @@ YogaSMC* YogaSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) 
     dictionary->setObject("Sensors", dev->conf);
 
     dev->ec = device;
+    dev->name = device->getName();
 
     if (!dev->init(dictionary) ||
         !dev->attach(provider)) {
@@ -233,12 +129,38 @@ YogaSMC* YogaSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) 
 }
 
 void YogaSMC::updateEC() {
+    if (!awake)
+        return;
+
     UInt32 result = 0;
     for (int i = 0; i < sensorCount; i++) {
         if (ec->evaluateInteger(sensorMethod[i], &result) == kIOReturnSuccess && result != 0)
             atomic_store_explicit(&currentSensor[i], result, memory_order_release);
     }
     poller->setTimeoutMS(POLLING_INTERVAL);
+}
+
+IOReturn YogaSMC::setPowerState(unsigned long powerStateOrdinal, IOService *whatDevice){
+    DebugLog("powerState %ld : %s", powerStateOrdinal, powerStateOrdinal ? "on" : "off");
+    if (whatDevice != this)
+        return kIOReturnInvalid;
+    if (powerStateOrdinal == 0) {
+        if (awake) {
+            poller->disable();
+            workLoop->removeEventSource(poller);
+            awake = false;
+            DebugLog("Going to sleep");
+        }
+    } else {
+        if (!awake) {
+            awake = true;
+            workLoop->addEventSource(poller);
+            poller->setTimeoutMS(POLLING_INTERVAL);
+            poller->enable();
+            DebugLog("Woke up");
+        }
+    }
+    return kIOPMAckImplied;
 }
 
 EXPORT extern "C" kern_return_t ADDPR(kern_start)(kmod_info_t *, void *) {

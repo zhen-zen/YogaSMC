@@ -15,12 +15,14 @@ jobs:
   # This workflow contains a single job called "build"
   build:
     # The type of runner that the job will run on
-    runs-on: macos-latest
+    runs-on: macos-11.0
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
     - name: Download MacKernelSDK
       run: git clone --depth 1 https://github.com/acidanthera/MacKernelSDK.git
     - name: Download Lilu / VirtualSMC SDK (script from hieplpvip/AsusSMC (Acidanthera/Lilu))
@@ -46,8 +48,6 @@ jobs:
       run: mkdir build/Release-App; mv build/Release/YogaSMCNC.app build/Release-App/; mv build/Release/YogaSMCPane.prefPane build/Release-App/; cp LICENSE build/Release-App/; ln -s /Applications build/Release-App/; cp -r YogaSMC/SSDTSample build/Release/
     - name: Prepare debug image
       run: mkdir build/Debug-App; mv build/Debug/YogaSMCNC.app build/Debug-App/; mv build/Debug/YogaSMCPane.prefPane build/Debug-App/; cp LICENSE build/Debug-App/;  ln -s /Applications build/Debug-App/; cp -r YogaSMC/SSDTSample build/Debug/
-    - name: Create DMG image
-      run: brew install create-dmg && create-dmg --window-size 450 450 build/YogaSMC-App-Debug.dmg build/Debug-App/ && create-dmg --window-size 450 450 build/YogaSMC-App-Release.dmg build/Release-App/
     - name: Upload debug kext
       uses: actions/upload-artifact@v2
       with:
@@ -64,6 +64,8 @@ jobs:
           build/Release/*.kext
           build/Release/LICENSE
           build/Release/SSDTSample
+    - name: Create DMG image
+      run: brew install create-dmg && create-dmg --no-internet-enable --sandbox-safe --window-size 450 450 build/YogaSMC-App-Debug.dmg build/Debug-App/ && create-dmg --no-internet-enable --sandbox-safe --window-size 450 450 build/YogaSMC-App-Release.dmg build/Release-App/
     - name: Upload debug app
       uses: actions/upload-artifact@v2
       with:
@@ -82,9 +84,11 @@ jobs:
           build/Release/*.dSYM
           build/Release/LICENSE
   analyze:
-    runs-on: macos-latest
+    runs-on: macos-11.0
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
     - name: Download MacKernelSDK
       run: git clone --depth 1 https://github.com/acidanthera/MacKernelSDK.git
     - name: Download Lilu / VirtualSMC SDK (script from hieplpvip/AsusSMC (Acidanthera/Lilu))

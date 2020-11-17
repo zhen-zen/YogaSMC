@@ -10,12 +10,8 @@
 #ifndef YogaVPC_hpp
 #define YogaVPC_hpp
 
-#include <IOKit/IOCommandGate.h>
-#include <IOKit/IOService.h>
-#include <IOKit/acpi/IOACPIPlatformDevice.h>
-#include "common.h"
 #include "DYTC.h"
-#include "message.h"
+#include "YogaBaseService.hpp"
 #include "YogaSMCUserClientPrivate.hpp"
 
 #ifndef ALTER
@@ -23,12 +19,14 @@
 #endif
 
 class YogaSMCUserClient;
-class YogaVPC : public IOService
+class YogaVPC : public YogaBaseService
 {
-  typedef IOService super;
+  typedef YogaBaseService super;
   OSDeclareDefaultStructors(YogaVPC);
 
 private:
+    inline virtual bool PMSupport() APPLE_KEXT_OVERRIDE {return true;};
+
     /**
      *  Related ACPI methods
      *  See SSDTexamples
@@ -64,23 +62,6 @@ private:
      *  @return true if success
      */
     bool toggleClamshell();
-
-    /**
-     *  Iterate over IOACPIPlane for PNP device
-     *
-     *  @param id PNP name
-     *  @param dev target ACPI device
-     *  @return true on sucess
-     */
-    bool findPNP(const char *id, IOACPIPlatformDevice **dev);
-
-    /**
-     *  Related ACPI methods
-     */
-    static constexpr const char *readECOneByte      = "RE1B";
-    static constexpr const char *readECBytes        = "RECB";
-    static constexpr const char *writeECOneByte     = "WE1B";
-    static constexpr const char *writeECBytes       = "WECB";
 
     /**
      *  Dump desired EC field
@@ -120,25 +101,24 @@ private:
     OSDictionary *DYTCVersion {nullptr};
 
 protected:
-    const char* name;
-
-    IOWorkLoop *workLoop {nullptr};
-    IOCommandGate *commandGate {nullptr};
-
-    /**
-     *  EC device
-     */
-    IOACPIPlatformDevice *ec {nullptr};
 
     /**
      *  VPC device
      */
     IOACPIPlatformDevice *vpc {nullptr};
     
+    OSOrderedSet *WMICollection {nullptr};
+    OSOrderedSet *WMIProvCollection {nullptr};
+
     /**
-     *  VPC UserClient
+     *  Initialize WMI
+     *
+     *  @param provider WMI provider
+     *
+     *  @return Initialized YogaWMI instance
      */
-    YogaSMCUserClient *client {nullptr};
+    inline virtual IOService* initWMI(IOACPIPlatformDevice *provider) {return nullptr;};
+
 #ifndef ALTER
     /**
      *  SMC service
@@ -147,10 +127,11 @@ protected:
 
     /**
      *  Initialize SMC
-     *
-     *  @return true if success
      */
-    inline virtual void initSMC() {smc = YogaSMC::withDevice(this, ec); smc->conf = OSDynamicCast(OSDictionary, getProperty("Sensors"));};
+    inline virtual void initSMC() {
+        smc = YogaSMC::withDevice(this, ec);
+        smc->conf = OSDynamicCast(OSDictionary, getProperty("Sensors"));
+    };
 #endif
     /**
      *  Initialize VPC EC, get config and update status
@@ -184,7 +165,7 @@ protected:
      *  BIT 3 Mute LED
      *  BIT 4 Mic Mute LED
      */
-    UInt32 automaticBacklightMode {0xf};
+    UInt32 automaticBacklightMode {0x17};
 
     /**
      *  Backlight mode capability, will be update on init
@@ -204,11 +185,11 @@ protected:
     /**
      *  Update keyboad backlight status
      *
-     *  @param update only update internal status when false
+     *  @param update true if triggered from hardware
      *
      *  @return true if success
      */
-    inline virtual bool updateBacklight(bool update=true) {return true;};
+    inline virtual bool updateBacklight(bool update=false) {return true;};
 
     /**
      *  Set backlight mode
@@ -248,65 +229,19 @@ protected:
      */
     bool setDYTC(int perfmode);
 
-    /**
-     *  EC access capability, will be update on init
-     *  BIT 0 Read
-     *  BIT 1 Write
-     */
-    UInt8 ECAccessCap {0};
-
-    /**
-     *  Wrapper for RE1B
-     *
-     *  @param offset EC field offset
-     *  @param result EC field value
-     *
-     *  @return kIOReturnSuccess on success
-     */
-    IOReturn method_re1b(UInt32 offset, UInt32 *result);
-
-    /**
-     *  Wrapper for RECB
-     *
-     *  @param offset EC field offset
-     *  @param size EC field length in bytes
-     *  @param data EC field value
-     *
-     *  @return kIOReturnSuccess on success
-     */
-    IOReturn method_recb(UInt32 offset, UInt32 size, OSData **data);
-
-    /**
-     *  Wrapper for WE1B
-     *
-     *  @param offset EC field offset
-     *  @param value EC field value
-     *
-     *  @return kIOReturnSuccess on success
-     */
-    IOReturn method_we1b(UInt32 offset, UInt32 value);
-
-    /**
-     *  Read custom field
-     *
-     *  @param name EC field name
-     *  @param result EC field value
-     *
-     *  @return kIOReturnSuccess on success
-     */
-    IOReturn readECName(const char* name, UInt32 *result);
-
 public:
-    virtual bool init(OSDictionary *dictionary) APPLE_KEXT_OVERRIDE;
     virtual IOService *probe(IOService *provider, SInt32 *score) APPLE_KEXT_OVERRIDE;
 
     virtual bool start(IOService *provider) APPLE_KEXT_OVERRIDE;
     virtual void stop(IOService *provider) APPLE_KEXT_OVERRIDE;
 
     virtual IOReturn setProperties(OSObject* props) APPLE_KEXT_OVERRIDE;
-    virtual IOReturn message(UInt32 type, IOService *provider, void *argument) APPLE_KEXT_OVERRIDE;
     virtual IOReturn setPowerState(unsigned long powerState, IOService * whatDevice) APPLE_KEXT_OVERRIDE;
-    friend class YogaSMCUserClient;
+
+    /**
+     *  VPC UserClient
+     */
+    YogaSMCUserClient *client {nullptr};
 };
 
 #endif /* YogaVPC_hpp */

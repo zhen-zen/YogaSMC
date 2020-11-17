@@ -13,7 +13,7 @@ OSDefineMetaClassAndStructors(IdeaWMI, YogaWMI);
 void IdeaWMI::ACPIEvent(UInt32 argument) {
     switch (argument) {
         case kIOACPIMessageReserved:
-            AlwaysLog("message: ACPI notification 80");
+            DebugLog("message: ACPI notification 80");
             // force enable keyboard and touchpad
             setTopCase(true);
             dispatchMessage(kSMC_FnlockEvent, NULL);
@@ -21,7 +21,7 @@ void IdeaWMI::ACPIEvent(UInt32 argument) {
 
         case kIOACPIMessageD0:
             if (isYMC) {
-                AlwaysLog("message: ACPI notification D0");
+                DebugLog("message: ACPI notification D0");
                 updateYogaMode();
             } else {
                 AlwaysLog("message: ACPI notification D0, unknown YMC");
@@ -44,7 +44,7 @@ IOReturn IdeaWMI::setPowerState(unsigned long powerState, IOService *whatDevice)
     if (isYMC) {
         if (powerState == 0) {
             if (YogaMode != kYogaMode_laptop) {
-                AlwaysLog("Re-enabling top case");
+                DebugLog("Re-enabling top case");
                 setTopCase(true);
             }
         } else {
@@ -101,7 +101,7 @@ void IdeaWMI::updateYogaMode() {
         return;
     }
 
-    AlwaysLog("YogaMode: %d", value);
+    DebugLog("YogaMode: %d", value);
     bool sync = updateTopCase();
     if (YogaMode == value && sync)
         return;
@@ -141,7 +141,7 @@ void IdeaWMI::updateYogaMode() {
 
 void IdeaWMI::stop(IOService *provider) {
     if (YogaMode != kYogaMode_laptop) {
-        AlwaysLog("Re-enabling top case");
+        DebugLog("Re-enabling top case");
         setTopCase(true);
     }
     super::stop(provider);
@@ -183,4 +183,20 @@ void IdeaWMI::checkEvent(const char *cname, UInt32 id) {
             AlwaysLog("found unknown notify id 0x%x for %s", id, cname);
             break;
     }
+}
+
+IdeaWMI* IdeaWMI::withDevice(IOService *provider) {
+    IdeaWMI* dev = OSTypeAlloc(IdeaWMI);
+
+    OSDictionary *dictionary = OSDictionary::withCapacity(1);
+
+    dev->name = provider->getName();
+
+    if (!dev->init(dictionary) ||
+        !dev->attach(provider)) {
+        OSSafeReleaseNULL(dev);
+    }
+
+    dictionary->release();
+    return dev;
 }

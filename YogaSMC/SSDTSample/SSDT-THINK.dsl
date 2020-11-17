@@ -3,12 +3,16 @@
  */
 DefinitionBlock ("", "SSDT", 2, "hack", "Think", 0x00000000)
 {
+    External (_SB.PCI0.LPCB.EC, DeviceObj)    // EC path
+    External (_SB.PCI0.LPCB.EC.HKEY, DeviceObj)    // HKEY path
+    External (_SB.PCI0.LPCB.EC.HFSP, FieldUnitObj)    // Fan control register
+    External (_SB.PCI0.LPCB.EC.HFNI, FieldUnitObj)    // Fan control register
+    External (_SB.PCI0.LPCB.EC.VRST, FieldUnitObj)    // Second fan switch register
+    External (_SI._SST, MethodObj)    // Indicator
+
     /*
      * Optional: Route to customized LED pattern or origin _SI._SST if differ from built in pattern.
      */
-    External (_SB_.PCI0.LPCB.EC__.HKEY, DeviceObj)
-    External (_SI_._SST, MethodObj)    // 1 Arguments
-
     Scope (\_SB.PCI0.LPCB.EC.HKEY)
     {
         // Used as a proxy-method to interface with \_SI._SST in YogaSMC
@@ -25,8 +29,6 @@ DefinitionBlock ("", "SSDT", 2, "hack", "Think", 0x00000000)
      * Registers return 0x00 for non-implemented, 
      * and return 0x80 when not available.
      */
-    External (_SB.PCI0.LPCB.EC, DeviceObj)    // EC path
-
     Scope (_SB.PCI0.LPCB.EC)
     {
         OperationRegion (ESEN, EmbeddedControl, Zero, 0x0100)
@@ -53,6 +55,27 @@ DefinitionBlock ("", "SSDT", 2, "hack", "Think", 0x00000000)
             ESTD,   8, 
             ESTE,   8, 
             ESTF,   8
+        }
+    }
+
+    /*
+     * Optional: Write access to fan control register
+     */
+    Scope (\_SB.PCI0.LPCB.EC.HKEY)
+    {
+        Method (CFSP, 1, NotSerialized)
+        {
+            \_SB.PCI0.LPCB.EC.HFSP = Arg0
+        }
+
+        Method (CFNI, 1, NotSerialized)
+        {
+            \_SB.PCI0.LPCB.EC.HFNI = Arg0
+        }
+
+        Method (CRST, 1, NotSerialized)
+        {
+            \_SB.PCI0.LPCB.EC.VRST = Arg0
         }
     }
 }

@@ -34,9 +34,14 @@ SMC_RESULT CH0B::update(const SMC_DATA *src) {
     return SmcSuccess;
 }
 
-SMC_RESULT atomicECKey::readAccess() {
-    uint16_t *ptr = reinterpret_cast<uint16_t *>(data);
-    uint32_t data = atomic_load_explicit(currentSensor, memory_order_acquire);
-    *ptr = VirtualSMCAPI::encodeSp(SmcKeyTypeSp78, data);
+SMC_RESULT atomicSpKey::readAccess() {
+    uint32_t value = atomic_load_explicit(currentSensor, memory_order_acquire);
+    *reinterpret_cast<uint16_t *>(data) = VirtualSMCAPI::encodeSp(SmcKeyTypeSp78, value);
+    return SmcSuccess;
+}
+
+SMC_RESULT atomicFpKey::readAccess() {
+    uint16_t value = atomic_load_explicit(currentSensor, memory_order_acquire);
+    *reinterpret_cast<uint16_t *>(data) = VirtualSMCAPI::encodeIntFp(SmcKeyTypeFpe2, value);
     return SmcSuccess;
 }

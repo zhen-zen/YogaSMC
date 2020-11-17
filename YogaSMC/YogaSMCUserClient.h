@@ -18,15 +18,17 @@ typedef uint64_t io_user_reference_t;
 
 enum {
     kYSMCUCOpen,            // ScalarIScalarO
-    kYSMCUCClose,        // ScalarIScalarO
-    kYSMCUCReadEC,        // ScalarIStructO
-    kYSMCUCWriteEC,        // ScalarIStructI
+    kYSMCUCClose,           // ScalarIScalarO
+    kYSMCUCReadEC,          // ScalarIStructO
+    kYSMCUCWriteEC,         // ScalarIStructI
+    kYSMCUCReadECName,      // ScalarIScalarO
     kYSMCUCNumMethods
 };
 
 typedef struct {
     mach_msg_header_t header;
     UInt32 event;
+    UInt32 data;
     io_user_reference_t ref;
 } SMCNotificationMessage;
 
