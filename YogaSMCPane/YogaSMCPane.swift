@@ -388,7 +388,7 @@ class YogaSMCPane: NSPreferencePane {
         vFanStop.state = defaults.bool(forKey: "AllowFanStop") ? .on : .off
     }
 
-    override func viewDidLoad() {
+    override func mainViewDidLoad() {
         guard io_service != 0, sendBoolean("Update", true, io_service) else { return }
 
         var CFProps: Unmanaged<CFMutableDictionary>?
