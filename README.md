@@ -71,8 +71,14 @@ When [Rehabman's](https://www.tonymacx86.com/threads/guide-how-to-patch-dsdt-for
 ## YogaSMCPane
 The preference pane provides a graphical user interface for basic information and settings, such as battery conservation mode and backlight.
 
+<img src="YogaSMCPane/General.png" width="668" height="420">
+
 ## YogaSMCNC
 The notification application receives EC events and displays them on OSD. Corresonding actions will also be triggered for function keys. The configuration can be customized at `~/Library/Preferences/org.zhen.YogaSMC.plist` after closing the app.
+
+<img src="YogaSMCNC/DualFan.png" width="301" height="372">
+
+Only a few models support dual fan reading and control, which could be enabled manually via debug prefpane or `SecondThinkFan` in preference plist.
 
 For unknown events in preset, feel free to submit a PR like [#40](https://github.com/zhen-zen/YogaSMC/pull/40).
 
