@@ -748,6 +748,7 @@ void ThinkVPC::updateVPC() {
                 case TP_HKEY_EV_SLEEP:
                     if (!client)
                         vpc->evaluateObject(setHKEYsleep);
+                    break;
 
                 case TP_HKEY_EV_MIC_MUTE:
                     if (!client)
@@ -757,6 +758,7 @@ void ThinkVPC::updateVPC() {
                 case TP_HKEY_EV_KEYBOARD:
                     toggleKeyboard();
                     data = Keyboardenabled;
+                    break;
 
                 default:
                     DebugLog("Hotkey(MHKP) key presses event: 0x%x", result);
