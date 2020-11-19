@@ -85,7 +85,7 @@ enum tpacpi_hkey_event_t : UInt32 {
     TP_HKEY_EV_BACKLIGHT_CHANGED     = 0x6050, /* backlight changed */
     TP_HKEY_EV_LID_STATUS_CHANGED    = 0x60D0, /* lid status changed */
     TP_HKEY_EV_THM_TRANSFM_CHANGED   = 0x60F0, /* windows; thermal transformation
-                           * changed. Related to AML GMTS; L390 Tablet mode */
+                           * changed. Related to AML GMTS */
 
     /* AC-related events */
     TP_HKEY_EV_AC_CHANGED        = 0x6040, /* AC status changed */
