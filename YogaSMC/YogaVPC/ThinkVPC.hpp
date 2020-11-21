@@ -40,6 +40,29 @@ enum  {
 };
 
 enum {
+    TP_ACPI_MULTI_MODE_INVALID    = 0,
+    TP_ACPI_MULTI_MODE_UNKNOWN    = 1 << 0,
+    TP_ACPI_MULTI_MODE_LAPTOP     = 1 << 1,
+    TP_ACPI_MULTI_MODE_TABLET     = 1 << 2,
+    TP_ACPI_MULTI_MODE_FLAT       = 1 << 3,
+    TP_ACPI_MULTI_MODE_STAND      = 1 << 4,
+    TP_ACPI_MULTI_MODE_TENT       = 1 << 5,
+    TP_ACPI_MULTI_MODE_STAND_TENT = 1 << 6,
+};
+
+enum {
+    /* The following modes are considered tablet mode for the purpose of
+     * reporting the status to userspace. i.e. in all these modes it makes
+     * sense to disable the laptop input devices such as touchpad and
+     * keyboard.
+     */
+    TP_ACPI_MULTI_MODE_TABLET_LIKE    = TP_ACPI_MULTI_MODE_TABLET |
+                                        TP_ACPI_MULTI_MODE_STAND |
+                                        TP_ACPI_MULTI_MODE_TENT |
+                                        TP_ACPI_MULTI_MODE_STAND_TENT,
+};
+
+enum {
     BAT_ANY = 0,
     BAT_PRIMARY = 1,
     BAT_SECONDARY = 2
@@ -93,6 +116,9 @@ private:
 
     static constexpr const char *getThermalControl     = "MHGT";
     static constexpr const char *setThermalControl     = "MHAT";
+
+    static constexpr const char *getMultiModeState     = "GMMS"; // both from H_EC.CMMD
+    static constexpr const char *getThermalModeState   = "GTMS";
 
     //    DSSG
     //    DSSS
@@ -168,6 +194,16 @@ private:
     bool initVPC() APPLE_KEXT_OVERRIDE;
     void setPropertiesGated(OSObject* props) APPLE_KEXT_OVERRIDE;
     void updateAll() APPLE_KEXT_OVERRIDE;
+
+    UInt32 validModes {0};
+
+    /**
+     *  Get yoga/multi mode
+     *
+     *  @return mode
+     */
+    UInt32 getYogaMode();
+    
     void updateVPC() APPLE_KEXT_OVERRIDE;
     bool exitVPC() APPLE_KEXT_OVERRIDE;
     
