@@ -120,7 +120,7 @@ class ThinkFanHelper {
         var input = [savedLevel]
         if kIOReturnSuccess != IOConnectCallMethod(connect, UInt32(kYSMCUCWriteEC), &fanStatus, 1, &input, 1, nil, nil, nil, nil) {
             os_log("Write Fan Speed failed!", type: .fault)
-            showOSD("Write Fan Speed failed!")
+            showOSD("WriteFanFail")
             enable = false
         }
     }
@@ -143,7 +143,7 @@ class ThinkFanHelper {
 
         outputSize = 1
         guard kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadECName), nil, 0, &fanLevel, 4, nil, nil, &output, &outputSize) else {
-            showOSD("Failed to read fan level!")
+            showOSD("ReadFanFail")
             os_log("Failed to read fan level!", type: .error)
             enable = false
             return

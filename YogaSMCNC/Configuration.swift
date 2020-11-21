@@ -108,7 +108,7 @@ let thinkEvents: [UInt32: [UInt32: EventDesc]] = [
     TP_HKEY_EV_KEY_FN_ESC.rawValue: [0: EventDesc("FnLock", .FunctionKey)], // 0x6060
     TP_HKEY_EV_PALM_DETECTED.rawValue: [0: EventDesc("Palm Detected", display: false)], // 0x60B0
     TP_HKEY_EV_PALM_UNDETECTED.rawValue: [0: EventDesc("Palm Undetected", display: false)], // 0x60B1
-    TP_HKEY_EV_THM_TRANSFM_CHANGED.rawValue: [0: EventDesc("Thermal Change", display: false)] // 0x60F0
+    TP_HKEY_EV_THM_TRANSFM_CHANGED.rawValue: [0: EventDesc("Thermal Changed", display: false)] // 0x60F0
 ]
 
 let HIDDEvents: [UInt32: [UInt32: EventDesc]] = [

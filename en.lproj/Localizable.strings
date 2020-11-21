@@ -1,0 +1,109 @@
+/* 
+  Localizable.strings
+  YogaSMC
+
+  Created by Zhen on 11/17/20.
+  Copyright © 2020 Zhen. All rights reserved.
+*/
+
+// OSD Warning
+"ConnectFail" = "Failed to connect \n to YogaSMC";
+"AlreadyConnected" = "Another instance has \n connected to YogaSMC";
+"YogaSMC Unavailable";
+"Unknown Version";
+"ECAccessUnavailable" = "EC access unavailable! \n See SSDT-ECRW.dsl";
+"Unknown Class";
+"MoveApp" = "Please move the app \n into Applications";
+
+// Event name
+// Idea
+"Special Button";
+"Fn-Q Cooling";
+"Keyboard Backlight";
+"Screen Off";
+"Screen On";
+"TouchPad Off";
+"TouchPad On";
+"Switch Video";
+"Camera";
+"Mic Mute";
+"TouchPad On";
+"Airplane Mode";
+"Yoga Mode";
+"Laptop Mode";
+"Tablet Mode";
+"Stand Mode";
+"Tent Mode";
+"FnKey Disabled";
+"FnKey Enabled";
+// Think
+"Sleep";
+"Second Display";
+"Brightness Up";
+"Brightness Down";
+"Settings";
+"Search";
+"Mission Control";
+"Launchpad";
+"Custom Hotkey";
+"Bluetooth";
+"Keyboard Disabled";
+"Keyboard Enabled";
+"LID Close";
+"LID Open";
+"Thermal Table Change";
+"Thermal Control Change";
+"AC Status Change";
+"Backlight Changed";
+"FnLock";
+"Palm Detected";
+"Palm Undetected";
+"Thermal Changed";
+// HIDD
+"STOPCD";
+"Rotate Lock";
+"Convertible";
+
+// OSD Res
+"Backlight Off";
+"Backlight Low";
+"Backlight High";
+"BacklightVar" = "Backlight ";
+"ThermalVar" = "Thermal: ";
+"EventVar" = "Event ";
+
+// Helper
+"OpenFail" = "Failed to open ";
+
+// Date
+"New Year";
+"Valentine's Day";
+"Saint Patrick's Day";
+"Easter";
+"Halloween";
+"Thanksgiving";
+"Christmas Eve";
+"Christmas Day";
+"New Year's Eve";
+
+// RF
+"Bluetooth Unavailable";
+"Bluetooth Off";
+"Bluetooth On";
+"BT Discoverable Off";
+"BT Discoverable On";
+"Wireless Unavailable";
+"Wireless On";
+"Wireless Off";
+"Wireless Toggle failed";
+"Airplane Mode Off";
+"Airplane Mode On";
+
+// Script
+"AppleEventAccess" = "Please grant access \n to Apple Event";
+"Mute";
+"Unmute";
+
+// ThinkFan
+"ReadFanFail" = "Read fan level failed!";
+"WriteFanFail" = "Write Fan level failed!";
