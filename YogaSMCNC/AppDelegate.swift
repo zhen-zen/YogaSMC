@@ -114,14 +114,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         guard conf.io_service != 0,
               kIOReturnSuccess == IOServiceOpen(conf.io_service, mach_task_self_, 0, &conf.connect) else {
             os_log("Failed to connect to YogaSMC", type: .fault)
-            showOSD("Failed to connect \n to YogaSMC", duration: 2000)
+            showOSD("ConnectFail", duration: 2000)
             NSApp.terminate(nil)
             return
         }
 
         guard kIOReturnSuccess == IOConnectCallScalarMethod(conf.connect, UInt32(kYSMCUCOpen), nil, 0, nil, nil) else {
             os_log("Another instance has connected to YogaSMC", type: .error)
-            showOSD("Another instance has \n connected to YogaSMC", duration: 2000)
+            showOSD("AlreadyConnected", duration: 2000)
             NSApp.terminate(nil)
             return
         }
@@ -146,7 +146,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         if !getProerty() {
             os_log("YogaSMC unavailable", type: .error)
-            showOSD("YogaSMC unavailable", duration: 2000)
+            showOSD("YogaSMC Unavailable", duration: 2000)
             NSApp.terminate(nil)
         }
     }
@@ -170,7 +170,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 if !hide {
                     appMenu.insertItem(NSMenuItem.separator(), at: 1)
                     appMenu.insertItem(withTitle: "Class: \(IOClass)", action: nil, keyEquivalent: "", at: 2)
-                    appMenu.insertItem(withTitle: "\(props["VersionInfo"] as? NSString ?? "Unknown Version")", action: nil, keyEquivalent: "", at: 3)
+                    appMenu.insertItem(withTitle: props["VersionInfo"] as? String ?? NSLocalizedString("Unknown Version", comment: ""), action: nil, keyEquivalent: "", at: 3)
                 }
 
                 switch getString("EC Capability", conf.io_service) {
@@ -201,7 +201,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                             fanHelper = ThinkFanHelper(appMenu, conf.connect, true, fanHelper2 == nil)
                             fanHelper?.update(true)
                         } else {
-                            showOSD("EC access unavailable! \n See `SSDT-ECRW.dsl`")
+                            showOSD("ECAccessUnavailable")
                         }
                     }
                     NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(thinkWakeup), name: NSWorkspace.didWakeNotification, object: nil)
@@ -210,7 +210,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                     isOpen = registerNotification()
                 default:
                     os_log("Unknown class", type: .error)
-                    showOSD("Unknown class", duration: 2000)
+                    showOSD("Unknown Class", duration: 2000)
                 }
                 if isOpen {
                     loadEvents()
@@ -312,7 +312,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
 
         if !Bundle.main.bundlePath.hasPrefix("/Applications") {
-            showOSD("Please move the app \n into Applications")
+            showOSD("MoveApp")
         }
 
         // Load driver settings
@@ -363,20 +363,19 @@ func notificationCallback(_ port: CFMachPort?, _ msg: UnsafeMutableRawPointer?, 
                 } else if let desc = events[0] {
                     eventActuator(desc, notification.data, &conf)
                 } else {
-                    let name = String(format: "Event 0x%04x:%d", notification.event, notification.data)
-                    showOSD(name)
-                    os_log("Event 0x%04x default data not found", type: .error, notification.event)
+                    let value = String(format: "0x%04x:%d", notification.event, notification.data)
+                    showOSD("\(NSLocalizedString("EventVar", comment: "Event "))\(value)")
+                    os_log("Event %s default data not found", type: .error, value)
                 }
             } else {
-                let name = String(format: "Event 0x%04x:%d", notification.event, notification.data)
-                showOSD(name)
-                conf.events[notification.event] = [0: EventDesc(name, nil, opt: "Unknown")]
+                let value = String(format: "0x%04x:%d", notification.event, notification.data)
+                showOSD("\(NSLocalizedString("EventVar", comment: "Event "))\(value)")
+                conf.events[notification.event] = [0: EventDesc("Event \(value)", nil, opt: "Unknown")]
                 #if DEBUG
-                os_log("Event 0x%04x:%d", type: .debug, notification.event, notification.data)
+                os_log("Event %s", type: .debug, value)
                 #endif
             }
         } else {
-            showOSD("Invalid Notification")
             os_log("Invalid notification", type: .error)
         }
     } else {
@@ -390,6 +389,14 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<Shar
         #if DEBUG
         os_log("%s: Do nothing", type: .info, desc.name)
         #endif
+        if desc.display {
+            if desc.name.hasPrefix("Event ") {
+                showOSD("\(NSLocalizedString("EventVar", comment: "Event "))\(desc.name.dropFirst("Event ".count))", desc.image)
+            } else {
+                showOSD("\(NSLocalizedString("EventVar", comment: "Event "))\(desc.name)", desc.image)
+            }
+        }
+        return
     case .script:
         if let scpt = desc.option {
             guard scriptHelper(scpt, desc.name) != nil else { return }
@@ -415,7 +422,7 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<Shar
         case 2:
             showOSDRes("Backlight High", .BacklightHigh)
         default:
-            showOSDRes("Backlight \(data)", .BacklightLow)
+            showOSDRes("\(NSLocalizedString("BacklightVar", comment: ""))\(data)", .BacklightLow)
         }
     case .micmute:
         micMuteHelper(conf.pointee.io_service)
@@ -456,7 +463,7 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<Shar
         _ = scriptHelper(spotlightAS, desc.name)
         return
     case .thermal:
-        showOSD("Thermal: \(desc.name)")
+        showOSD("\(NSLocalizedString("ThermalVar", comment: "Thermal: "))\(NSLocalizedString(desc.name, comment: ""))", desc.image)
         os_log("%s: thermal event", type: .info, desc.name)
     case .wireless:
         wirelessHelper()

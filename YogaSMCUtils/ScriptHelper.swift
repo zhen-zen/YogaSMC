@@ -78,7 +78,7 @@ func prefpaneHelper(_ identifier: String = "YogaSMCPane") {
 
     guard paneArray.count != 0 else {
         #if DEBUG
-        showOSD("Please grant access \n to Apple Event")
+        showOSD("AppleEventAccess")
         #endif
         if scriptHelper(prefpaneAS, "Prefpane") == nil {
             let alert = NSAlert()

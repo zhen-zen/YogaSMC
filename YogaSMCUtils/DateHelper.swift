@@ -25,31 +25,31 @@ func setHolidayIcon(_ button: NSStatusItem) {
     switch (month, day, weekday, weekdayOrdinal) {
     case (1, 1, _, _):
         button.title = "🎍"
-        button.toolTip = "New Year"
+        button.toolTip = NSLocalizedString("New Year", comment: "")
     case (2, 14, _, _):
         button.title = "💝"
-        button.toolTip = "Valentine's Day"
+        button.toolTip = NSLocalizedString("Valentine's Day", comment: "")
     case (3, 17, _, _):
         button.title = "🍀"
-        button.toolTip = "Saint Patrick's Day"
+        button.toolTip = NSLocalizedString("Saint Patrick's Day", comment: "")
     case (easterMonth, easterDay, _, _):
         button.title = "🥚"
-        button.toolTip = "Easter"
+        button.toolTip = NSLocalizedString("Easter", comment: "")
     case (10, 31, _, _):
         button.title = "🎃"
-        button.toolTip = "Halloween"
+        button.toolTip = NSLocalizedString("Halloween", comment: "")
     case (11, _, 5, 4):
         button.title = "🦃"
-        button.toolTip = "Thanksgiving"
+        button.toolTip = NSLocalizedString("Thanksgiving", comment: "")
     case (12, 25, _, _):
         button.title = "🎄"
-        button.toolTip = "Christmas Eve"
+        button.toolTip = NSLocalizedString("Christmas Eve", comment: "")
     case (12, 26, _, _):
         button.title = "🎁"
-        button.toolTip = "Christmas Day"
+        button.toolTip = NSLocalizedString("Christmas Day", comment: "")
     case (12, 31, _, _):
         button.title = "🎇"
-        button.toolTip = "New Year's Eve"
+        button.toolTip = NSLocalizedString("New Year's Eve", comment: "")
     default:
         button.title = "⎇"
     }
