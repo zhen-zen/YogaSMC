@@ -83,6 +83,10 @@ func showOSDRes(_ prompt: String, _ status: String, _ image: EventImage, duratio
               path.hasPrefix("/Applications") {
         img = path as NSString
     }
-    let localizedString = NSLocalizedString(prompt, comment: "") + NSLocalizedString(status, comment: "")
-    showOSDRaw(localizedString, img, duration: duration, priority: priority)
+    if prompt.isEmpty {
+        showOSDRaw(prompt, img, duration: duration, priority: priority)
+    } else {
+        let localizedString = NSLocalizedString(prompt, comment: "") + " " + NSLocalizedString(status, comment: "")
+        showOSDRaw(localizedString, img, duration: duration, priority: priority)
+    }
 }

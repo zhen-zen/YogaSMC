@@ -55,19 +55,19 @@ func scriptHelper(_ source: String, _ name: String) -> NSAppleEventDescriptor? {
     return nil
 }
 
-func micMuteHelper(_ io_service: io_service_t, _ hideText: Bool) {
+func micMuteHelper(_ io_service: io_service_t, _ name: String) {
     guard let current = scriptHelper(getMicVolumeAS, "MicMute") else { return }
     if current.int32Value != 0 {
         if scriptHelper(String(format: setMicVolumeAS, 0), "MicMute") != nil {
             volume = current.int32Value
             _ = sendNumber("MicMuteLED", 2, io_service)
-            showOSDRes(hideText ? "" : "Mute", .MicOff)
+            showOSDRes(name, "Mute", .MicOff)
         }
     } else {
         if scriptHelper(String(format: setMicVolumeAS, volume), "MicMute") != nil {
             volume = current.int32Value
             _ = sendNumber("MicMuteLED", 0, io_service)
-            showOSDRes(hideText ? ""  : "Unmute", .Mic)
+            showOSDRes(name, "Unmute", .Mic)
         }
     }
 }

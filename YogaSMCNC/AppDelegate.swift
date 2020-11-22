@@ -364,12 +364,12 @@ func notificationCallback(_ port: CFMachPort?, _ msg: UnsafeMutableRawPointer?, 
                     eventActuator(desc, notification.data, &conf)
                 } else {
                     let value = String(format: "0x%04x:%d", notification.event, notification.data)
-                    showOSD("\(NSLocalizedString("EventVar", comment: "Event "))\(value)")
+                    showOSDRaw("\(NSLocalizedString("EventVar", comment: "Event "))\(value)")
                     os_log("Event %s default data not found", type: .error, value)
                 }
             } else {
                 let value = String(format: "0x%04x:%d", notification.event, notification.data)
-                showOSD("\(NSLocalizedString("EventVar", comment: "Event "))\(value)")
+                showOSDRaw("\(NSLocalizedString("EventVar", comment: "Event "))\(value)")
                 conf.events[notification.event] = [0: EventDesc("Event \(value)", nil, opt: "Unknown")]
                 #if DEBUG
                 os_log("Event %s", type: .debug, value)
@@ -405,27 +405,27 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<Shar
             return
         }
     case .airplane:
-        airplaneModeHelper(desc.name.isEmpty)
+        airplaneModeHelper(desc.name)
         return
     case .bluetooth:
-        bluetoothHelper(desc.name.isEmpty)
+        bluetoothHelper(desc.name)
         return
     case .bluetoothdiscoverable:
-        bluetoothDiscoverableHelper(desc.name.isEmpty)
+        bluetoothDiscoverableHelper(desc.name)
         return
     case .backlight:
         switch data {
         case 0:
-            showOSDRes("BacklightVar", "Off", .BacklightOff)
+            showOSDRes("Backlight", "Off", .BacklightOff)
         case 1:
-            showOSDRes("BacklightVar", "Low", .BacklightLow)
+            showOSDRes("Backlight", "Low", .BacklightLow)
         case 2:
-            showOSDRes("BacklightVar", "High", .BacklightHigh)
+            showOSDRes("Backlight", "High", .BacklightHigh)
         default:
-            showOSDRes("BacklightVar", "\(data)", .BacklightLow)
+            showOSDRes("Backlight", "\(data)", .BacklightLow)
         }
     case .micmute:
-        micMuteHelper(conf.pointee.io_service, desc.name.isEmpty)
+        micMuteHelper(conf.pointee.io_service, desc.name)
         return
     case .desktop:
         CoreDockSendNotification("com.apple.showdesktop.awake" as CFString, nil)
@@ -463,10 +463,10 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<Shar
         _ = scriptHelper(spotlightAS, desc.name)
         return
     case .thermal:
-        showOSD("\(NSLocalizedString("ThermalVar", comment: "Thermal: "))\(NSLocalizedString(desc.name, comment: ""))", desc.image)
+        showOSD(desc.name, desc.image)
         os_log("%s: thermal event", type: .info, desc.name)
     case .wireless:
-        wirelessHelper(desc.name.isEmpty)
+        wirelessHelper(desc.name)
         return
     default:
         #if DEBUG

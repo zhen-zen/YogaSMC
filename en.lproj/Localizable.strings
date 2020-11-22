@@ -72,8 +72,7 @@
 "Unavailable";
 "Toggle failed";
 
-"BacklightVar" = "Backlight ";
-"ThermalVar" = "Thermal: ";
+"Backlight";
 "EventVar" = "Event ";
 
 // Helper
@@ -91,13 +90,14 @@
 "New Year's Eve";
 
 // RF
-"BluetoothVar" = "Bluetooth ";
-"BTDiscoverableVar" = "BT Discoverable ";
-"WirelessVar" = "Wireless ";
-"AirplaneModeVar" = "Airplane Mode ";
+"Bluetooth";
+"BT Discoverable";
+"Wireless";
+"Airplane Mode";
 
 // Script
 "AppleEventAccess" = "Please grant access \n to Apple Event";
+"Mic";
 "Mute";
 "Unmute";
 

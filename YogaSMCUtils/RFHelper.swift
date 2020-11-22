@@ -11,39 +11,39 @@ import IOBluetooth
 import os.log
 import CoreWLAN
 
-func bluetoothHelper(_ hideText: Bool) {
+func bluetoothHelper(_ name: String) {
     guard IOBluetoothPreferencesAvailable() != 0 else {
-        showOSDRes("BluetoothVar", "Unavailable", .Bluetooth)
+        showOSDRes("Bluetooth", "Unavailable", .Bluetooth)
         os_log("Bluetooth unavailable!", type: .error)
         return
     }
     if IOBluetoothPreferenceGetControllerPowerState() != 0 {
         IOBluetoothPreferenceSetControllerPowerState(0)
-        showOSDRes("BluetoothVar", "Off", .Bluetooth)
+        showOSDRes(name.isEmpty ? "Bluetooth" : name, "Off", .Bluetooth)
     } else {
         IOBluetoothPreferenceSetControllerPowerState(1)
-        showOSDRes("BluetoothVar", "On", .Bluetooth)
+        showOSDRes(name.isEmpty ? "Bluetooth" : name, "On", .Bluetooth)
     }
 }
 
-func bluetoothDiscoverableHelper(_ hideText: Bool) {
+func bluetoothDiscoverableHelper(_ name: String) {
     guard IOBluetoothPreferencesAvailable() != 0 else {
-        showOSDRes("BluetoothVar", "Unavailable", .Bluetooth)
+        showOSDRes("Bluetooth", "Unavailable", .Bluetooth)
         os_log("Bluetooth unavailable!", type: .error)
         return
     }
     if IOBluetoothPreferenceGetDiscoverableState() != 0 {
         IOBluetoothPreferenceSetDiscoverableState(0)
-        showOSDRes("BTDiscoverableVar", "Off", .Bluetooth)
+        showOSDRes(name.isEmpty ? "BT Discoverable" : name, "Off", .Bluetooth)
     } else {
         IOBluetoothPreferenceSetDiscoverableState(1)
-        showOSDRes("BTDiscoverableVar", "On", .Bluetooth)
+        showOSDRes(name.isEmpty ? "BT Discoverable" : name, "On", .Bluetooth)
     }
 }
 
-func wirelessHelper(_ hideText: Bool) {
+func wirelessHelper(_ name: String) {
     guard let iface = CWWiFiClient.shared().interface() else {
-        showOSDRes("WirelessVar", "Unavailable", .Wifi)
+        showOSDRes("Wireless", "Unavailable", .Wifi)
         os_log("Wireless unavailable!", type: .error)
         return
     }
@@ -51,24 +51,24 @@ func wirelessHelper(_ hideText: Bool) {
     do {
         try iface.setPower(status)
         if status {
-            showOSDRes("WirelessVar", "On", .Wifi)
+            showOSDRes(name, "On", .Wifi)
         } else {
-            showOSDRes("WirelessVar", "Off", .WifiOff)
+            showOSDRes(name, "Off", .WifiOff)
         }
     } catch {
-        showOSDRes("WirelessVar", "Toggle failed", .Wifi)
+        showOSDRes("Wireless", "Toggle failed", .Wifi)
         os_log("Wireless toggle failed!", type: .error)
     }
 }
 
-func airplaneModeHelper(_ hideText: Bool) {
+func airplaneModeHelper(_ name: String) {
     guard IOBluetoothPreferencesAvailable() != 0 else {
-        showOSDRes("BluetoothVar", "Unavailable", .Bluetooth)
+        showOSDRes("Bluetooth", "Unavailable", .Bluetooth)
         os_log("Bluetooth unavailable!", type: .error)
         return
     }
     guard let iface = CWWiFiClient.shared().interface() else {
-        showOSDRes("WirelessVar", "Unavailable", .Wifi)
+        showOSDRes("Wireless", "Unavailable", .Wifi)
         os_log("Wireless unavailable!", type: .error)
         return
     }
@@ -77,18 +77,18 @@ func airplaneModeHelper(_ hideText: Bool) {
         IOBluetoothPreferenceSetControllerPowerState(1)
         do {
             try iface.setPower(true)
-            showOSDRes("AirplaneModeVar", "Off", .Antenna)
+            showOSDRes(name, "Off", .Antenna)
         } catch {
-            showOSDRes("WirelessVar", "Toggle failed", .Wifi)
+            showOSDRes("Wireless", "Toggle failed", .Wifi)
             os_log("Wireless toggle failed!", type: .error)
         }
     } else {
         IOBluetoothPreferenceSetControllerPowerState(0)
         do {
             try iface.setPower(false)
-            showOSDRes("AirplaneModeVar", "On", .AirplaneMode)
+            showOSDRes(name, "On", .AirplaneMode)
         } catch {
-            showOSDRes("WirelessVar", "Toggle failed", .Wifi)
+            showOSDRes("Wireless", "Toggle failed", .Wifi)
             os_log("Wireless toggle failed!", type: .error)
         }
     }
