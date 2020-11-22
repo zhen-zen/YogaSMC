@@ -41,6 +41,7 @@ bool YogaHIDD::initVPC() {
     }
     DebugLog("fn_mask = 0x%llx", fn_mask);
     OSSafeReleaseNULL(data);
+    return true;
 }
 
 bool YogaHIDD::start(IOService *provider) {
