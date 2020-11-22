@@ -51,7 +51,7 @@ bool YogaHIDD::start(IOService *provider) {
     if (!initVPC())
         AlwaysLog("Failed to obtain valid fn mask, evaluating methods directly");
 
-    UInt64 mode {0};
+    UInt64 mode = 0;
     if (kIOReturnSuccess != evaluateHIDD(INTEL_HID_DSM_HDMM_FN, &mode)) {
         AlwaysLog("Failed to read fn mode");
         return false;
@@ -67,7 +67,7 @@ bool YogaHIDD::start(IOService *provider) {
         return false;
     }
 
-    UInt64 cap {0};
+    UInt64 cap = 0;
     if ((kIOReturnSuccess == evaluateHIDD(INTEL_HID_DSM_HEBC_V2_FN, &cap) && (cap & 0x60000)) ||
         (kIOReturnSuccess == evaluateHIDD(INTEL_HID_DSM_HEBC_V1_FN, &cap) && (cap & 0x20000))) {
         DebugLog("5 button array or v2 power button is supported");
@@ -259,32 +259,30 @@ IOReturn YogaHIDD::evaluateHIDD(intel_hid_dsm_fn_codes index, UInt64 *value, UIn
         index >= INTEL_HID_DSM_FN_MAX)
         return kIOReturnUnsupported;
 
+    OSObject *obj = nullptr;
+    OSNumber *val = OSNumber::withNumber(arg, 32);
     if (fn_mask & BIT(index)) {
-        OSObject *obj = nullptr;
         OSArray *arr = nullptr;
         if (!value) {
             arr = OSArray::withCapacity(1);
-            OSNumber *val = OSNumber::withNumber(arg, 32);
-            OSSafeReleaseNULL(val);
+            arr->setObject(val);
         }
         ret = evaluateDSM(index, &obj, arr);
         OSSafeReleaseNULL(arr);
-
-        if (ret == kIOReturnSuccess) {
-            if (!value)
-                return ret;
-
-            OSNumber *number = OSDynamicCast(OSNumber, obj);
-            if (number != nullptr) {
-                *value = number->unsigned64BitValue();
-                DebugLog("index %d results 0x%llx", index, *value);
-                OSSafeReleaseNULL(number);
-                return ret;
-            }
-        }
-        OSSafeReleaseNULL(obj);
+    } else {
+        OSObject *params[] = { val,};
+        ret = vpc->evaluateObject(intel_hid_dsm_fn_to_method[index], &obj, params, 1);
     }
-    ret = vpc->evaluateInteger(intel_hid_dsm_fn_to_method[index], value);
+    OSSafeReleaseNULL(val);
+
+    if (ret == kIOReturnSuccess && value) {
+        OSNumber *number = OSDynamicCast(OSNumber, obj);
+        if (number != nullptr) {
+            *value = number->unsigned64BitValue();
+            DebugLog("index %d results 0x%llx", index, *value);
+        }
+    }
+    OSSafeReleaseNULL(obj);
     return ret;
 }
 

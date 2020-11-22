@@ -65,7 +65,7 @@ class YogaHIDD : public YogaVPC
     /**
      * Evaluate _DSM for specific GUID and function index.
      * @param index Function index
-     * @param value value
+     * @param value pointer to value
      * @param arg argument
      *
      * @return *kIOReturnSuccess* upon a successfull *_DSM* parse, otherwise failed when executing *evaluateObject*.
