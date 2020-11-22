@@ -2,6 +2,14 @@ YogaSMC Changelog
 ============================
 
 #### v1.3.1
+- Pane: debug: enable RapidChargeMode checkbox
+- ThinkVPC: fix forgotten break in switch case, thx @junaedahmed
+- NC: update presets, thx @antoniomcr96 @Ab2774
+- NC: support localization
+- ThinkVPC: check LED availability
+- NC: support hideText for actions with customized OSD
+- Build: replace deprecated ARCHS with ONLY_ACTIVE_ARCH
+- ThinkVPC: support yoga mode detection
 
 #### v1.3.0
 - Pane: fix loading prior to 10.14.4 with embedded swift runtime, thx @Charlyo

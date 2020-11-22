@@ -67,6 +67,7 @@ let ideaEvents: [UInt32: [UInt32: EventDesc]] = [
     0x01: [0: EventDesc("Keyboard Backlight", act: .backlight, display: false)],
     0x02: [0: EventDesc("Screen Off"),
             1: EventDesc("Screen On")],
+    0x04: [0: EventDesc("Backlight Changed", display: false)],
     0x05: [0: EventDesc("TouchPad Off"),
             1: EventDesc("TouchPad On")],
     0x06: [0: EventDesc("Switch Video")],
