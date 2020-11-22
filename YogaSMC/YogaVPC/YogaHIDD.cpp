@@ -161,6 +161,7 @@ IOReturn YogaHIDD::message(UInt32 type, IOService *provider, void *argument) {
                             client->sendNotification(event);
                         break;
                 }
+                break;
             // Notify PWRB?
             case 0xce: // KEY_POWER DOWN
                 dispatchKeyEvent(ADB_POWER, true);
