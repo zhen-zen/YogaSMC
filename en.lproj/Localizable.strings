@@ -65,9 +65,13 @@
 "Convertible";
 
 // OSD Res
-"Backlight Off";
-"Backlight Low";
-"Backlight High";
+"On";
+"Off";
+"Low";
+"High";
+"Unavailable";
+"Toggle failed";
+
 "BacklightVar" = "Backlight ";
 "ThermalVar" = "Thermal: ";
 "EventVar" = "Event ";
@@ -87,17 +91,10 @@
 "New Year's Eve";
 
 // RF
-"Bluetooth Unavailable";
-"Bluetooth Off";
-"Bluetooth On";
-"BT Discoverable Off";
-"BT Discoverable On";
-"Wireless Unavailable";
-"Wireless On";
-"Wireless Off";
-"Wireless Toggle failed";
-"Airplane Mode Off";
-"Airplane Mode On";
+"BluetoothVar" = "Bluetooth ";
+"BTDiscoverableVar" = "BT Discoverable ";
+"WirelessVar" = "Wireless ";
+"AirplaneModeVar" = "Airplane Mode ";
 
 // Script
 "AppleEventAccess" = "Please grant access \n to Apple Event";

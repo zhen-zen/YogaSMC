@@ -405,27 +405,27 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<Shar
             return
         }
     case .airplane:
-        airplaneModeHelper()
+        airplaneModeHelper(desc.name.isEmpty)
         return
     case .bluetooth:
-        bluetoothHelper()
+        bluetoothHelper(desc.name.isEmpty)
         return
     case .bluetoothdiscoverable:
-        bluetoothDiscoverableHelper()
+        bluetoothDiscoverableHelper(desc.name.isEmpty)
         return
     case .backlight:
         switch data {
         case 0:
-            showOSDRes("Backlight Off", .BacklightOff)
+            showOSDRes("BacklightVar", "Off", .BacklightOff)
         case 1:
-            showOSDRes("Backlight Low", .BacklightLow)
+            showOSDRes("BacklightVar", "Low", .BacklightLow)
         case 2:
-            showOSDRes("Backlight High", .BacklightHigh)
+            showOSDRes("BacklightVar", "High", .BacklightHigh)
         default:
-            showOSDRes("\(NSLocalizedString("BacklightVar", comment: ""))\(data)", .BacklightLow)
+            showOSDRes("BacklightVar", "\(data)", .BacklightLow)
         }
     case .micmute:
-        micMuteHelper(conf.pointee.io_service)
+        micMuteHelper(conf.pointee.io_service, desc.name.isEmpty)
         return
     case .desktop:
         CoreDockSendNotification("com.apple.showdesktop.awake" as CFString, nil)
@@ -466,7 +466,7 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<Shar
         showOSD("\(NSLocalizedString("ThermalVar", comment: "Thermal: "))\(NSLocalizedString(desc.name, comment: ""))", desc.image)
         os_log("%s: thermal event", type: .info, desc.name)
     case .wireless:
-        wirelessHelper()
+        wirelessHelper(desc.name.isEmpty)
         return
     default:
         #if DEBUG

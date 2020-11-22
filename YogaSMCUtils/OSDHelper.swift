@@ -50,7 +50,7 @@ enum EventImage: String {
 }
 
 // from https://github.com/alin23/Lunar/blob/master/Lunar/Data/Hotkeys.swift
-func showOSD(_ prompt: String, _ img: NSString? = nil, duration: UInt32 = 1000, priority: UInt32 = 0x1f4) {
+func showOSDRaw(_ prompt: String, _ img: NSString? = nil, duration: UInt32 = 1000, priority: UInt32 = 0x1f4) {
     guard let manager = OSDManager.sharedManager() as? OSDManager else {
         os_log("OSDManager unavailable", type: .error)
         return
@@ -64,11 +64,25 @@ func showOSD(_ prompt: String, _ img: NSString? = nil, duration: UInt32 = 1000, 
         withText: NSLocalizedString(prompt, comment: "LocalizedString") as NSString)
 }
 
-func showOSDRes(_ prompt: String, _ img: EventImage, duration: UInt32 = 1000, priority: UInt32 = 0x1f4) {
-    var image: NSString?
-    if let path = Bundle.main.pathForImageResource(img.rawValue),
+func showOSD(_ prompt: String, _ img: NSString? = nil, duration: UInt32 = 1000, priority: UInt32 = 0x1f4) {
+    showOSDRaw(NSLocalizedString(prompt, comment: "LocalizedString"), img, duration: duration, priority: priority)
+}
+
+func showOSDRes(_ prompt: String, _ image: EventImage, duration: UInt32 = 1000, priority: UInt32 = 0x1f4) {
+    var img: NSString?
+    if let path = Bundle.main.pathForImageResource(image.rawValue),
               path.hasPrefix("/Applications") {
-        image = path as NSString
+        img = path as NSString
     }
-    showOSD(prompt, image, duration: duration, priority: priority)
+    showOSDRaw(NSLocalizedString(prompt, comment: "LocalizedString"), img, duration: duration, priority: priority)
+}
+
+func showOSDRes(_ prompt: String, _ status: String, _ image: EventImage, duration: UInt32 = 1000, priority: UInt32 = 0x1f4) {
+    var img: NSString?
+    if let path = Bundle.main.pathForImageResource(image.rawValue),
+              path.hasPrefix("/Applications") {
+        img = path as NSString
+    }
+    let localizedString = NSLocalizedString(prompt, comment: "") + NSLocalizedString(status, comment: "")
+    showOSDRaw(localizedString, img, duration: duration, priority: priority)
 }
