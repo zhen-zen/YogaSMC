@@ -734,6 +734,93 @@ IOReturn ThinkVPC::message(UInt32 type, IOService *provider, void *argument) {
     return kIOReturnSuccess;
 }
 
+UInt32 ThinkVPC::getYogaMode() {
+    UInt32 mode;
+    if (vpc->evaluateInteger(getMultiModeState, &mode) != kIOReturnSuccess) {
+        AlwaysLog("failed to evaluate tablet mode");
+        return 0;
+    }
+
+    DebugLog("tablet mode: %x", mode);
+    if (!validModes) {
+        UInt16 type = mode >> 16;
+        setProperty("MultiModeType", type, 16);
+        switch (type) {
+            case 1:
+                validModes = TP_ACPI_MULTI_MODE_LAPTOP |
+                             TP_ACPI_MULTI_MODE_TABLET |
+                             TP_ACPI_MULTI_MODE_STAND_TENT;
+                break;
+            case 2:
+                validModes = TP_ACPI_MULTI_MODE_LAPTOP |
+                             TP_ACPI_MULTI_MODE_FLAT |
+                             TP_ACPI_MULTI_MODE_TABLET |
+                             TP_ACPI_MULTI_MODE_STAND |
+                             TP_ACPI_MULTI_MODE_TENT;
+                break;
+            case 3:
+                validModes = TP_ACPI_MULTI_MODE_LAPTOP |
+                             TP_ACPI_MULTI_MODE_FLAT;
+                break;
+            case 4:
+            case 5:
+                /* In mode 4, FLAT is not specified as a valid mode. However,
+                 * it can be seen at least on the X1 Yoga 2nd Generation.
+                 */
+                validModes = TP_ACPI_MULTI_MODE_LAPTOP |
+                             TP_ACPI_MULTI_MODE_FLAT |
+                             TP_ACPI_MULTI_MODE_TABLET |
+                             TP_ACPI_MULTI_MODE_STAND |
+                             TP_ACPI_MULTI_MODE_TENT;
+                break;
+                
+            default:
+                AlwaysLog("unknown tablet mode: %x", mode);
+                validModes = TP_ACPI_MULTI_MODE_UNKNOWN;
+                break;
+        }
+    }
+    UInt32 data = mode & 0xf;
+    switch (data) {
+        case 1:
+//            mode = TP_ACPI_MULTI_MODE_LAPTOP;
+            if (validModes & TP_ACPI_MULTI_MODE_TABLET_LIKE)
+                setTopCase(true);
+            setProperty("YogaMode", "Laptop");
+            break;
+        case 2:
+//            mode = TP_ACPI_MULTI_MODE_FLAT;
+            if (validModes & TP_ACPI_MULTI_MODE_TABLET_LIKE)
+                setTopCase(true);
+            setProperty("YogaMode", "Flat");
+            break;
+        case 3:
+//            mode = TP_ACPI_MULTI_MODE_TABLET;
+            setTopCase(false);
+            setProperty("YogaMode", "Tablet");
+            break;
+        case 4:
+//            if ((mode >> 16) == 1)
+//                mode = TP_ACPI_MULTI_MODE_STAND_TENT;
+//            else
+//                mode = TP_ACPI_MULTI_MODE_STAND;
+            setTopCase(false);
+            setProperty("YogaMode", "Stand");
+            break;
+        case 5:
+//            mode = TP_ACPI_MULTI_MODE_TENT;
+            setTopCase(false);
+            setProperty("YogaMode", "Tent");
+            break;
+        default:
+//            if (type == 5 && value == 0xffff)
+//                DebugLog("Multi mode status is undetected, assuming laptop");
+            AlwaysLog("unknown tablet mode: %x", mode);
+            break;
+    }
+    return data;
+}
+
 void ThinkVPC::updateVPC() {
     UInt32 result;
     if (vpc->evaluateInteger(getHKEYevent, &result) != kIOReturnSuccess) {
@@ -876,7 +963,7 @@ void ThinkVPC::updateVPC() {
                     break;
 
                 case TP_HKEY_EV_TABLET_CHANGED:
-                    DebugLog("tablet mode has changed");
+                    data = getYogaMode();
                     break;
 
                 case TP_HKEY_EV_PALM_DETECTED:
