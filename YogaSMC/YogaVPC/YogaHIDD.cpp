@@ -9,7 +9,7 @@
 #include "YogaHIDD.hpp"
 OSDefineMetaClassAndStructors(YogaHIDD, YogaVPC);
 
-bool YogaHIDD::initVPC() {
+bool YogaHIDD::initDSM() {
     if (kIOReturnSuccess != vpc->validateObject("_DSM"))
         return false;
 
@@ -44,11 +44,8 @@ bool YogaHIDD::initVPC() {
     return true;
 }
 
-bool YogaHIDD::start(IOService *provider) {
-    if (!super::start(provider))
-        return false;
-
-    if (!initVPC())
+bool YogaHIDD::initVPC() {
+    if (!initDSM())
         AlwaysLog("Failed to obtain valid fn mask, evaluating methods directly");
 
     UInt64 mode = 0;
@@ -77,10 +74,11 @@ bool YogaHIDD::start(IOService *provider) {
     return true;
 }
 
-void YogaHIDD::stop(IOService *provider) {
+bool YogaHIDD::exitVPC() {
     evaluateHIDD(INTEL_HID_DSM_HDSM_FN, nullptr, false);
     if (arrayCap != 0)
         evaluateHIDD(INTEL_HID_DSM_BTNE_FN, nullptr, 1);
+    return false;
 }
 
 IOReturn YogaHIDD::message(UInt32 type, IOService *provider, void *argument) {

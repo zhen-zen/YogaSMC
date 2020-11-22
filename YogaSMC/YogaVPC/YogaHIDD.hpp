@@ -49,6 +49,9 @@ class YogaHIDD : public YogaVPC
     OSDeclareDefaultStructors(YogaHIDD)
 
     bool initVPC() APPLE_KEXT_OVERRIDE;
+    bool exitVPC() APPLE_KEXT_OVERRIDE;
+
+    bool initDSM();
 
     /**
      * Evaluate _DSM for specific GUID and function index.
@@ -88,9 +91,6 @@ class YogaHIDD : public YogaVPC
     void initButtonArray();
     
 public:
-    virtual bool start(IOService *provider) APPLE_KEXT_OVERRIDE;
-    virtual void stop(IOService *provider) APPLE_KEXT_OVERRIDE;
-
     IOReturn message(UInt32 type, IOService *provider, void *argument) APPLE_KEXT_OVERRIDE;
     IOReturn setPowerState(unsigned long powerStateOrdinal, IOService * whatDevice) APPLE_KEXT_OVERRIDE;
 };
