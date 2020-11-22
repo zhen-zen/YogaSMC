@@ -48,7 +48,7 @@ bool YogaHIDD::start(IOService *provider) {
         return false;
 
     if (!initVPC())
-        AlwaysLog("Failed to obtain valid fn mask");
+        AlwaysLog("Failed to obtain valid fn mask, evaluating methods directly");
 
     UInt64 mode {0};
     if (kIOReturnSuccess != evaluateHIDD(INTEL_HID_DSM_HDMM_FN, &mode)) {
