@@ -140,6 +140,8 @@ private:
 
     UInt32 thermalstate {0};
 
+    bool LEDsupport {false};
+
     UInt32 batnum {BAT_ANY};
 
     bool ConservationMode {false};

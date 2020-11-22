@@ -227,6 +227,12 @@ bool ThinkVPC::initVPC() {
         setProperty(backlightPrompt, "unsupported");
 
     setProperty(autoBacklightPrompt, automaticBacklightMode, 8);
+    if (vpc->validateObject(setLED) == kIOReturnSuccess) {
+        LEDsupport = true;
+        setProperty("LEDSupport", true);
+    } else {
+        setProperty("LEDSupport", false);
+    }
     return true;
 }
 
@@ -470,6 +476,10 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 getPropertyNumber(SSTPrompt);
                 setSSTStatus(value->unsigned32BitValue());
             } else if (key->isEqualTo(LEDPrompt)) {
+                if (!LEDsupport) {
+                    AlwaysLog(notSupported, LEDPrompt);
+                    continue;
+                }
                 OSNumber *value;
                 getPropertyNumber(LEDPrompt);
                 if (value->unsigned32BitValue() > 0xff) {
@@ -982,6 +992,8 @@ bool ThinkVPC::setSSTStatus(UInt32 value) {
         DebugLog(toggleSuccess, "SST Proxy", value, property[value]);
         return true;
     }
+    if (!LEDsupport)
+        return true;
     // Replicate of _SI._SST
     bool status = true;
     switch (value) {
