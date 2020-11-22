@@ -87,7 +87,7 @@ If you want to add new actions, the easiest approach is to use the `script` acti
 ## Installation
 The kext should work out-of-the-box. If you have modified `_QXX` methods before, please remove the patches.
 
-Some features may relay on methods accessing EC. Although it won't affect the core functionality, please consider patching related EC fields larger than 8-bit.
+Some features may rely on methods accessing EC. Although it won't affect the core functionality, please consider patching related EC fields larger than 8-bit.
 
 The `YogaSMCAlter.kext` is a variant without SMC keys support and the dependencies of `Lilu` and `VirtualSMC`. It's designed for quick loading / unloading without reboot when debugging. 
 
