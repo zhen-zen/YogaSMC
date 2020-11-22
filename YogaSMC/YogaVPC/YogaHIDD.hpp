@@ -47,7 +47,9 @@ class YogaHIDD : public YogaVPC
 {
     typedef YogaVPC super;
     OSDeclareDefaultStructors(YogaHIDD)
-    
+
+    bool initVPC() APPLE_KEXT_OVERRIDE;
+
     /**
      * Evaluate _DSM for specific GUID and function index.
      * @param index Function index

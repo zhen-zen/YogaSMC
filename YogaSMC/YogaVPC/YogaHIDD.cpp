@@ -9,8 +9,8 @@
 #include "YogaHIDD.hpp"
 OSDefineMetaClassAndStructors(YogaHIDD, YogaVPC);
 
-bool YogaHIDD::start(IOService *provider) {
-    if (!super::start(provider))
+bool YogaHIDD::initVPC() {
+    if (kIOReturnSuccess != vpc->validateObject("_DSM"))
         return false;
 
     OSObject *result = nullptr;
@@ -37,11 +37,18 @@ bool YogaHIDD::start(IOService *provider) {
             break;
         case 0:
             AlwaysLog("Invalid length for fn mask");
-            break;
+            return false;
     }
     DebugLog("fn_mask = 0x%llx", fn_mask);
-    setProperty("fn_mask", fn_mask, 64);
     OSSafeReleaseNULL(data);
+}
+
+bool YogaHIDD::start(IOService *provider) {
+    if (!super::start(provider))
+        return false;
+
+    if (!initVPC())
+        AlwaysLog("Failed to obtain valid fn mask");
 
     UInt64 mode {0};
     if (kIOReturnSuccess != evaluateHIDD(INTEL_HID_DSM_HDMM_FN, &mode)) {
