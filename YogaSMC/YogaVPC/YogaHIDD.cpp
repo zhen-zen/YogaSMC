@@ -253,33 +253,42 @@ IOReturn YogaHIDD::evaluateDSM(UInt32 index, OSObject **result, OSArray *arg, co
     return ret;
 }
 
-IOReturn YogaHIDD::evaluateHIDD(intel_hid_dsm_fn_codes index, UInt64 *value, UInt64 arg) {
+IOReturn YogaHIDD::evaluateHIDD(intel_hid_dsm_fn_codes index, UInt64 *value, SInt64 arg) {
     IOReturn ret;
     if (index <= INTEL_HID_DSM_FN_INVALID ||
         index >= INTEL_HID_DSM_FN_MAX)
         return kIOReturnUnsupported;
 
     OSObject *obj = nullptr;
-    OSNumber *val = OSNumber::withNumber(arg, 32);
     if (fn_mask & BIT(index)) {
         OSArray *arr = nullptr;
-        if (!value) {
+        if (arg > 0) {
             arr = OSArray::withCapacity(1);
+            OSNumber *val = OSNumber::withNumber(arg, 32);
             arr->setObject(val);
+            OSSafeReleaseNULL(val);
         }
         ret = evaluateDSM(index, &obj, arr);
         OSSafeReleaseNULL(arr);
     } else {
-        OSObject *params[] = { val,};
-        ret = vpc->evaluateObject(intel_hid_dsm_fn_to_method[index], &obj, params, 1);
+        if (arg > 0) {
+            OSObject *params[] = {
+                OSNumber::withNumber(arg, 32),
+            };
+            ret = vpc->evaluateObject(intel_hid_dsm_fn_to_method[index], &obj, params, 1);
+            params[0]->release();
+        } else {
+            ret = vpc->evaluateObject(intel_hid_dsm_fn_to_method[index], &obj);
+        }
     }
-    OSSafeReleaseNULL(val);
 
     if (ret == kIOReturnSuccess && value) {
         OSNumber *number = OSDynamicCast(OSNumber, obj);
         if (number != nullptr) {
             *value = number->unsigned64BitValue();
             DebugLog("index %d results 0x%llx", index, *value);
+        } else {
+            AlwaysLog("index %d results invalid", index);
         }
     }
     OSSafeReleaseNULL(obj);

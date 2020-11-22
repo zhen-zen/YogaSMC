@@ -40,7 +40,7 @@ static const char *intel_hid_dsm_fn_to_method[INTEL_HID_DSM_FN_MAX] = {
     "BTNE",
     "HEBC",
     "VGBS",
-    "HEBC"
+    "HEEC"
 };
 
 class YogaHIDD : public YogaVPC
@@ -70,7 +70,7 @@ class YogaHIDD : public YogaVPC
      *
      * @return *kIOReturnSuccess* upon a successfull *_DSM* parse, otherwise failed when executing *evaluateObject*.
      */
-    IOReturn evaluateHIDD(intel_hid_dsm_fn_codes index, UInt64 *value, UInt64 arg=0);
+    IOReturn evaluateHIDD(intel_hid_dsm_fn_codes index, UInt64 *value, SInt64 arg=-1);
 
     /**
      *  Fn mask
