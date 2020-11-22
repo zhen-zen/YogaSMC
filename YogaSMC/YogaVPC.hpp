@@ -189,7 +189,7 @@ protected:
      *
      *  @return true if success
      */
-    inline virtual bool updateBacklight(bool update=false) {return true;};
+    inline virtual bool updateBacklight(bool update=false) {return false;};
 
     /**
      *  Set backlight mode
