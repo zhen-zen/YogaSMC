@@ -172,7 +172,12 @@ class YogaSMCPane: NSPreferencePane {
         defaults.setValue((vFanStop.state == .on), forKey: "AllowFanStop")
         _ = scriptHelper(reloadAS, "Reload YogaSMCNC")
     }
-
+    @IBOutlet weak var vDisableFan: NSButton!
+    @IBAction func vDisableFanSet(_ sender: NSButton) {
+        defaults.setValue((vDisableFan.state == .on), forKey: "DisableFan")
+        _ = scriptHelper(reloadAS, "Reload YogaSMCNC")
+    }
+    
     // Main
 
     @IBOutlet weak var TabView: NSTabView!
@@ -380,12 +385,17 @@ class YogaSMCPane: NSPreferencePane {
         #if DEBUG
         if !getBoolean("Dual fan", io_service) {
             vSecondFan.isEnabled = true
-            if defaults.object(forKey: "SecondThinkFan") != nil {
-                vSecondFan.state = defaults.bool(forKey: "SecondThinkFan") ? .on : .off
-            }
+            vSecondFan.state = defaults.bool(forKey: "SecondThinkFan") ? .on : .off
         }
         #endif
         vFanStop.state = defaults.bool(forKey: "AllowFanStop") ? .on : .off
+        if getBoolean("LEDSupport", io_service) {
+            vPowerLEDSlider.isEnabled = true
+            vStandbyLEDSlider.isEnabled = true
+            vThinkDotSlider.isEnabled = true
+            vCustomLEDSlider.isEnabled = true
+        }
+        vDisableFan.state = defaults.bool(forKey: "DisableFan") ? .on : .off
     }
 
     override func awakeFromNib() {
