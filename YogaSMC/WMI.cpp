@@ -134,9 +134,6 @@ bool WMI::extractData()
     for (int i = 0; i < count; i++)
         parseWDGEntry((struct WMI_DATA*)data->getBytesNoCopy(i * WMI_DATA_SIZE, WMI_DATA_SIZE));
     
-    if (bmf_guid_string)
-        extractBMF();
-
     mDevice->setProperty("WDG", mData);
     data->release();
     
@@ -179,12 +176,8 @@ void WMI::parseWDGEntry(struct WMI_DATA* block)
     if (block->flags == 0 && block->instance_count == 1) {
         AlwaysLog("Possible BMF object %s %s", guid_string, object_id_string);
         // TODO: get BMF guid
-        if (bmf_guid_string) {
-            AlwaysLog("Previous BMF object %s", bmf_guid_string);
-        } else {
-            bmf_guid_string = new char[37];
-            uuid_unparse_lower(hostUUID, bmf_guid_string);
-        }
+        if (!foundBMF)
+            extractBMF(guid_string);
     }
 
     mData->setObject(guid_string, dict);
@@ -273,14 +266,14 @@ bool WMI::executeInteger(const char * guid, UInt32 * result, OSObject * params[]
     return ret;
 }
 
-bool WMI::extractBMF()
+bool WMI::extractBMF(const char * guid)
 {
     OSObject *bmf;
     OSData *data;
 
     char methodName[5]; // always 4 chars per ACPI spec
 
-    OSDictionary *method = getMethod(bmf_guid_string, 0);
+    OSDictionary *method = getMethod(guid, 0);
     if (!method)
         return false;
 
@@ -317,6 +310,7 @@ bool WMI::extractBMF()
         AlwaysLog("%s format invalid", methodName);
         return false;
     }
+    foundBMF = true;
 #if DEBUG
     mDevice->setProperty("BMF size", data->getLength(), sizeof(unsigned int)*8);
 #endif
@@ -333,7 +327,7 @@ bool WMI::extractBMF()
 #endif
     MOF mof(pout, size, mData, name);
     mDevice->removeProperty("MOF");
-    OSObject *result = mof.parse_bmf(bmf_guid_string);
+    OSObject *result = mof.parse_bmf(guid);
     mDevice->setProperty("MOF", result);
     if (!mof.parsed)
         mDevice->setProperty("BMF data", data);
