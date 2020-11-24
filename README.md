@@ -49,7 +49,7 @@ Currently available functions:
 | ---- | ---- | ---- | ---- |
 | `_HID` | `VPC2004` | `LEN0268`<br>`LEN0068` | `INT33D5`<br>`INTC1051` |
 | Reference | [ideapad-laptop](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/ideapad-laptop.c) | [thinkpad_acpi](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/thinkpad_acpi.c) | [intel-hid](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/intel-hid.c) |
-| Hotkey polling | ✅ | ✅ | ✅ (beta) |
+| Hotkey polling | ✅ | ✅ | ✅ |
 | Conservation mode | ✅ | ✅ | N/A |
 | Battery threshold | Not supported | ✅ | N/A |
 | Charging control | Need testing | Need testing | N/A |

@@ -202,6 +202,7 @@ IOReturn YogaHIDD::message(UInt32 type, IOService *provider, void *argument) {
             default:
                 if (client)
                     client->sendNotification(event);
+                break;
         }
     }
     return kIOReturnSuccess;
