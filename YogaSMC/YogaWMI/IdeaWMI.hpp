@@ -53,8 +53,13 @@ private:
 
     /**
      *  Parse Battery Info
+     *
+     *  @param method method name to be executed
+     *  @param bat array for status
+     *
+     *  @return true if success
      */
-    const char *getBatteryInfo (UInt32 index);
+    bool getBatteryInfo (UInt32 index, OSArray *bat);
 
     void processWMI() APPLE_KEXT_OVERRIDE;
     void ACPIEvent(UInt32 argument) APPLE_KEXT_OVERRIDE;
