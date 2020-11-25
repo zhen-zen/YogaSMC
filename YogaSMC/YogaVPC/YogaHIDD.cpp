@@ -289,6 +289,7 @@ IOReturn YogaHIDD::evaluateHIDD(intel_hid_dsm_fn_codes index, UInt64 *value, SIn
             DebugLog("index %d results 0x%llx", index, *value);
         } else {
             AlwaysLog("index %d results invalid", index);
+            ret = kIOReturnInvalid;
         }
     }
     OSSafeReleaseNULL(obj);
