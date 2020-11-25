@@ -10,6 +10,11 @@ YogaSMC Changelog
 - NC: support hideText for actions with customized OSD
 - Build: replace deprecated ARCHS with ONLY_ACTIVE_ARCH
 - ThinkVPC: support yoga mode detection
+- NC, Pane: support DisableFan
+- YogaHIDD: fix support for devices without `_DSM`
+- YogaVPC: validate clamshellCap and updateBacklight support
+- YogaWMI: fix getNotifyID
+- IdeaWMI: fix getBatteryInfo retain count
 
 #### v1.3.0
 - Pane: fix loading prior to 10.14.4 with embedded swift runtime, thx @Charlyo
