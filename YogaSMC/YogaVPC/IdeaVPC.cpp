@@ -639,6 +639,7 @@ void IdeaVPC::updateVPC() {
     if (!brightnessPoller)
         DebugLog("read VPC EC result: 0x%x %d", vpc1, retries);
 
+    UInt64 time = 0;
     for (int vpc_bit = 0; vpc_bit < 16; vpc_bit++) {
         if (BIT(vpc_bit) & vpc1) {
             UInt32 data = 0;
@@ -658,12 +659,14 @@ void IdeaVPC::updateVPC() {
                         }
                         data = result;
                     }
+                    time = 1;
                     break;
 
                 case 1: // ENERGY_EVENT_GENERAL / ENERGY_EVENT_KEYBDLED_OLD
                     DebugLog("Fn+Space keyboard backlight?");
                     updateKeyboard(true);
                     data = backlightLevel;
+                    time = 1;
                     // also on AC connect / disconnect
                     break;
 
@@ -696,6 +699,7 @@ void IdeaVPC::updateVPC() {
                         brightnessSaved = result;
                         data = result;
                     }
+                    time = 1;
                     break;
 
                 case 5:
@@ -704,26 +708,32 @@ void IdeaVPC::updateVPC() {
                     else
                         DebugLog("Fn+F6 touchpad 0x%x %s", result, result ? "on" : "off");
                     data = result;
+                    time = 1;
                     break;
 
                 case 7:
                     DebugLog("Fn+F8 camera");
+                    time = 1;
                     break;
 
                 case 8: // ENERGY_EVENT_MIC
                     DebugLog("Fn+F4 mic");
+                    time = 1;
                     break;
 
                 case 10:
                     DebugLog("Touchpad on");
+                    time = 1;
                     break;
 
                 case 12: // ENERGY_EVENT_KEYBDLED
                     DebugLog("Fn+Space keyboard backlight?");
+                    time = 1;
                     break;
 
                 case 13:
                     DebugLog("Fn+F7 airplane mode");
+                    time = 1;
                     break;
 
                 default:
@@ -734,6 +744,11 @@ void IdeaVPC::updateVPC() {
             if (client != nullptr)
                 client->sendNotification(vpc_bit, data);
         }
+    }
+
+    if (time != 0) {
+        clock_get_uptime(&time);
+        dispatchMessage(kPS2M_notifyKeyTime, &time);
     }
 }
 
