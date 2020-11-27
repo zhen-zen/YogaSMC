@@ -30,7 +30,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @objc func thinkWakeup() {
         if let current = scriptHelper(getMicVolumeAS, "MicMute"),
-           sendNumber("MicMuteLED", current.int32Value == 0 ? 2 : 0, conf.io_service) {
+           sendNumber("MicMuteLED", current.int32Value == 0 ? 2 : 0, conf.service) {
             os_log("Mic Mute LED updated", type: .info)
         } else {
             os_log("Failed to update Mic Mute LED", type: .error)
@@ -111,8 +111,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     // MARK: - Application
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        guard conf.io_service != 0,
-              kIOReturnSuccess == IOServiceOpen(conf.io_service, mach_task_self_, 0, &conf.connect) else {
+        guard conf.service != 0,
+              kIOReturnSuccess == IOServiceOpen(conf.service, mach_task_self_, 0, &conf.connect) else {
             os_log("Failed to connect to YogaSMC", type: .fault)
             showOSD("ConnectFail", duration: 2000)
             NSApp.terminate(nil)
@@ -163,7 +163,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func getProerty() -> Bool {
         var CFProps: Unmanaged<CFMutableDictionary>?
-        if kIOReturnSuccess == IORegistryEntryCreateCFProperties(conf.io_service, &CFProps, kCFAllocatorDefault, 0),
+        if kIOReturnSuccess == IORegistryEntryCreateCFProperties(conf.service, &CFProps, kCFAllocatorDefault, 0),
            CFProps != nil {
             if let props = CFProps?.takeRetainedValue() as NSDictionary?,
                let IOClass = props["IOClass"] as? NSString {
@@ -173,7 +173,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                     appMenu.insertItem(withTitle: props["VersionInfo"] as? String ?? NSLocalizedString("Unknown Version", comment: ""), action: nil, keyEquivalent: "", at: 3)
                 }
 
-                switch getString("EC Capability", conf.io_service) {
+                switch getString("EC Capability", conf.service) {
                 case "RW":
                     ECCap = 3
                 case "RO":
@@ -193,7 +193,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                     thinkWakeup()
                     if !hide, !defaults.bool(forKey: "DisableFan") {
                         if ECCap == 3 {
-                            if !getBoolean("Dual fan", conf.io_service),
+                            if !getBoolean("Dual fan", conf.service),
                                defaults.bool(forKey: "SecondThinkFan") {
                                 fanHelper2 = ThinkFanHelper(appMenu, conf.connect, false, false)
                                 fanHelper2?.update(true)
@@ -223,21 +223,21 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func loadEvents() {
         if let arr = defaults.object(forKey: "Events") as? [[String: Any]] {
-            for v in arr {
-                if let id = v["id"] as? UInt32,
-                   let events = v["events"] as? [[String: Any]] {
-                    var e = conf.events[id] ?? [:]
+            for entry in arr {
+                if let eid = entry["id"] as? UInt32,
+                   let events = entry["events"] as? [[String: Any]] {
+                    var info = conf.events[eid] ?? [:]
                     for event in events {
                         if let data = event["data"] as? UInt32,
                            let name = event["name"] as? String,
                            let action = event["action"] as? String {
                             let opt = event["option"] as? String
-                            if e[data] != nil,
+                            if info[data] != nil,
                                action == "nothing",
                                (opt == "Unknown" || (opt == nil && name.hasPrefix("Event 0x"))) {
-                                os_log("Override unknown event 0x%04x : %d", type: .info, id, data)
+                                os_log("Override unknown event 0x%04x : %d", type: .info, eid, data)
                             } else {
-                                e[data] = EventDesc(
+                                info[data] = EventDesc(
                                     name,
                                     event["image"] as? String,
                                     act: EventAction(rawValue: action) ?? .nothing,
@@ -245,10 +245,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                                     opt: opt)
                             }
                         } else {
-                            os_log("Invalid event for 0x%04x!", type: .info, id)
+                            os_log("Invalid event for 0x%04x!", type: .info, eid)
                         }
                     }
-                    conf.events[id] = e
+                    conf.events[eid] = info
                 } else {
                     os_log("Invalid event!", type: .info)
                 }
@@ -260,16 +260,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     func saveEvents() {
-        var array: [[String: Any]] = []
-        for (k, v) in conf.events {
+        var arr: [[String: Any]] = []
+        for (eid, info) in conf.events {
             var events: [[String: Any]] = []
-            var dict: [String: Any] = [:]
-            dict["id"] = Int(k)
-            for (data, e) in v {
+            var entry: [String: Any] = [:]
+            entry["id"] = Int(eid)
+            for (data, desc) in info {
                 var event: [String: Any] = [:]
                 event["data"] = Int(data)
-                event["name"] = e.name
-                if let res = e.image {
+                event["name"] = desc.name
+                if let res = desc.image {
                     if let path = Bundle.main.resourcePath,
                        res.hasPrefix(path) {
                         event["image"] = res.lastPathComponent
@@ -277,17 +277,17 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                         event["image"] = res
                    }
                 }
-                event["action"] = e.action.rawValue
-                event["display"] = e.display
-                if e.option != nil {
-                    event["option"] = e.option
+                event["action"] = desc.action.rawValue
+                event["display"] = desc.display
+                if desc.option != nil {
+                    event["option"] = desc.option
                 }
                 events.append(event)
             }
-            dict["events"] = events
-            array.append(dict)
+            entry["events"] = events
+            arr.append(entry)
         }
-        defaults.setValue(array, forKey: "Events")
+        defaults.setValue(arr, forKey: "Events")
     }
 
     func loadConfig() {
@@ -317,7 +317,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         // Load driver settings
         if defaults.object(forKey: "AutoBacklight") != nil {
-            _ = sendNumber("AutoBacklight", defaults.integer(forKey: "AutoBacklight"), conf.io_service)
+            _ = sendNumber("AutoBacklight", defaults.integer(forKey: "AutoBacklight"), conf.service)
         }
     }
 
@@ -328,7 +328,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
 
         // Save driver settings
-        defaults.setValue(getNumber("AutoBacklight", conf.io_service), forKey: "AutoBacklight")
+        defaults.setValue(getNumber("AutoBacklight", conf.service), forKey: "AutoBacklight")
     }
 
     // MARK: - Notification
@@ -416,16 +416,16 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<Shar
     case .backlight:
         switch data {
         case 0:
-            showOSDRes("Backlight", "Off", .BacklightOff)
+            showOSDRes("Backlight", "Off", .kBacklightOff)
         case 1:
-            showOSDRes("Backlight", "Low", .BacklightLow)
+            showOSDRes("Backlight", "Low", .kBacklightLow)
         case 2:
-            showOSDRes("Backlight", "High", .BacklightHigh)
+            showOSDRes("Backlight", "High", .kBacklightHigh)
         default:
-            showOSDRes("Backlight", "\(data)", .BacklightLow)
+            showOSDRes("Backlight", "\(data)", .kBacklightLow)
         }
     case .micmute:
-        micMuteHelper(conf.pointee.io_service, desc.name)
+        micMuteHelper(conf.pointee.service, desc.name)
         return
     case .desktop:
         CoreDockSendNotification("com.apple.showdesktop.awake" as CFString, nil)
@@ -447,7 +447,7 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<Shar
             if let img = desc.image {
                 showOSD(desc.name, img)
             } else {
-                showOSDRes(desc.name, .Sleep)
+                showOSDRes(desc.name, .kSleep)
             }
             sleep(1)
         }
@@ -482,5 +482,5 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<Shar
 struct SharedConfig {
     var connect: io_connect_t = 0
     var events: [UInt32: [UInt32: EventDesc]] = [:]
-    let io_service: io_service_t = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("YogaVPC"))
+    let service: io_service_t = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("YogaVPC"))
 }
