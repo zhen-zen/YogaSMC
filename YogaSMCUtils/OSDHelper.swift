@@ -63,7 +63,7 @@ func showOSDRaw(_ prompt: String, _ img: NSString? = nil, duration: UInt32 = 100
         onDisplayID: CGMainDisplayID(),
         priority: priority,
         msecUntilFade: duration,
-        withText: NSLocalizedString(prompt, comment: "LocalizedString") as NSString)
+        withText: prompt as NSString)
 }
 
 func showOSD(_ prompt: String, _ img: NSString? = nil, duration: UInt32 = 1000, priority: UInt32 = 0x1f4) {
@@ -85,10 +85,14 @@ func showOSDRes(_ prompt: String, _ status: String, _ image: EventImage, duratio
               path.hasPrefix("/Applications") {
         img = path as NSString
     }
-    if prompt.isEmpty {
-        showOSDRaw(prompt, img, duration: duration, priority: priority)
+    var alias = prompt
+    if img != nil {
+        alias = NSLocalizedString(prompt, comment: "")
+    }
+    if alias.isEmpty {
+        showOSDRaw(alias, img, duration: duration, priority: priority)
     } else {
-        let localizedString = NSLocalizedString(prompt, comment: "") + " " + NSLocalizedString(status, comment: "")
+        let localizedString = alias + " " + NSLocalizedString(status, comment: "")
         showOSDRaw(localizedString, img, duration: duration, priority: priority)
     }
 }

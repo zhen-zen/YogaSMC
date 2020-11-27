@@ -393,7 +393,7 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<Shar
             if desc.name.hasPrefix("Event ") {
                 showOSD("\(NSLocalizedString("EventVar", comment: "Event "))\(desc.name.dropFirst("Event ".count))", desc.image)
             } else {
-                showOSD("\(NSLocalizedString("EventVar", comment: "Event "))\(desc.name)", desc.image)
+                showOSD(desc.name, desc.image)
             }
         }
         return
