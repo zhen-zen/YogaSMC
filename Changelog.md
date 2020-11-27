@@ -16,6 +16,8 @@ YogaSMC Changelog
 - YogaWMI: fix getNotifyID
 - IdeaWMI: fix getBatteryInfo retain count
 - NC: hide selected text which status is revealed by image
+- YogaVPC: notify timestamp for key press
+- NC: fix easter egg and enable it by default
 
 #### v1.3.0
 - Pane: fix loading prior to 10.14.4 with embedded swift runtime, thx @Charlyo

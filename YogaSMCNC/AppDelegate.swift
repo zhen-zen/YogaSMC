@@ -73,6 +73,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         os_log("Timer sheduled at %s", type: .info, sender.fireDate.description(with: Locale.current))
     }
 
+    @objc func iconWakeup() {
+        setHolidayIcon(statusItem!)
+    }
+
     @objc func update () {
         DispatchQueue.main.async {
             if self.fanHelper2 != nil {
@@ -171,6 +175,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                     appMenu.insertItem(NSMenuItem.separator(), at: 1)
                     appMenu.insertItem(withTitle: "Class: \(IOClass)", action: nil, keyEquivalent: "", at: 2)
                     appMenu.insertItem(withTitle: props["VersionInfo"] as? String ?? NSLocalizedString("Unknown Version", comment: ""), action: nil, keyEquivalent: "", at: 3)
+                    NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(iconWakeup), name: NSWorkspace.didWakeNotification, object: nil)
                 }
 
                 switch getString("EC Capability", conf.service) {
@@ -295,7 +300,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             os_log("First launch", type: .info)
             defaults.setValue(false, forKey: "HideIcon")
             defaults.setValue(false, forKey: "StartAtLogin")
-            defaults.setValue("⎇", forKey: "Title")
         }
 
         hide = defaults.bool(forKey: "HideIcon")
