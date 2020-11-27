@@ -26,9 +26,8 @@
 "TouchPad On";
 "Switch Video";
 "Camera";
-"Mic Mute";
+"Mic Mute" = "";
 "TouchPad On";
-"Airplane Mode";
 "Yoga Mode";
 "Laptop Mode";
 "Tablet Mode";
@@ -47,8 +46,8 @@
 "Launchpad";
 "Custom Hotkey";
 "Bluetooth";
-"Keyboard Disabled";
-"Keyboard Enabled";
+"Keyboard Disabled" = "";
+"Keyboard Enabled" = "";
 "LID Close";
 "LID Open";
 "Thermal Table Change";
@@ -92,8 +91,8 @@
 // RF
 "Bluetooth";
 "BT Discoverable";
-"Wireless";
-"Airplane Mode";
+"Wireless" = "";
+"Airplane Mode" = "";
 
 // Script
 "AppleEventAccess" = "Please grant access \n to Apple Event";

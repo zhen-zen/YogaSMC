@@ -15,6 +15,7 @@ YogaSMC Changelog
 - YogaVPC: validate clamshellCap and updateBacklight support
 - YogaWMI: fix getNotifyID
 - IdeaWMI: fix getBatteryInfo retain count
+- NC: hide selected text which status is revealed by image
 
 #### v1.3.0
 - Pane: fix loading prior to 10.14.4 with embedded swift runtime, thx @Charlyo
