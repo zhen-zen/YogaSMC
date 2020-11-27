@@ -834,6 +834,7 @@ void ThinkVPC::updateVPC() {
     }
 
     UInt32 data = 0;
+    UInt64 time = 0;
     switch (result >> 0xC) {
         case 1:
             switch (result) {
@@ -861,6 +862,7 @@ void ThinkVPC::updateVPC() {
                     DebugLog("Hotkey(MHKP) key presses event: 0x%x", result);
                     break;
             }
+            time = 1;
             break;
 
         case 2:
@@ -949,14 +951,17 @@ void ThinkVPC::updateVPC() {
 
                 case TP_HKEY_EV_KEY_NUMLOCK:
                     DebugLog("Numlock");
+                    time = 1;
                     break;
 
                 case TP_HKEY_EV_KEY_FN:
                     DebugLog("Fn");
+                    time = 1;
                     break;
 
                 case TP_HKEY_EV_KEY_FN_ESC:
                     DebugLog("Fn+Esc");
+                    time = 1;
                     break;
 
                 case TP_HKEY_EV_LID_STATUS_CHANGED:
@@ -991,6 +996,11 @@ void ThinkVPC::updateVPC() {
 
     if (client)
         client->sendNotification(result, data);
+
+    if (time != 0) {
+        clock_get_uptime(&time);
+        dispatchMessage(kPS2M_notifyKeyTime, &time);
+    }
 }
 
 bool ThinkVPC::setHotkeyStatus(bool enable) {
