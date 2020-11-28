@@ -14,12 +14,12 @@
 #include <VirtualSMCSDK/kern_vsmcapi.hpp>
 #include "YogaBaseService.hpp"
 
-#define addECKeySp(key, name) \
+#define addECKeySp(key, name, type) \
     do { \
         if (sensorCount < MAX_SENSOR && (method = OSDynamicCast(OSString, conf->getObject(name))) && (method->getLength() == 4)) { \
             if (ec->validateObject(method->getCStringNoCopy()) == kIOReturnSuccess) { \
                 atomic_init(&currentSensor[sensorCount], 0); \
-                VirtualSMCAPI::addKey(key, vsmcPlugin.data, VirtualSMCAPI::valueWithSp(0, SmcKeyTypeSp78, new atomicSpKey(&currentSensor[sensorCount]))); \
+                VirtualSMCAPI::addKey(key, vsmcPlugin.data, VirtualSMCAPI::valueWithSp(0, SmcKeyTypeSp78, new type(&currentSensor[sensorCount]))); \
                 sensorMethod[sensorCount] = method->getCStringNoCopy(); \
                 status->setObject(name, kOSBooleanTrue); \
                 sensorCount++; \
@@ -33,6 +33,7 @@ static constexpr const char *KeyIndexes = "0123456789ABCDEF";
 
 static constexpr SMC_KEY KeyBDVT = SMC_MAKE_IDENTIFIER('B','D','V','T');
 static constexpr SMC_KEY KeyCH0B = SMC_MAKE_IDENTIFIER('C','H','0','B');
+static constexpr SMC_KEY KeyTB0T(size_t i) { return SMC_MAKE_IDENTIFIER('T','B',KeyIndexes[i],'T'); }
 static constexpr SMC_KEY KeyTCSA = SMC_MAKE_IDENTIFIER('T','C','S','A');
 static constexpr SMC_KEY KeyTCXC = SMC_MAKE_IDENTIFIER('T','C','X','C');
 static constexpr SMC_KEY KeyTM0P = SMC_MAKE_IDENTIFIER('T','M','0','P');
@@ -83,6 +84,14 @@ protected:
     SMC_RESULT readAccess() override;
 public:
     atomicSpKey(_Atomic(uint32_t) *currentSensor) : currentSensor(currentSensor) {};
+};
+
+class atomicSpDeciKelvinKey : public VirtualSMCValue {
+    _Atomic(uint32_t) *currentSensor;
+protected:
+    SMC_RESULT readAccess() override;
+public:
+    atomicSpDeciKelvinKey(_Atomic(uint32_t) *currentSensor) : currentSensor(currentSensor) {};
 };
 
 class atomicFpKey : public VirtualSMCValue {
