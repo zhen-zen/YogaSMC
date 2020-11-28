@@ -89,7 +89,8 @@ class YogaSMCPane: NSPreferencePane {
     @IBOutlet weak var vChargeThresholdStop: NSTextField!
     @IBAction func vChargeThresholdStartSet(_ sender: NSTextFieldCell) {
         if let dict = getDictionary(thinkBatteryName[thinkBatteryNumber], service) {
-            if let vStart = dict["BCTG"] as? NSNumber {
+            if let vStart = dict["BCTG"] as? NSNumber,
+               vStart.intValue >= 0 {
                 let old = (vStart.intValue) & 0xff
                 if old < 0 || old > 99 {
                     vChargeThresholdStart.isEnabled = false
@@ -108,7 +109,8 @@ class YogaSMCPane: NSPreferencePane {
 
     @IBAction func vChargeThresholdStopSet(_ sender: NSTextField) {
         if let dict = getDictionary(thinkBatteryName[thinkBatteryNumber], service) {
-            if let vStop = dict["BCSG"] as? NSNumber {
+            if let vStop = dict["BCSG"] as? NSNumber,
+               vStop.int32Value >= 0 {
                 var old = (vStop.intValue) & 0xff
                 if old < 0 || old > 99 {
                     vChargeThresholdStop.isEnabled = false
@@ -347,7 +349,9 @@ class YogaSMCPane: NSPreferencePane {
         _ = sendNumber("Battery", thinkBatteryNumber, service)
         if let dict = getDictionary(thinkBatteryName[thinkBatteryNumber], service),
            let vStart = dict["BCTG"] as? NSNumber,
-           let vStop = dict["BCSG"] as? NSNumber {
+           let vStop = dict["BCSG"] as? NSNumber,
+           vStart.int32Value >= 0,
+           vStop.int32Value >= 0 {
             vChargeThresholdStart.isEnabled = true
             vChargeThresholdStop.isEnabled = true
             vChargeThresholdStart.integerValue = vStart.intValue & 0xff
