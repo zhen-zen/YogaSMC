@@ -616,7 +616,7 @@ OSDictionary* MOF::parse_class(uint32_t *buf) {
 *   |                               |                               |
 *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 */
-OSObject* MOF::parse_bmf(char * bmf_guid_string) {
+OSObject* MOF::parse_bmf(const char * bmf_guid_string) {
     parsed = true;
     indent = 0;
 

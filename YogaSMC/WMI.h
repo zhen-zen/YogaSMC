@@ -72,13 +72,13 @@ public:
 
 private:
     inline const char *getName() {return mDevice->getName();}
-    bool extractData();
-    bool extractBMF();
-    void parseWDGEntry(struct WMI_DATA * block);
-    
     OSDictionary* getMethod(const char * guid, UInt8 flg = 0);
-    
-    char * bmf_guid_string {nullptr};
+
+    bool extractData();
+    void parseWDGEntry(struct WMI_DATA * block);
+
+    bool extractBMF(struct WMI_DATA* block);
+    bool foundBMF {false};
 };
 
 
