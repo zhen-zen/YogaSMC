@@ -42,6 +42,7 @@
                 <outlet property="vHideMenubarIcon" destination="E2f-lv-n7y" id="WAb-o1-YJk"/>
                 <outlet property="vMenubarIcon" destination="MLd-yL-06X" id="scx-xB-ii6"/>
                 <outlet property="vMfgDate" destination="q5f-L2-yxr" id="WcY-ib-6kM"/>
+                <outlet property="vMuteLEDFixup" destination="zvb-gN-ODn" id="ULa-0R-0Z1"/>
                 <outlet property="vPowerLEDSlider" destination="waU-W1-TYS" id="7Wx-IJ-18g"/>
                 <outlet property="vRapidChargeMode" destination="QxV-Zx-1xy" id="QQp-dH-Dad"/>
                 <outlet property="vSecondFan" destination="fz3-OS-Dwq" id="pge-jF-NeS"/>
@@ -985,6 +986,17 @@
                                             </buttonCell>
                                             <connections>
                                                 <action selector="vDisableFanSet:" target="-2" id="ruN-p3-7A8"/>
+                                            </connections>
+                                        </button>
+                                        <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zvb-gN-ODn">
+                                            <rect key="frame" x="493" y="172" width="114" height="18"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <buttonCell key="cell" type="check" title="MuteLEDFixup" bezelStyle="regularSquare" imagePosition="left" inset="2" id="zCQ-pz-fBF">
+                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                            <connections>
+                                                <action selector="vMuteLEDFixupSet:" target="-2" id="5eP-un-Lrs"/>
                                             </connections>
                                         </button>
                                     </subviews>

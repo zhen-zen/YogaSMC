@@ -40,6 +40,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
     }
 
+    @objc func thinkMuteLEDFixup() {
+        muteLEDHelper(conf.service, false)
+    }
+
     // MARK: - Menu
 
     @IBAction func openAboutPanel(_ sender: NSMenuItem) {
@@ -206,6 +210,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                         }
                     }
                     NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(thinkWakeup), name: NSWorkspace.didWakeNotification, object: nil)
+                    if defaults.bool(forKey: "ThinkMuteLEDFixup") {
+                        NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(thinkMuteLEDFixup), name: NSNotification.Name(rawValue: "com.apple.sound.settingsChangedNotification"), object: nil)
+                    }
                 case "YogaHIDD":
                     conf.events = HIDDEvents
                     isOpen = registerNotification()

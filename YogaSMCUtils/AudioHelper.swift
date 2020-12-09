@@ -146,7 +146,7 @@ func micMuteHelper(_ service: io_service_t, _ name: String) {
 func micMuteLEDHelper(_ service: io_service_t) {
     do {
         let mute = try inputMute.get().get() != 0
-        if !sendNumber("MicMuteLED", mute ? 2 : 0, service) {
+        guard sendNumber("MicMuteLED", mute ? 2 : 0, service) else {
             throw AudioPropertyError.NoProperty
         }
         os_log("Mic Mute LED updated", type: .info)
@@ -155,12 +155,18 @@ func micMuteLEDHelper(_ service: io_service_t) {
     }
 }
 
-func muteLEDHelper(_ service: io_service_t) {
+var muteLEDStatus = false
+
+func muteLEDHelper(_ service: io_service_t, _ wake: Bool = true) {
     do {
         let mute = try outputMute.get().get() != 0
-        if !sendBoolean("MuteLED", mute, service) {
+        if !wake, mute == muteLEDStatus {
+            return
+        }
+        guard sendBoolean("MuteLED", mute, service) else {
             throw AudioPropertyError.NoProperty
         }
+        muteLEDStatus = mute
         os_log("Mute LED updated", type: .info)
     } catch {
         os_log("Failed to update Mute LED", type: .error)

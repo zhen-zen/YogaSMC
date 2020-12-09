@@ -177,6 +177,11 @@ class YogaSMCPane: NSPreferencePane {
         defaults.setValue((vDisableFan.state == .on), forKey: "DisableFan")
         _ = scriptHelper(reloadAS, "Reload YogaSMCNC")
     }
+    @IBOutlet weak var vMuteLEDFixup: NSButton!
+    @IBAction func vMuteLEDFixupSet(_ sender: NSButton) {
+        defaults.setValue((vMuteLEDFixup.state == .on), forKey: "ThinkMuteLEDFixup")
+        _ = scriptHelper(reloadAS, "Reload YogaSMCNC")
+    }
     
     // Main
 
@@ -396,6 +401,7 @@ class YogaSMCPane: NSPreferencePane {
             vCustomLEDSlider.isEnabled = true
         }
         vDisableFan.state = defaults.bool(forKey: "DisableFan") ? .on : .off
+        vMuteLEDFixup.state = defaults.bool(forKey: "ThinkMuteLEDFixup") ? .on : .off
     }
 
     override func awakeFromNib() {
