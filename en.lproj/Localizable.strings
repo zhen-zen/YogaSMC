@@ -96,8 +96,6 @@
 
 // Audio
 "Mic";
-"MicMuteLED";
-"MuteLED";
 "Mute";
 "Unmute";
 

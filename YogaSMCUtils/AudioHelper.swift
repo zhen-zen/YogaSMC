@@ -138,8 +138,8 @@ func micMuteHelper(_ service: io_service_t, _ name: String) {
             showOSDRes(name, "Mute", .kMicOff)
         }
     } catch {
-        showOSDRes("MicMute", "Toggle failed", .kMic)
-        os_log("Mic Mute toggle failed!", type: .error)
+        showOSDRes("Mic", "Toggle failed", .kMic)
+        os_log("Mic toggle failed!", type: .error)
     }
 }
 

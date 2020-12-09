@@ -92,7 +92,7 @@ func showOSDRes(_ prompt: String, _ status: String, _ image: EventImage, duratio
     if alias.isEmpty {
         showOSDRaw(alias, img, duration: duration, priority: priority)
     } else {
-        let localizedString = alias + " " + NSLocalizedString(status, comment: "")
-        showOSDRaw(localizedString, img, duration: duration, priority: priority)
+        alias += " " + NSLocalizedString(status, comment: "")
+        showOSDRaw(alias, img, duration: duration, priority: priority)
     }
 }
