@@ -29,10 +29,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var fanHelper2: ThinkFanHelper?
 
     @objc func thinkWakeup() {
-        if let current = scriptHelper(getMicVolumeAS, "MicMute"),
-           sendNumber("MicMuteLED", current.int32Value == 0 ? 2 : 0, conf.service) {
+        do {
+            let vol = try inputVolume.get().get()
+            if !sendNumber("MicMuteLED", vol == 0 ? 2 : 0, conf.service) {
+                throw AudioPropertyError.NoProperty
+            }
             os_log("Mic Mute LED updated", type: .info)
-        } else {
+        } catch {
             os_log("Failed to update Mic Mute LED", type: .error)
         }
 
@@ -429,7 +432,7 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<Shar
             showOSDRes("Backlight", "\(data)", .kBacklightLow)
         }
     case .micmute:
-        micMuteHelper(conf.pointee.service, desc.name)
+        micMuteLEDHelper(conf.pointee.service, desc.name)
         return
     case .desktop:
         CoreDockSendNotification("com.apple.showdesktop.awake" as CFString, nil)
