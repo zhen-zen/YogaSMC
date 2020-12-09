@@ -29,15 +29,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var fanHelper2: ThinkFanHelper?
 
     @objc func thinkWakeup() {
-        do {
-            let vol = try inputVolume.get().get()
-            if !sendNumber("MicMuteLED", vol == 0 ? 2 : 0, conf.service) {
-                throw AudioPropertyError.NoProperty
-            }
-            os_log("Mic Mute LED updated", type: .info)
-        } catch {
-            os_log("Failed to update Mic Mute LED", type: .error)
-        }
+        micMuteLEDHelper(conf.service)
+        muteLEDHelper(conf.service)
 
         if fanHelper2 != nil {
             fanHelper2?.setFanLevel()
@@ -432,7 +425,7 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<Shar
             showOSDRes("Backlight", "\(data)", .kBacklightLow)
         }
     case .micmute:
-        micMuteLEDHelper(conf.pointee.service, desc.name)
+        micMuteHelper(conf.pointee.service, desc.name)
         return
     case .desktop:
         CoreDockSendNotification("com.apple.showdesktop.awake" as CFString, nil)

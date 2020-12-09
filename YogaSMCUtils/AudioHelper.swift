@@ -117,7 +117,7 @@ let outputVolume = AudioProperty<Float>(device: outputDevice, emptyValue: 0, pro
 let inputMute = AudioProperty<UInt32>(device: inputDevice, emptyValue: 0, prop: muteInputVolumeProp)
 let outputMute = AudioProperty<UInt32>(device: outputDevice, emptyValue: 0, prop: muteOutputVolumeProp)
 
-func micMuteLEDHelper(_ service: io_service_t, _ name: String) {
+func micMuteHelper(_ service: io_service_t, _ name: String) {
     do {
         if try inputMute.get().get() != 0 {
             if try inputVolume.get().get() == 0 {
@@ -138,21 +138,32 @@ func micMuteLEDHelper(_ service: io_service_t, _ name: String) {
             showOSDRes(name, "Mute", .kMicOff)
         }
     } catch {
-        showOSDRes("MicMuteLED", "Toggle failed", .kMic)
-        os_log("MicMuteLED toggle failed!", type: .error)
+        showOSDRes("MicMute", "Toggle failed", .kMic)
+        os_log("Mic Mute toggle failed!", type: .error)
     }
 }
 
-func muteLEDHelper(_ service: io_service_t, _ name: String) {
+func micMuteLEDHelper(_ service: io_service_t) {
     do {
-        if try outputVolume.get().get() != 0 {
-            _ = sendBoolean("MuteLED", false, service)
-        } else {
-            _ = sendBoolean("MuteLED", true, service)
+        let mute = try inputMute.get().get() != 0
+        if !sendNumber("MicMuteLED", mute ? 2 : 0, service) {
+            throw AudioPropertyError.NoProperty
         }
+        os_log("Mic Mute LED updated", type: .info)
     } catch {
-        showOSDRes("MuteLED", "Toggle failed", .kMic)
-        os_log("MuteLED toggle failed!", type: .error)
+        os_log("Failed to update Mic Mute LED", type: .error)
+    }
+}
+
+func muteLEDHelper(_ service: io_service_t) {
+    do {
+        let mute = try outputMute.get().get() != 0
+        if !sendBoolean("MuteLED", mute, service) {
+            throw AudioPropertyError.NoProperty
+        }
+        os_log("Mute LED updated", type: .info)
+    } catch {
+        os_log("Failed to update Mute LED", type: .error)
     }
 }
 
