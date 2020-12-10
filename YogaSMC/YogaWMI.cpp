@@ -38,34 +38,33 @@ void YogaWMI::checkEvent(const char *cname, UInt32 id) {
         AlwaysLog("found unknown notify id 0x%x for %s", id, cname);
 }
 
-void YogaWMI::getNotifyID(OSString *key) {
+void YogaWMI::getNotifyID(const char *key) {
     OSDictionary *item = OSDynamicCast(OSDictionary, Event->getObject(key));
     if (!item) {
-        AlwaysLog("found unparsed notify id %s", key->getCStringNoCopy());
+        AlwaysLog("found unparsed notify id %s", key);
         return;
     }
-    OSNumber *id = OSDynamicCast(OSNumber, item->getObject(kWMINotifyId));
-    if (id != nullptr) {
-        AlwaysLog("found invalid notify id %s", key->getCStringNoCopy());
+    OSNumber *num = OSDynamicCast(OSNumber, item->getObject(kWMINotifyId));
+    if (num == nullptr) {
+        AlwaysLog("found invalid notify id %s", key);
         return;
     }
-    char notify_id_string[3];
-    snprintf(notify_id_string, 3, "%2x", id->unsigned8BitValue());
-    if (strncmp(key->getCStringNoCopy(), notify_id_string, 2) != 0) {
-        AlwaysLog("notify id %s mismatch %x", key->getCStringNoCopy(), id->unsigned8BitValue());
-    }
+    UInt32 id;
+    sscanf(key, "%2x", &id);
+    if (id != num->unsigned8BitValue())
+        AlwaysLog("notify id %s mismatch %x", key, num->unsigned8BitValue());
 
     OSDictionary *mof = OSDynamicCast(OSDictionary, item->getObject("MOF"));
     if (!mof) {
-        AlwaysLog("found notify id 0x%x with no description", id->unsigned8BitValue());
+        AlwaysLog("found notify id 0x%x with no description", id);
         return;
     }
     OSString *cname = OSDynamicCast(OSString, mof->getObject("__CLASS"));
     if (!cname) {
-        AlwaysLog("found notify id 0x%x with no __CLASS", id->unsigned8BitValue());
+        AlwaysLog("found notify id 0x%x with no __CLASS", id);
         return;
     }
-    checkEvent(cname->getCStringNoCopy(), id->unsigned8BitValue());
+    checkEvent(cname->getCStringNoCopy(), id);
     // TODO: Event Enable and Disable WExx; Data Collection Enable and Disable WCxx
 }
 
@@ -87,9 +86,8 @@ bool YogaWMI::start(IOService *provider)
         OSCollectionIterator* i = OSCollectionIterator::withCollection(Event);
 
         if (i) {
-            while (OSString* key = OSDynamicCast(OSString, i->getNextObject())) {
-                getNotifyID(key);
-            }
+            while (OSString* key = OSDynamicCast(OSString, i->getNextObject()))
+                getNotifyID(key->getCStringNoCopy());
             i->release();
         }
     }

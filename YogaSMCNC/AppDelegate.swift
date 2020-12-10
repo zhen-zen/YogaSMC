@@ -30,7 +30,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @objc func thinkWakeup() {
         if let current = scriptHelper(getMicVolumeAS, "MicMute"),
-           sendNumber("MicMuteLED", current.int32Value == 0 ? 2 : 0, conf.io_service) {
+           sendNumber("MicMuteLED", current.int32Value == 0 ? 2 : 0, conf.service) {
             os_log("Mic Mute LED updated", type: .info)
         } else {
             os_log("Failed to update Mic Mute LED", type: .error)
@@ -73,6 +73,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         os_log("Timer sheduled at %s", type: .info, sender.fireDate.description(with: Locale.current))
     }
 
+    @objc func iconWakeup() {
+        setHolidayIcon(statusItem!)
+    }
+
     @objc func update () {
         DispatchQueue.main.async {
             if self.fanHelper2 != nil {
@@ -111,17 +115,17 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     // MARK: - Application
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        guard conf.io_service != 0,
-              kIOReturnSuccess == IOServiceOpen(conf.io_service, mach_task_self_, 0, &conf.connect) else {
+        guard conf.service != 0,
+              kIOReturnSuccess == IOServiceOpen(conf.service, mach_task_self_, 0, &conf.connect) else {
             os_log("Failed to connect to YogaSMC", type: .fault)
-            showOSD("Failed to connect \n to YogaSMC", duration: 2000)
+            showOSD("ConnectFail", duration: 2000)
             NSApp.terminate(nil)
             return
         }
 
         guard kIOReturnSuccess == IOConnectCallScalarMethod(conf.connect, UInt32(kYSMCUCOpen), nil, 0, nil, nil) else {
             os_log("Another instance has connected to YogaSMC", type: .error)
-            showOSD("Another instance has \n connected to YogaSMC", duration: 2000)
+            showOSD("AlreadyConnected", duration: 2000)
             NSApp.terminate(nil)
             return
         }
@@ -146,7 +150,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         if !getProerty() {
             os_log("YogaSMC unavailable", type: .error)
-            showOSD("YogaSMC unavailable", duration: 2000)
+            showOSD("YogaSMC Unavailable", duration: 2000)
             NSApp.terminate(nil)
         }
     }
@@ -163,17 +167,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func getProerty() -> Bool {
         var CFProps: Unmanaged<CFMutableDictionary>?
-        if kIOReturnSuccess == IORegistryEntryCreateCFProperties(conf.io_service, &CFProps, kCFAllocatorDefault, 0),
+        if kIOReturnSuccess == IORegistryEntryCreateCFProperties(conf.service, &CFProps, kCFAllocatorDefault, 0),
            CFProps != nil {
             if let props = CFProps?.takeRetainedValue() as NSDictionary?,
                let IOClass = props["IOClass"] as? NSString {
                 if !hide {
                     appMenu.insertItem(NSMenuItem.separator(), at: 1)
                     appMenu.insertItem(withTitle: "Class: \(IOClass)", action: nil, keyEquivalent: "", at: 2)
-                    appMenu.insertItem(withTitle: "\(props["VersionInfo"] as? NSString ?? "Unknown Version")", action: nil, keyEquivalent: "", at: 3)
+                    appMenu.insertItem(withTitle: props["VersionInfo"] as? String ?? NSLocalizedString("Unknown Version", comment: ""), action: nil, keyEquivalent: "", at: 3)
+                    NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(iconWakeup), name: NSWorkspace.didWakeNotification, object: nil)
                 }
 
-                switch getString("EC Capability", conf.io_service) {
+                switch getString("EC Capability", conf.service) {
                 case "RW":
                     ECCap = 3
                 case "RO":
@@ -191,9 +196,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                     conf.events = thinkEvents
                     isOpen = registerNotification()
                     thinkWakeup()
-                    if !hide {
+                    if !hide, !defaults.bool(forKey: "DisableFan") {
                         if ECCap == 3 {
-                            if !getBoolean("Dual fan", conf.io_service),
+                            if !getBoolean("Dual fan", conf.service),
                                defaults.bool(forKey: "SecondThinkFan") {
                                 fanHelper2 = ThinkFanHelper(appMenu, conf.connect, false, false)
                                 fanHelper2?.update(true)
@@ -201,7 +206,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                             fanHelper = ThinkFanHelper(appMenu, conf.connect, true, fanHelper2 == nil)
                             fanHelper?.update(true)
                         } else {
-                            showOSD("EC access unavailable! \n See `SSDT-ECRW.dsl`")
+                            showOSD("ECAccessUnavailable")
                         }
                     }
                     NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(thinkWakeup), name: NSWorkspace.didWakeNotification, object: nil)
@@ -210,7 +215,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                     isOpen = registerNotification()
                 default:
                     os_log("Unknown class", type: .error)
-                    showOSD("Unknown class", duration: 2000)
+                    showOSD("Unknown Class", duration: 2000)
                 }
                 if isOpen {
                     loadEvents()
@@ -223,21 +228,21 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func loadEvents() {
         if let arr = defaults.object(forKey: "Events") as? [[String: Any]] {
-            for v in arr {
-                if let id = v["id"] as? UInt32,
-                   let events = v["events"] as? [[String: Any]] {
-                    var e = conf.events[id] ?? [:]
+            for entry in arr {
+                if let eid = entry["id"] as? UInt32,
+                   let events = entry["events"] as? [[String: Any]] {
+                    var info = conf.events[eid] ?? [:]
                     for event in events {
                         if let data = event["data"] as? UInt32,
                            let name = event["name"] as? String,
                            let action = event["action"] as? String {
                             let opt = event["option"] as? String
-                            if e[data] != nil,
+                            if info[data] != nil,
                                action == "nothing",
                                (opt == "Unknown" || (opt == nil && name.hasPrefix("Event 0x"))) {
-                                os_log("Override unknown event 0x%04x : %d", type: .info, id, data)
+                                os_log("Override unknown event 0x%04x : %d", type: .info, eid, data)
                             } else {
-                                e[data] = EventDesc(
+                                info[data] = EventDesc(
                                     name,
                                     event["image"] as? String,
                                     act: EventAction(rawValue: action) ?? .nothing,
@@ -245,10 +250,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                                     opt: opt)
                             }
                         } else {
-                            os_log("Invalid event for 0x%04x!", type: .info, id)
+                            os_log("Invalid event for 0x%04x!", type: .info, eid)
                         }
                     }
-                    conf.events[id] = e
+                    conf.events[eid] = info
                 } else {
                     os_log("Invalid event!", type: .info)
                 }
@@ -260,16 +265,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     func saveEvents() {
-        var array: [[String: Any]] = []
-        for (k, v) in conf.events {
+        var arr: [[String: Any]] = []
+        for (eid, info) in conf.events {
             var events: [[String: Any]] = []
-            var dict: [String: Any] = [:]
-            dict["id"] = Int(k)
-            for (data, e) in v {
+            var entry: [String: Any] = [:]
+            entry["id"] = Int(eid)
+            for (data, desc) in info {
                 var event: [String: Any] = [:]
                 event["data"] = Int(data)
-                event["name"] = e.name
-                if let res = e.image {
+                event["name"] = desc.name
+                if let res = desc.image {
                     if let path = Bundle.main.resourcePath,
                        res.hasPrefix(path) {
                         event["image"] = res.lastPathComponent
@@ -277,17 +282,17 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                         event["image"] = res
                    }
                 }
-                event["action"] = e.action.rawValue
-                event["display"] = e.display
-                if e.option != nil {
-                    event["option"] = e.option
+                event["action"] = desc.action.rawValue
+                event["display"] = desc.display
+                if desc.option != nil {
+                    event["option"] = desc.option
                 }
                 events.append(event)
             }
-            dict["events"] = events
-            array.append(dict)
+            entry["events"] = events
+            arr.append(entry)
         }
-        defaults.setValue(array, forKey: "Events")
+        defaults.setValue(arr, forKey: "Events")
     }
 
     func loadConfig() {
@@ -295,7 +300,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             os_log("First launch", type: .info)
             defaults.setValue(false, forKey: "HideIcon")
             defaults.setValue(false, forKey: "StartAtLogin")
-            defaults.setValue("⎇", forKey: "Title")
         }
 
         hide = defaults.bool(forKey: "HideIcon")
@@ -312,12 +316,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
 
         if !Bundle.main.bundlePath.hasPrefix("/Applications") {
-            showOSD("Please move the app \n into Applications")
+            showOSD("MoveApp")
         }
 
         // Load driver settings
         if defaults.object(forKey: "AutoBacklight") != nil {
-            _ = sendNumber("AutoBacklight", defaults.integer(forKey: "AutoBacklight"), conf.io_service)
+            _ = sendNumber("AutoBacklight", defaults.integer(forKey: "AutoBacklight"), conf.service)
         }
     }
 
@@ -328,7 +332,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
 
         // Save driver settings
-        defaults.setValue(getNumber("AutoBacklight", conf.io_service), forKey: "AutoBacklight")
+        defaults.setValue(getNumber("AutoBacklight", conf.service), forKey: "AutoBacklight")
     }
 
     // MARK: - Notification
@@ -363,20 +367,19 @@ func notificationCallback(_ port: CFMachPort?, _ msg: UnsafeMutableRawPointer?, 
                 } else if let desc = events[0] {
                     eventActuator(desc, notification.data, &conf)
                 } else {
-                    let name = String(format: "Event 0x%04x:%d", notification.event, notification.data)
-                    showOSD(name)
-                    os_log("Event 0x%04x default data not found", type: .error, notification.event)
+                    let value = String(format: "0x%04x:%d", notification.event, notification.data)
+                    showOSDRaw("\(NSLocalizedString("EventVar", comment: "Event "))\(value)")
+                    os_log("Event %s default data not found", type: .error, value)
                 }
             } else {
-                let name = String(format: "Event 0x%04x:%d", notification.event, notification.data)
-                showOSD(name)
-                conf.events[notification.event] = [0: EventDesc(name, nil, opt: "Unknown")]
+                let value = String(format: "0x%04x:%d", notification.event, notification.data)
+                showOSDRaw("\(NSLocalizedString("EventVar", comment: "Event "))\(value)")
+                conf.events[notification.event] = [0: EventDesc("Event \(value)", nil, opt: "Unknown")]
                 #if DEBUG
-                os_log("Event 0x%04x:%d", type: .debug, notification.event, notification.data)
+                os_log("Event %s", type: .debug, value)
                 #endif
             }
         } else {
-            showOSD("Invalid Notification")
             os_log("Invalid notification", type: .error)
         }
     } else {
@@ -390,6 +393,14 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<Shar
         #if DEBUG
         os_log("%s: Do nothing", type: .info, desc.name)
         #endif
+        if desc.display {
+            if desc.name.hasPrefix("Event ") {
+                showOSD("\(NSLocalizedString("EventVar", comment: "Event "))\(desc.name.dropFirst("Event ".count))", desc.image)
+            } else {
+                showOSD(desc.name, desc.image)
+            }
+        }
+        return
     case .script:
         if let scpt = desc.option {
             guard scriptHelper(scpt, desc.name) != nil else { return }
@@ -398,27 +409,27 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<Shar
             return
         }
     case .airplane:
-        airplaneModeHelper()
+        airplaneModeHelper(desc.name)
         return
     case .bluetooth:
-        bluetoothHelper()
+        bluetoothHelper(desc.name)
         return
     case .bluetoothdiscoverable:
-        bluetoothDiscoverableHelper()
+        bluetoothDiscoverableHelper(desc.name)
         return
     case .backlight:
         switch data {
         case 0:
-            showOSDRes("Backlight Off", .BacklightOff)
+            showOSDRes("Backlight", "Off", .kBacklightOff)
         case 1:
-            showOSDRes("Backlight Low", .BacklightLow)
+            showOSDRes("Backlight", "Low", .kBacklightLow)
         case 2:
-            showOSDRes("Backlight High", .BacklightHigh)
+            showOSDRes("Backlight", "High", .kBacklightHigh)
         default:
-            showOSDRes("Backlight \(data)", .BacklightLow)
+            showOSDRes("Backlight", "\(data)", .kBacklightLow)
         }
     case .micmute:
-        micMuteHelper(conf.pointee.io_service)
+        micMuteHelper(conf.pointee.service, desc.name)
         return
     case .desktop:
         CoreDockSendNotification("com.apple.showdesktop.awake" as CFString, nil)
@@ -440,7 +451,7 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<Shar
             if let img = desc.image {
                 showOSD(desc.name, img)
             } else {
-                showOSDRes(desc.name, .Sleep)
+                showOSDRes(desc.name, .kSleep)
             }
             sleep(1)
         }
@@ -456,10 +467,10 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<Shar
         _ = scriptHelper(spotlightAS, desc.name)
         return
     case .thermal:
-        showOSD("Thermal: \(desc.name)")
+        showOSD(desc.name, desc.image)
         os_log("%s: thermal event", type: .info, desc.name)
     case .wireless:
-        wirelessHelper()
+        wirelessHelper(desc.name)
         return
     default:
         #if DEBUG
@@ -475,5 +486,5 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<Shar
 struct SharedConfig {
     var connect: io_connect_t = 0
     var events: [UInt32: [UInt32: EventDesc]] = [:]
-    let io_service: io_service_t = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("YogaVPC"))
+    let service: io_service_t = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("YogaVPC"))
 }

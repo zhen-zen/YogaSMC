@@ -47,7 +47,7 @@ public:
     MOF(char *data, uint32_t size, OSDictionary *mData, const char* name) : buf(data), size(size), mData(mData), wmi_name(name) {};
     MOF();
 //    OSObject* parse_bmf(uuid_t bmf_guid);
-    OSObject* parse_bmf(char * bmf_guid_string);
+    OSObject* parse_bmf(const char * bmf_guid_string);
     bool parsed;
 private:
     const char* wmi_name;

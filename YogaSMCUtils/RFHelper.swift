@@ -11,39 +11,39 @@ import IOBluetooth
 import os.log
 import CoreWLAN
 
-func bluetoothHelper() {
+func bluetoothHelper(_ name: String) {
     guard IOBluetoothPreferencesAvailable() != 0 else {
-        showOSDRes("Bluetooth Unavailable", .Bluetooth)
+        showOSDRes("Bluetooth", "Unavailable", .kBluetooth)
         os_log("Bluetooth unavailable!", type: .error)
         return
     }
     if IOBluetoothPreferenceGetControllerPowerState() != 0 {
         IOBluetoothPreferenceSetControllerPowerState(0)
-        showOSDRes("Bluetooth Off", .Bluetooth)
+        showOSDRes(name.isEmpty ? "Bluetooth" : name, "Off", .kBluetooth)
     } else {
         IOBluetoothPreferenceSetControllerPowerState(1)
-        showOSDRes("Bluetooth On", .Bluetooth)
+        showOSDRes(name.isEmpty ? "Bluetooth" : name, "On", .kBluetooth)
     }
 }
 
-func bluetoothDiscoverableHelper() {
+func bluetoothDiscoverableHelper(_ name: String) {
     guard IOBluetoothPreferencesAvailable() != 0 else {
-        showOSDRes("Bluetooth Unavailable", .Bluetooth)
+        showOSDRes("Bluetooth", "Unavailable", .kBluetooth)
         os_log("Bluetooth unavailable!", type: .error)
         return
     }
     if IOBluetoothPreferenceGetDiscoverableState() != 0 {
         IOBluetoothPreferenceSetDiscoverableState(0)
-        showOSDRes("BT Discoverable Off", .Bluetooth)
+        showOSDRes(name.isEmpty ? "BT Discoverable" : name, "Off", .kBluetooth)
     } else {
         IOBluetoothPreferenceSetDiscoverableState(1)
-        showOSDRes("BT Discoverable On", .Bluetooth)
+        showOSDRes(name.isEmpty ? "BT Discoverable" : name, "On", .kBluetooth)
     }
 }
 
-func wirelessHelper() {
+func wirelessHelper(_ name: String) {
     guard let iface = CWWiFiClient.shared().interface() else {
-        showOSDRes("Wireless Unavailable", .Wifi)
+        showOSDRes("Wireless", "Unavailable", .kWifi)
         os_log("Wireless unavailable!", type: .error)
         return
     }
@@ -51,24 +51,24 @@ func wirelessHelper() {
     do {
         try iface.setPower(status)
         if status {
-            showOSDRes("Wireless On", .Wifi)
+            showOSDRes(name, "On", .kWifi)
         } else {
-            showOSDRes("Wireless Off", .WifiOff)
+            showOSDRes(name, "Off", .kWifiOff)
         }
     } catch {
-        showOSDRes("Wireless Toggle failed", .Wifi)
+        showOSDRes("Wireless", "Toggle failed", .kWifi)
         os_log("Wireless toggle failed!", type: .error)
     }
 }
 
-func airplaneModeHelper() {
+func airplaneModeHelper(_ name: String) {
     guard IOBluetoothPreferencesAvailable() != 0 else {
-        showOSDRes("Bluetooth Unavailable", .Bluetooth)
+        showOSDRes("Bluetooth", "Unavailable", .kBluetooth)
         os_log("Bluetooth unavailable!", type: .error)
         return
     }
     guard let iface = CWWiFiClient.shared().interface() else {
-        showOSDRes("Wireless Unavailable", .Wifi)
+        showOSDRes("Wireless", "Unavailable", .kWifi)
         os_log("Wireless unavailable!", type: .error)
         return
     }
@@ -77,18 +77,18 @@ func airplaneModeHelper() {
         IOBluetoothPreferenceSetControllerPowerState(1)
         do {
             try iface.setPower(true)
-            showOSDRes("Airplane Mode Off", .Antenna)
+            showOSDRes(name, "Off", .kAntenna)
         } catch {
-            showOSDRes("Wireless Toggle failed", .Wifi)
+            showOSDRes("Wireless", "Toggle failed", .kWifi)
             os_log("Wireless toggle failed!", type: .error)
         }
     } else {
         IOBluetoothPreferenceSetControllerPowerState(0)
         do {
             try iface.setPower(false)
-            showOSDRes("Airplane Mode On", .AirplaneMode)
+            showOSDRes(name, "On", .kAirplaneMode)
         } catch {
-            showOSDRes("Wireless Toggle failed", .Wifi)
+            showOSDRes("Wireless", "Toggle failed", .kWifi)
             os_log("Wireless toggle failed!", type: .error)
         }
     }

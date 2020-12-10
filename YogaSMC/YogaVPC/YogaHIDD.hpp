@@ -40,14 +40,19 @@ static const char *intel_hid_dsm_fn_to_method[INTEL_HID_DSM_FN_MAX] = {
     "BTNE",
     "HEBC",
     "VGBS",
-    "HEBC"
+    "HEEC"
 };
 
 class YogaHIDD : public YogaVPC
 {
     typedef YogaVPC super;
     OSDeclareDefaultStructors(YogaHIDD)
-    
+
+    bool initVPC() APPLE_KEXT_OVERRIDE;
+    bool exitVPC() APPLE_KEXT_OVERRIDE;
+
+    bool initDSM();
+
     /**
      * Evaluate _DSM for specific GUID and function index.
      * @param index Function index
@@ -63,12 +68,12 @@ class YogaHIDD : public YogaVPC
     /**
      * Evaluate _DSM for specific GUID and function index.
      * @param index Function index
-     * @param value value
+     * @param value pointer to value
      * @param arg argument
      *
      * @return *kIOReturnSuccess* upon a successfull *_DSM* parse, otherwise failed when executing *evaluateObject*.
      */
-    IOReturn evaluateHIDD(intel_hid_dsm_fn_codes index, UInt64 *value, UInt64 arg=0);
+    IOReturn evaluateHIDD(intel_hid_dsm_fn_codes index, UInt64 *value, SInt64 arg=-1);
 
     /**
      *  Fn mask
@@ -86,9 +91,6 @@ class YogaHIDD : public YogaVPC
     void initButtonArray();
     
 public:
-    virtual bool start(IOService *provider) APPLE_KEXT_OVERRIDE;
-    virtual void stop(IOService *provider) APPLE_KEXT_OVERRIDE;
-
     IOReturn message(UInt32 type, IOService *provider, void *argument) APPLE_KEXT_OVERRIDE;
     IOReturn setPowerState(unsigned long powerStateOrdinal, IOService * whatDevice) APPLE_KEXT_OVERRIDE;
 };

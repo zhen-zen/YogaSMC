@@ -40,6 +40,12 @@ SMC_RESULT atomicSpKey::readAccess() {
     return SmcSuccess;
 }
 
+SMC_RESULT atomicSpDeciKelvinKey::readAccess() {
+    uint32_t value = atomic_load_explicit(currentSensor, memory_order_acquire);
+    *reinterpret_cast<uint16_t *>(data) = VirtualSMCAPI::encodeSp(SmcKeyTypeSp78, ((double)value - 2731)/10);
+    return SmcSuccess;
+}
+
 SMC_RESULT atomicFpKey::readAccess() {
     uint16_t value = atomic_load_explicit(currentSensor, memory_order_acquire);
     *reinterpret_cast<uint16_t *>(data) = VirtualSMCAPI::encodeIntFp(SmcKeyTypeFpe2, value);

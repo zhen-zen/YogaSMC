@@ -42,7 +42,7 @@ let setMicVolumeAS = "set volume input volume %d"
 
 var volume: Int32 = 50
 
-// based on https://medium.com/macoclock/everything-you-need-to-do-to-launch-an-applescript-from-appkit-on-macos-catalina-with-swift-1ba82537f7c3
+// based on https://medium.com/macoclock/1ba82537f7c3
 func scriptHelper(_ source: String, _ name: String) -> NSAppleEventDescriptor? {
     if let scpt = NSAppleScript(source: source) {
         var error: NSDictionary?
@@ -55,19 +55,19 @@ func scriptHelper(_ source: String, _ name: String) -> NSAppleEventDescriptor? {
     return nil
 }
 
-func micMuteHelper(_ io_service: io_service_t) {
-    guard let current = scriptHelper(getMicVolumeAS, "MicMute") else { return}
+func micMuteHelper(_ service: io_service_t, _ name: String) {
+    guard let current = scriptHelper(getMicVolumeAS, "MicMute") else { return }
     if current.int32Value != 0 {
         if scriptHelper(String(format: setMicVolumeAS, 0), "MicMute") != nil {
             volume = current.int32Value
-            _ = sendNumber("MicMuteLED", 2, io_service)
-            showOSDRes("Mute", .MicOff)
+            _ = sendNumber("MicMuteLED", 2, service)
+            showOSDRes(name, "Mute", .kMicOff)
         }
     } else {
         if scriptHelper(String(format: setMicVolumeAS, volume), "MicMute") != nil {
             volume = current.int32Value
-            _ = sendNumber("MicMuteLED", 0, io_service)
-            showOSDRes("Unmute", .Mic)
+            _ = sendNumber("MicMuteLED", 0, service)
+            showOSDRes(name, "Unmute", .kMic)
         }
     }
 }
@@ -78,7 +78,7 @@ func prefpaneHelper(_ identifier: String = "YogaSMCPane") {
 
     guard paneArray.count != 0 else {
         #if DEBUG
-        showOSD("Please grant access \n to Apple Event")
+        showOSD("AppleEventAccess")
         #endif
         if scriptHelper(prefpaneAS, "Prefpane") == nil {
             let alert = NSAlert()

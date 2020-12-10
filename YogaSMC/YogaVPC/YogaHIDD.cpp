@@ -9,8 +9,8 @@
 #include "YogaHIDD.hpp"
 OSDefineMetaClassAndStructors(YogaHIDD, YogaVPC);
 
-bool YogaHIDD::start(IOService *provider) {
-    if (!super::start(provider))
+bool YogaHIDD::initDSM() {
+    if (kIOReturnSuccess != vpc->validateObject("_DSM"))
         return false;
 
     OSObject *result = nullptr;
@@ -37,13 +37,18 @@ bool YogaHIDD::start(IOService *provider) {
             break;
         case 0:
             AlwaysLog("Invalid length for fn mask");
-            break;
+            return false;
     }
     DebugLog("fn_mask = 0x%llx", fn_mask);
-    setProperty("fn_mask", fn_mask, 64);
     OSSafeReleaseNULL(data);
+    return true;
+}
 
-    UInt64 mode {0};
+bool YogaHIDD::initVPC() {
+    if (!initDSM())
+        AlwaysLog("Failed to obtain valid fn mask, evaluating methods directly");
+
+    UInt64 mode = 0;
     if (kIOReturnSuccess != evaluateHIDD(INTEL_HID_DSM_HDMM_FN, &mode)) {
         AlwaysLog("Failed to read fn mode");
         return false;
@@ -59,7 +64,7 @@ bool YogaHIDD::start(IOService *provider) {
         return false;
     }
 
-    UInt64 cap {0};
+    UInt64 cap = 0;
     if ((kIOReturnSuccess == evaluateHIDD(INTEL_HID_DSM_HEBC_V2_FN, &cap) && (cap & 0x60000)) ||
         (kIOReturnSuccess == evaluateHIDD(INTEL_HID_DSM_HEBC_V1_FN, &cap) && (cap & 0x20000))) {
         DebugLog("5 button array or v2 power button is supported");
@@ -69,10 +74,11 @@ bool YogaHIDD::start(IOService *provider) {
     return true;
 }
 
-void YogaHIDD::stop(IOService *provider) {
+bool YogaHIDD::exitVPC() {
     evaluateHIDD(INTEL_HID_DSM_HDSM_FN, nullptr, false);
     if (arrayCap != 0)
         evaluateHIDD(INTEL_HID_DSM_BTNE_FN, nullptr, 1);
+    return false;
 }
 
 IOReturn YogaHIDD::message(UInt32 type, IOService *provider, void *argument) {
@@ -155,6 +161,7 @@ IOReturn YogaHIDD::message(UInt32 type, IOService *provider, void *argument) {
                             client->sendNotification(event);
                         break;
                 }
+                break;
             // Notify PWRB?
             case 0xce: // KEY_POWER DOWN
                 dispatchKeyEvent(ADB_POWER, true);
@@ -195,6 +202,7 @@ IOReturn YogaHIDD::message(UInt32 type, IOService *provider, void *argument) {
             default:
                 if (client)
                     client->sendNotification(event);
+                break;
         }
     }
     return kIOReturnSuccess;
@@ -245,38 +253,46 @@ IOReturn YogaHIDD::evaluateDSM(UInt32 index, OSObject **result, OSArray *arg, co
     return ret;
 }
 
-IOReturn YogaHIDD::evaluateHIDD(intel_hid_dsm_fn_codes index, UInt64 *value, UInt64 arg) {
+IOReturn YogaHIDD::evaluateHIDD(intel_hid_dsm_fn_codes index, UInt64 *value, SInt64 arg) {
     IOReturn ret;
     if (index <= INTEL_HID_DSM_FN_INVALID ||
         index >= INTEL_HID_DSM_FN_MAX)
         return kIOReturnUnsupported;
 
+    OSObject *obj = nullptr;
     if (fn_mask & BIT(index)) {
-        OSObject *obj = nullptr;
         OSArray *arr = nullptr;
-        if (!value) {
+        if (arg > 0) {
             arr = OSArray::withCapacity(1);
             OSNumber *val = OSNumber::withNumber(arg, 32);
+            arr->setObject(val);
             OSSafeReleaseNULL(val);
         }
         ret = evaluateDSM(index, &obj, arr);
         OSSafeReleaseNULL(arr);
-
-        if (ret == kIOReturnSuccess) {
-            if (!value)
-                return ret;
-
-            OSNumber *number = OSDynamicCast(OSNumber, obj);
-            if (number != nullptr) {
-                *value = number->unsigned64BitValue();
-                DebugLog("index %d results 0x%llx", index, *value);
-                OSSafeReleaseNULL(number);
-                return ret;
-            }
+    } else {
+        if (arg > 0) {
+            OSObject *params[] = {
+                OSNumber::withNumber(arg, 32),
+            };
+            ret = vpc->evaluateObject(intel_hid_dsm_fn_to_method[index], &obj, params, 1);
+            params[0]->release();
+        } else {
+            ret = vpc->evaluateObject(intel_hid_dsm_fn_to_method[index], &obj);
         }
-        OSSafeReleaseNULL(obj);
     }
-    ret = vpc->evaluateInteger(intel_hid_dsm_fn_to_method[index], value);
+
+    if (ret == kIOReturnSuccess && value) {
+        OSNumber *number = OSDynamicCast(OSNumber, obj);
+        if (number != nullptr) {
+            *value = number->unsigned64BitValue();
+            DebugLog("index %d results 0x%llx", index, *value);
+        } else {
+            AlwaysLog("index %d results invalid", index);
+            ret = kIOReturnInvalid;
+        }
+    }
+    OSSafeReleaseNULL(obj);
     return ret;
 }
 
