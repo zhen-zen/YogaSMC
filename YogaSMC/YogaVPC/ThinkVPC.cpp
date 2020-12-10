@@ -1092,6 +1092,9 @@ bool ThinkVPC::setSSTStatus(UInt32 value) {
     if (!LEDsupport)
         return true;
     // Replicate of _SI._SST
+    // 0x0: power
+    // 0x7: standby
+    // 0xA: thinkdot
     bool status = true;
     switch (value) {
         case 0:
