@@ -73,8 +73,8 @@ func micMuteHelper(_ service: io_service_t, _ name: String) {
 }
 
 func prefpaneHelper(_ identifier: String = "YogaSMCPane") {
-    guard let application: SystemPreferencesApplication = SBApplication(bundleIdentifier: "com.apple.systempreferences"),
-          let paneArray = application.panes?() else { return }
+    guard let prefpane: SystemPreferencesApplication = SBApplication(bundleIdentifier: "com.apple.systempreferences"),
+          let paneArray = prefpane.panes?() else { return }
 
     guard paneArray.count != 0 else {
         #if DEBUG
@@ -110,5 +110,5 @@ func prefpaneHelper(_ identifier: String = "YogaSMCPane") {
         return
     }
     _ = target?.reveal?()
-    application.activate()
+    prefpane.activate()
 }
