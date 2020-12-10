@@ -22,14 +22,11 @@ extension YogaSMCPane {
         }
     }
 
-    func updateIdeaBattery() {
-        _ = sendBoolean("Battery", true, service)
-        if let dict = getDictionary("Battery 0", service) {
-            vBatteryID.stringValue = dict["ID"] as? String ?? "Unknown"
-            vCycleCount.stringValue = dict["Cycle count"] as? String ?? "Unknown"
-            vBatteryTemperature.stringValue = dict["Temperature"] as? String ?? "Unknown"
-            vMfgDate.stringValue = dict["Manufacture date"] as? String ?? "Unknown"
-        }
+    func updateIdeaBattery(_ dict: NSDictionary) {
+        vBatteryID.stringValue = dict["ID"] as? String ?? "Unknown"
+        vCycleCount.stringValue = dict["Cycle count"] as? String ?? "Unknown"
+        vBatteryTemperature.stringValue = dict["Temperature"] as? String ?? "Unknown"
+        vMfgDate.stringValue = dict["Manufacture date"] as? String ?? "Unknown"
     }
 
     func updateIdeaCap(_ dict: NSDictionary) {
@@ -61,8 +58,6 @@ extension YogaSMCPane {
 
     func updateIdea(_ props: NSDictionary) {
         vFunctionKeyView.isHidden = false
-        updateIdeaBattery()
-
         if let val = props["PrimeKeyType"] as? NSString {
             vFnKeyRadio.title = val as String
             if let val = props["FnlockMode"] as? Bool {
@@ -88,6 +83,10 @@ extension YogaSMCPane {
             #endif
         } else {
             vRapidChargeMode.isEnabled = false
+        }
+
+        if let dict = props["Battery 0"] as? NSDictionary {
+            updateIdeaBattery(dict)
         }
 
         if let dict = props["Capability"] as? NSDictionary {

@@ -2,8 +2,8 @@
 //  ThinkSMCPane.swift
 //  YogaSMCPane
 //
-//  Created by Zhen Gong on 12/9/20.
-//  Copyright © 2020 zhen. All rights reserved.
+//  Created by Zhen on 12/9/20.
+//  Copyright © 2020 Zhen. All rights reserved.
 //
 
 import AppKit
