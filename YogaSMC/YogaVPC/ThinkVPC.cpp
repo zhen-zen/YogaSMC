@@ -962,6 +962,20 @@ void ThinkVPC::updateVPC() {
                 case TP_HKEY_EV_KEY_FN_ESC:
                     DebugLog("Fn+Esc");
                     time = 1;
+                    if (vpc->evaluateInteger("GMKS", &data) == kIOReturnSuccess) {
+                        DebugLog("GMKS 0x%x", data);
+                        OSObject *params[] = {
+                            OSNumber::withNumber(0ULL, 32)
+                        };
+                        if (vpc->evaluateInteger("GHSL", &data, params, 0) == kIOReturnSuccess) {
+                            DebugLog("GHSL 0x%x", data);
+                        } else {
+                            AlwaysLog(updateFailure, "GHSL");
+                        }
+                        params[0]->release();
+                    } else {
+                        AlwaysLog(updateFailure, "GMKS");
+                    }
                     break;
 
                 case TP_HKEY_EV_LID_STATUS_CHANGED:
