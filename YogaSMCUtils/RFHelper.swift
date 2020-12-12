@@ -11,7 +11,7 @@ import IOBluetooth
 import os.log
 import CoreWLAN
 
-func bluetoothHelper(_ name: String) {
+func bluetoothHelper(_ name: String, _ display: Bool) {
     guard IOBluetoothPreferencesAvailable() != 0 else {
         showOSDRes("Bluetooth", "Unavailable", .kBluetooth)
         os_log("Bluetooth unavailable!", type: .error)
@@ -19,14 +19,18 @@ func bluetoothHelper(_ name: String) {
     }
     if IOBluetoothPreferenceGetControllerPowerState() != 0 {
         IOBluetoothPreferenceSetControllerPowerState(0)
-        showOSDRes(name.isEmpty ? "Bluetooth" : name, "Off", .kBluetooth)
+        if display {
+            showOSDRes(name.isEmpty ? "Bluetooth" : name, "Off", .kBluetooth)
+        }
     } else {
         IOBluetoothPreferenceSetControllerPowerState(1)
-        showOSDRes(name.isEmpty ? "Bluetooth" : name, "On", .kBluetooth)
+        if display {
+            showOSDRes(name.isEmpty ? "Bluetooth" : name, "On", .kBluetooth)
+        }
     }
 }
 
-func bluetoothDiscoverableHelper(_ name: String) {
+func bluetoothDiscoverableHelper(_ name: String, _ display: Bool) {
     guard IOBluetoothPreferencesAvailable() != 0 else {
         showOSDRes("Bluetooth", "Unavailable", .kBluetooth)
         os_log("Bluetooth unavailable!", type: .error)
@@ -34,14 +38,18 @@ func bluetoothDiscoverableHelper(_ name: String) {
     }
     if IOBluetoothPreferenceGetDiscoverableState() != 0 {
         IOBluetoothPreferenceSetDiscoverableState(0)
-        showOSDRes(name.isEmpty ? "BT Discoverable" : name, "Off", .kBluetooth)
+        if display {
+            showOSDRes(name.isEmpty ? "BT Discoverable" : name, "Off", .kBluetooth)
+        }
     } else {
         IOBluetoothPreferenceSetDiscoverableState(1)
-        showOSDRes(name.isEmpty ? "BT Discoverable" : name, "On", .kBluetooth)
+        if display {
+            showOSDRes(name.isEmpty ? "BT Discoverable" : name, "On", .kBluetooth)
+        }
     }
 }
 
-func wirelessHelper(_ name: String) {
+func wirelessHelper(_ name: String, _ display: Bool) {
     guard let iface = CWWiFiClient.shared().interface() else {
         showOSDRes("Wireless", "Unavailable", .kWifi)
         os_log("Wireless unavailable!", type: .error)
@@ -50,10 +58,12 @@ func wirelessHelper(_ name: String) {
     let status = !iface.powerOn()
     do {
         try iface.setPower(status)
-        if status {
-            showOSDRes(name, "On", .kWifi)
-        } else {
-            showOSDRes(name, "Off", .kWifiOff)
+        if display {
+            if status {
+                showOSDRes(name, "On", .kWifi)
+            } else {
+                showOSDRes(name, "Off", .kWifiOff)
+            }
         }
     } catch {
         showOSDRes("Wireless", "Toggle failed", .kWifi)
@@ -61,7 +71,7 @@ func wirelessHelper(_ name: String) {
     }
 }
 
-func airplaneModeHelper(_ name: String) {
+func airplaneModeHelper(_ name: String, _ display: Bool) {
     guard IOBluetoothPreferencesAvailable() != 0 else {
         showOSDRes("Bluetooth", "Unavailable", .kBluetooth)
         os_log("Bluetooth unavailable!", type: .error)
@@ -77,7 +87,9 @@ func airplaneModeHelper(_ name: String) {
         IOBluetoothPreferenceSetControllerPowerState(1)
         do {
             try iface.setPower(true)
-            showOSDRes(name, "Off", .kAntenna)
+            if display {
+                showOSDRes(name, "Off", .kAntenna)
+            }
         } catch {
             showOSDRes("Wireless", "Toggle failed", .kWifi)
             os_log("Wireless toggle failed!", type: .error)
@@ -86,7 +98,9 @@ func airplaneModeHelper(_ name: String) {
         IOBluetoothPreferenceSetControllerPowerState(0)
         do {
             try iface.setPower(false)
-            showOSDRes(name, "On", .kAirplaneMode)
+            if display {
+                showOSDRes(name, "On", .kAirplaneMode)
+            }
         } catch {
             showOSDRes("Wireless", "Toggle failed", .kWifi)
             os_log("Wireless toggle failed!", type: .error)

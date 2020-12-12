@@ -466,19 +466,16 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<Shar
         }
     case .script:
         if let scpt = desc.option {
-            guard scriptHelper(scpt, desc.name) != nil else { return }
-            if desc.display {
-                showOSD(desc.name, desc.image)
-            }
+            _ = scriptHelper(scpt, desc.name, desc.display ? desc.image : nil)
         } else {
             os_log("%s: script not found", type: .error)
         }
     case .airplane:
-        airplaneModeHelper(desc.name)
+        airplaneModeHelper(desc.name, desc.display)
     case .bluetooth:
-        bluetoothHelper(desc.name)
+        bluetoothHelper(desc.name, desc.display)
     case .bluetoothdiscoverable:
-        bluetoothDiscoverableHelper(desc.name)
+        bluetoothDiscoverableHelper(desc.name, desc.display)
     case .backlight:
         if !desc.display { return }
         switch data {
@@ -547,7 +544,7 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<Shar
         showOSD(desc.name, desc.image)
         os_log("%s: thermal event", type: .info, desc.name)
     case .wireless:
-        wirelessHelper(desc.name)
+        wirelessHelper(desc.name, desc.display)
     default:
         #if DEBUG
         os_log("%s: Not implmented", type: .info, desc.name)
