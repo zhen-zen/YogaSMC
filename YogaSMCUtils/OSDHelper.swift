@@ -48,7 +48,7 @@ let defaultImage: NSString = "/System/Library/CoreServices/OSDUIHelper.app/Conte
 enum EventImage: String {
     case kAirplaneMode, kAntenna, kMic, kMicOff, kKeyboard, kKeyboardOff, kWifi, kWifiOff
     case kBacklightHigh, kBacklightLow, kBacklightOff
-    case kBluetooth, kCamera, kFunctionKey, kSecondDisplay, kSleep, kStar
+    case kBluetooth, kCamera, kFunctionKey, kFunctionKeyOff, kFunctionKeyOn, kSecondDisplay, kSleep, kStar
 }
 
 // from https://github.com/alin23/Lunar/blob/master/Lunar/Data/Hotkeys.swift
