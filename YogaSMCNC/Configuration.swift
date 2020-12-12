@@ -6,6 +6,7 @@
 //  Copyright © 2020 Zhen. All rights reserved.
 //
 
+import AppKit
 import Foundation
 import os.log
 
@@ -16,6 +17,7 @@ enum EventAction: String {
     case prefpane, spotlight, search, siri, sleep, micmute
     case mission, launchpad, desktop, expose
     case mirror, camera, yoga
+    case capslock, fnlock
     // Driver
     case backlight, keyboard, thermal
 }
@@ -61,6 +63,9 @@ struct EventDesc {
     }
 }
 
+let capslockOn = EventDesc("Caps Lock On", act: .capslock)
+let capslockOff = EventDesc("Caps Lock Off", act: .capslock)
+
 let ideaEvents: [UInt32: [UInt32: EventDesc]] = [
     0x00: [0: EventDesc("Special Button", display: false),
             0x40: EventDesc("Fn-Q Cooling", act: .thermal)],
@@ -74,14 +79,16 @@ let ideaEvents: [UInt32: [UInt32: EventDesc]] = [
     0x07: [0: EventDesc("Camera", .kCamera, act: .camera)],
     0x08: [0: EventDesc("Mic Mute", act: .micmute, display: false)],
     0x0A: [0: EventDesc("TouchPad On", display: false)],
-    0x0D: [0: EventDesc("Airplane Mode", act: .airplane)],
+    0x0D: [0: EventDesc("Airplane Mode", act: .airplane),
+           UInt32(NSEvent.ModifierFlags.control.rawValue) : EventDesc("Bluetooth", act: .bluetooth),
+           UInt32(NSEvent.ModifierFlags.option.rawValue) : EventDesc("BT Discoverable", act: .bluetoothdiscoverable),
+           UInt32(NSEvent.ModifierFlags.command.rawValue) : EventDesc("Wireless", act: .wireless)],
     0x10: [0: EventDesc("Yoga Mode", act: .yoga),
             1: EventDesc("Laptop Mode"),
             2: EventDesc("Tablet Mode"),
             3: EventDesc("Stand Mode"),
             4: EventDesc("Tent Mode")],
-    0x11: [0: EventDesc("FnKey Disabled", .kFunctionKeyOff),
-            1: EventDesc("FnKey Enabled", .kFunctionKeyOn)]
+    0x11: [0: EventDesc("FnLock", act: .fnlock)]
 ]
 
 let thinkEvents: [UInt32: [UInt32: EventDesc]] = [
@@ -98,8 +105,7 @@ let thinkEvents: [UInt32: [UInt32: EventDesc]] = [
     TP_HKEY_EV_APPS.rawValue: [0: EventDesc("Launchpad", act: .launchpad, display: false)], // 0x1020
     TP_HKEY_EV_STAR.rawValue: [0: EventDesc("Custom Hotkey", .kStar, act: .script, opt: prefpaneAS)], // 0x1311
     TP_HKEY_EV_BLUETOOTH.rawValue: [0: EventDesc("Bluetooth", act: .bluetooth)], // 0x1314
-    TP_HKEY_EV_KEYBOARD.rawValue: [0: EventDesc("Keyboard Disabled", .kKeyboardOff),
-                                    1: EventDesc("Keyboard Enabled", .kKeyboard)], // 0x1315
+    TP_HKEY_EV_KEYBOARD.rawValue: [0: EventDesc("Keyboard Toggle", act: .keyboard)], // 0x1315
     TP_HKEY_EV_LID_CLOSE.rawValue: [0: EventDesc("LID Close", display: false)], // 0x5001
     TP_HKEY_EV_LID_OPEN.rawValue: [0: EventDesc("LID Open", display: false)], // 0x5002
     TP_HKEY_EV_THM_TABLE_CHANGED.rawValue: [0: EventDesc("Thermal Table Change", display: false)], // 0x6030
