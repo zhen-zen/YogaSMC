@@ -8,9 +8,9 @@ YogaSMC Changelog
 - NC: support localization
 - ThinkVPC: check LED availability
 - NC: support hideText for actions with customized OSD
-- Build: replace deprecated ARCHS with ONLY_ACTIVE_ARCH
+- Build: switch ARCHS to x86_64
 - ThinkVPC: support yoga mode detection
-- NC, Pane: support DisableFan
+- NC: support DisableFan option
 - YogaHIDD: fix support for devices without `_DSM`
 - YogaVPC: validate clamshellCap and updateBacklight support
 - YogaWMI: fix getNotifyID
@@ -18,6 +18,10 @@ YogaSMC Changelog
 - NC: hide selected text which status is revealed by image
 - YogaVPC: notify timestamp for key press
 - NC: fix easter egg and enable it by default
+- YogaWMI: evaluate all possible BMF names
+- YogaSMC: support atomicSpDeciKelvinKey
+- Docs: merge SSDT samples for ThinkSMC; add suggestions for LNUX
+- Pane: separate different views and update when reopen
 
 #### v1.3.0
 - Pane: fix loading prior to 10.14.4 with embedded swift runtime, thx @Charlyo

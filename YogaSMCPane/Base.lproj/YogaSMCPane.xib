@@ -9,16 +9,15 @@
         <customObject id="-2" userLabel="File's Owner" customClass="YogaSMCPane" customModule="YogaSMCPane" customModuleProvider="target">
             <connections>
                 <outlet property="DYTCSlider" destination="H87-Ly-sql" id="haV-1t-2Re"/>
-                <outlet property="FunctionKey" destination="JLD-MO-T8u" id="nUe-Rm-u3h"/>
-                <outlet property="IdeaViewItem" destination="GmU-Sc-yjc" id="MJK-Vb-NCw"/>
-                <outlet property="TabView" destination="Fe4-fM-T79" id="zQh-TM-B9f"/>
-                <outlet property="ThinkViewItem" destination="eaw-hp-JIE" id="sTD-qn-Tzl"/>
                 <outlet property="_window" destination="F0z-JX-Cv5" id="gIp-Ho-8D9"/>
                 <outlet property="autoSleepCheck" destination="lHz-fM-CAF" id="QT6-Rq-Xiu"/>
                 <outlet property="backlightSlider" destination="GDa-7X-UOO" id="YgO-45-nNU"/>
+                <outlet property="ideaViewItem" destination="GmU-Sc-yjc" id="MJK-Vb-NCw"/>
                 <outlet property="indicatorCheck" destination="rQA-kz-210" id="VEU-W3-JH1"/>
+                <outlet property="mainTabView" destination="Fe4-fM-T79" id="zQh-TM-B9f"/>
                 <outlet property="micMuteCheck" destination="n3n-Iq-zXz" id="3nc-LL-fQj"/>
                 <outlet property="muteCheck" destination="EC3-Nq-KoI" id="1Fz-Wd-7AT"/>
+                <outlet property="thinkViewItem" destination="eaw-hp-JIE" id="sTD-qn-Tzl"/>
                 <outlet property="vBatteryID" destination="rTr-ll-Qx5" id="4nM-zK-e5s"/>
                 <outlet property="vBatteryTemperature" destination="0xn-Ly-yhc" id="PvZ-fF-JYH"/>
                 <outlet property="vBluetooth" destination="BZO-y6-Hbq" id="Ldm-X4-PdI"/>
@@ -37,6 +36,7 @@
                 <outlet property="vFanSpeed" destination="uDk-6Z-gTN" id="2iO-3w-kaE"/>
                 <outlet property="vFanStop" destination="IDX-pC-nEt" id="Wby-GI-i2A"/>
                 <outlet property="vFnKeyRadio" destination="So0-Nv-cHB" id="SOX-xb-H38"/>
+                <outlet property="vFunctionKeyView" destination="JLD-MO-T8u" id="nUe-Rm-u3h"/>
                 <outlet property="vFxKeyRadio" destination="TKw-8Y-61F" id="GaD-1g-5iH"/>
                 <outlet property="vGraphics" destination="sb9-CF-7V3" id="doH-V8-XzT"/>
                 <outlet property="vHideMenubarIcon" destination="E2f-lv-n7y" id="WAb-o1-YJk"/>

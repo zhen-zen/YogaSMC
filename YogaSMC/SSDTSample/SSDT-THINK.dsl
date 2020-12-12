@@ -9,13 +9,26 @@ DefinitionBlock ("", "SSDT", 2, "hack", "Think", 0x00000000)
     External (_SB.PCI0.LPCB.EC.HFNI, FieldUnitObj)    // Fan control register
     External (_SB.PCI0.LPCB.EC.VRST, FieldUnitObj)    // Second fan switch register
     External (_SI._SST, MethodObj)    // Indicator
+    External (LNUX, IntObj)    // Variable set with "Linux" or "FreeBSD"
+    External (WNTF, IntObj)    // Variable set with "Windows 2001" or "Microsoft Windows NT"
+
+    Scope (\)
+    {
+        If (_OSI ("Darwin"))
+        {
+            // Initialze mute button mode like Linux.
+            LNUX = 0x01
+            // Enable DYTC thermal-management on newer Thinkpads. Please check \_SB.PCI0.LPCB.EC.HKEY.DYTC()
+            WNTF = 0x01
+        }
+    }
 
     /*
      * Optional: Route to customized LED pattern or origin _SI._SST if differ from built in pattern.
      */
     Scope (\_SB.PCI0.LPCB.EC.HKEY)
     {
-        // Used as a proxy-method to interface with \_SI._SST in YogaSMC
+        // Proxy-method to interface with \_SI._SST in YogaSMC
         Method (CSSI, 1, NotSerialized)
         {
             \_SI._SST (Arg0)
@@ -59,7 +72,7 @@ DefinitionBlock ("", "SSDT", 2, "hack", "Think", 0x00000000)
     }
 
     /*
-     * Optional: Write access to fan control register
+     * Deprecated: Write access to fan control register
      */
     Scope (\_SB.PCI0.LPCB.EC.HKEY)
     {

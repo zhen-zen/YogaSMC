@@ -22,6 +22,8 @@
 		6F0A987E25343359002F9F65 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6F0A987D25343359002F9F65 /* Assets.xcassets */; };
 		6F0A988125343359002F9F65 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6F0A987F25343359002F9F65 /* Main.storyboard */; };
 		6F14956F2580BF7200A3BA83 /* AudioHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F14956E2580BF7200A3BA83 /* AudioHelper.swift */; };
+		6F1495D32582000500A3BA83 /* IdeaSMCPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F1495D22582000500A3BA83 /* IdeaSMCPane.swift */; };
+		6F1495DF258200DA00A3BA83 /* ThinkSMCPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F1495DE258200DA00A3BA83 /* ThinkSMCPane.swift */; };
 		6F1C7093251473BB007D1DFC /* YogaSMCPane.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 6F1C7092251473BB007D1DFC /* YogaSMCPane.tiff */; };
 		6F1C7096251473BB007D1DFC /* YogaSMCPane.xib in Resources */ = {isa = PBXBuildFile; fileRef = 6F1C7094251473BB007D1DFC /* YogaSMCPane.xib */; };
 		6F1C70A0251473CD007D1DFC /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F1C709F251473CD007D1DFC /* IOKit.framework */; };
@@ -30,6 +32,8 @@
 		6F1C70A725147410007D1DFC /* YogaSMCPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F1C70A625147410007D1DFC /* YogaSMCPane.swift */; };
 		6F1C70B2251475BA007D1DFC /* PreferencePanes.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F1C70B1251475BA007D1DFC /* PreferencePanes.framework */; };
 		6F2D45CC24C9494B00A75751 /* LICENSE in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6F2D45CB24C9494B00A75751 /* LICENSE */; };
+		6F3DA56F2584968A00A498C9 /* FunctionKeyOff.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 6F3DA56D2584968A00A498C9 /* FunctionKeyOff.pdf */; };
+		6F3DA5702584968A00A498C9 /* FunctionKeyOn.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 6F3DA56E2584968A00A498C9 /* FunctionKeyOn.pdf */; };
 		6F48676324A293A0003AD4CA /* IdeaWMI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F48676124A293A0003AD4CA /* IdeaWMI.cpp */; };
 		6F48676424A293A0003AD4CA /* IdeaWMI.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F48676224A293A0003AD4CA /* IdeaWMI.hpp */; };
 		6F53F8382564C51F00CC4140 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 6F53F83A2564C51F00CC4140 /* Localizable.strings */; };
@@ -199,6 +203,8 @@
 		6F0A988025343359002F9F65 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		6F0A988225343359002F9F65 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		6F14956E2580BF7200A3BA83 /* AudioHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioHelper.swift; sourceTree = "<group>"; };
+		6F1495D22582000500A3BA83 /* IdeaSMCPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdeaSMCPane.swift; sourceTree = "<group>"; };
+		6F1495DE258200DA00A3BA83 /* ThinkSMCPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThinkSMCPane.swift; sourceTree = "<group>"; };
 		6F1C708C251473BB007D1DFC /* YogaSMCPane.prefPane */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = YogaSMCPane.prefPane; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F1C7092251473BB007D1DFC /* YogaSMCPane.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = YogaSMCPane.tiff; sourceTree = "<group>"; };
 		6F1C7095251473BB007D1DFC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/YogaSMCPane.xib; sourceTree = "<group>"; };
@@ -209,6 +215,8 @@
 		6F1C70A625147410007D1DFC /* YogaSMCPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YogaSMCPane.swift; sourceTree = "<group>"; };
 		6F1C70B1251475BA007D1DFC /* PreferencePanes.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PreferencePanes.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk/System/Library/Frameworks/PreferencePanes.framework; sourceTree = DEVELOPER_DIR; };
 		6F2D45CB24C9494B00A75751 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		6F3DA56D2584968A00A498C9 /* FunctionKeyOff.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = FunctionKeyOff.pdf; sourceTree = "<group>"; };
+		6F3DA56E2584968A00A498C9 /* FunctionKeyOn.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = FunctionKeyOn.pdf; sourceTree = "<group>"; };
 		6F48676124A293A0003AD4CA /* IdeaWMI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IdeaWMI.cpp; sourceTree = "<group>"; };
 		6F48676224A293A0003AD4CA /* IdeaWMI.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IdeaWMI.hpp; sourceTree = "<group>"; };
 		6F53F8392564C51F00CC4140 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -420,6 +428,8 @@
 		6F1C708D251473BB007D1DFC /* YogaSMCPane */ = {
 			isa = PBXGroup;
 			children = (
+				6F1495D22582000500A3BA83 /* IdeaSMCPane.swift */,
+				6F1495DE258200DA00A3BA83 /* ThinkSMCPane.swift */,
 				6F1C70A625147410007D1DFC /* YogaSMCPane.swift */,
 				6F1C7092251473BB007D1DFC /* YogaSMCPane.tiff */,
 				6F1C7094251473BB007D1DFC /* YogaSMCPane.xib */,
@@ -507,6 +517,8 @@
 				6F8B2321253CE59C005BEC5D /* Bluetooth.pdf */,
 				6F8B2336253CEA93005BEC5D /* Camera.pdf */,
 				6FA75307253D68C600EBE9D7 /* FunctionKey.pdf */,
+				6F3DA56D2584968A00A498C9 /* FunctionKeyOff.pdf */,
+				6F3DA56E2584968A00A498C9 /* FunctionKeyOn.pdf */,
 				6F8B230F253CE075005BEC5D /* Keyboard.pdf */,
 				6F8B2310253CE075005BEC5D /* KeyboardOff.pdf */,
 				6F8B2301253C4241005BEC5D /* Mic.pdf */,
@@ -770,8 +782,10 @@
 				6F8B2303253C4241005BEC5D /* Mic.pdf in Resources */,
 				6F861215253AF7E4008FB857 /* BacklightLow.pdf in Resources */,
 				6F8B231A253CE1F3005BEC5D /* Wifi.pdf in Resources */,
+				6F3DA5702584968A00A498C9 /* FunctionKeyOn.pdf in Resources */,
 				6F8B234A253CF029005BEC5D /* SecondDisplay.pdf in Resources */,
 				6F861216253AF7E4008FB857 /* BacklightOff.pdf in Resources */,
+				6F3DA56F2584968A00A498C9 /* FunctionKeyOff.pdf in Resources */,
 				6F53F8382564C51F00CC4140 /* Localizable.strings in Resources */,
 				6FA75308253D68C600EBE9D7 /* FunctionKey.pdf in Resources */,
 				6F861237253BD518008FB857 /* Star.pdf in Resources */,
@@ -889,6 +903,8 @@
 			files = (
 				6F8B1F2D253808DC003DD8A8 /* OSDHelper.swift in Sources */,
 				6F8B1F252538083A003DD8A8 /* PropertyHelper.swift in Sources */,
+				6F1495D32582000500A3BA83 /* IdeaSMCPane.swift in Sources */,
+				6F1495DF258200DA00A3BA83 /* ThinkSMCPane.swift in Sources */,
 				6F8AF13B254DF79100438EC8 /* ScriptHelper.swift in Sources */,
 				6F8AF141254DF89600438EC8 /* SystemPreferences.swift in Sources */,
 				6F1C70A725147410007D1DFC /* YogaSMCPane.swift in Sources */,
@@ -1089,7 +1105,6 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
-				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
 			};
