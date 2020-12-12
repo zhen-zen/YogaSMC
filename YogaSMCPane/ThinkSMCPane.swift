@@ -87,6 +87,11 @@ extension YogaSMCPane {
         _ = scriptHelper(reloadAS, "Reload YogaSMCNC")
     }
 
+    @IBAction func vMuteLEDFixupSet(_ sender: NSButton) {
+        defaults.setValue((vMuteLEDFixup.state == .on), forKey: "ThinkMuteLEDFixup")
+        _ = scriptHelper(reloadAS, "Reload YogaSMCNC")
+    }
+
     func updateThinkBattery() -> Bool {
         _ = sendNumber("Battery", thinkBatteryNumber, service)
         if let dict = getDictionary(thinkBatteryName[thinkBatteryNumber], service),
@@ -140,5 +145,6 @@ extension YogaSMCPane {
             vCustomLEDSlider.isEnabled = true
         }
         vDisableFan.state = defaults.bool(forKey: "DisableFan") ? .on : .off
+        vMuteLEDFixup.state = defaults.bool(forKey: "ThinkMuteLEDFixup") ? .on : .off
     }
 }
