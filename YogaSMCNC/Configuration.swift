@@ -27,16 +27,16 @@ struct EventDesc {
     let display: Bool
     let option: String?
 
-    init(_ name: String, _ image: String? = nil, act: EventAction = .nothing, display: Bool = true, opt: String? = nil) {
+    init(_ name: String, _ img: String? = nil, act: EventAction = .nothing, display: Bool = true, opt: String? = nil) {
         self.name = name
-        if let img = image {
-            if img.hasPrefix("/") {
-                self.image = img as NSString
-            } else if let path = Bundle.main.path(forResource: img, ofType: nil),
-                      path.hasPrefix("/Applications") {
+        if let path = img {
+            if path.hasPrefix("/") {
                 self.image = path as NSString
+            } else if let res = Bundle.main.path(forResource: path, ofType: nil),
+                      res.hasPrefix("/Applications") {
+                self.image = res as NSString
             } else {
-                os_log("Incompatible res path: %s", type: .error, img)
+                os_log("Incompatible res path: %s", type: .error, path)
                 self.image = nil
             }
         } else {
@@ -80,8 +80,8 @@ let ideaEvents: [UInt32: [UInt32: EventDesc]] = [
             2: EventDesc("Tablet Mode"),
             3: EventDesc("Stand Mode"),
             4: EventDesc("Tent Mode")],
-    0x11: [0: EventDesc("FnKey Disabled", .kFunctionKey),
-            1: EventDesc("FnKey Enabled", .kFunctionKey)]
+    0x11: [0: EventDesc("FnKey Disabled", .kFunctionKeyOff),
+            1: EventDesc("FnKey Enabled", .kFunctionKeyOn)]
 ]
 
 let thinkEvents: [UInt32: [UInt32: EventDesc]] = [
