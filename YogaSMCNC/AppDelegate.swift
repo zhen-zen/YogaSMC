@@ -117,15 +117,41 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     // MARK: - Application
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        guard conf.service != 0,
-              kIOReturnSuccess == IOServiceOpen(conf.service, mach_task_self_, 0, &conf.connect) else {
+        var iter: io_iterator_t = 0
+
+        IOServiceGetMatchingServices(kIOMasterPortDefault, IOServiceMatching("YogaVPC"), &iter)
+
+        while let service = IOIteratorNextOptional(iter) {
+            guard let IOClass = getString("IOClass", service) else {
+                os_log("Invalid YogaVPC instance", type: .info)
+                continue
+            }
+
+            os_log("Found %s", type: .info, IOClass)
+
+            var connect: io_connect_t = 0
+
+            guard kIOReturnSuccess == IOServiceOpen(service, mach_task_self_, 0, &connect) else { continue }
+
+            conf.service = service
+
+            guard kIOReturnSuccess == IOConnectCallScalarMethod(connect, UInt32(kYSMCUCOpen), nil, 0, nil, nil) else {
+                IOServiceClose(connect)
+                continue
+            }
+
+            conf.connect = connect
+            break
+        }
+
+        guard conf.service != 0 else {
             os_log("Failed to connect to YogaSMC", type: .fault)
             showOSD("ConnectFail", duration: 2000)
             NSApp.terminate(nil)
             return
         }
 
-        guard kIOReturnSuccess == IOConnectCallScalarMethod(conf.connect, UInt32(kYSMCUCOpen), nil, 0, nil, nil) else {
+        guard conf.connect != 0 else {
             os_log("Another instance has connected to YogaSMC", type: .error)
             showOSD("AlreadyConnected", duration: 2000)
             NSApp.terminate(nil)
@@ -163,9 +189,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     func applicationWillTerminate(_ aNotification: Notification) {
         saveConfig()
         NSWorkspace.shared.notificationCenter.removeObserver(self)
-        if conf.connect != 0 {
-            IOServiceClose(conf.connect)
-        }
+        IOServiceClose(conf.connect)
     }
 
     // MARK: - Configuration
@@ -404,22 +428,24 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     // MARK: - Notification
 
     func registerNotification() -> Bool {
-        if conf.connect != 0 {
-            // fix warning per https://forums.swift.org/t/swift-5-2-pointers-and-coretext/34862
-            var portContext: CFMachPortContext = withUnsafeMutableBytes(of: &conf) { conf in
-                CFMachPortContext(version: 0, info: conf.baseAddress, retain: nil, release: nil, copyDescription: nil)
-            }
-            if let notificationPort = CFMachPortCreate(kCFAllocatorDefault, notificationCallback, &portContext, nil) {
-                if let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, notificationPort, 0) {
-                    CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .defaultMode)
-                }
-                IOConnectSetNotificationPort(conf.connect, 0, CFMachPortGetPort(notificationPort), 0)
-                return true
-            } else {
-                os_log("Failed to create mach port", type: .error)
-            }
+        // fix warning per https://forums.swift.org/t/swift-5-2-pointers-and-coretext/34862
+        var portContext: CFMachPortContext = withUnsafeMutableBytes(of: &conf) { conf in
+            CFMachPortContext(version: 0, info: conf.baseAddress, retain: nil, release: nil, copyDescription: nil)
         }
-        return false
+
+        guard let notificationPort = CFMachPortCreate(kCFAllocatorDefault, notificationCallback, &portContext, nil),
+           let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, notificationPort, 0) else {
+            os_log("Failed to create mach port", type: .error)
+            return false
+        }
+
+        CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .defaultMode)
+
+        if kIOReturnSuccess != IOConnectSetNotificationPort(conf.connect, 0, CFMachPortGetPort(notificationPort), 0) {
+            os_log("Failed to set notification port", type: .error)
+            return false
+        }
+        return true
     }
 }
 
@@ -565,5 +591,5 @@ struct SharedConfig {
     var connect: io_connect_t = 0
     var events: [UInt32: [UInt32: EventDesc]] = [:]
     var modifier = NSEvent.ModifierFlags()
-    let service: io_service_t = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("YogaVPC"))
+    var service: io_service_t = 0
 }

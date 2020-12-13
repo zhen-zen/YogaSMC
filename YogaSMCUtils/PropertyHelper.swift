@@ -8,6 +8,13 @@
 
 import Foundation
 
+// from https://github.com/LinusHenze/Fugu/blob/master/USB/IOKitUSB.swift
+// IOIteratorNext, Swift Style
+func IOIteratorNextOptional(_ iterator: io_iterator_t) -> io_service_t? {
+    let service = IOIteratorNext(iterator)
+    return service != 0 ? service : nil
+}
+
 func getBoolean(_ key: String, _ service: io_service_t) -> Bool {
     guard let rvalue = IORegistryEntryCreateCFProperty(service, key as CFString, kCFAllocatorDefault, 0),
           let val = rvalue.takeRetainedValue() as? Bool else {
