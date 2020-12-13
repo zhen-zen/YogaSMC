@@ -8,6 +8,7 @@
 
 import AppKit
 import ApplicationServices
+import Carbon
 import NotificationCenter
 import os.log
 import ServiceManagement
@@ -20,6 +21,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var statusItem: NSStatusItem?
     @IBOutlet weak var appMenu: NSMenu!
     var hide = false
+    var hideCapslock = false
     var ECCap = 0
     var fanTimer: Timer?
 
@@ -220,10 +222,68 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 if isOpen {
                     loadEvents()
                 }
+                if GetCurrentKeyModifiers() & UInt32(alphaLock) != 0 {
+                    conf.modifier.insert(.capsLock)
+                }
+                NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged, handler: flagsCallBack)
                 return true
             }
         }
         return false
+    }
+
+    func flagsCallBack(event: NSEvent) {
+//        print(event.keyCode)
+//        switch event.keyCode {
+//        case 0x36:
+//            os_log("left_option", type: .debug)
+//        case 0x37:
+//            os_log("right_option", type: .debug)
+//        case 0x39:
+//            os_log("caps_lock", type: .debug)
+//        case 0x3b:
+//            os_log("left_control", type: .debug)
+//        case 0x3d:
+//            os_log("left_command", type: .debug)
+//        case 0x3e:
+//            os_log("right_control", type: .debug)
+//        default:
+//            os_log("Unknown %x", type: .debug, event.keyCode)
+//        }
+        // 1 << 16
+        if !hideCapslock {
+            if event.modifierFlags.contains(.capsLock) {
+                if !conf.modifier.contains(.capsLock) {
+                    eventActuator(capslockOn, 1, &conf)
+                }
+            } else if conf.modifier.contains(.capsLock) {
+                eventActuator(capslockOff, 0, &conf)
+            }
+        }
+        conf.modifier = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+        // 1 << 17
+//        if conf.modifier.contains(.shift) {
+//            os_log("Shift", type: .debug)
+//            flags.remove(.shift)
+//        }
+        // 1 << 18
+//        if conf.modifier.contains(.control) {
+//            os_log("Control", type: .debug)
+//            flags.remove(.control)
+//        }
+        // 1 << 19
+//        if conf.modifier.contains(.option) {
+//            os_log("Option", type: .debug)
+//            flags.remove(.option)
+//        }
+        // 1 << 20
+//        if conf.modifier.contains(.command) {
+//            os_log("Command", type: .debug)
+//            flags.remove(.command)
+//        }
+//        if !flags.isEmpty {
+//            print(flags)
+//        }
     }
 
     func loadEvents() {
@@ -303,6 +363,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
 
         hide = defaults.bool(forKey: "HideIcon")
+        hideCapslock = defaults.bool(forKey: "HideCapsLock")
 
         if !hide {
             let login = NSMenuItem(title: "Start at Login", action: #selector(toggleStartAtLogin), keyEquivalent: "s")
@@ -362,7 +423,10 @@ func notificationCallback(_ port: CFMachPort?, _ msg: UnsafeMutableRawPointer?, 
        var conf = raw.pointee {
         if let notification = msg?.load(as: SMCNotificationMessage.self) {
             if let events = conf.events[notification.event] {
-                if let desc = events[notification.data] {
+                if !conf.modifier.isEmpty,
+                   let desc = events[notification.data | UInt32(conf.modifier.rawValue)] {
+                    eventActuator(desc, notification.data, &conf)
+                } else if let desc = events[notification.data] {
                     eventActuator(desc, notification.data, &conf)
                 } else if let desc = events[0] {
                     eventActuator(desc, notification.data, &conf)
@@ -400,24 +464,20 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<Shar
                 showOSD(desc.name, desc.image)
             }
         }
-        return
     case .script:
         if let scpt = desc.option {
-            guard scriptHelper(scpt, desc.name) != nil else { return }
+            _ = scriptHelper(scpt, desc.name, desc.display ? desc.image : nil)
         } else {
             os_log("%s: script not found", type: .error)
-            return
         }
     case .airplane:
-        airplaneModeHelper(desc.name)
-        return
+        airplaneModeHelper(desc.name, desc.display)
     case .bluetooth:
-        bluetoothHelper(desc.name)
-        return
+        bluetoothHelper(desc.name, desc.display)
     case .bluetoothdiscoverable:
-        bluetoothDiscoverableHelper(desc.name)
-        return
+        bluetoothDiscoverableHelper(desc.name, desc.display)
     case .backlight:
+        if !desc.display { return }
         switch data {
         case 0:
             showOSDRes("Backlight", "Off", .kBacklightOff)
@@ -426,26 +486,44 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<Shar
         case 2:
             showOSDRes("Backlight", "High", .kBacklightHigh)
         default:
-            showOSDRes("Backlight", "\(data)", .kBacklightLow)
+            showOSDRes("Backlight", "\(data)", .kBacklightHigh)
+        }
+    case .capslock:
+        if data == 0 {
+            showOSDRes("Caps Lock", "Off", .kBacklightOff)
+        } else {
+            showOSDRes("Caps Lock", "On", .kBacklightLow)
+        }
+    case .fnlock:
+        if !desc.display { return }
+        switch data {
+        case 0:
+            showOSDRes("FnKey", "Disabled", .kFunctionKeyOff)
+        case 1:
+            showOSDRes("FnKey", "Enabled", .kFunctionKeyOn)
+        default:
+            // reserved for media keyboard
+            showOSDRes("FnKey", "\(data)", .kFunctionKeyOn)
+        }
+    case .keyboard:
+        if !desc.display { return }
+        if data == 0 {
+            showOSDRes("Keyboard", "Disabled", .kKeyboardOff)
+        } else {
+            showOSDRes("Keyboard", "Enabled", .kKeyboard)
         }
     case .micmute:
         micMuteHelper(conf.pointee.service, desc.name)
-        return
     case .desktop:
         CoreDockSendNotification("com.apple.showdesktop.awake" as CFString, nil)
-        return
     case .expose:
         CoreDockSendNotification("com.apple.expose.front.awake" as CFString, nil)
-        return
     case .mission:
         CoreDockSendNotification("com.apple.expose.awake" as CFString, nil)
-        return
     case .launchpad:
         CoreDockSendNotification("com.apple.launchpad.toggle" as CFString, nil)
-        return
     case .prefpane:
         prefpaneHelper()
-        return
     case .sleep:
         if desc.display {
             if let img = desc.image {
@@ -456,35 +534,30 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<Shar
             sleep(1)
         }
         _ = scriptHelper(sleepAS, desc.name)
-        return
     case .search:
         _ = scriptHelper(searchAS, desc.name)
-        return
     case .siri:
         _ = scriptHelper(siriAS, desc.name)
-        return
     case .spotlight:
         _ = scriptHelper(spotlightAS, desc.name)
-        return
     case .thermal:
         showOSD(desc.name, desc.image)
         os_log("%s: thermal event", type: .info, desc.name)
     case .wireless:
-        wirelessHelper(desc.name)
-        return
+        wirelessHelper(desc.name, desc.display)
     default:
         #if DEBUG
         os_log("%s: Not implmented", type: .info, desc.name)
         #endif
-    }
-
-    if desc.display {
-        showOSD(desc.name, desc.image)
+        if desc.display {
+            showOSD(desc.name, desc.image)
+        }
     }
 }
 
 struct SharedConfig {
     var connect: io_connect_t = 0
     var events: [UInt32: [UInt32: EventDesc]] = [:]
+    var modifier = NSEvent.ModifierFlags()
     let service: io_service_t = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("YogaVPC"))
 }

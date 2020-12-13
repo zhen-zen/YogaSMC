@@ -43,11 +43,14 @@ let setMicVolumeAS = "set volume input volume %d"
 var volume: Int32 = 50
 
 // based on https://medium.com/macoclock/1ba82537f7c3
-func scriptHelper(_ source: String, _ name: String) -> NSAppleEventDescriptor? {
+func scriptHelper(_ source: String, _ name: String, _ image: NSString? = nil) -> NSAppleEventDescriptor? {
     if let scpt = NSAppleScript(source: source) {
         var error: NSDictionary?
         let ret = scpt.executeAndReturnError(&error)
         if error == nil {
+            if let img = image {
+                showOSD(name, img)
+            }
             return ret
         }
     }
