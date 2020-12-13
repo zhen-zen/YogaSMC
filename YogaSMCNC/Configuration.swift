@@ -79,21 +79,28 @@ let ideaEvents: [UInt32: [UInt32: EventDesc]] = [
     0x07: [0: EventDesc("Camera", .kCamera, act: .camera)],
     0x08: [0: EventDesc("Mic Mute", act: .micmute, display: false)],
     0x0A: [0: EventDesc("TouchPad On", display: false)],
-    0x0D: [0: EventDesc("Airplane Mode", act: .airplane),
-           UInt32(NSEvent.ModifierFlags.control.rawValue) : EventDesc("Bluetooth", act: .bluetooth),
-           UInt32(NSEvent.ModifierFlags.option.rawValue) : EventDesc("BT Discoverable", act: .bluetoothdiscoverable),
-           UInt32(NSEvent.ModifierFlags.command.rawValue) : EventDesc("Wireless", act: .wireless)],
-    0x10: [0: EventDesc("Yoga Mode", act: .yoga),
-            1: EventDesc("Laptop Mode"),
-            2: EventDesc("Tablet Mode"),
-            3: EventDesc("Stand Mode"),
-            4: EventDesc("Tent Mode")],
+    0x0D: [
+        0: EventDesc("Airplane Mode", act: .airplane),
+        UInt32(NSEvent.ModifierFlags.control.rawValue): EventDesc("Bluetooth", act: .bluetooth),
+        UInt32(NSEvent.ModifierFlags.option.rawValue): EventDesc("BT Discoverable", act: .bluetoothdiscoverable),
+        UInt32(NSEvent.ModifierFlags.command.rawValue): EventDesc("Wireless", act: .wireless)
+    ],
+    0x10: [
+        0: EventDesc("Yoga Mode", act: .yoga),
+        1: EventDesc("Laptop Mode"),
+        2: EventDesc("Tablet Mode"),
+        3: EventDesc("Stand Mode"),
+        4: EventDesc("Tent Mode")
+    ],
     0x11: [0: EventDesc("FnLock", act: .fnlock)]
 ]
 
 let thinkEvents: [UInt32: [UInt32: EventDesc]] = [
     TP_HKEY_EV_SLEEP.rawValue: [0: EventDesc("Sleep", act: .sleep, display: false)], // 0x1004
-    TP_HKEY_EV_NETWORK.rawValue: [0: EventDesc("Airplane Mode", act: .wireless)], // 0x1005
+    TP_HKEY_EV_NETWORK.rawValue: [
+        0: EventDesc("Wireless", act: .wireless),
+        UInt32(NSEvent.ModifierFlags.option.rawValue): EventDesc("Airplane Mode", act: .airplane)
+    ], // 0x1005
     TP_HKEY_EV_DISPLAY.rawValue: [0: EventDesc("Second Display", .kSecondDisplay, act: .mirror)], // 0x1007
     TP_HKEY_EV_BRGHT_UP.rawValue: [0: EventDesc("Brightness Up", display: false)], // 0x1010
     TP_HKEY_EV_BRGHT_DOWN.rawValue: [0: EventDesc("Brightness Down", display: false)], // 0x1011
@@ -104,7 +111,10 @@ let thinkEvents: [UInt32: [UInt32: EventDesc]] = [
     TP_HKEY_EV_MISSION.rawValue: [0: EventDesc("Mission Control", act: .mission, display: false)], // 0x101F
     TP_HKEY_EV_APPS.rawValue: [0: EventDesc("Launchpad", act: .launchpad, display: false)], // 0x1020
     TP_HKEY_EV_STAR.rawValue: [0: EventDesc("Custom Hotkey", .kStar, act: .script, opt: prefpaneAS)], // 0x1311
-    TP_HKEY_EV_BLUETOOTH.rawValue: [0: EventDesc("Bluetooth", act: .bluetooth)], // 0x1314
+    TP_HKEY_EV_BLUETOOTH.rawValue: [
+        0: EventDesc("Bluetooth", act: .bluetooth),
+        UInt32(NSEvent.ModifierFlags.option.rawValue): EventDesc("BT Discoverable", act: .bluetoothdiscoverable)
+    ], // 0x1314
     TP_HKEY_EV_KEYBOARD.rawValue: [0: EventDesc("Keyboard Toggle", act: .keyboard)], // 0x1315
     TP_HKEY_EV_LID_CLOSE.rawValue: [0: EventDesc("LID Close", display: false)], // 0x5001
     TP_HKEY_EV_LID_OPEN.rawValue: [0: EventDesc("LID Open", display: false)], // 0x5002
@@ -115,12 +125,14 @@ let thinkEvents: [UInt32: [UInt32: EventDesc]] = [
     TP_HKEY_EV_KEY_FN_ESC.rawValue: [0: EventDesc("FnLock", .kFunctionKey)], // 0x6060
     TP_HKEY_EV_PALM_DETECTED.rawValue: [0: EventDesc("Palm Detected", display: false)], // 0x60B0
     TP_HKEY_EV_PALM_UNDETECTED.rawValue: [0: EventDesc("Palm Undetected", display: false)], // 0x60B1
-    TP_HKEY_EV_TABLET_CHANGED.rawValue: [0: EventDesc("Yoga Mode", act: .yoga),
-                                         1: EventDesc("Laptop Mode"),
-                                         2: EventDesc("Flat Mode"),
-                                         3: EventDesc("Tablet Mode"),
-                                         4: EventDesc("Stand Mode"),
-                                         5: EventDesc("Tent Mode")], // 0x60C0
+    TP_HKEY_EV_TABLET_CHANGED.rawValue: [
+        0: EventDesc("Yoga Mode", act: .yoga),
+        1: EventDesc("Laptop Mode"),
+        2: EventDesc("Flat Mode"),
+        3: EventDesc("Tablet Mode"),
+        4: EventDesc("Stand Mode"),
+        5: EventDesc("Tent Mode")
+    ], // 0x60C0
     TP_HKEY_EV_THM_TRANSFM_CHANGED.rawValue: [0: EventDesc("Thermal Changed", display: false)] // 0x60F0
 ]
 
