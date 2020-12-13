@@ -17,6 +17,7 @@ import ServiceManagement
 class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     let defaults = UserDefaults(suiteName: "org.zhen.YogaSMC")!
     var conf = SharedConfig()
+    var IOClass = "YogaSMC"
 
     var statusItem: NSStatusItem?
     @IBOutlet weak var appMenu: NSMenu!
@@ -134,6 +135,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             guard kIOReturnSuccess == IOServiceOpen(service, mach_task_self_, 0, &connect) else { continue }
 
             conf.service = service
+            self.IOClass = IOClass
 
             guard kIOReturnSuccess == IOConnectCallScalarMethod(connect, UInt32(kYSMCUCOpen), nil, 0, nil, nil) else {
                 IOServiceClose(connect)
@@ -151,14 +153,21 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             return
         }
 
+        guard let props = getProperties(conf.service) else {
+            os_log("YogaSMC unavailable", type: .error)
+            showOSD("YogaSMC Unavailable", duration: 2000)
+            NSApp.terminate(nil)
+            return
+        }
+
         guard conf.connect != 0 else {
-            os_log("Another instance has connected to YogaSMC", type: .error)
+            os_log("Another instance has connected to %s", type: .error, IOClass)
             showOSD("AlreadyConnected", duration: 2000)
             NSApp.terminate(nil)
             return
         }
 
-        os_log("Connected to YogaSMC", type: .info)
+        os_log("Connected to %s", type: .info, IOClass)
 
         loadConfig()
 
@@ -192,7 +201,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     func getProerty(_ props: NSDictionary) {
         if !hide {
             appMenu.insertItem(NSMenuItem.separator(), at: 1)
-            let classPrompt = NSLocalizedString("Class: ", comment: "Class: ") + IOClass
+            let classPrompt = NSLocalizedString("ClassVar", comment: "Class: ") + IOClass
             let version = props["VersionInfo"] as? String ?? NSLocalizedString("Unknown Version", comment: "")
             appMenu.insertItem(withTitle: classPrompt, action: nil, keyEquivalent: "", at: 2)
             appMenu.insertItem(withTitle: version, action: nil, keyEquivalent: "", at: 3)
@@ -381,12 +390,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         hideCapslock = defaults.bool(forKey: "HideCapsLock")
 
         if !hide {
-            let login = NSMenuItem(title: "Start at Login", action: #selector(toggleStartAtLogin), keyEquivalent: "s")
+            let loginPrompt = NSLocalizedString("Start at Login", comment: "")
+            let login = NSMenuItem(title: loginPrompt, action: #selector(toggleStartAtLogin), keyEquivalent: "s")
             login.state = defaults.bool(forKey: "StartAtLogin") ? .on : .off
             appMenu.insertItem(NSMenuItem.separator(), at: 1)
             appMenu.insertItem(login, at: 2)
 
-            let pref = NSMenuItem(title: "Preferences", action: #selector(openPrefpane), keyEquivalent: "p")
+            let prefPrompt = NSLocalizedString("Preferences", comment: "")
+            let pref = NSMenuItem(title: prefPrompt, action: #selector(openPrefpane), keyEquivalent: "p")
             appMenu.insertItem(NSMenuItem.separator(), at: 3)
             appMenu.insertItem(pref, at: 4)
         }

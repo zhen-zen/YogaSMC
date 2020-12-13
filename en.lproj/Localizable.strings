@@ -15,6 +15,11 @@
 "Unknown Class";
 "MoveApp" = "Please move the app \n into Applications";
 
+// Menu
+"ClassVar" = "Class: ";
+"Preferences";
+"Start at Login";
+
 // Event name
 // Idea
 "Special Button";
@@ -34,7 +39,7 @@
 "Stand Mode";
 "Tent Mode";
 "FnKey" = "";
-"Caps Lock";
+"Caps Lock" = "";
 // Think
 "Sleep";
 "Second Display";
@@ -102,5 +107,9 @@
 "Unmute";
 
 // ThinkFan
+"Auto";
+"Main";
 "ReadFanFail" = "Read fan level failed!";
 "WriteFanFail" = "Write Fan level failed!";
+"Main: %d rpm";
+"Alt: %d rpm";
