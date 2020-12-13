@@ -67,18 +67,27 @@ let capslockOn = EventDesc("Caps Lock On", act: .capslock)
 let capslockOff = EventDesc("Caps Lock Off", act: .capslock)
 
 let ideaEvents: [UInt32: [UInt32: EventDesc]] = [
-    0x00: [0: EventDesc("Special Button", display: false),
-            0x40: EventDesc("Fn-Q Cooling", act: .thermal)],
-    0x01: [0: EventDesc("Keyboard Backlight", act: .backlight, display: false)],
-    0x02: [0: EventDesc("Screen Off"),
-            1: EventDesc("Screen On")],
+    0x00: [
+        0x00: EventDesc("Special Button", display: false),
+        0x01: EventDesc("Fn-Q Cooling", act: .thermal),
+        0x02: EventDesc("OneKey Theater", .kStar, act: .script, opt: prefpaneAS),
+        0x40: EventDesc("Fn-Q Cooling", act: .thermal)
+    ],
+    0x01: [0: EventDesc("Keyboard Backlight", act: .backlight)],
+    0x02: [
+        0: EventDesc("Screen Off"),
+        1: EventDesc("Screen On")
+    ],
     0x04: [0: EventDesc("Backlight Changed", display: false)],
-    0x05: [0: EventDesc("TouchPad Off"),
-            1: EventDesc("TouchPad On")],
+    0x05: [
+        0: EventDesc("TouchPad Off"),
+        1: EventDesc("TouchPad On")
+    ],
     0x06: [0: EventDesc("Switch Video")],
     0x07: [0: EventDesc("Camera", .kCamera, act: .camera)],
-    0x08: [0: EventDesc("Mic Mute", act: .micmute, display: false)],
+    0x08: [0: EventDesc("Mic Mute", act: .micmute)],
     0x0A: [0: EventDesc("TouchPad On", display: false)],
+    0x0C: [0: EventDesc("Keyboard Backlight")],
     0x0D: [
         0: EventDesc("Airplane Mode", act: .airplane),
         UInt32(NSEvent.ModifierFlags.control.rawValue): EventDesc("Bluetooth", act: .bluetooth),
@@ -105,7 +114,7 @@ let thinkEvents: [UInt32: [UInt32: EventDesc]] = [
     TP_HKEY_EV_BRGHT_UP.rawValue: [0: EventDesc("Brightness Up", display: false)], // 0x1010
     TP_HKEY_EV_BRGHT_DOWN.rawValue: [0: EventDesc("Brightness Down", display: false)], // 0x1011
     TP_HKEY_EV_KBD_LIGHT.rawValue: [0: EventDesc("Keyboard Backlight", act: .backlight, display: false)], // 0x1012
-    TP_HKEY_EV_MIC_MUTE.rawValue: [0: EventDesc("Mic Mute", act: .micmute, display: false)], // 0x101B
+    TP_HKEY_EV_MIC_MUTE.rawValue: [0: EventDesc("Mic Mute", act: .micmute)], // 0x101B
     TP_HKEY_EV_SETTING.rawValue: [0: EventDesc("Settings", act: .prefpane, display: false)], // 0x101D
     TP_HKEY_EV_SEARCH.rawValue: [0: EventDesc("Search", act: .siri, display: false)], // 0x101E
     TP_HKEY_EV_MISSION.rawValue: [0: EventDesc("Mission Control", act: .mission, display: false)], // 0x101F
