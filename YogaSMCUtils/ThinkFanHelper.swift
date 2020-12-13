@@ -67,7 +67,7 @@ class ThinkFanHelper {
         fullMode.target = self
         fullMode.action = #selector(buttonChanged)
 
-        let view = NSView(frame: NSRect(x: 0, y: 0, width: slider.frame.width + 20, height: slider.frame.height + 40))
+        let view = NSView(frame: NSRect(x: 0, y: 0, width: slider.frame.width + 40, height: slider.frame.height + 40))
         view.addSubview(slider)
         view.addSubview(fanReading)
         view.addSubview(autoMode)

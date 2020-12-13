@@ -17,19 +17,18 @@ import ServiceManagement
 class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     let defaults = UserDefaults(suiteName: "org.zhen.YogaSMC")!
     var conf = SharedConfig()
-//    let sharedNC = DistributedNotificationCenter.default
 
     var statusItem: NSStatusItem?
     @IBOutlet weak var appMenu: NSMenu!
     var hide = false
     var hideCapslock = false
     var ECCap = 0
-    var fanTimer: Timer?
 
     // MARK: - Think
 
     var fanHelper: ThinkFanHelper?
     var fanHelper2: ThinkFanHelper?
+    var fanTimer: Timer?
 
     @objc func thinkWakeup() {
         if let current = scriptHelper(getMicVolumeAS, "MicMute"),
@@ -146,7 +145,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 statusItem?.title = title
                 statusItem?.toolTip = defaults.string(forKey: "ToolTip")
             } else {
-                _ = Timer.scheduledTimer(timeInterval: 0, target: self, selector: #selector(midnightTimer(sender:)), userInfo: nil, repeats: true)
+                _ = Timer.scheduledTimer(timeInterval: 0, target: self, selector: #selector(midnightTimer(sender:)),
+                                         userInfo: nil, repeats: true)
+                NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(iconWakeup),
+                                                                  name: NSWorkspace.didWakeNotification, object: nil)
             }
             appMenu.delegate = self
         }
@@ -213,7 +215,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                             showOSD("ECAccessUnavailable")
                         }
                     }
-                    NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(thinkWakeup), name: NSWorkspace.didWakeNotification, object: nil)
+                    NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(thinkWakeup),
+                                                                      name: NSWorkspace.didWakeNotification, object: nil)
                 case "YogaHIDD":
                     conf.events = HIDDEvents
                     isOpen = registerNotification()

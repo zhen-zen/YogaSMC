@@ -113,7 +113,7 @@ let thinkEvents: [UInt32: [UInt32: EventDesc]] = [
     TP_HKEY_EV_DISPLAY.rawValue: [0: EventDesc("Second Display", .kSecondDisplay, act: .mirror)], // 0x1007
     TP_HKEY_EV_BRGHT_UP.rawValue: [0: EventDesc("Brightness Up", display: false)], // 0x1010
     TP_HKEY_EV_BRGHT_DOWN.rawValue: [0: EventDesc("Brightness Down", display: false)], // 0x1011
-    TP_HKEY_EV_KBD_LIGHT.rawValue: [0: EventDesc("Keyboard Backlight", act: .backlight, display: false)], // 0x1012
+    TP_HKEY_EV_KBD_LIGHT.rawValue: [0: EventDesc("Keyboard Backlight", act: .backlight)], // 0x1012
     TP_HKEY_EV_MIC_MUTE.rawValue: [0: EventDesc("Mic Mute", act: .micmute)], // 0x101B
     TP_HKEY_EV_SETTING.rawValue: [0: EventDesc("Settings", act: .prefpane, display: false)], // 0x101D
     TP_HKEY_EV_SEARCH.rawValue: [0: EventDesc("Search", act: .siri, display: false)], // 0x101E
