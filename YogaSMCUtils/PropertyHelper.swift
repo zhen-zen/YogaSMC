@@ -46,6 +46,15 @@ func getDictionary(_ key: String, _ service: io_service_t) -> NSDictionary? {
     return rvalue.takeRetainedValue() as? NSDictionary
 }
 
+func getProperties(_ service: io_service_t) -> NSDictionary? {
+    var CFProps: Unmanaged<CFMutableDictionary>?
+    guard kIOReturnSuccess == IORegistryEntryCreateCFProperties(service, &CFProps, kCFAllocatorDefault, 0),
+          CFProps != nil else {
+        return nil
+    }
+    return CFProps?.takeRetainedValue() as NSDictionary?
+}
+
 func sendBoolean(_ key: String, _ value: Bool, _ service: io_service_t) -> Bool {
     return (kIOReturnSuccess == IORegistryEntrySetCFProperty(service, key as CFString, value as CFBoolean))
 }

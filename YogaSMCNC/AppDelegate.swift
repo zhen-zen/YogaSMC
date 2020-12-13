@@ -178,12 +178,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             }
             appMenu.delegate = self
         }
-
-        if !getProerty() {
-            os_log("YogaSMC unavailable", type: .error)
-            showOSD("YogaSMC Unavailable", duration: 2000)
-            NSApp.terminate(nil)
-        }
+        getProerty(props)
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
@@ -194,71 +189,62 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     // MARK: - Configuration
 
-    func getProerty() -> Bool {
-        var CFProps: Unmanaged<CFMutableDictionary>?
-        if kIOReturnSuccess == IORegistryEntryCreateCFProperties(conf.service, &CFProps, kCFAllocatorDefault, 0),
-           CFProps != nil {
-            if let props = CFProps?.takeRetainedValue() as NSDictionary?,
-               let IOClass = props["IOClass"] as? String {
-                if !hide {
-                    appMenu.insertItem(NSMenuItem.separator(), at: 1)
-                    let classPrompt = NSLocalizedString("Class: ", comment: "Class: ") + IOClass
-                    let version = props["VersionInfo"] as? String ?? NSLocalizedString("Unknown Version", comment: "")
-                    appMenu.insertItem(withTitle: classPrompt, action: nil, keyEquivalent: "", at: 2)
-                    appMenu.insertItem(withTitle: version, action: nil, keyEquivalent: "", at: 3)
-                }
-
-                switch getString("EC Capability", conf.service) {
-                case "RW":
-                    ECCap = 3
-                case "RO":
-                    ECCap = 1
-                default:
-                    break
-                }
-
-                var isOpen = false
-                switch IOClass {
-                case "IdeaVPC":
-                    conf.events = ideaEvents
-                    isOpen = registerNotification()
-                case "ThinkVPC":
-                    conf.events = thinkEvents
-                    isOpen = registerNotification()
-                    thinkWakeup()
-                    if !hide, !defaults.bool(forKey: "DisableFan") {
-                        if ECCap == 3 {
-                            if !getBoolean("Dual fan", conf.service),
-                               defaults.bool(forKey: "SecondThinkFan") {
-                                fanHelper2 = ThinkFanHelper(appMenu, conf.connect, false, false)
-                                fanHelper2?.update(true)
-                            }
-                            fanHelper = ThinkFanHelper(appMenu, conf.connect, true, fanHelper2 == nil)
-                            fanHelper?.update(true)
-                        } else {
-                            showOSD("ECAccessUnavailable")
-                        }
-                    }
-                    NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(thinkWakeup),
-                                                                      name: NSWorkspace.didWakeNotification, object: nil)
-                case "YogaHIDD":
-                    conf.events = HIDDEvents
-                    isOpen = registerNotification()
-                default:
-                    os_log("Unknown class", type: .error)
-                    showOSD("Unknown Class", duration: 2000)
-                }
-                if isOpen {
-                    loadEvents()
-                }
-                if GetCurrentKeyModifiers() & UInt32(alphaLock) != 0 {
-                    conf.modifier.insert(.capsLock)
-                }
-                NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged, handler: flagsCallBack)
-                return true
-            }
+    func getProerty(_ props: NSDictionary) {
+        if !hide {
+            appMenu.insertItem(NSMenuItem.separator(), at: 1)
+            let classPrompt = NSLocalizedString("Class: ", comment: "Class: ") + IOClass
+            let version = props["VersionInfo"] as? String ?? NSLocalizedString("Unknown Version", comment: "")
+            appMenu.insertItem(withTitle: classPrompt, action: nil, keyEquivalent: "", at: 2)
+            appMenu.insertItem(withTitle: version, action: nil, keyEquivalent: "", at: 3)
         }
-        return false
+
+        switch getString("EC Capability", conf.service) {
+        case "RW":
+            ECCap = 3
+        case "RO":
+            ECCap = 1
+        default:
+            break
+        }
+
+        var isOpen = false
+        switch IOClass {
+        case "IdeaVPC":
+            conf.events = ideaEvents
+            isOpen = registerNotification()
+        case "ThinkVPC":
+            conf.events = thinkEvents
+            isOpen = registerNotification()
+            thinkWakeup()
+            if !hide, !defaults.bool(forKey: "DisableFan") {
+                if ECCap == 3 {
+                    if !getBoolean("Dual fan", conf.service),
+                       defaults.bool(forKey: "SecondThinkFan") {
+                        fanHelper2 = ThinkFanHelper(appMenu, conf.connect, false, false)
+                        fanHelper2?.update(true)
+                    }
+                    fanHelper = ThinkFanHelper(appMenu, conf.connect, true, fanHelper2 == nil)
+                    fanHelper?.update(true)
+                } else {
+                    showOSD("ECAccessUnavailable")
+                }
+            }
+            NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(thinkWakeup),
+                                                              name: NSWorkspace.didWakeNotification, object: nil)
+        case "YogaHIDD":
+            conf.events = HIDDEvents
+            isOpen = registerNotification()
+        default:
+            os_log("Unknown class", type: .error)
+            showOSD("Unknown Class", duration: 2000)
+        }
+        if isOpen {
+            loadEvents()
+        }
+        if GetCurrentKeyModifiers() & UInt32(alphaLock) != 0 {
+            conf.modifier.insert(.capsLock)
+        }
+        NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged, handler: flagsCallBack)
     }
 
     func flagsCallBack(event: NSEvent) {

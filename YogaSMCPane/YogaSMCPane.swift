@@ -237,10 +237,7 @@ class YogaSMCPane: NSPreferencePane {
     override func willSelect() {
         guard service != 0, sendBoolean("Update", true, service) else { return }
 
-        var CFProps: Unmanaged<CFMutableDictionary>?
-        guard kIOReturnSuccess == IORegistryEntryCreateCFProperties(service, &CFProps, kCFAllocatorDefault, 0),
-              CFProps != nil,
-              let props = CFProps?.takeRetainedValue() as NSDictionary? else {
+        guard let props = getProperties(service) else {
             os_log("Unable to acquire driver properties!", type: .fault)
             return
         }
