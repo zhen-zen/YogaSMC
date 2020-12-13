@@ -17,6 +17,7 @@ import ServiceManagement
 class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     let defaults = UserDefaults(suiteName: "org.zhen.YogaSMC")!
     var conf = SharedConfig()
+//    let sharedNC = DistributedNotificationCenter.default
 
     var statusItem: NSStatusItem?
     @IBOutlet weak var appMenu: NSMenu!
@@ -172,12 +173,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if kIOReturnSuccess == IORegistryEntryCreateCFProperties(conf.service, &CFProps, kCFAllocatorDefault, 0),
            CFProps != nil {
             if let props = CFProps?.takeRetainedValue() as NSDictionary?,
-               let IOClass = props["IOClass"] as? NSString {
+               let IOClass = props["IOClass"] as? String {
                 if !hide {
                     appMenu.insertItem(NSMenuItem.separator(), at: 1)
-                    appMenu.insertItem(withTitle: "Class: \(IOClass)", action: nil, keyEquivalent: "", at: 2)
-                    appMenu.insertItem(withTitle: props["VersionInfo"] as? String ?? NSLocalizedString("Unknown Version", comment: ""), action: nil, keyEquivalent: "", at: 3)
-                    NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(iconWakeup), name: NSWorkspace.didWakeNotification, object: nil)
+                    let classPrompt = NSLocalizedString("Class: ", comment: "Class: ") + IOClass
+                    let version = props["VersionInfo"] as? String ?? NSLocalizedString("Unknown Version", comment: "")
+                    appMenu.insertItem(withTitle: classPrompt, action: nil, keyEquivalent: "", at: 2)
+                    appMenu.insertItem(withTitle: version, action: nil, keyEquivalent: "", at: 3)
                 }
 
                 switch getString("EC Capability", conf.service) {
@@ -371,7 +373,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             appMenu.insertItem(NSMenuItem.separator(), at: 1)
             appMenu.insertItem(login, at: 2)
 
-            let pref = NSMenuItem(title: "Open YogaSMC Preferences…", action: #selector(openPrefpane), keyEquivalent: "p")
+            let pref = NSMenuItem(title: "Preferences", action: #selector(openPrefpane), keyEquivalent: "p")
             appMenu.insertItem(NSMenuItem.separator(), at: 3)
             appMenu.insertItem(pref, at: 4)
         }
@@ -459,7 +461,8 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<Shar
         #endif
         if desc.display {
             if desc.name.hasPrefix("Event ") {
-                showOSD("\(NSLocalizedString("EventVar", comment: "Event "))\(desc.name.dropFirst("Event ".count))", desc.image)
+                let prompt = NSLocalizedString("EventVar", comment: "Event ") + desc.name.dropFirst("Event ".count)
+                showOSDRaw(prompt, desc.image)
             } else {
                 showOSD(desc.name, desc.image)
             }

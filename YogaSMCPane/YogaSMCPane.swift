@@ -53,6 +53,12 @@ class YogaSMCPane: NSPreferencePane {
         _ = scriptHelper(reloadAS, "Reload YogaSMCNC")
     }
 
+    @IBAction func vClearEvents(_ sender: NSButton) {
+        _ = scriptHelper(stopAS, "Stop YogaSMCNC")
+        defaults.removeObject(forKey: "Events")
+        _ = scriptHelper(startAS, "Start YogaSMCNC")
+    }
+
     // Idea
     @IBOutlet weak var vFunctionKeyView: NSStackView!
     @IBOutlet weak var vFnKeyRadio: NSButton!

@@ -32,6 +32,8 @@ let reloadAS = """
                   tell application "YogaSMCNC" to quit
                   tell application "YogaSMCNC" to activate
                """
+let stopAS = "tell application \"YogaSMCNC\" to quit"
+let startAS = "tell application \"YogaSMCNC\" to activate"
 
 let getAudioMutedAS = "output muted of (get volume settings)"
 let setAudioMuteAS = "set volume with output muted"
