@@ -23,7 +23,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @IBOutlet weak var appMenu: NSMenu!
     var hide = false
     var hideCapslock = false
-    var ECCap = 0
 
     // MARK: - Think
 
@@ -161,7 +160,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
 
         guard conf.connect != 0 else {
-            os_log("Another instance has connected to %s", type: .error, IOClass)
+            os_log("Another instance has connected to %s", type: .fault, IOClass)
             showOSD("AlreadyConnected", duration: 2000)
             NSApp.terminate(nil)
             return
@@ -171,23 +170,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         loadConfig()
 
-        if hide {
-            os_log("Icon hidden", type: .info)
-        } else {
-            statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-            statusItem?.menu = appMenu
-            if let title = defaults.string(forKey: "Title") {
-                statusItem?.title = title
-                statusItem?.toolTip = defaults.string(forKey: "ToolTip")
-            } else {
-                _ = Timer.scheduledTimer(timeInterval: 0, target: self, selector: #selector(midnightTimer(sender:)),
-                                         userInfo: nil, repeats: true)
-                NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(iconWakeup),
-                                                                  name: NSWorkspace.didWakeNotification, object: nil)
-            }
-            appMenu.delegate = self
+        initMenu(props["VersionInfo"] as? String ?? NSLocalizedString("Unknown Version", comment: ""))
+        initNotification(props["EC Capability"] as? String)
+
+        if GetCurrentKeyModifiers() & UInt32(alphaLock) != 0 {
+            conf.modifier.insert(.capsLock)
         }
-        getProerty(props)
+        NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged, handler: flagsCallBack)
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
@@ -198,24 +187,44 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     // MARK: - Configuration
 
-    func getProerty(_ props: NSDictionary) {
-        if !hide {
-            appMenu.insertItem(NSMenuItem.separator(), at: 1)
-            let classPrompt = NSLocalizedString("ClassVar", comment: "Class: ") + IOClass
-            let version = props["VersionInfo"] as? String ?? NSLocalizedString("Unknown Version", comment: "")
-            appMenu.insertItem(withTitle: classPrompt, action: nil, keyEquivalent: "", at: 2)
-            appMenu.insertItem(withTitle: version, action: nil, keyEquivalent: "", at: 3)
+    func initMenu(_ version: String) {
+        if hide {
+            os_log("Icon hidden", type: .info)
+            return
         }
 
-        switch getString("EC Capability", conf.service) {
-        case "RW":
-            ECCap = 3
-        case "RO":
-            ECCap = 1
-        default:
-            break
+        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        statusItem?.menu = appMenu
+        if let title = defaults.string(forKey: "Title") {
+            statusItem?.title = title
+            statusItem?.toolTip = defaults.string(forKey: "ToolTip")
+        } else {
+            _ = Timer.scheduledTimer(timeInterval: 0, target: self, selector: #selector(midnightTimer(sender:)),
+                                     userInfo: nil, repeats: true)
+            NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(iconWakeup),
+                                                              name: NSWorkspace.didWakeNotification, object: nil)
         }
 
+        appMenu.delegate = self
+
+        let classPrompt = NSLocalizedString("ClassVar", comment: "Class: ") + IOClass
+        appMenu.insertItem(NSMenuItem.separator(), at: 1)
+        appMenu.insertItem(withTitle: classPrompt, action: nil, keyEquivalent: "", at: 2)
+        appMenu.insertItem(withTitle: version, action: nil, keyEquivalent: "", at: 3)
+
+        let loginPrompt = NSLocalizedString("Start at Login", comment: "")
+        let login = NSMenuItem(title: loginPrompt, action: #selector(toggleStartAtLogin), keyEquivalent: "s")
+        login.state = defaults.bool(forKey: "StartAtLogin") ? .on : .off
+        appMenu.insertItem(NSMenuItem.separator(), at: 4)
+        appMenu.insertItem(login, at: 5)
+
+        let prefPrompt = NSLocalizedString("Preferences", comment: "")
+        let pref = NSMenuItem(title: prefPrompt, action: #selector(openPrefpane), keyEquivalent: "p")
+        appMenu.insertItem(NSMenuItem.separator(), at: 6)
+        appMenu.insertItem(pref, at: 7)
+    }
+
+    func initNotification(_ ECCap: String?) {
         var isOpen = false
         switch IOClass {
         case "IdeaVPC":
@@ -226,7 +235,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             isOpen = registerNotification()
             thinkWakeup()
             if !hide, !defaults.bool(forKey: "DisableFan") {
-                if ECCap == 3 {
+                if ECCap != "RW" {
                     if !getBoolean("Dual fan", conf.service),
                        defaults.bool(forKey: "SecondThinkFan") {
                         fanHelper2 = ThinkFanHelper(appMenu, conf.connect, false, false)
@@ -243,6 +252,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         case "YogaHIDD":
             conf.events = HIDDEvents
             _ = registerNotification()
+            os_log("Skip loadEvents", type: .info)
         default:
             os_log("Unknown class", type: .error)
             showOSD("Unknown Class", duration: 2000)
@@ -250,10 +260,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if isOpen {
             loadEvents()
         }
-        if GetCurrentKeyModifiers() & UInt32(alphaLock) != 0 {
-            conf.modifier.insert(.capsLock)
-        }
-        NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged, handler: flagsCallBack)
     }
 
     func flagsCallBack(event: NSEvent) {
@@ -389,19 +395,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         hide = defaults.bool(forKey: "HideIcon")
         hideCapslock = defaults.bool(forKey: "HideCapsLock")
 
-        if !hide {
-            let loginPrompt = NSLocalizedString("Start at Login", comment: "")
-            let login = NSMenuItem(title: loginPrompt, action: #selector(toggleStartAtLogin), keyEquivalent: "s")
-            login.state = defaults.bool(forKey: "StartAtLogin") ? .on : .off
-            appMenu.insertItem(NSMenuItem.separator(), at: 1)
-            appMenu.insertItem(login, at: 2)
-
-            let prefPrompt = NSLocalizedString("Preferences", comment: "")
-            let pref = NSMenuItem(title: prefPrompt, action: #selector(openPrefpane), keyEquivalent: "p")
-            appMenu.insertItem(NSMenuItem.separator(), at: 3)
-            appMenu.insertItem(pref, at: 4)
-        }
-
         if !Bundle.main.bundlePath.hasPrefix("/Applications") {
             showOSD("MoveApp")
         }
@@ -452,8 +445,9 @@ func notificationCallback(_ port: CFMachPort?, _ msg: UnsafeMutableRawPointer?, 
        var conf = raw.pointee {
         if let notification = msg?.load(as: SMCNotificationMessage.self) {
             if let events = conf.events[notification.event] {
-                if !conf.modifier.isEmpty,
-                   let desc = events[notification.data | UInt32(conf.modifier.rawValue)] {
+                let mod = conf.modifier.subtracting(.capsLock)
+                if !mod.isEmpty,
+                   let desc = events[notification.data | UInt32(mod.rawValue)] {
                     eventActuator(desc, notification.data, &conf)
                 } else if let desc = events[notification.data] {
                     eventActuator(desc, notification.data, &conf)
