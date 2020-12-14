@@ -105,7 +105,10 @@ let ideaEvents: [UInt32: [UInt32: EventDesc]] = [
 ]
 
 let thinkEvents: [UInt32: [UInt32: EventDesc]] = [
-    TP_HKEY_EV_SLEEP.rawValue: [0: EventDesc("Sleep", act: .sleep, display: false)], // 0x1004
+    TP_HKEY_EV_SLEEP.rawValue: [
+        0: EventDesc("Sleep", act: .sleep, display: false),
+        UInt32(NSEvent.ModifierFlags.option.rawValue): EventDesc("Sleep", act: .sleep),
+    ], // 0x1004
     TP_HKEY_EV_NETWORK.rawValue: [
         0: EventDesc("Wireless", act: .wireless),
         UInt32(NSEvent.ModifierFlags.option.rawValue): EventDesc("Airplane Mode", act: .airplane)
@@ -146,8 +149,16 @@ let thinkEvents: [UInt32: [UInt32: EventDesc]] = [
 ]
 
 let HIDDEvents: [UInt32: [UInt32: EventDesc]] = [
-    0x08: [0: EventDesc("Airplane Mode", act: .airplane)],
-    0x0B: [0: EventDesc("Sleep", act: .sleep, display: false)],
+    0x08: [
+        0: EventDesc("Airplane Mode", act: .airplane),
+        UInt32(NSEvent.ModifierFlags.control.rawValue): EventDesc("Bluetooth", act: .bluetooth),
+        UInt32(NSEvent.ModifierFlags.option.rawValue): EventDesc("BT Discoverable", act: .bluetoothdiscoverable),
+        UInt32(NSEvent.ModifierFlags.command.rawValue): EventDesc("Wireless", act: .wireless)
+    ],
+    0x0B: [
+        0: EventDesc("Sleep", act: .sleep, display: false),
+        UInt32(NSEvent.ModifierFlags.option.rawValue): EventDesc("Sleep", act: .sleep),
+    ],
     0x0E: [0: EventDesc("STOPCD")],
     0xC8: [0: EventDesc("Rotate Lock")], // Down
     0xC9: [0: EventDesc("Rotate Lock", display: false)], // Up

@@ -242,7 +242,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                                                               name: NSWorkspace.didWakeNotification, object: nil)
         case "YogaHIDD":
             conf.events = HIDDEvents
-            isOpen = registerNotification()
+            _ = registerNotification()
         default:
             os_log("Unknown class", type: .error)
             showOSD("Unknown Class", duration: 2000)
@@ -414,7 +414,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func saveConfig() {
         if !conf.events.isEmpty,
-           Bundle.main.bundlePath.hasPrefix("/Applications") {
+           Bundle.main.bundlePath.hasPrefix("/Applications"),
+           IOClass != "YogaHIDD" {
             saveEvents()
         }
 
