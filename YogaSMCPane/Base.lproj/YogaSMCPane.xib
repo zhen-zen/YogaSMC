@@ -39,6 +39,7 @@
                 <outlet property="vFunctionKeyView" destination="JLD-MO-T8u" id="nUe-Rm-u3h"/>
                 <outlet property="vFxKeyRadio" destination="TKw-8Y-61F" id="GaD-1g-5iH"/>
                 <outlet property="vGraphics" destination="sb9-CF-7V3" id="doH-V8-XzT"/>
+                <outlet property="vHideCapsLock" destination="0RV-HA-nag" id="5iK-92-Qn7"/>
                 <outlet property="vHideMenubarIcon" destination="E2f-lv-n7y" id="WAb-o1-YJk"/>
                 <outlet property="vMenubarIcon" destination="MLd-yL-06X" id="scx-xB-ii6"/>
                 <outlet property="vMfgDate" destination="q5f-L2-yxr" id="WcY-ib-6kM"/>
@@ -366,6 +367,17 @@
                                             </buttonCell>
                                             <connections>
                                                 <action selector="vClearEvents:" target="-2" id="gOg-dC-MPI"/>
+                                            </connections>
+                                        </button>
+                                        <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="0RV-HA-nag">
+                                            <rect key="frame" x="15" y="165" width="121" height="18"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <buttonCell key="cell" type="check" title="Hide Caps Lock" bezelStyle="regularSquare" imagePosition="left" enabled="NO" state="on" inset="2" id="s22-X0-HDH">
+                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                            <connections>
+                                                <action selector="toggleHideCapsLock:" target="-2" id="KvD-pY-8uS"/>
                                             </connections>
                                         </button>
                                     </subviews>
