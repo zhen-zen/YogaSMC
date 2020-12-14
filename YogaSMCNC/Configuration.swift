@@ -17,9 +17,8 @@ enum EventAction: String {
     case prefpane, spotlight, search, siri, sleep, micmute
     case mission, launchpad, desktop, expose
     case mirror, camera, yoga
-    case capslock, fnlock
     // Driver
-    case backlight, keyboard, thermal
+    case backlight, fnlock, keyboard, thermal
 }
 
 struct EventDesc {
@@ -63,9 +62,6 @@ struct EventDesc {
     }
 }
 
-let capslockOn = EventDesc("Caps Lock On", act: .capslock)
-let capslockOff = EventDesc("Caps Lock Off", act: .capslock)
-
 let ideaEvents: [UInt32: [UInt32: EventDesc]] = [
     0x00: [
         0x00: EventDesc("Special Button", display: false),
@@ -107,7 +103,7 @@ let ideaEvents: [UInt32: [UInt32: EventDesc]] = [
 let thinkEvents: [UInt32: [UInt32: EventDesc]] = [
     TP_HKEY_EV_SLEEP.rawValue: [
         0: EventDesc("Sleep", act: .sleep, display: false),
-        UInt32(NSEvent.ModifierFlags.option.rawValue): EventDesc("Sleep", act: .sleep),
+        UInt32(NSEvent.ModifierFlags.option.rawValue): EventDesc("Sleep", act: .sleep)
     ], // 0x1004
     TP_HKEY_EV_NETWORK.rawValue: [
         0: EventDesc("Wireless", act: .wireless),
@@ -157,7 +153,7 @@ let HIDDEvents: [UInt32: [UInt32: EventDesc]] = [
     ],
     0x0B: [
         0: EventDesc("Sleep", act: .sleep, display: false),
-        UInt32(NSEvent.ModifierFlags.option.rawValue): EventDesc("Sleep", act: .sleep),
+        UInt32(NSEvent.ModifierFlags.option.rawValue): EventDesc("Sleep", act: .sleep)
     ],
     0x0E: [0: EventDesc("STOPCD")],
     0xC8: [0: EventDesc("Rotate Lock")], // Down

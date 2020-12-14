@@ -284,10 +284,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if !hideCapslock {
             if event.modifierFlags.contains(.capsLock) {
                 if !conf.modifier.contains(.capsLock) {
-                    eventActuator(capslockOn, 1, &conf)
+                    showOSDRes("Caps Lock", "On", .kCapslockOn)
                 }
             } else if conf.modifier.contains(.capsLock) {
-                eventActuator(capslockOff, 0, &conf)
+                showOSDRes("Caps Lock", "Off", .kCapslockOff)
             }
         }
         conf.modifier = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
@@ -511,12 +511,6 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<Shar
             showOSDRes("Backlight", "High", .kBacklightHigh)
         default:
             showOSDRes("Backlight", "\(data)", .kBacklightHigh)
-        }
-    case .capslock:
-        if data == 0 {
-            showOSDRes("Caps Lock", "Off", .kBacklightOff)
-        } else {
-            showOSDRes("Caps Lock", "On", .kBacklightLow)
         }
     case .fnlock:
         if !desc.display { return }
