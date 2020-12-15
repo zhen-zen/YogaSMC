@@ -22,6 +22,12 @@ YogaSMC Changelog
 - YogaSMC: support atomicSpDeciKelvinKey
 - Docs: merge SSDT samples for ThinkSMC; add suggestions for LNUX
 - Pane: separate different views and update when reopen
+- YogaSMC: support atomicSpDeciKelvinKey
+- NC: update resources, thx @hexart
+- NC: support multiple instance, specifically YogaHIDD
+- NC: support modifier
+- NC: support Caps Lock monitor
+- ThinkVPC: evaluate GMKS for FnLock state
 
 #### v1.3.0
 - Pane: fix loading prior to 10.14.4 with embedded swift runtime, thx @Charlyo
