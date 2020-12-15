@@ -130,7 +130,7 @@ let thinkEvents: [UInt32: [UInt32: EventDesc]] = [
     TP_HKEY_EV_THM_CSM_COMPLETED.rawValue: [0: EventDesc("Thermal Control Change", display: false)], // 0x6032
     TP_HKEY_EV_AC_CHANGED.rawValue: [0: EventDesc("AC Status Change", display: false)], // 0x6040
     TP_HKEY_EV_BACKLIGHT_CHANGED.rawValue: [0: EventDesc("Backlight Changed", display: false)], // 0x6050
-    TP_HKEY_EV_KEY_FN_ESC.rawValue: [0: EventDesc("FnLock", .kFunctionKey)], // 0x6060
+    TP_HKEY_EV_KEY_FN_ESC.rawValue: [0: EventDesc("FnLock", act: .fnlock)], // 0x6060
     TP_HKEY_EV_PALM_DETECTED.rawValue: [0: EventDesc("Palm Detected", display: false)], // 0x60B0
     TP_HKEY_EV_PALM_UNDETECTED.rawValue: [0: EventDesc("Palm Undetected", display: false)], // 0x60B1
     TP_HKEY_EV_TABLET_CHANGED.rawValue: [

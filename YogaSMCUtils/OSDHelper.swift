@@ -47,7 +47,7 @@ let defaultImage: NSString = "/System/Library/CoreServices/OSDUIHelper.app/Conte
 // Bundled resources
 enum EventImage: String {
     case kAirplaneMode, kAntenna, kMic, kMicOff, kKeyboard, kKeyboardOff, kWifi, kWifiOff
-    case kBacklightHigh, kBacklightLow, kBacklightOff
+    case kBacklightHigh, kBacklightLow, kBacklightOff, kCapslockOn, kCapslockOff
     case kBluetooth, kCamera, kFunctionKey, kFunctionKeyOff, kFunctionKeyOn, kSecondDisplay, kSleep, kStar
 }
 
