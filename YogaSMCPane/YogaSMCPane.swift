@@ -62,7 +62,6 @@ class YogaSMCPane: NSPreferencePane {
     }
 
     // Idea
-    @IBOutlet weak var vFunctionKeyView: NSStackView!
     @IBOutlet weak var vFnKeyRadio: NSButton!
     @IBOutlet weak var vFxKeyRadio: NSButton!
 

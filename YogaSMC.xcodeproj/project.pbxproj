@@ -733,7 +733,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1200;
-				LastUpgradeCheck = 1220;
+				LastUpgradeCheck = 1230;
 				ORGANIZATIONNAME = zhen;
 				TargetAttributes = {
 					6F08ACE324746B8B00681A63 = {
@@ -1055,6 +1055,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 			};
 			name = Debug;

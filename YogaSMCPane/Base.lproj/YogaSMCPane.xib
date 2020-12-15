@@ -36,7 +36,6 @@
                 <outlet property="vFanSpeed" destination="uDk-6Z-gTN" id="2iO-3w-kaE"/>
                 <outlet property="vFanStop" destination="IDX-pC-nEt" id="Wby-GI-i2A"/>
                 <outlet property="vFnKeyRadio" destination="So0-Nv-cHB" id="SOX-xb-H38"/>
-                <outlet property="vFunctionKeyView" destination="JLD-MO-T8u" id="nUe-Rm-u3h"/>
                 <outlet property="vFxKeyRadio" destination="TKw-8Y-61F" id="GaD-1g-5iH"/>
                 <outlet property="vGraphics" destination="sb9-CF-7V3" id="doH-V8-XzT"/>
                 <outlet property="vHideCapsLock" destination="0RV-HA-nag" id="5iK-92-Qn7"/>
@@ -282,7 +281,7 @@
                                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
                                         </textField>
-                                        <stackView hidden="YES" distribution="fill" orientation="vertical" alignment="leading" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" id="JLD-MO-T8u">
+                                        <stackView distribution="fill" orientation="vertical" alignment="leading" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" id="JLD-MO-T8u">
                                             <rect key="frame" x="227" y="82" width="110" height="62"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>

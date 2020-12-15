@@ -125,10 +125,13 @@ extension YogaSMCPane {
                 break
             }
         }
-        vFunctionKeyView.isHidden = false
         if let val = props["FnlockMode"] as? Bool {
             vFnKeyRadio.title = "FnKey"
-            vFnKeyRadio.state = val ? .on : .off
+            if val {
+                vFnKeyRadio.state = .on
+            } else {
+                vFxKeyRadio.state = .on
+            }
         }
         updateThinkFan()
         #if DEBUG
