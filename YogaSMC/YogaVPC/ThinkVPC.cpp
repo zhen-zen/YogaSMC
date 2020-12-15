@@ -29,6 +29,7 @@ void ThinkVPC::updateAll() {
         KBDPresent->release();
     }
     updateBattery(BAT_ANY);
+    updateFnLockStatus();
     updateMutestatus();
     updateMuteLEDStatus();
     updateMicMuteLEDStatus();
@@ -955,12 +956,7 @@ void ThinkVPC::updateVPC() {
                 case TP_HKEY_EV_KEY_FN_ESC:
                     DebugLog("Fn+Esc");
                     time = 1;
-                    if (vpc->evaluateInteger("GMKS", &data) == kIOReturnSuccess) {
-                        DebugLog("GMKS 0x%x", data);
-                        data &= 0x1;
-                    } else {
-                        AlwaysLog(updateFailure, "GMKS");
-                    }
+                    data = updateFnLockStatus();
                     break;
 
                 case TP_HKEY_EV_LID_STATUS_CHANGED:
@@ -1000,6 +996,19 @@ void ThinkVPC::updateVPC() {
         clock_get_uptime(&time);
         dispatchMessage(kPS2M_notifyKeyTime, &time);
     }
+}
+
+bool ThinkVPC::updateFnLockStatus() {
+    UInt32 result;
+
+    if (vpc->evaluateInteger("GMKS", &result) != kIOReturnSuccess) {
+        AlwaysLog(updateFailure, FnKeyPrompt);
+        return false;
+    }
+
+    DebugLog(toggleSuccess, FnKeyPrompt, result, (result & 0x1 ? "enabled" : "disabled"));
+    setProperty(FnKeyPrompt, result & 0x1);
+    return result & 0x1;
 }
 
 bool ThinkVPC::setHotkeyStatus(bool enable) {
