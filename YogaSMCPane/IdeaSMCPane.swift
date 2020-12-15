@@ -63,11 +63,10 @@ extension YogaSMCPane {
             if let val = props["FnlockMode"] as? Bool {
                 vFnKeyRadio.state = val ? .on : .off
             }
+            vFnKeyRadio.isEnabled = true
+            vFxKeyRadio.isEnabled = true
         } else {
             vFnKeyRadio.title = "Unknown"
-            vFnKeyRadio.isEnabled = false
-            vFxKeyRadio.isEnabled = false
-            vFxKeyRadio.state = .on
         }
 
         if let val = props["ConservationMode"] as? Bool {
