@@ -245,6 +245,13 @@ private:
     bool updateAdaptiveKBD(int arg);
 
     /**
+     *  Get FnLock status
+     *
+     *  @return Fnkey Status, false if false
+     */
+    bool updateFnLockStatus();
+
+    /**
      *  Set hotkey reporting status
      *
      *  @param enable enable hotkey report
