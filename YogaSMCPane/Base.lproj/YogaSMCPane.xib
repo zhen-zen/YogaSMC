@@ -328,7 +328,7 @@
                                         <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="E2f-lv-n7y">
                                             <rect key="frame" x="15" y="135" width="141" height="18"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <buttonCell key="cell" type="check" title="Hide menubar icon" bezelStyle="regularSquare" imagePosition="left" enabled="NO" state="on" inset="2" id="ZuO-ho-yyd">
+                                            <buttonCell key="cell" type="check" title="Hide menubar icon" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="ZuO-ho-yyd">
                                                 <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                 <font key="font" metaFont="system"/>
                                             </buttonCell>
@@ -371,7 +371,7 @@
                                         <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="0RV-HA-nag">
                                             <rect key="frame" x="15" y="165" width="121" height="18"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <buttonCell key="cell" type="check" title="Hide Caps Lock" bezelStyle="regularSquare" imagePosition="left" enabled="NO" state="on" inset="2" id="s22-X0-HDH">
+                                            <buttonCell key="cell" type="check" title="Hide Caps Lock" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="s22-X0-HDH">
                                                 <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                 <font key="font" metaFont="system"/>
                                             </buttonCell>

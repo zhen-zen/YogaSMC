@@ -223,16 +223,13 @@ class YogaSMCPane: NSPreferencePane {
             DYTCSlider.isHidden = true
         }
 
-        if defaults.object(forKey: "HideIcon") != nil {
-            vHideMenubarIcon.isEnabled = true
-            if defaults.bool(forKey: "HideIcon") {
-                vHideMenubarIcon.state = .on
-            } else {
-                vHideMenubarIcon.state = .off
-                vMenubarIcon.isEnabled = true
-            }
-            vMenubarIcon.stringValue = defaults.string(forKey: "Title") ?? ""
+        if defaults.bool(forKey: "HideIcon") {
+            vHideMenubarIcon.state = .on
+        } else {
+            vHideMenubarIcon.state = .off
+            vMenubarIcon.isEnabled = true
         }
+        vMenubarIcon.stringValue = defaults.string(forKey: "Title") ?? ""
 
         vHideCapsLock.state = defaults.bool(forKey: "HideCapsLock") ? .on : .off
     }

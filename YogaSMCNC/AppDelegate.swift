@@ -388,7 +388,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     func loadConfig() {
         if defaults.object(forKey: "StartAtLogin") == nil {
             os_log("First launch", type: .info)
-            defaults.setValue(false, forKey: "HideIcon")
             defaults.setValue(false, forKey: "StartAtLogin")
         }
 
