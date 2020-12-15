@@ -365,13 +365,6 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 OSNumber *value;
                 getPropertyNumber("setCMPeakShiftState");
                 setConservation(setCMPeakShiftState, value->unsigned8BitValue());
-            } else if (key->isEqualTo("GMKS")) {
-                UInt32 result;
-                ret = vpc->evaluateInteger("GMKS", &result);
-                if (ret == kIOReturnSuccess)
-                    DebugLog(updateSuccess, "GMKS", result);
-                else
-                    AlwaysLog("%s evaluation failed 0x%x", "GMKS", ret);
             } else if (key->isEqualTo("GSKL")) {
                 OSNumber *value;
                 getPropertyNumber("GSKL");
@@ -964,15 +957,7 @@ void ThinkVPC::updateVPC() {
                     time = 1;
                     if (vpc->evaluateInteger("GMKS", &data) == kIOReturnSuccess) {
                         DebugLog("GMKS 0x%x", data);
-                        OSObject *params[] = {
-                            OSNumber::withNumber(0ULL, 32)
-                        };
-                        if (vpc->evaluateInteger("GHSL", &data, params, 0) == kIOReturnSuccess) {
-                            DebugLog("GHSL 0x%x", data);
-                        } else {
-                            AlwaysLog(updateFailure, "GHSL");
-                        }
-                        params[0]->release();
+                        data &= 0x1;
                     } else {
                         AlwaysLog(updateFailure, "GMKS");
                     }
