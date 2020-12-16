@@ -17,6 +17,7 @@ class ThinkFanHelper {
     let defaults = UserDefaults(suiteName: "org.zhen.YogaSMC")!
     var enable = false
     var single: Bool
+    let fanPrompt: String
 
     let slider = NSSlider(frame: NSRect(x: 15, y: 5, width: 200, height: 30))
     let fanReading = NSTextField(frame: NSRect(x: 12, y: 30, width: 110, height: 30))
@@ -36,9 +37,8 @@ class ThinkFanHelper {
         self.main = main
         self.single = single
 
-        if menu.items[2].title == "Class: ThinkVPC" {
-            enable = true
-        }
+        enable = menu.items[2].title.hasSuffix("ThinkVPC")
+        fanPrompt = NSLocalizedString(main ? "Main: %d rpm" : "Alt: %d rpm", comment: "")
 
         slider.maxValue = 7
         slider.minValue = defaults.bool(forKey: "AllowFanStop") ? 0 : 1
@@ -52,22 +52,22 @@ class ThinkFanHelper {
         fanReading.isSelectable = false
         fanReading.isBezeled = false
         fanReading.drawsBackground = false
-        fanReading.stringValue = main ? "Main: 12345 rpm" : "Alt: 12345 rpm"
+        fanReading.stringValue = String(format: fanPrompt, 12345)
         fanReading.font = menu.font
 
-        autoMode.title = "Auto"
+        autoMode.title = NSLocalizedString("Auto", comment: "")
         autoMode.bezelStyle = .texturedRounded
         autoMode.setButtonType(.onOff)
         autoMode.target = self
         autoMode.action = #selector(buttonChanged)
 
-        fullMode.title = "Full"
+        fullMode.title = NSLocalizedString("Full", comment: "")
         fullMode.bezelStyle = .texturedRounded
         fullMode.setButtonType(.onOff)
         fullMode.target = self
         fullMode.action = #selector(buttonChanged)
 
-        let view = NSView(frame: NSRect(x: 0, y: 0, width: slider.frame.width + 20, height: slider.frame.height + 40))
+        let view = NSView(frame: NSRect(x: 0, y: 0, width: slider.frame.width + 40, height: slider.frame.height + 40))
         view.addSubview(slider)
         view.addSubview(fanReading)
         view.addSubview(autoMode)
@@ -109,7 +109,8 @@ class ThinkFanHelper {
         guard enable, switchFan(main) else { return }
 
         var input = [savedLevel]
-        if kIOReturnSuccess != IOConnectCallMethod(connect, UInt32(kYSMCUCWriteEC), &fanStatus, 1, &input, 1, nil, nil, nil, nil) {
+        if kIOReturnSuccess != IOConnectCallMethod(connect, UInt32(kYSMCUCWriteEC),
+                                                   &fanStatus, 1, &input, 1, nil, nil, nil, nil) {
             os_log("Write Fan Speed failed!", type: .fault)
             showOSD("WriteFanFail")
             enable = false
@@ -121,19 +122,21 @@ class ThinkFanHelper {
 
         var output: [UInt8] = [0, 0]
         var outputSize = 2
-        guard kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadEC), &fanSpeed, 1, nil, 0, nil, nil, &output, &outputSize),
+        guard kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadEC),
+                                                      &fanSpeed, 1, nil, 0, nil, nil, &output, &outputSize),
            outputSize == 2 else {
             os_log("Failed to access EC", type: .error)
             enable = false
             return
         }
 
-        fanReading.stringValue = String(format: main ? "Main: %d rpm" : "Alt: %d rpm", Int32(output[0]) | Int32(output[1]) << 8)
+        fanReading.stringValue = String(format: fanPrompt, Int32(output[0]) | Int32(output[1]) << 8)
 
         if !updateLevel { return }
 
         outputSize = 1
-        guard kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadECName), nil, 0, &fanLevel, 4, nil, nil, &output, &outputSize) else {
+        guard kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadECName),
+                                                      nil, 0, &fanLevel, 4, nil, nil, &output, &outputSize) else {
             showOSD("ReadFanFail")
             os_log("Failed to read fan level!", type: .error)
             enable = false
@@ -168,7 +171,8 @@ class ThinkFanHelper {
 
         var current: [UInt8] = [0]
         var outputSize = 1
-        guard kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadEC), &fanSelect, 1, nil, 0, nil, nil, &current, &outputSize),
+        guard kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadEC),
+                                                      &fanSelect, 1, nil, 0, nil, nil, &current, &outputSize),
            outputSize == 1 else {
             os_log("Failed to read current fan", type: .error)
             enable = false
@@ -190,7 +194,8 @@ class ThinkFanHelper {
             current[0] |= 0x1
         }
 
-        guard kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCWriteEC), &fanSelect, 1, &current, 1, nil, nil, nil, nil) else {
+        guard kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCWriteEC),
+                                                      &fanSelect, 1, &current, 1, nil, nil, nil, nil) else {
             os_log("Failed to select another fan", type: .error)
             enable = false
             return false

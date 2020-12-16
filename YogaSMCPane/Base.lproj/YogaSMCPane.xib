@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="17506" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="17701" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17506"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17701"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -36,9 +36,9 @@
                 <outlet property="vFanSpeed" destination="uDk-6Z-gTN" id="2iO-3w-kaE"/>
                 <outlet property="vFanStop" destination="IDX-pC-nEt" id="Wby-GI-i2A"/>
                 <outlet property="vFnKeyRadio" destination="So0-Nv-cHB" id="SOX-xb-H38"/>
-                <outlet property="vFunctionKeyView" destination="JLD-MO-T8u" id="nUe-Rm-u3h"/>
                 <outlet property="vFxKeyRadio" destination="TKw-8Y-61F" id="GaD-1g-5iH"/>
                 <outlet property="vGraphics" destination="sb9-CF-7V3" id="doH-V8-XzT"/>
+                <outlet property="vHideCapsLock" destination="0RV-HA-nag" id="5iK-92-Qn7"/>
                 <outlet property="vHideMenubarIcon" destination="E2f-lv-n7y" id="WAb-o1-YJk"/>
                 <outlet property="vMenubarIcon" destination="MLd-yL-06X" id="scx-xB-ii6"/>
                 <outlet property="vMfgDate" destination="q5f-L2-yxr" id="WcY-ib-6kM"/>
@@ -282,7 +282,7 @@
                                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
                                         </textField>
-                                        <stackView hidden="YES" distribution="fill" orientation="vertical" alignment="leading" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" id="JLD-MO-T8u">
+                                        <stackView distribution="fill" orientation="vertical" alignment="leading" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" id="JLD-MO-T8u">
                                             <rect key="frame" x="227" y="82" width="110" height="62"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
@@ -296,7 +296,7 @@
                                                 </textField>
                                                 <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="TKw-8Y-61F">
                                                     <rect key="frame" x="-2" y="21" width="67" height="18"/>
-                                                    <buttonCell key="cell" type="radio" title="F1-F12" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="lA1-4L-igz">
+                                                    <buttonCell key="cell" type="radio" title="F1-F12" bezelStyle="regularSquare" imagePosition="left" alignment="left" enabled="NO" inset="2" id="lA1-4L-igz">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" metaFont="system"/>
                                                     </buttonCell>
@@ -306,7 +306,7 @@
                                                 </button>
                                                 <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="So0-Nv-cHB" userLabel="vFxKey">
                                                     <rect key="frame" x="-2" y="-2" width="18" height="18"/>
-                                                    <buttonCell key="cell" type="radio" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="7ei-7V-C85">
+                                                    <buttonCell key="cell" type="radio" bezelStyle="regularSquare" imagePosition="left" alignment="left" enabled="NO" inset="2" id="7ei-7V-C85">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" metaFont="system"/>
                                                     </buttonCell>
@@ -329,7 +329,7 @@
                                         <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="E2f-lv-n7y">
                                             <rect key="frame" x="15" y="135" width="141" height="18"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <buttonCell key="cell" type="check" title="Hide menubar icon" bezelStyle="regularSquare" imagePosition="left" enabled="NO" state="on" inset="2" id="ZuO-ho-yyd">
+                                            <buttonCell key="cell" type="check" title="Hide menubar icon" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="ZuO-ho-yyd">
                                                 <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                 <font key="font" metaFont="system"/>
                                             </buttonCell>
@@ -358,6 +358,28 @@
                                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
                                         </textField>
+                                        <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="aK8-ox-5J1">
+                                            <rect key="frame" x="10" y="65" width="149" height="32"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <buttonCell key="cell" type="push" title="Clear saved events" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="t3U-YT-XHj">
+                                                <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                            <connections>
+                                                <action selector="vClearEvents:" target="-2" id="gOg-dC-MPI"/>
+                                            </connections>
+                                        </button>
+                                        <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="0RV-HA-nag">
+                                            <rect key="frame" x="15" y="165" width="121" height="18"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <buttonCell key="cell" type="check" title="Hide Caps Lock" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="s22-X0-HDH">
+                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                            <connections>
+                                                <action selector="toggleHideCapsLock:" target="-2" id="KvD-pY-8uS"/>
+                                            </connections>
+                                        </button>
                                     </subviews>
                                 </view>
                             </tabViewItem>

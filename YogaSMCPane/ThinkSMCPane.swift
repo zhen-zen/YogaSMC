@@ -130,6 +130,14 @@ extension YogaSMCPane {
                 break
             }
         }
+        if let val = props["FnlockMode"] as? Bool {
+            vFnKeyRadio.title = "FnKey"
+            if val {
+                vFnKeyRadio.state = .on
+            } else {
+                vFxKeyRadio.state = .on
+            }
+        }
         updateThinkFan()
         #if DEBUG
         if !getBoolean("Dual fan", service) {

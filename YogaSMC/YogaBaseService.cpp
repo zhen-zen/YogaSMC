@@ -41,7 +41,9 @@ bool YogaBaseService::start(IOService *provider)
         return false;
 
     setProperty("VersionInfo", kextVersion);
-
+#ifdef ALTER
+    setProperty("Variant", "Alter");
+#endif
     workLoop = IOWorkLoop::workLoop();
     commandGate = IOCommandGate::commandGate(this);
     if (!workLoop || !commandGate || (workLoop->addEventSource(commandGate) != kIOReturnSuccess)) {

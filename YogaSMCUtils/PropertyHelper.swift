@@ -8,6 +8,13 @@
 
 import Foundation
 
+// from https://github.com/LinusHenze/Fugu/blob/master/USB/IOKitUSB.swift
+// IOIteratorNext, Swift Style
+func IOIteratorNextOptional(_ iterator: io_iterator_t) -> io_service_t? {
+    let service = IOIteratorNext(iterator)
+    return service != 0 ? service : nil
+}
+
 func getBoolean(_ key: String, _ service: io_service_t) -> Bool {
     guard let rvalue = IORegistryEntryCreateCFProperty(service, key as CFString, kCFAllocatorDefault, 0),
           let val = rvalue.takeRetainedValue() as? Bool else {
@@ -37,6 +44,15 @@ func getDictionary(_ key: String, _ service: io_service_t) -> NSDictionary? {
         return nil
     }
     return rvalue.takeRetainedValue() as? NSDictionary
+}
+
+func getProperties(_ service: io_service_t) -> NSDictionary? {
+    var CFProps: Unmanaged<CFMutableDictionary>?
+    guard kIOReturnSuccess == IORegistryEntryCreateCFProperties(service, &CFProps, kCFAllocatorDefault, 0),
+          CFProps != nil else {
+        return nil
+    }
+    return CFProps?.takeRetainedValue() as NSDictionary?
 }
 
 func sendBoolean(_ key: String, _ value: Bool, _ service: io_service_t) -> Bool {

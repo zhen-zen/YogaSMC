@@ -34,6 +34,8 @@
 		6F2D45CC24C9494B00A75751 /* LICENSE in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6F2D45CB24C9494B00A75751 /* LICENSE */; };
 		6F3DA56F2584968A00A498C9 /* FunctionKeyOff.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 6F3DA56D2584968A00A498C9 /* FunctionKeyOff.pdf */; };
 		6F3DA5702584968A00A498C9 /* FunctionKeyOn.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 6F3DA56E2584968A00A498C9 /* FunctionKeyOn.pdf */; };
+		6F3DA5CF2586C14A00A498C9 /* CapslockOff.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 6F3DA5CD2586C14A00A498C9 /* CapslockOff.pdf */; };
+		6F3DA5D02586C14A00A498C9 /* CapslockOn.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 6F3DA5CE2586C14A00A498C9 /* CapslockOn.pdf */; };
 		6F48676324A293A0003AD4CA /* IdeaWMI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F48676124A293A0003AD4CA /* IdeaWMI.cpp */; };
 		6F48676424A293A0003AD4CA /* IdeaWMI.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F48676224A293A0003AD4CA /* IdeaWMI.hpp */; };
 		6F53F8382564C51F00CC4140 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 6F53F83A2564C51F00CC4140 /* Localizable.strings */; };
@@ -217,6 +219,8 @@
 		6F2D45CB24C9494B00A75751 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		6F3DA56D2584968A00A498C9 /* FunctionKeyOff.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = FunctionKeyOff.pdf; sourceTree = "<group>"; };
 		6F3DA56E2584968A00A498C9 /* FunctionKeyOn.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = FunctionKeyOn.pdf; sourceTree = "<group>"; };
+		6F3DA5CD2586C14A00A498C9 /* CapslockOff.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = CapslockOff.pdf; sourceTree = "<group>"; };
+		6F3DA5CE2586C14A00A498C9 /* CapslockOn.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = CapslockOn.pdf; sourceTree = "<group>"; };
 		6F48676124A293A0003AD4CA /* IdeaWMI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IdeaWMI.cpp; sourceTree = "<group>"; };
 		6F48676224A293A0003AD4CA /* IdeaWMI.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IdeaWMI.hpp; sourceTree = "<group>"; };
 		6F53F8392564C51F00CC4140 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -516,6 +520,8 @@
 				6F861213253AF7E4008FB857 /* BacklightOff.pdf */,
 				6F8B2321253CE59C005BEC5D /* Bluetooth.pdf */,
 				6F8B2336253CEA93005BEC5D /* Camera.pdf */,
+				6F3DA5CD2586C14A00A498C9 /* CapslockOff.pdf */,
+				6F3DA5CE2586C14A00A498C9 /* CapslockOn.pdf */,
 				6FA75307253D68C600EBE9D7 /* FunctionKey.pdf */,
 				6F3DA56D2584968A00A498C9 /* FunctionKeyOff.pdf */,
 				6F3DA56E2584968A00A498C9 /* FunctionKeyOn.pdf */,
@@ -730,7 +736,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1200;
-				LastUpgradeCheck = 1220;
+				LastUpgradeCheck = 1230;
 				ORGANIZATIONNAME = zhen;
 				TargetAttributes = {
 					6F08ACE324746B8B00681A63 = {
@@ -780,7 +786,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				6F8B2303253C4241005BEC5D /* Mic.pdf in Resources */,
+				6F3DA5CF2586C14A00A498C9 /* CapslockOff.pdf in Resources */,
 				6F861215253AF7E4008FB857 /* BacklightLow.pdf in Resources */,
+				6F3DA5D02586C14A00A498C9 /* CapslockOn.pdf in Resources */,
 				6F8B231A253CE1F3005BEC5D /* Wifi.pdf in Resources */,
 				6F3DA5702584968A00A498C9 /* FunctionKeyOn.pdf in Resources */,
 				6F8B234A253CF029005BEC5D /* SecondDisplay.pdf in Resources */,
@@ -1051,6 +1059,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 			};
 			name = Debug;

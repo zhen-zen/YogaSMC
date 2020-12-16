@@ -32,6 +32,8 @@ let reloadAS = """
                   tell application "YogaSMCNC" to quit
                   tell application "YogaSMCNC" to activate
                """
+let stopAS = "tell application \"YogaSMCNC\" to quit"
+let startAS = "tell application \"YogaSMCNC\" to activate"
 
 let getAudioMutedAS = "output muted of (get volume settings)"
 let setAudioMuteAS = "set volume with output muted"
@@ -41,11 +43,14 @@ let getMicVolumeAS = "input volume of (get volume settings)"
 let setMicVolumeAS = "set volume input volume %d"
 
 // based on https://medium.com/macoclock/1ba82537f7c3
-func scriptHelper(_ source: String, _ name: String) -> NSAppleEventDescriptor? {
+func scriptHelper(_ source: String, _ name: String, _ image: NSString? = nil) -> NSAppleEventDescriptor? {
     if let scpt = NSAppleScript(source: source) {
         var error: NSDictionary?
         let ret = scpt.executeAndReturnError(&error)
         if error == nil {
+            if let img = image {
+                showOSD(name, img)
+            }
             return ret
         }
     }

@@ -40,21 +40,28 @@ class YogaSMCPane: NSPreferencePane {
     @IBOutlet weak var vMenubarIcon: NSTextField!
     @IBAction func setMenubarIcon(_ sender: NSTextField) {
         if vMenubarIcon.stringValue == "" {
-            if defaults.value(forKey: "Title") == nil {
-                return
-            }
+            guard defaults.value(forKey: "Title") != nil else { return }
             defaults.removeObject(forKey: "Title")
         } else {
-            if defaults.string(forKey: "Title") == vMenubarIcon.stringValue {
-                return
-            }
+            if defaults.string(forKey: "Title") == vMenubarIcon.stringValue { return }
             defaults.setValue(vMenubarIcon.stringValue, forKey: "Title")
         }
         _ = scriptHelper(reloadAS, "Reload YogaSMCNC")
     }
 
+    @IBOutlet weak var vHideCapsLock: NSButton!
+    @IBAction func toggleHideCapsLock(_ sender: NSButton) {
+        defaults.setValue(vHideCapsLock.state == .on, forKey: "HideCapsLock")
+        _ = scriptHelper(reloadAS, "Reload YogaSMCNC")
+    }
+
+    @IBAction func vClearEvents(_ sender: NSButton) {
+        _ = scriptHelper(stopAS, "Stop YogaSMCNC")
+        defaults.removeObject(forKey: "Events")
+        _ = scriptHelper(startAS, "Start YogaSMCNC")
+    }
+
     // Idea
-    @IBOutlet weak var vFunctionKeyView: NSStackView!
     @IBOutlet weak var vFnKeyRadio: NSButton!
     @IBOutlet weak var vFxKeyRadio: NSButton!
 
@@ -217,25 +224,21 @@ class YogaSMCPane: NSPreferencePane {
             DYTCSlider.isHidden = true
         }
 
-        if defaults.object(forKey: "HideIcon") != nil {
-            vHideMenubarIcon.isEnabled = true
-            if defaults.bool(forKey: "HideIcon") {
-                vHideMenubarIcon.state = .on
-            } else {
-                vHideMenubarIcon.state = .off
-                vMenubarIcon.isEnabled = true
-            }
-            vMenubarIcon.stringValue = defaults.string(forKey: "Title") ?? ""
+        if defaults.bool(forKey: "HideIcon") {
+            vHideMenubarIcon.state = .on
+        } else {
+            vHideMenubarIcon.state = .off
+            vMenubarIcon.isEnabled = true
         }
+        vMenubarIcon.stringValue = defaults.string(forKey: "Title") ?? ""
+
+        vHideCapsLock.state = defaults.bool(forKey: "HideCapsLock") ? .on : .off
     }
 
     override func willSelect() {
         guard service != 0, sendBoolean("Update", true, service) else { return }
 
-        var CFProps: Unmanaged<CFMutableDictionary>?
-        guard kIOReturnSuccess == IORegistryEntryCreateCFProperties(service, &CFProps, kCFAllocatorDefault, 0),
-              CFProps != nil,
-              let props = CFProps?.takeRetainedValue() as NSDictionary? else {
+        guard let props = getProperties(service) else {
             os_log("Unable to acquire driver properties!", type: .fault)
             return
         }

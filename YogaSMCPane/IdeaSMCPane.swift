@@ -57,17 +57,19 @@ extension YogaSMCPane {
     }
 
     func updateIdea(_ props: NSDictionary) {
-        vFunctionKeyView.isHidden = false
         if let val = props["PrimeKeyType"] as? NSString {
             vFnKeyRadio.title = val as String
             if let val = props["FnlockMode"] as? Bool {
-                vFnKeyRadio.state = val ? .on : .off
+                vFnKeyRadio.isEnabled = true
+                vFxKeyRadio.isEnabled = true
+                if val {
+                    vFnKeyRadio.state = .on
+                } else {
+                    vFxKeyRadio.state = .on
+                }
             }
         } else {
             vFnKeyRadio.title = "Unknown"
-            vFnKeyRadio.isEnabled = false
-            vFxKeyRadio.isEnabled = false
-            vFxKeyRadio.state = .on
         }
 
         if let val = props["ConservationMode"] as? Bool {
