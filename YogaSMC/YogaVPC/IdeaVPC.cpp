@@ -665,7 +665,7 @@ void IdeaVPC::updateVPC() {
                     break;
 
                 case 1: // ENERGY_EVENT_GENERAL / ENERGY_EVENT_KEYBDLED_OLD
-                    DebugLog("Fn+Space keyboard backlight?");
+                    DebugLog("Fn+Space keyboard backlight old?");
                     updateKeyboard(true);
                     data = backlightLevel;
                     // also on AC connect / disconnect
@@ -727,6 +727,8 @@ void IdeaVPC::updateVPC() {
 
                 case 12: // ENERGY_EVENT_KEYBDLED
                     DebugLog("Fn+Space keyboard backlight?");
+                    updateKeyboard(true);
+                    data = backlightLevel;
                     break;
 
                 case 13:

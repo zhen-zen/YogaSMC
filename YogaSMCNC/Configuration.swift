@@ -73,6 +73,7 @@ let ideaEvents: [UInt32: [UInt32: EventDesc]] = [
     0x07: [0: EventDesc("Camera", .Camera, act: .camera)],
     0x08: [0: EventDesc("Mic Mute", act: .micmute, display: false)],
     0x0A: [0: EventDesc("TouchPad On", display: false)],
+    0x0C: [0: EventDesc("Keyboard Backlight", act: .backlight)],
     0x0D: [0: EventDesc("Airplane Mode", act: .airplane)],
     0x10: [0: EventDesc("Yoga Mode", act: .yoga),
             1: EventDesc("Laptop Mode"),
