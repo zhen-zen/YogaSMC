@@ -250,7 +250,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(thinkWakeup),
                                                               name: NSWorkspace.didWakeNotification, object: nil)
             if defaults.bool(forKey: "ThinkMuteLEDFixup") {
-                NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(thinkMuteLEDFixup),
+                NotificationCenter.default.addObserver(self, selector: #selector(thinkMuteLEDFixup),
+                                                       name: VolumeObserver.volumeChanged, object: nil)
+                DistributedNotificationCenter.default.addObserver(self, selector: #selector(thinkMuteLEDFixup),
                                                                   name: NSNotification.Name(rawValue: "com.apple.sound.settingsChangedNotification"), object: nil)
             }
         case "YogaHIDD":

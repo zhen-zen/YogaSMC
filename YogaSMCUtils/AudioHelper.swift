@@ -9,6 +9,7 @@
 import Foundation
 import CoreAudio
 import AudioToolbox
+import AppKit
 import os.log
 
 // from https://gist.github.com/mblsha/f6db715ca6245b36eb1fa6d8af23cf4b
@@ -173,3 +174,29 @@ func muteLEDHelper(_ service: io_service_t, _ wake: Bool = true) {
     }
 }
 
+class VolumeObserver: NSApplication {
+    static let volumeChanged = Notification.Name("YogaSMCNC.volumeChanged")
+
+    //from https://stackoverflow.com/a/32769093/6884062
+    override func sendEvent(_ event: NSEvent) {
+        if (event.type == .systemDefined && event.subtype.rawValue == 8) {
+            let keyCode = ((event.data1 & 0xFFFF0000) >> 16)
+            let keyFlags = (event.data1 & 0x0000FFFF)
+            // Get the key state. 0xA is KeyDown, OxB is KeyUp
+            let keyState = (((keyFlags & 0xFF00) >> 8)) == 0xA
+            let keyRepeat = keyFlags & 0x1
+            mediaKeyEvent(key: Int32(keyCode), state: keyState, keyRepeat: Bool(truncating: keyRepeat as NSNumber))
+        }
+
+        super.sendEvent(event)
+    }
+
+    func mediaKeyEvent(key: Int32, state: Bool, keyRepeat: Bool) {
+        switch(key) {
+        case NX_KEYTYPE_SOUND_DOWN, NX_KEYTYPE_SOUND_UP, NX_KEYTYPE_MUTE:
+            NotificationCenter.default.post(name: VolumeObserver.volumeChanged, object: self)
+        default:
+            break
+        }
+    }
+}
