@@ -12,7 +12,7 @@ import os.log
 
 enum EventAction: String {
     // Userspace
-    case nothing, script
+    case nothing, script, launchapp
     case airplane, wireless, bluetooth, bluetoothdiscoverable
     case prefpane, spotlight, search, siri, sleep, micmute
     case mission, launchpad, desktop, expose
@@ -80,7 +80,10 @@ let ideaEvents: [UInt32: [UInt32: EventDesc]] = [
         1: EventDesc("TouchPad On")
     ],
     0x06: [0: EventDesc("Switch Video")],
-    0x07: [0: EventDesc("Camera", .kCamera, act: .camera)],
+    0x07: [
+        0: EventDesc("Camera", .kCamera, act: .camera),
+        UInt32(NSEvent.ModifierFlags.option.rawValue): EventDesc("Photo Booth", act: .launchapp, opt: "Photo Booth")
+    ],
     0x08: [0: EventDesc("Mic Mute", act: .micmute)],
     0x0A: [0: EventDesc("TouchPad On", display: false)],
     0x0C: [0: EventDesc("Keyboard Backlight")],

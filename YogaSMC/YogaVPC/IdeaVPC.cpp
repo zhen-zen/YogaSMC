@@ -319,8 +319,6 @@ void IdeaVPC::updateKeyboardStats(UInt32 kbdState) {
     FnlockCap = BIT(HA_FNLOCK_CAP_BIT) & kbdState;
     if (!FnlockCap)
         setProperty(FnKeyPrompt, "unsupported");
-    else
-        setProperty(FnKeyPrompt, FnlockCap);
 
     if (BIT(HA_PRIMEKEY_BIT) & kbdState)
         setProperty("PrimeKeyType", "HotKey");

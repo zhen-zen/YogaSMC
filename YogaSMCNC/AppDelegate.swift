@@ -493,6 +493,13 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<Shar
         } else {
             os_log("%s: script not found", type: .error)
         }
+    case .launchapp:
+        if let name = desc.option {
+            let scpt = "tell application \"" + name + "\" to activate"
+            _ = scriptHelper(scpt, desc.name, desc.display ? desc.image : nil)
+        } else {
+            os_log("%s: script not found", type: .error)
+        }
     case .airplane:
         airplaneModeHelper(desc.name, desc.display)
     case .bluetooth:
