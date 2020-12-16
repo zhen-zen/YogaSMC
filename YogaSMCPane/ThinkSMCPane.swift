@@ -87,6 +87,10 @@ extension YogaSMCPane {
         _ = scriptHelper(reloadAS, "Reload YogaSMCNC")
     }
 
+    @IBAction func vSaveFanLevelSet(_ sender: NSButton) {
+        defaults.setValue((vSaveFanLevel.state == .on), forKey: "SaveFanLevel")
+    }
+
     func updateThinkBattery() -> Bool {
         _ = sendNumber("Battery", thinkBatteryNumber, service)
         if let dict = getDictionary(thinkBatteryName[thinkBatteryNumber], service),
@@ -148,5 +152,6 @@ extension YogaSMCPane {
             vCustomLEDSlider.isEnabled = true
         }
         vDisableFan.state = defaults.bool(forKey: "DisableFan") ? .on : .off
+        vSaveFanLevel.state = defaults.bool(forKey: "SaveFanLevel") ? .on : .off
     }
 }

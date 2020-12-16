@@ -239,9 +239,20 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                     if !getBoolean("Dual fan", conf.service),
                        defaults.bool(forKey: "SecondThinkFan") {
                         fanHelper2 = ThinkFanHelper(appMenu, conf.connect, false, false)
+                        if defaults.bool(forKey: "SaveFanLevel") {
+                            os_log("Restore Fan Level", type: .info)
+                            if let level = defaults.object(forKey: "Fan2Level") as? UInt8 {
+                                fanHelper2?.setFanLevel(level)
+                            }
+                        }
                         fanHelper2?.update(true)
                     }
                     fanHelper = ThinkFanHelper(appMenu, conf.connect, true, fanHelper2 == nil)
+                    if defaults.bool(forKey: "SaveFanLevel"),
+                       let level = defaults.object(forKey: "FanLevel") as? UInt8 {
+                        os_log("Restore Fan Level", type: .info)
+                        fanHelper?.setFanLevel(level)
+                    }
                     fanHelper?.update(true)
                 } else {
                     showOSD("ECAccessUnavailable")
@@ -409,6 +420,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
            Bundle.main.bundlePath.hasPrefix("/Applications"),
            IOClass != "YogaHIDD" {
             saveEvents()
+        }
+        if defaults.bool(forKey: "SaveFanLevel") {
+            if fanHelper2 != nil {
+                defaults.setValue(fanHelper2?.savedLevel, forKey: "Fan2Level")
+            }
+            if fanHelper != nil {
+                defaults.setValue(fanHelper?.savedLevel, forKey: "FanLevel")
+            }
         }
 
         // Save driver settings

@@ -94,6 +94,7 @@ class YogaSMCPane: NSPreferencePane {
     @IBOutlet weak var vSecondFan: NSButton!
     @IBOutlet weak var vFanStop: NSButton!
     @IBOutlet weak var vDisableFan: NSButton!
+    @IBOutlet weak var vSaveFanLevel: NSButton!
 
     // Main
 

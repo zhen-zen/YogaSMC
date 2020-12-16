@@ -105,7 +105,12 @@ class ThinkFanHelper {
         setFanLevel()
     }
 
-    func setFanLevel() {
+    func setFanLevel(_ level: UInt8 = 0) {
+        if level != 0 {
+            os_log("Set Fan Level to %x", type: .info, level)
+            savedLevel = level
+        }
+
         guard enable, switchFan(main) else { return }
 
         var input = [savedLevel]
