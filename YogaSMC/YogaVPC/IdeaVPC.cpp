@@ -705,6 +705,11 @@ void IdeaVPC::updateVPC() {
                         AlwaysLog("Failed to read VPCCMD_R_TOUCHPAD %d", retries);
                     else
                         DebugLog("Fn+F6 touchpad 0x%x %s", result, result ? "on" : "off");
+                    if (TouchPadEnabledHW == (result != 0)) {
+                        DebugLog("Skip duplicate touchpad report");
+                        continue;
+                    }
+                    TouchPadEnabledHW = (result != 0);
                     data = result;
                     break;
 

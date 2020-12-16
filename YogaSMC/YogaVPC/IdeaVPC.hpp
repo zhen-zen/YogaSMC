@@ -157,6 +157,11 @@ private:
     bool rapidChargeMode {false};
 
     /**
+     *  Current TouchPad status
+     */
+    bool TouchPadEnabledHW {true};
+
+    /**
      *  Initialize VPC EC status
      *
      *  @return true if success
