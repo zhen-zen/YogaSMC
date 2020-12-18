@@ -762,6 +762,7 @@ bool IdeaVPC::read_ec_data(UInt32 cmd, UInt32 *result, UInt32 *retries) {
         if (*result == 0)
             return method_vpcr(0, result);
         *retries = *retries + 1;
+        IODelay(250);
         clock_get_uptime(&now_abs);
     }
 
@@ -790,6 +791,7 @@ bool IdeaVPC::write_ec_data(UInt32 cmd, UInt32 value, UInt32 *retries) {
         if (result == 0)
             return true;
         *retries = *retries + 1;
+        IODelay(250);
         clock_get_uptime(&now_abs);
     }
 
