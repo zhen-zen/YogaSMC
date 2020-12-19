@@ -152,6 +152,11 @@ class YogaSMCPane: NSPreferencePane {
         }
     }
 
+    @IBOutlet weak var vClamshellMode: NSButton!
+    @IBAction func vClamshellModeSet(_ sender: NSButton) {
+        _ = sendBoolean("ClamshellMode", (vClamshellMode.state == .on), service)
+    }
+
     override func mainViewDidLoad() {
         super.mainViewDidLoad()
         os_log(#function, type: .info)
@@ -232,6 +237,11 @@ class YogaSMCPane: NSPreferencePane {
         vMenubarIcon.stringValue = defaults.string(forKey: "Title") ?? ""
 
         vHideCapsLock.state = defaults.bool(forKey: "HideCapsLock") ? .on : .off
+
+        if let val = props["ClamshellMode"] as? Bool {
+            vClamshellMode.isEnabled = true
+            vClamshellMode.state = val ? .on : .off
+        }
     }
 
     override func willSelect() {

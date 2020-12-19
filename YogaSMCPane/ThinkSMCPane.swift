@@ -110,7 +110,8 @@ extension YogaSMCPane {
                 var input: UInt64 = 0x84
                 var outputSize = 2
                 var output: [UInt8] = Array(repeating: 0, count: 2)
-                if kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadEC), &input, 1, nil, 0, nil, nil, &output, &outputSize),
+                if kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadEC),
+                                                           &input, 1, nil, 0, nil, nil, &output, &outputSize),
                    outputSize == 2 {
                     vFanSpeed.intValue = Int32(output[0]) | Int32(output[1]) << 8
                 }
@@ -135,13 +136,15 @@ extension YogaSMCPane {
         }
         updateThinkFan()
         #if DEBUG
-        if !getBoolean("Dual fan", service) {
+        if let val = props["Dual fan"] as? Bool,
+           val == true {
             vSecondFan.isEnabled = true
             vSecondFan.state = defaults.bool(forKey: "SecondThinkFan") ? .on : .off
         }
         #endif
         vFanStop.state = defaults.bool(forKey: "AllowFanStop") ? .on : .off
-        if getBoolean("LEDSupport", service) {
+        if let val = props["LEDSupport"] as? Bool,
+           val == true {
             vPowerLEDSlider.isEnabled = true
             vStandbyLEDSlider.isEnabled = true
             vThinkDotSlider.isEnabled = true

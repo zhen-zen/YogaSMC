@@ -24,6 +24,7 @@
                 <outlet property="vCamera" destination="Efv-S1-sfb" id="0wF-xZ-tmI"/>
                 <outlet property="vChargeThresholdStart" destination="TYs-Hl-oRb" id="5SD-Ls-toa"/>
                 <outlet property="vChargeThresholdStop" destination="DUq-Wn-qQw" id="rHX-J0-Yc6"/>
+                <outlet property="vClamshellMode" destination="fWe-h7-yii" id="vcg-Yg-d7X"/>
                 <outlet property="vClass" destination="AXm-L5-4AS" id="gKQ-mw-X2J"/>
                 <outlet property="vConservationMode" destination="1qm-YF-8v2" id="3ff-bu-iky"/>
                 <outlet property="vCustomLEDList" destination="8Wg-LT-AId" id="aAp-oR-Nad"/>
@@ -377,6 +378,17 @@
                                             </buttonCell>
                                             <connections>
                                                 <action selector="toggleHideCapsLock:" target="-2" id="KvD-pY-8uS"/>
+                                            </connections>
+                                        </button>
+                                        <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="fWe-h7-yii">
+                                            <rect key="frame" x="225" y="50" width="119" height="18"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <buttonCell key="cell" type="check" title="ClamshellMode" bezelStyle="regularSquare" imagePosition="left" enabled="NO" inset="2" id="ibn-Rf-9jp">
+                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                            <connections>
+                                                <action selector="vClamshellModeSet:" target="-2" id="nCo-wo-ZZj"/>
                                             </connections>
                                         </button>
                                     </subviews>
