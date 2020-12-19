@@ -29,6 +29,7 @@ void ThinkVPC::updateAll() {
         KBDPresent->release();
     }
     updateBattery(BAT_ANY);
+    updateFnLockStatus();
     updateMutestatus();
     updateMuteLEDStatus();
     updateMicMuteLEDStatus();
@@ -227,6 +228,12 @@ bool ThinkVPC::initVPC() {
         setProperty(backlightPrompt, "unsupported");
 
     setProperty(autoBacklightPrompt, automaticBacklightMode, 8);
+    if (vpc->validateObject(setLED) == kIOReturnSuccess) {
+        LEDsupport = true;
+        setProperty("LEDSupport", true);
+    } else {
+        setProperty("LEDSupport", false);
+    }
     return true;
 }
 
@@ -359,13 +366,6 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 OSNumber *value;
                 getPropertyNumber("setCMPeakShiftState");
                 setConservation(setCMPeakShiftState, value->unsigned8BitValue());
-            } else if (key->isEqualTo("GMKS")) {
-                UInt32 result;
-                ret = vpc->evaluateInteger("GMKS", &result);
-                if (ret == kIOReturnSuccess)
-                    DebugLog(updateSuccess, "GMKS", result);
-                else
-                    AlwaysLog("%s evaluation failed 0x%x", "GMKS", ret);
             } else if (key->isEqualTo("GSKL")) {
                 OSNumber *value;
                 getPropertyNumber("GSKL");
@@ -470,6 +470,10 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 getPropertyNumber(SSTPrompt);
                 setSSTStatus(value->unsigned32BitValue());
             } else if (key->isEqualTo(LEDPrompt)) {
+                if (!LEDsupport) {
+                    AlwaysLog(notSupported, LEDPrompt);
+                    continue;
+                }
                 OSNumber *value;
                 getPropertyNumber(LEDPrompt);
                 if (value->unsigned32BitValue() > 0xff) {
@@ -724,6 +728,93 @@ IOReturn ThinkVPC::message(UInt32 type, IOService *provider, void *argument) {
     return kIOReturnSuccess;
 }
 
+UInt32 ThinkVPC::getYogaMode() {
+    UInt32 mode;
+    if (vpc->evaluateInteger(getMultiModeState, &mode) != kIOReturnSuccess) {
+        AlwaysLog("failed to evaluate tablet mode");
+        return 0;
+    }
+
+    DebugLog("tablet mode: %x", mode);
+    if (!validModes) {
+        UInt16 type = mode >> 16;
+        setProperty("MultiModeType", type, 16);
+        switch (type) {
+            case 1:
+                validModes = TP_ACPI_MULTI_MODE_LAPTOP |
+                             TP_ACPI_MULTI_MODE_TABLET |
+                             TP_ACPI_MULTI_MODE_STAND_TENT;
+                break;
+            case 2:
+                validModes = TP_ACPI_MULTI_MODE_LAPTOP |
+                             TP_ACPI_MULTI_MODE_FLAT |
+                             TP_ACPI_MULTI_MODE_TABLET |
+                             TP_ACPI_MULTI_MODE_STAND |
+                             TP_ACPI_MULTI_MODE_TENT;
+                break;
+            case 3:
+                validModes = TP_ACPI_MULTI_MODE_LAPTOP |
+                             TP_ACPI_MULTI_MODE_FLAT;
+                break;
+            case 4:
+            case 5:
+                /* In mode 4, FLAT is not specified as a valid mode. However,
+                 * it can be seen at least on the X1 Yoga 2nd Generation.
+                 */
+                validModes = TP_ACPI_MULTI_MODE_LAPTOP |
+                             TP_ACPI_MULTI_MODE_FLAT |
+                             TP_ACPI_MULTI_MODE_TABLET |
+                             TP_ACPI_MULTI_MODE_STAND |
+                             TP_ACPI_MULTI_MODE_TENT;
+                break;
+                
+            default:
+                AlwaysLog("unknown tablet mode: %x", mode);
+                validModes = TP_ACPI_MULTI_MODE_UNKNOWN;
+                break;
+        }
+    }
+    UInt32 data = mode & 0xf;
+    switch (data) {
+        case 1:
+//            mode = TP_ACPI_MULTI_MODE_LAPTOP;
+            if (validModes & TP_ACPI_MULTI_MODE_TABLET_LIKE)
+                setTopCase(true);
+            setProperty("YogaMode", "Laptop");
+            break;
+        case 2:
+//            mode = TP_ACPI_MULTI_MODE_FLAT;
+            if (validModes & TP_ACPI_MULTI_MODE_TABLET_LIKE)
+                setTopCase(true);
+            setProperty("YogaMode", "Flat");
+            break;
+        case 3:
+//            mode = TP_ACPI_MULTI_MODE_TABLET;
+            setTopCase(false);
+            setProperty("YogaMode", "Tablet");
+            break;
+        case 4:
+//            if ((mode >> 16) == 1)
+//                mode = TP_ACPI_MULTI_MODE_STAND_TENT;
+//            else
+//                mode = TP_ACPI_MULTI_MODE_STAND;
+            setTopCase(false);
+            setProperty("YogaMode", "Stand");
+            break;
+        case 5:
+//            mode = TP_ACPI_MULTI_MODE_TENT;
+            setTopCase(false);
+            setProperty("YogaMode", "Tent");
+            break;
+        default:
+//            if (type == 5 && value == 0xffff)
+//                DebugLog("Multi mode status is undetected, assuming laptop");
+            AlwaysLog("unknown tablet mode: %x", mode);
+            break;
+    }
+    return data;
+}
+
 void ThinkVPC::updateVPC() {
     UInt32 result;
     if (vpc->evaluateInteger(getHKEYevent, &result) != kIOReturnSuccess) {
@@ -737,6 +828,7 @@ void ThinkVPC::updateVPC() {
     }
 
     UInt32 data = 0;
+    UInt64 time = 0;
     switch (result >> 0xC) {
         case 1:
             switch (result) {
@@ -748,6 +840,7 @@ void ThinkVPC::updateVPC() {
                 case TP_HKEY_EV_SLEEP:
                     if (!client)
                         vpc->evaluateObject(setHKEYsleep);
+                    break;
 
                 case TP_HKEY_EV_MIC_MUTE:
                     if (!client)
@@ -757,11 +850,13 @@ void ThinkVPC::updateVPC() {
                 case TP_HKEY_EV_KEYBOARD:
                     toggleKeyboard();
                     data = Keyboardenabled;
+                    break;
 
                 default:
                     DebugLog("Hotkey(MHKP) key presses event: 0x%x", result);
                     break;
             }
+            time = 1;
             break;
 
         case 2:
@@ -850,21 +945,25 @@ void ThinkVPC::updateVPC() {
 
                 case TP_HKEY_EV_KEY_NUMLOCK:
                     DebugLog("Numlock");
+                    time = 1;
                     break;
 
                 case TP_HKEY_EV_KEY_FN:
                     DebugLog("Fn");
+                    time = 1;
                     break;
 
                 case TP_HKEY_EV_KEY_FN_ESC:
                     DebugLog("Fn+Esc");
+                    time = 1;
+                    data = updateFnLockStatus();
                     break;
 
                 case TP_HKEY_EV_LID_STATUS_CHANGED:
                     break;
 
                 case TP_HKEY_EV_TABLET_CHANGED:
-                    DebugLog("tablet mode has changed");
+                    data = getYogaMode();
                     break;
 
                 case TP_HKEY_EV_PALM_DETECTED:
@@ -892,6 +991,24 @@ void ThinkVPC::updateVPC() {
 
     if (client)
         client->sendNotification(result, data);
+
+    if (time != 0) {
+        clock_get_uptime(&time);
+        dispatchMessage(kPS2M_notifyKeyTime, &time);
+    }
+}
+
+bool ThinkVPC::updateFnLockStatus() {
+    UInt32 result;
+
+    if (vpc->evaluateInteger("GMKS", &result) != kIOReturnSuccess) {
+        AlwaysLog(updateFailure, FnKeyPrompt);
+        return false;
+    }
+
+    DebugLog(toggleSuccess, FnKeyPrompt, result, (result & 0x1 ? "enabled" : "disabled"));
+    setProperty(FnKeyPrompt, result & 0x1);
+    return result & 0x1;
 }
 
 bool ThinkVPC::setHotkeyStatus(bool enable) {
@@ -980,7 +1097,12 @@ bool ThinkVPC::setSSTStatus(UInt32 value) {
         DebugLog(toggleSuccess, "SST Proxy", value, property[value]);
         return true;
     }
+    if (!LEDsupport)
+        return true;
     // Replicate of _SI._SST
+    // 0x0: power
+    // 0x7: standby
+    // 0xA: thinkdot
     bool status = true;
     switch (value) {
         case 0:

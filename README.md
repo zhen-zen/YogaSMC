@@ -49,7 +49,7 @@ Currently available functions:
 | ---- | ---- | ---- | ---- |
 | `_HID` | `VPC2004` | `LEN0268`<br>`LEN0068` | `INT33D5`<br>`INTC1051` |
 | Reference | [ideapad-laptop](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/ideapad-laptop.c) | [thinkpad_acpi](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/thinkpad_acpi.c) | [intel-hid](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/intel-hid.c) |
-| Hotkey polling | ✅ | ✅ | ✅ (beta) |
+| Hotkey polling | ✅ | ✅ | ✅ |
 | Conservation mode | ✅ | ✅ | N/A |
 | Battery threshold | Not supported | ✅ | N/A |
 | Charging control | Need testing | Need testing | N/A |
@@ -71,8 +71,14 @@ When [Rehabman's](https://www.tonymacx86.com/threads/guide-how-to-patch-dsdt-for
 ## YogaSMCPane
 The preference pane provides a graphical user interface for basic information and settings, such as battery conservation mode and backlight.
 
+<img src="YogaSMCPane/General.png" width="668" height="420">
+
 ## YogaSMCNC
 The notification application receives EC events and displays them on OSD. Corresonding actions will also be triggered for function keys. The configuration can be customized at `~/Library/Preferences/org.zhen.YogaSMC.plist` after closing the app.
+
+<img src="YogaSMCNC/DualFan.png" width="301" height="372">
+
+Only a few models support dual fan reading and control, which could be enabled manually via debug prefpane or `SecondThinkFan` in preference plist.
 
 For unknown events in preset, feel free to submit a PR like [#40](https://github.com/zhen-zen/YogaSMC/pull/40).
 
@@ -81,7 +87,7 @@ If you want to add new actions, the easiest approach is to use the `script` acti
 ## Installation
 The kext should work out-of-the-box. If you have modified `_QXX` methods before, please remove the patches.
 
-Some features may relay on methods accessing EC. Although it won't affect the core functionality, please consider patching related EC fields larger than 8-bit.
+Some features may rely on methods accessing EC. Although it won't affect the core functionality, please consider patching related EC fields larger than 8-bit.
 
 The `YogaSMCAlter.kext` is a variant without SMC keys support and the dependencies of `Lilu` and `VirtualSMC`. It's designed for quick loading / unloading without reboot when debugging. 
 

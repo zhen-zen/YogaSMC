@@ -69,18 +69,11 @@ void IdeaWMI::processWMI() {
 
     if (YWMI->hasMethod(BAT_INFO_WMI_STRING, ACPI_WMI_EXPENSIVE | ACPI_WMI_STRING)) {
         setProperty("Feature", "WBAT");
-        OSArray *BatteryInfo = OSArray::withCapacity(3);
         // only execute once for WMI_EXPENSIVE
-        OSObject *value;
-        value = OSString::withCString(getBatteryInfo(WBAT_BAT0_BatMaker));
-        BatteryInfo->setObject(value);
-        value->release();
-        value = OSString::withCString(getBatteryInfo(WBAT_BAT0_HwId));
-        BatteryInfo->setObject(value);
-        value->release();
-        value = OSString::withCString(getBatteryInfo(WBAT_BAT0_MfgDate));
-        BatteryInfo->setObject(value);
-        value->release();
+        OSArray *BatteryInfo = OSArray::withCapacity(3);
+        getBatteryInfo(WBAT_BAT0_BatMaker, BatteryInfo);
+        getBatteryInfo(WBAT_BAT0_HwId, BatteryInfo);
+        getBatteryInfo(WBAT_BAT0_MfgDate, BatteryInfo);
         setProperty("BatteryInfo", BatteryInfo);
         BatteryInfo->release();
     }
@@ -147,26 +140,30 @@ void IdeaWMI::stop(IOService *provider) {
     super::stop(provider);
 }
 
-const char *IdeaWMI::getBatteryInfo(UInt32 index) {
-    OSObject* result;
+bool IdeaWMI::getBatteryInfo(UInt32 index, OSArray *bat) {
+    OSObject *result;
+    bool ret;
 
     OSObject* params[1] = {
         OSNumber::withNumber(index, 32),
     };
 
-    if (!YWMI->executeMethod(BAT_INFO_WMI_STRING, &result, params, 1)) {
+    ret = YWMI->executeMethod(BAT_INFO_WMI_STRING, &result, params, 1);
+    params[0]->release();
+    if (ret) {
+        OSString *info = OSDynamicCast(OSString, result);
+        if (info != nullptr) {
+            AlwaysLog("WBAT %d %s", index, info->getCStringNoCopy());
+            bat->setObject(info);
+        } else {
+            AlwaysLog("WBAT result not a string");
+            ret = false;
+        }
+        result->release();
+    } else {
         AlwaysLog("WBAT evaluation failed");
-        return "evaluation failed";
     }
-
-    OSString *info = OSDynamicCast(OSString, result);
-
-    if (!info) {
-        AlwaysLog("WBAT result not a string");
-        return "result not a string";
-    }
-    AlwaysLog("WBAT %s", info->getCStringNoCopy());
-    return info->getCStringNoCopy();
+    return ret;
 }
 
 void IdeaWMI::checkEvent(const char *cname, UInt32 id) {

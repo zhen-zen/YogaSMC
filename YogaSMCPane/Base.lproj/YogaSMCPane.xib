@@ -1,24 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="17156" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="17701" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17156"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17701"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="YogaSMCPane" customModule="YogaSMCPane" customModuleProvider="target">
             <connections>
                 <outlet property="DYTCSlider" destination="H87-Ly-sql" id="haV-1t-2Re"/>
-                <outlet property="FunctionKey" destination="JLD-MO-T8u" id="nUe-Rm-u3h"/>
-                <outlet property="IdeaViewItem" destination="GmU-Sc-yjc" id="MJK-Vb-NCw"/>
-                <outlet property="TabView" destination="Fe4-fM-T79" id="zQh-TM-B9f"/>
-                <outlet property="ThinkViewItem" destination="eaw-hp-JIE" id="sTD-qn-Tzl"/>
                 <outlet property="_window" destination="F0z-JX-Cv5" id="gIp-Ho-8D9"/>
                 <outlet property="autoSleepCheck" destination="lHz-fM-CAF" id="QT6-Rq-Xiu"/>
                 <outlet property="backlightSlider" destination="GDa-7X-UOO" id="YgO-45-nNU"/>
+                <outlet property="ideaViewItem" destination="GmU-Sc-yjc" id="MJK-Vb-NCw"/>
                 <outlet property="indicatorCheck" destination="rQA-kz-210" id="VEU-W3-JH1"/>
+                <outlet property="mainTabView" destination="Fe4-fM-T79" id="zQh-TM-B9f"/>
                 <outlet property="micMuteCheck" destination="n3n-Iq-zXz" id="3nc-LL-fQj"/>
                 <outlet property="muteCheck" destination="EC3-Nq-KoI" id="1Fz-Wd-7AT"/>
+                <outlet property="thinkViewItem" destination="eaw-hp-JIE" id="sTD-qn-Tzl"/>
                 <outlet property="vBatteryID" destination="rTr-ll-Qx5" id="4nM-zK-e5s"/>
                 <outlet property="vBatteryTemperature" destination="0xn-Ly-yhc" id="PvZ-fF-JYH"/>
                 <outlet property="vBluetooth" destination="BZO-y6-Hbq" id="Ldm-X4-PdI"/>
@@ -32,12 +31,14 @@
                 <outlet property="vCycleCount" destination="cFi-NC-K0C" id="axy-Rg-jnS"/>
                 <outlet property="vDYTCFuncMode" destination="fZZ-Y6-z0X" id="v6d-fS-QEH"/>
                 <outlet property="vDYTCRevision" destination="W8B-pr-Ckq" id="JAI-9h-llK"/>
+                <outlet property="vDisableFan" destination="5sT-I1-ipX" id="0X7-Qq-6Zs"/>
                 <outlet property="vECRead" destination="w0X-ID-3TJ" id="8MX-ad-Owg"/>
                 <outlet property="vFanSpeed" destination="uDk-6Z-gTN" id="2iO-3w-kaE"/>
                 <outlet property="vFanStop" destination="IDX-pC-nEt" id="Wby-GI-i2A"/>
                 <outlet property="vFnKeyRadio" destination="So0-Nv-cHB" id="SOX-xb-H38"/>
                 <outlet property="vFxKeyRadio" destination="TKw-8Y-61F" id="GaD-1g-5iH"/>
                 <outlet property="vGraphics" destination="sb9-CF-7V3" id="doH-V8-XzT"/>
+                <outlet property="vHideCapsLock" destination="0RV-HA-nag" id="5iK-92-Qn7"/>
                 <outlet property="vHideMenubarIcon" destination="E2f-lv-n7y" id="WAb-o1-YJk"/>
                 <outlet property="vMenubarIcon" destination="MLd-yL-06X" id="scx-xB-ii6"/>
                 <outlet property="vMfgDate" destination="q5f-L2-yxr" id="WcY-ib-6kM"/>
@@ -280,7 +281,7 @@
                                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
                                         </textField>
-                                        <stackView hidden="YES" distribution="fill" orientation="vertical" alignment="leading" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" id="JLD-MO-T8u">
+                                        <stackView distribution="fill" orientation="vertical" alignment="leading" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" id="JLD-MO-T8u">
                                             <rect key="frame" x="227" y="82" width="110" height="62"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
@@ -294,7 +295,7 @@
                                                 </textField>
                                                 <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="TKw-8Y-61F">
                                                     <rect key="frame" x="-2" y="21" width="67" height="18"/>
-                                                    <buttonCell key="cell" type="radio" title="F1-F12" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="lA1-4L-igz">
+                                                    <buttonCell key="cell" type="radio" title="F1-F12" bezelStyle="regularSquare" imagePosition="left" alignment="left" enabled="NO" inset="2" id="lA1-4L-igz">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" metaFont="system"/>
                                                     </buttonCell>
@@ -304,7 +305,7 @@
                                                 </button>
                                                 <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="So0-Nv-cHB" userLabel="vFxKey">
                                                     <rect key="frame" x="-2" y="-2" width="18" height="18"/>
-                                                    <buttonCell key="cell" type="radio" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="7ei-7V-C85">
+                                                    <buttonCell key="cell" type="radio" bezelStyle="regularSquare" imagePosition="left" alignment="left" enabled="NO" inset="2" id="7ei-7V-C85">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" metaFont="system"/>
                                                     </buttonCell>
@@ -327,7 +328,7 @@
                                         <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="E2f-lv-n7y">
                                             <rect key="frame" x="15" y="135" width="141" height="18"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <buttonCell key="cell" type="check" title="Hide menubar icon" bezelStyle="regularSquare" imagePosition="left" enabled="NO" state="on" inset="2" id="ZuO-ho-yyd">
+                                            <buttonCell key="cell" type="check" title="Hide menubar icon" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="ZuO-ho-yyd">
                                                 <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                 <font key="font" metaFont="system"/>
                                             </buttonCell>
@@ -356,6 +357,28 @@
                                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
                                         </textField>
+                                        <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="aK8-ox-5J1">
+                                            <rect key="frame" x="10" y="65" width="149" height="32"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <buttonCell key="cell" type="push" title="Clear saved events" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="t3U-YT-XHj">
+                                                <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                            <connections>
+                                                <action selector="vClearEvents:" target="-2" id="gOg-dC-MPI"/>
+                                            </connections>
+                                        </button>
+                                        <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="0RV-HA-nag">
+                                            <rect key="frame" x="15" y="165" width="121" height="18"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <buttonCell key="cell" type="check" title="Hide Caps Lock" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="s22-X0-HDH">
+                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                            <connections>
+                                                <action selector="toggleHideCapsLock:" target="-2" id="KvD-pY-8uS"/>
+                                            </connections>
+                                        </button>
                                     </subviews>
                                 </view>
                             </tabViewItem>
@@ -636,7 +659,7 @@
                                                     <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="waU-W1-TYS">
                                                         <rect key="frame" x="104" y="220" width="132" height="28"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                        <sliderCell key="cell" alignment="left" maxValue="3" tickMarkPosition="below" numberOfTickMarks="4" allowsTickMarkValuesOnly="YES" sliderType="linear" id="v4y-UK-MkJ"/>
+                                                        <sliderCell key="cell" enabled="NO" alignment="left" maxValue="3" tickMarkPosition="below" numberOfTickMarks="4" allowsTickMarkValuesOnly="YES" sliderType="linear" id="v4y-UK-MkJ"/>
                                                         <connections>
                                                             <action selector="vPowerLEDSet:" target="-2" id="hHQ-6b-2fj"/>
                                                         </connections>
@@ -693,7 +716,7 @@
                                                     <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="96M-Na-T3c">
                                                         <rect key="frame" x="104" y="160" width="132" height="28"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                        <sliderCell key="cell" alignment="left" maxValue="3" tickMarkPosition="below" numberOfTickMarks="4" allowsTickMarkValuesOnly="YES" sliderType="linear" id="t9r-7x-hVj"/>
+                                                        <sliderCell key="cell" enabled="NO" alignment="left" maxValue="3" tickMarkPosition="below" numberOfTickMarks="4" allowsTickMarkValuesOnly="YES" sliderType="linear" id="t9r-7x-hVj"/>
                                                         <connections>
                                                             <action selector="vStandbyLEDSet:" target="-2" id="KKZ-b3-GMv"/>
                                                         </connections>
@@ -750,7 +773,7 @@
                                                     <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ANf-1P-ZLt">
                                                         <rect key="frame" x="104" y="100" width="132" height="28"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                        <sliderCell key="cell" alignment="left" maxValue="3" tickMarkPosition="below" numberOfTickMarks="4" allowsTickMarkValuesOnly="YES" sliderType="linear" id="IMC-QI-01L"/>
+                                                        <sliderCell key="cell" enabled="NO" alignment="left" maxValue="3" tickMarkPosition="below" numberOfTickMarks="4" allowsTickMarkValuesOnly="YES" sliderType="linear" id="IMC-QI-01L"/>
                                                         <connections>
                                                             <action selector="vThinkDotSet:" target="-2" id="zbs-Cj-HhV"/>
                                                         </connections>
@@ -807,7 +830,7 @@
                                                     <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5gQ-az-9US">
                                                         <rect key="frame" x="104" y="50" width="132" height="28"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                        <sliderCell key="cell" alignment="left" maxValue="3" tickMarkPosition="below" numberOfTickMarks="4" allowsTickMarkValuesOnly="YES" sliderType="linear" id="M4M-Od-9Mh"/>
+                                                        <sliderCell key="cell" enabled="NO" alignment="left" maxValue="3" tickMarkPosition="below" numberOfTickMarks="4" allowsTickMarkValuesOnly="YES" sliderType="linear" id="M4M-Od-9Mh"/>
                                                         <connections>
                                                             <action selector="vCustomLEDSet:" target="-2" id="NBM-l9-gYU"/>
                                                         </connections>
@@ -973,6 +996,17 @@
                                             </buttonCell>
                                             <connections>
                                                 <action selector="vSecondFanSet:" target="-2" id="pIe-wt-kzK"/>
+                                            </connections>
+                                        </button>
+                                        <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5sT-I1-ipX">
+                                            <rect key="frame" x="294" y="122" width="115" height="18"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <buttonCell key="cell" type="check" title="DisableFanCtrl" bezelStyle="regularSquare" imagePosition="left" inset="2" id="SAD-xa-6lF">
+                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                            <connections>
+                                                <action selector="vDisableFanSet:" target="-2" id="ruN-p3-7A8"/>
                                             </connections>
                                         </button>
                                     </subviews>

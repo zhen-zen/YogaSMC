@@ -58,6 +58,7 @@ static IOPMPowerState IOPMPowerStates[kIOPMNumberPowerStates] = {
 #define toggleFailure "%s toggle failed"
 #define toggleSuccess "%s set to 0x%x: %s"
 
+#define notSupported "%s not supported"
 #define valueMatched "%s already %x"
 #define valueInvalid "Invalid value for %s"
 #define valueUnknown "Unknown value for %s: %d"

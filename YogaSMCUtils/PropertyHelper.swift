@@ -8,45 +8,61 @@
 
 import Foundation
 
-func getBoolean(_ key: String, _ io_service: io_service_t) -> Bool {
-    guard let rvalue = IORegistryEntryCreateCFProperty(io_service, key as CFString, kCFAllocatorDefault, 0),
+// from https://github.com/LinusHenze/Fugu/blob/master/USB/IOKitUSB.swift
+// IOIteratorNext, Swift Style
+func IOIteratorNextOptional(_ iterator: io_iterator_t) -> io_service_t? {
+    let service = IOIteratorNext(iterator)
+    return service != 0 ? service : nil
+}
+
+func getBoolean(_ key: String, _ service: io_service_t) -> Bool {
+    guard let rvalue = IORegistryEntryCreateCFProperty(service, key as CFString, kCFAllocatorDefault, 0),
           let val = rvalue.takeRetainedValue() as? Bool else {
         return false
     }
     return val
 }
 
-func getNumber(_ key: String, _ io_service: io_service_t) -> Int {
-    guard let rvalue = IORegistryEntryCreateCFProperty(io_service, key as CFString, kCFAllocatorDefault, 0),
+func getNumber(_ key: String, _ service: io_service_t) -> Int {
+    guard let rvalue = IORegistryEntryCreateCFProperty(service, key as CFString, kCFAllocatorDefault, 0),
           let val = rvalue.takeRetainedValue() as? Int else {
         return -1
     }
     return val
 }
 
-func getString(_ key: String, _ io_service: io_service_t) -> String? {
-    guard let rvalue = IORegistryEntryCreateCFProperty(io_service, key as CFString, kCFAllocatorDefault, 0),
+func getString(_ key: String, _ service: io_service_t) -> String? {
+    guard let rvalue = IORegistryEntryCreateCFProperty(service, key as CFString, kCFAllocatorDefault, 0),
           let val = rvalue.takeRetainedValue() as? NSString else {
         return nil
     }
     return val as String
 }
 
-func getDictionary(_ key: String, _ io_service: io_service_t) -> NSDictionary? {
-    guard let rvalue = IORegistryEntryCreateCFProperty(io_service, key as CFString, kCFAllocatorDefault, 0) else {
+func getDictionary(_ key: String, _ service: io_service_t) -> NSDictionary? {
+    guard let rvalue = IORegistryEntryCreateCFProperty(service, key as CFString, kCFAllocatorDefault, 0) else {
         return nil
     }
     return rvalue.takeRetainedValue() as? NSDictionary
 }
 
-func sendBoolean(_ key: String, _ value: Bool, _ io_service: io_service_t) -> Bool {
-    return (kIOReturnSuccess == IORegistryEntrySetCFProperty(io_service, key as CFString, value as CFBoolean))
+func getProperties(_ service: io_service_t) -> NSDictionary? {
+    var CFProps: Unmanaged<CFMutableDictionary>?
+    guard kIOReturnSuccess == IORegistryEntryCreateCFProperties(service, &CFProps, kCFAllocatorDefault, 0),
+          CFProps != nil else {
+        return nil
+    }
+    return CFProps?.takeRetainedValue() as NSDictionary?
 }
 
-func sendNumber(_ key: String, _ value: Int, _ io_service: io_service_t) -> Bool {
-    return (kIOReturnSuccess == IORegistryEntrySetCFProperty(io_service, key as CFString, value as CFNumber))
+func sendBoolean(_ key: String, _ value: Bool, _ service: io_service_t) -> Bool {
+    return (kIOReturnSuccess == IORegistryEntrySetCFProperty(service, key as CFString, value as CFBoolean))
 }
 
-func sendString(_ key: String, _ value: String, _ io_service: io_service_t) -> Bool {
-    return (kIOReturnSuccess == IORegistryEntrySetCFProperty(io_service, key as CFString, value as CFString))
+func sendNumber(_ key: String, _ value: Int, _ service: io_service_t) -> Bool {
+    return (kIOReturnSuccess == IORegistryEntrySetCFProperty(service, key as CFString, value as CFNumber))
+}
+
+func sendString(_ key: String, _ value: String, _ service: io_service_t) -> Bool {
+    return (kIOReturnSuccess == IORegistryEntrySetCFProperty(service, key as CFString, value as CFString))
 }

@@ -40,6 +40,12 @@
 				<false/>
 				<key>Airflow Right</key>
 				<false/>
+				<key>Battery</key>
+				<false/>
+				<key>Battery Sensor 1</key>
+				<string>TBAT</string>
+				<key>Battery Sensor 2</key>
+				<false/>
 				<key>CPU Core PECI</key>
 				<string>CPEC</string>
 				<key>CPU System Agent Core</key>
@@ -86,6 +92,12 @@
 				<key>Airflow Left</key>
 				<false/>
 				<key>Airflow Right</key>
+				<false/>
+				<key>Battery</key>
+				<false/>
+				<key>Battery Sensor 1</key>
+				<false/>
+				<key>Battery Sensor 2</key>
 				<false/>
 				<key>CPU Core PECI</key>
 				<false/>

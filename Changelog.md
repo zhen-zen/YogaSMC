@@ -2,6 +2,32 @@ YogaSMC Changelog
 ============================
 
 #### v1.3.1
+- Pane: debug: enable RapidChargeMode checkbox
+- ThinkVPC: fix forgotten break in switch case, thx @junaedahmed
+- NC: update presets, thx @antoniomcr96 @Ab2774
+- NC: support localization
+- ThinkVPC: check LED availability
+- NC: support hideText for actions with customized OSD
+- Build: switch ARCHS to x86_64
+- ThinkVPC: support yoga mode detection
+- NC: support DisableFan option
+- YogaHIDD: fix support for devices without `_DSM`
+- YogaVPC: validate clamshellCap and updateBacklight support
+- YogaWMI: fix getNotifyID
+- IdeaWMI: fix getBatteryInfo retain count
+- NC: hide selected text which status is revealed by image
+- YogaVPC: notify timestamp for key press
+- NC: fix easter egg and enable it by default
+- YogaWMI: evaluate all possible BMF names
+- YogaSMC: support atomicSpDeciKelvinKey
+- Docs: merge SSDT samples for ThinkSMC; add suggestions for LNUX
+- Pane: separate different views and update when reopen
+- YogaSMC: support atomicSpDeciKelvinKey
+- NC: update resources, thx @hexart
+- NC: support multiple instance, specifically YogaHIDD
+- NC: support modifier
+- NC: support Caps Lock monitor
+- ThinkVPC: evaluate GMKS for FnLock state
 
 #### v1.3.0
 - Pane: fix loading prior to 10.14.4 with embedded swift runtime, thx @Charlyo

@@ -26,7 +26,7 @@ protected:
      *
      *  @param key  name of event dictionary
      */
-    void getNotifyID(OSString *key);
+    void getNotifyID(const char *key);
 
     /**
      *  Vendor specific WMI analyze

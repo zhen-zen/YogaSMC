@@ -21,26 +21,30 @@ void YogaSMC::addVSMCKey() {
     OSDictionary *status = OSDictionary::withCapacity(8);
     OSString *method;
 
-    addECKeySp(KeyTCSA, "CPU System Agent Core");
-    addECKeySp(KeyTCXC, "CPU Core PECI");
+    addECKeySp(KeyTB0T(0), "Battery", atomicSpDeciKelvinKey);
+    addECKeySp(KeyTB0T(1), "Battery Sensor 1", atomicSpDeciKelvinKey);
+    addECKeySp(KeyTB0T(2), "Battery Sensor 2", atomicSpDeciKelvinKey);
+
+    addECKeySp(KeyTCSA, "CPU System Agent Core", atomicSpKey);
+    addECKeySp(KeyTCXC, "CPU Core PECI", atomicSpKey);
 
     // Laptops only have 1 key for both channel
-    addECKeySp(KeyTM0P, "Memory Proximity");
+    addECKeySp(KeyTM0P, "Memory Proximity", atomicSpKey);
 
     // Desktops
-    addECKeySp(KeyTM0p(0), "SO-DIMM 1 Proximity");
-    addECKeySp(KeyTM0p(1), "SO-DIMM 2 Proximity");
-    addECKeySp(KeyTM0p(2), "SO-DIMM 3 Proximity");
-    addECKeySp(KeyTM0p(3), "SO-DIMM 4 Proximity");
+    addECKeySp(KeyTM0p(0), "SO-DIMM 1 Proximity", atomicSpKey);
+    addECKeySp(KeyTM0p(1), "SO-DIMM 2 Proximity", atomicSpKey);
+    addECKeySp(KeyTM0p(2), "SO-DIMM 3 Proximity", atomicSpKey);
+    addECKeySp(KeyTM0p(3), "SO-DIMM 4 Proximity", atomicSpKey);
 
-    addECKeySp(KeyTPCD, "Platform Controller Hub Die");
-    addECKeySp(KeyTW0P, "Airport Proximity");
-    addECKeySp(KeyTaLC, "Airflow Left");
-    addECKeySp(KeyTaRC, "Airflow Right");
-    addECKeySp(KeyTh0H(1), "Fin Stack Proximity Right");
-    addECKeySp(KeyTh0H(2), "Fin Stack Proximity Left");
-    addECKeySp(KeyTs0p(0), "Palm Rest");
-    addECKeySp(KeyTs0p(1), "Trackpad Actuator");
+    addECKeySp(KeyTPCD, "Platform Controller Hub Die", atomicSpKey);
+    addECKeySp(KeyTW0P, "Airport Proximity", atomicSpKey);
+    addECKeySp(KeyTaLC, "Airflow Left", atomicSpKey);
+    addECKeySp(KeyTaRC, "Airflow Right", atomicSpKey);
+    addECKeySp(KeyTh0H(1), "Fin Stack Proximity Right", atomicSpKey);
+    addECKeySp(KeyTh0H(2), "Fin Stack Proximity Left", atomicSpKey);
+    addECKeySp(KeyTs0p(0), "Palm Rest", atomicSpKey);
+    addECKeySp(KeyTs0p(1), "Trackpad Actuator", atomicSpKey);
 
     setProperty("DirectECKey", status);
     status->release();

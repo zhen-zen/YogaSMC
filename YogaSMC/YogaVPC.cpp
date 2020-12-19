@@ -180,6 +180,10 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
     if (i) {
         while (OSString* key = OSDynamicCast(OSString, i->getNextObject())) {
             if (key->isEqualTo(clamshellPrompt)) {
+                if (!clamshellCap) {
+                    AlwaysLog(notSupported, clamshellPrompt);
+                    continue;
+                }
                 OSBoolean *value;
                 getPropertyBoolean(clamshellPrompt);
                 updateClamshell(false);
@@ -191,7 +195,10 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
             } else if (key->isEqualTo(backlightPrompt)) {
                 OSNumber *value;
                 getPropertyNumber(backlightPrompt);
-                updateBacklight();
+                if (!updateBacklight()) {
+                    AlwaysLog(notSupported, backlightPrompt);
+                    continue;
+                }
                 if (value->unsigned32BitValue() == backlightLevel)
                     DebugLog(valueMatched, backlightPrompt, backlightLevel);
                 else
@@ -209,7 +216,7 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
                 }
             } else if (key->isEqualTo("ReadECOffset")) {
                 if (!(ECAccessCap & BIT(0))) {
-                    AlwaysLog("%s not supported", "EC Read");
+                    AlwaysLog(notSupported, "EC Read");
                     continue;
                 }
                 OSNumber *value;
@@ -227,7 +234,7 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
                     AlwaysLog("%s: 0x%02x", value->getCStringNoCopy(), result);
             } else if (key->isEqualTo(DYTCPrompt)) {
                 if (!DYTCCap) {
-                    AlwaysLog("%s not supported", DYTCPrompt);
+                    AlwaysLog(notSupported, DYTCPrompt);
                     continue;
                 }
                 OSNumber *raw = OSDynamicCast(OSNumber, dict->getObject(DYTCPrompt));

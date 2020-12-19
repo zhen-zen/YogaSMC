@@ -643,6 +643,7 @@ void IdeaVPC::updateVPC() {
     if (!brightnessPoller)
         DebugLog("read VPC EC result: 0x%x %d", vpc1, retries);
 
+    UInt64 time = 0;
     for (int vpc_bit = 0; vpc_bit < 16; vpc_bit++) {
         if (BIT(vpc_bit) & vpc1) {
             UInt32 data = 0;
@@ -652,8 +653,13 @@ void IdeaVPC::updateVPC() {
                         AlwaysLog("Failed to read VPCCMD_R_SPECIAL_BUTTONS %d", retries);
                     } else {
                         switch (result) {
-                            case 0x40:
-                                DebugLog("Fn+Q cooling");
+                            case 0x01:
+                            case 0x40: // KEY_PROG4
+                                DebugLog("Fn+Q cooling 0x%x", result);
+                                break;
+
+                            case 0x02: // KEY_PROG3
+                                DebugLog("OneKey Theater");
                                 break;
 
                             default:
@@ -662,12 +668,14 @@ void IdeaVPC::updateVPC() {
                         }
                         data = result;
                     }
+                    time = 1;
                     break;
 
                 case 1: // ENERGY_EVENT_GENERAL / ENERGY_EVENT_KEYBDLED_OLD
                     DebugLog("Fn+Space keyboard backlight old?");
                     updateKeyboard(true);
                     data = backlightLevel;
+                    time = 1;
                     // also on AC connect / disconnect
                     break;
 
@@ -678,6 +686,16 @@ void IdeaVPC::updateVPC() {
                         DebugLog("Open lid? 0x%x %s", result, result ? "on" : "off");
                     data = result;
                     // functional, TODO: turn off screen on demand
+                    break;
+
+                case 3: // long_pressed ? KEY_PROG2 : KEY_PROG1
+                    if (!read_ec_data(VPCCMD_R_NOVO, &result, &retries)) {
+                        AlwaysLog("Failed to read VPCCMD_R_NOVO %d", retries);
+                    } else {
+                        DebugLog("NOVO button 0x%x", result);
+                        data = result;
+                    }
+                    time = 1;
                     break;
 
                 case 4:
@@ -698,6 +716,7 @@ void IdeaVPC::updateVPC() {
                         brightnessSaved = result;
                         data = result;
                     }
+                    time = 1;
                     break;
 
                 case 5:
@@ -711,28 +730,49 @@ void IdeaVPC::updateVPC() {
                     }
                     TouchPadEnabledHW = (result != 0);
                     data = result;
+                    time = 1;
+                    break;
+
+                case 6: // KEY_SWITCHVIDEOMODE
+                    DebugLog("Fn+F10 mirror");
+                    time = 1;
                     break;
 
                 case 7:
                     DebugLog("Fn+F8 camera");
+                    time = 1;
                     break;
 
                 case 8: // ENERGY_EVENT_MIC
                     DebugLog("Fn+F4 mic");
+                    time = 1;
+                    break;
+
+                case 9: // RFKILL
+                    DebugLog("Fn rfkill");
+                    time = 1;
                     break;
 
                 case 10:
                     DebugLog("Touchpad on");
+                    time = 1;
+                    break;
+
+                case 11: // KEY_F16
+                    DebugLog("Fn F16");
+                    time = 1;
                     break;
 
                 case 12: // ENERGY_EVENT_KEYBDLED
                     DebugLog("Fn+Space keyboard backlight?");
                     updateKeyboard(true);
                     data = backlightLevel;
+                    time = 1;
                     break;
 
                 case 13:
                     DebugLog("Fn+F7 airplane mode");
+                    time = 1;
                     break;
 
                 default:
@@ -743,6 +783,11 @@ void IdeaVPC::updateVPC() {
             if (client != nullptr)
                 client->sendNotification(vpc_bit, data);
         }
+    }
+
+    if (time != 0) {
+        clock_get_uptime(&time);
+        dispatchMessage(kPS2M_notifyKeyTime, &time);
     }
 }
 

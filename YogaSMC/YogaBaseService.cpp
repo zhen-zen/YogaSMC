@@ -41,7 +41,9 @@ bool YogaBaseService::start(IOService *provider)
         return false;
 
     setProperty("VersionInfo", kextVersion);
-
+#ifdef ALTER
+    setProperty("Variant", "Alter");
+#endif
     workLoop = IOWorkLoop::workLoop();
     commandGate = IOCommandGate::commandGate(this);
     if (!workLoop || !commandGate || (workLoop->addEventSource(commandGate) != kIOReturnSuccess)) {
@@ -285,18 +287,18 @@ IOReturn YogaBaseService::method_we1b(UInt32 offset, UInt8 value) {
 void YogaBaseService::validateEC() {
     if (!ec)
         return;
-    if (ec->validateObject(readECOneByte) == kIOReturnSuccess &&
-        ec->validateObject(readECBytes) == kIOReturnSuccess) {
-        ECAccessCap |= BIT(0);
-        if (ec->validateObject(writeECOneByte) == kIOReturnSuccess) {
-            setProperty("EC Capability", "RW");
-            ECAccessCap |= BIT(1);
-        } else {
-            setProperty("EC Capability", "RO");
-        }
-    } else {
+    if (ec->validateObject(readECOneByte) != kIOReturnSuccess ||
+        ec->validateObject(readECBytes) != kIOReturnSuccess) {
         setProperty("EC Capability", "False");
+        return;
     }
+    ECAccessCap |= BIT(0);
+    if (ec->validateObject(writeECOneByte) != kIOReturnSuccess) {
+        setProperty("EC Capability", "RO");
+        return;
+    }
+    ECAccessCap |= BIT(1);
+    setProperty("EC Capability", "RW");
 }
 
 void YogaBaseService::dispatchKeyEvent(UInt16 keyCode, bool goingDown, bool time) {

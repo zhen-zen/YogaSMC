@@ -1,0 +1,115 @@
+/* 
+  Localizable.strings
+  YogaSMC
+
+  Created by Zhen on 11/17/20.
+  Copyright © 2020 Zhen. All rights reserved.
+*/
+
+// OSD Warning
+"ConnectFail" = "Failed to connect \n to YogaSMC";
+"AlreadyConnected" = "Another instance has \n connected to YogaSMC";
+"YogaSMC Unavailable";
+"Unknown Version";
+"ECAccessUnavailable" = "EC access unavailable! \n See SSDT-ECRW.dsl";
+"Unknown Class";
+"MoveApp" = "Please move the app \n into Applications";
+
+// Menu
+"ClassVar" = "Class: ";
+"Preferences";
+"Start at Login";
+
+// Event name
+// Idea
+"Special Button";
+"Fn-Q Cooling";
+"Keyboard Backlight";
+"Screen Off";
+"Screen On";
+"TouchPad Off";
+"TouchPad On";
+"Switch Video";
+"Camera";
+"Mic Mute" = "";
+"TouchPad On";
+"Yoga Mode";
+"Laptop Mode";
+"Tablet Mode";
+"Stand Mode";
+"Tent Mode";
+"FnKey" = "";
+"Caps Lock" = "";
+// Think
+"Sleep";
+"Second Display";
+"Brightness Up";
+"Brightness Down";
+"Settings";
+"Search";
+"Mission Control";
+"Launchpad";
+"Custom Hotkey";
+"Bluetooth";
+"Keyboard" = "";
+"LID Close";
+"LID Open";
+"Thermal Table Change";
+"Thermal Control Change";
+"AC Status Change";
+"Backlight Changed";
+"FnLock";
+"Palm Detected";
+"Palm Undetected";
+"Thermal Changed";
+// HIDD
+"STOPCD";
+"Rotate Lock";
+"Convertible";
+
+// OSD Res
+"On";
+"Off";
+"Low";
+"High";
+"Enabled";
+"Disabled";
+"Unavailable";
+"Toggle failed";
+
+"Backlight";
+"EventVar" = "Event ";
+
+// Helper
+"OpenFail" = "Failed to open ";
+
+// Date
+"New Year";
+"Valentine's Day";
+"Saint Patrick's Day";
+"Easter";
+"Halloween";
+"Thanksgiving";
+"Christmas Eve";
+"Christmas Day";
+"New Year's Eve";
+
+// RF
+"Bluetooth";
+"BT Discoverable";
+"Wireless" = "";
+"Airplane Mode" = "";
+
+// Script
+"AppleEventAccess" = "Please grant access \n to Apple Event";
+"Mic";
+"Mute";
+"Unmute";
+
+// ThinkFan
+"Auto";
+"Main";
+"ReadFanFail" = "Read fan level failed!";
+"WriteFanFail" = "Write Fan level failed!";
+"Main: %d rpm";
+"Alt: %d rpm";
