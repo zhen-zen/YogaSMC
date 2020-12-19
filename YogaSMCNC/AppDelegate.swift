@@ -235,7 +235,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             isOpen = registerNotification()
             thinkWakeup()
             if !hide, !defaults.bool(forKey: "DisableFan") {
-                if ECCap != "RW" {
+                if ECCap == "RW" {
                     if !getBoolean("Dual fan", conf.service),
                        defaults.bool(forKey: "SecondThinkFan") {
                         fanHelper2 = ThinkFanHelper(appMenu, conf.connect, false, false)
