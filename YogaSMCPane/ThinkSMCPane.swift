@@ -32,7 +32,7 @@ extension YogaSMCPane {
     @IBAction func vChargeThresholdStopSet(_ sender: NSTextField) {
         if let dict = getDictionary(thinkBatteryName[thinkBatteryNumber], service) {
             if let vStop = dict["BCSG"] as? NSNumber,
-               vStart.intValue >= 0 {
+               vStop.intValue >= 0 {
                 var current = (vStop.intValue) & 0xff
                 if current < 0 || current > 99 {
                     vChargeThresholdStop.isEnabled = false
