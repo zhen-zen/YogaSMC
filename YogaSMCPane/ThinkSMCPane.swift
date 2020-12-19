@@ -12,7 +12,8 @@ import Foundation
 extension YogaSMCPane {
     @IBAction func vChargeThresholdStartSet(_ sender: NSTextFieldCell) {
         if let dict = getDictionary(thinkBatteryName[thinkBatteryNumber], service) {
-            if let vStart = dict["BCTG"] as? NSNumber {
+            if let vStart = dict["BCTG"] as? NSNumber,
+               vStart.intValue >= 0 {
                 var current = (vStart.intValue) & 0xff
                 if current < 0 || current > 99 {
                     vChargeThresholdStart.isEnabled = false
@@ -30,7 +31,8 @@ extension YogaSMCPane {
 
     @IBAction func vChargeThresholdStopSet(_ sender: NSTextField) {
         if let dict = getDictionary(thinkBatteryName[thinkBatteryNumber], service) {
-            if let vStop = dict["BCSG"] as? NSNumber {
+            if let vStop = dict["BCSG"] as? NSNumber,
+               vStart.intValue >= 0 {
                 var current = (vStop.intValue) & 0xff
                 if current < 0 || current > 99 {
                     vChargeThresholdStop.isEnabled = false
@@ -91,7 +93,9 @@ extension YogaSMCPane {
         _ = sendNumber("Battery", thinkBatteryNumber, service)
         if let dict = getDictionary(thinkBatteryName[thinkBatteryNumber], service),
            let vStart = dict["BCTG"] as? NSNumber,
-           let vStop = dict["BCSG"] as? NSNumber {
+           let vStop = dict["BCSG"] as? NSNumber,
+           vStart.int32Value >= 0,
+           vStop.int32Value >= 0 {
             vChargeThresholdStart.isEnabled = true
             vChargeThresholdStop.isEnabled = true
             vChargeThresholdStart.integerValue = vStart.intValue & 0xff
