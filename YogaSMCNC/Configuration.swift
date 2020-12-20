@@ -86,7 +86,7 @@ let ideaEvents: [UInt32: [UInt32: EventDesc]] = [
     ],
     0x08: [0: EventDesc("Mic Mute", act: .micmute)],
     0x0A: [0: EventDesc("TouchPad On", display: false)],
-    0x0C: [0: EventDesc("Keyboard Backlight", act: .backlight)],
+    0x0C: [0: EventDesc("Keyboard Backlight", act: .backlight, display: false)],
     0x0D: [
         0: EventDesc("Airplane Mode", act: .airplane),
         UInt32(NSEvent.ModifierFlags.control.rawValue): EventDesc("Bluetooth", act: .bluetooth),
