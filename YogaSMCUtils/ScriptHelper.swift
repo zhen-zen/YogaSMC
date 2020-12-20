@@ -42,8 +42,6 @@ let setAudioUnmuteAS = "set volume without output muted"
 let getMicVolumeAS = "input volume of (get volume settings)"
 let setMicVolumeAS = "set volume input volume %d"
 
-var volume: Int32 = 50
-
 // based on https://medium.com/macoclock/1ba82537f7c3
 func scriptHelper(_ source: String, _ name: String, _ image: NSString? = nil) -> NSAppleEventDescriptor? {
     if let scpt = NSAppleScript(source: source) {
@@ -58,23 +56,6 @@ func scriptHelper(_ source: String, _ name: String, _ image: NSString? = nil) ->
     }
     os_log("%s: failed to execute script", type: .error, name)
     return nil
-}
-
-func micMuteHelper(_ service: io_service_t, _ name: String) {
-    guard let current = scriptHelper(getMicVolumeAS, "MicMute") else { return }
-    if current.int32Value != 0 {
-        if scriptHelper(String(format: setMicVolumeAS, 0), "MicMute") != nil {
-            volume = current.int32Value
-            _ = sendNumber("MicMuteLED", 2, service)
-            showOSDRes(name, "Mute", .kMicOff)
-        }
-    } else {
-        if scriptHelper(String(format: setMicVolumeAS, volume), "MicMute") != nil {
-            volume = current.int32Value
-            _ = sendNumber("MicMuteLED", 0, service)
-            showOSDRes(name, "Unmute", .kMic)
-        }
-    }
 }
 
 func prefpaneHelper(_ identifier: String = "YogaSMCPane") {

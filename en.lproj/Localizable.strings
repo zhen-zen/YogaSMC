@@ -100,11 +100,13 @@
 "Wireless" = "";
 "Airplane Mode" = "";
 
-// Script
-"AppleEventAccess" = "Please grant access \n to Apple Event";
+// Audio
 "Mic";
 "Mute";
 "Unmute";
+
+// Script
+"AppleEventAccess" = "Please grant access \n to Apple Event";
 
 // ThinkFan
 "Auto";

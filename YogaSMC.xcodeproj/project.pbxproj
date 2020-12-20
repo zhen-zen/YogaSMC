@@ -21,6 +21,7 @@
 		6F0A987A25343357002F9F65 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F0A987925343357002F9F65 /* AppDelegate.swift */; };
 		6F0A987E25343359002F9F65 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6F0A987D25343359002F9F65 /* Assets.xcassets */; };
 		6F0A988125343359002F9F65 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6F0A987F25343359002F9F65 /* Main.storyboard */; };
+		6F14956F2580BF7200A3BA83 /* AudioHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F14956E2580BF7200A3BA83 /* AudioHelper.swift */; };
 		6F1495D32582000500A3BA83 /* IdeaSMCPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F1495D22582000500A3BA83 /* IdeaSMCPane.swift */; };
 		6F1495DF258200DA00A3BA83 /* ThinkSMCPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F1495DE258200DA00A3BA83 /* ThinkSMCPane.swift */; };
 		6F1C7093251473BB007D1DFC /* YogaSMCPane.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 6F1C7092251473BB007D1DFC /* YogaSMCPane.tiff */; };
@@ -203,6 +204,7 @@
 		6F0A987D25343359002F9F65 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		6F0A988025343359002F9F65 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		6F0A988225343359002F9F65 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		6F14956E2580BF7200A3BA83 /* AudioHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioHelper.swift; sourceTree = "<group>"; };
 		6F1495D22582000500A3BA83 /* IdeaSMCPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdeaSMCPane.swift; sourceTree = "<group>"; };
 		6F1495DE258200DA00A3BA83 /* ThinkSMCPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThinkSMCPane.swift; sourceTree = "<group>"; };
 		6F1C708C251473BB007D1DFC /* YogaSMCPane.prefPane */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = YogaSMCPane.prefPane; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -539,6 +541,7 @@
 		6F8B1F1925380748003DD8A8 /* YogaSMCUtils */ = {
 			isa = PBXGroup;
 			children = (
+				6F14956E2580BF7200A3BA83 /* AudioHelper.swift */,
 				6F8AF12F254DEDEE00438EC8 /* DateHelper.swift */,
 				6F8B1F2C253808DC003DD8A8 /* OSDHelper.swift */,
 				6F8B1F242538083A003DD8A8 /* PropertyHelper.swift */,
@@ -890,6 +893,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6FB5BE15255521E1001BFDFF /* ThinkFanHelper.swift in Sources */,
+				6F14956F2580BF7200A3BA83 /* AudioHelper.swift in Sources */,
 				6F8B1F2E253808DC003DD8A8 /* OSDHelper.swift in Sources */,
 				6F8AF130254DEDEE00438EC8 /* DateHelper.swift in Sources */,
 				6F8B1F262538083A003DD8A8 /* PropertyHelper.swift in Sources */,
