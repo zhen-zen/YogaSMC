@@ -95,6 +95,7 @@ class YogaSMCPane: NSPreferencePane {
     @IBOutlet weak var vFanStop: NSButton!
     @IBOutlet weak var vDisableFan: NSButton!
     @IBOutlet weak var vSaveFanLevel: NSButton!
+    @IBOutlet weak var vMuteLEDFixup: NSButton!
 
     // Main
 
@@ -151,6 +152,11 @@ class YogaSMCPane: NSPreferencePane {
                 micMuteCheck.isEnabled = false
             }
         }
+    }
+
+    @IBOutlet weak var vClamshellMode: NSButton!
+    @IBAction func vClamshellModeSet(_ sender: NSButton) {
+        _ = sendBoolean("ClamshellMode", (vClamshellMode.state == .on), service)
     }
 
     override func mainViewDidLoad() {
@@ -233,6 +239,11 @@ class YogaSMCPane: NSPreferencePane {
         vMenubarIcon.stringValue = defaults.string(forKey: "Title") ?? ""
 
         vHideCapsLock.state = defaults.bool(forKey: "HideCapsLock") ? .on : .off
+
+        if let val = props["ClamshellMode"] as? Bool {
+            vClamshellMode.isEnabled = true
+            vClamshellMode.state = val ? .on : .off
+        }
     }
 
     override func willSelect() {

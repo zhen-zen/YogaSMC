@@ -12,7 +12,8 @@ import Foundation
 extension YogaSMCPane {
     @IBAction func vChargeThresholdStartSet(_ sender: NSTextFieldCell) {
         if let dict = getDictionary(thinkBatteryName[thinkBatteryNumber], service) {
-            if let vStart = dict["BCTG"] as? NSNumber {
+            if let vStart = dict["BCTG"] as? NSNumber,
+               vStart.intValue >= 0 {
                 var current = (vStart.intValue) & 0xff
                 if current < 0 || current > 99 {
                     vChargeThresholdStart.isEnabled = false
@@ -30,7 +31,8 @@ extension YogaSMCPane {
 
     @IBAction func vChargeThresholdStopSet(_ sender: NSTextField) {
         if let dict = getDictionary(thinkBatteryName[thinkBatteryNumber], service) {
-            if let vStop = dict["BCSG"] as? NSNumber {
+            if let vStop = dict["BCSG"] as? NSNumber,
+               vStop.intValue >= 0 {
                 var current = (vStop.intValue) & 0xff
                 if current < 0 || current > 99 {
                     vChargeThresholdStop.isEnabled = false
@@ -89,13 +91,19 @@ extension YogaSMCPane {
 
     @IBAction func vSaveFanLevelSet(_ sender: NSButton) {
         defaults.setValue((vSaveFanLevel.state == .on), forKey: "SaveFanLevel")
+
+    @IBAction func vMuteLEDFixupSet(_ sender: NSButton) {
+        defaults.setValue((vMuteLEDFixup.state == .on), forKey: "ThinkMuteLEDFixup")
+        _ = scriptHelper(reloadAS, "Reload YogaSMCNC")
     }
 
     func updateThinkBattery() -> Bool {
         _ = sendNumber("Battery", thinkBatteryNumber, service)
         if let dict = getDictionary(thinkBatteryName[thinkBatteryNumber], service),
            let vStart = dict["BCTG"] as? NSNumber,
-           let vStop = dict["BCSG"] as? NSNumber {
+           let vStop = dict["BCSG"] as? NSNumber,
+           vStart.int32Value >= 0,
+           vStop.int32Value >= 0 {
             vChargeThresholdStart.isEnabled = true
             vChargeThresholdStop.isEnabled = true
             vChargeThresholdStart.integerValue = vStart.intValue & 0xff
@@ -114,7 +122,8 @@ extension YogaSMCPane {
                 var input: UInt64 = 0x84
                 var outputSize = 2
                 var output: [UInt8] = Array(repeating: 0, count: 2)
-                if kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadEC), &input, 1, nil, 0, nil, nil, &output, &outputSize),
+                if kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadEC),
+                                                           &input, 1, nil, 0, nil, nil, &output, &outputSize),
                    outputSize == 2 {
                     vFanSpeed.intValue = Int32(output[0]) | Int32(output[1]) << 8
                 }
@@ -139,13 +148,15 @@ extension YogaSMCPane {
         }
         updateThinkFan()
         #if DEBUG
-        if !getBoolean("Dual fan", service) {
+        if let val = props["Dual fan"] as? Bool,
+           val == true {
             vSecondFan.isEnabled = true
             vSecondFan.state = defaults.bool(forKey: "SecondThinkFan") ? .on : .off
         }
         #endif
         vFanStop.state = defaults.bool(forKey: "AllowFanStop") ? .on : .off
-        if getBoolean("LEDSupport", service) {
+        if let val = props["LEDSupport"] as? Bool,
+           val == true {
             vPowerLEDSlider.isEnabled = true
             vStandbyLEDSlider.isEnabled = true
             vThinkDotSlider.isEnabled = true
@@ -153,5 +164,6 @@ extension YogaSMCPane {
         }
         vDisableFan.state = defaults.bool(forKey: "DisableFan") ? .on : .off
         vSaveFanLevel.state = defaults.bool(forKey: "SaveFanLevel") ? .on : .off
+        vMuteLEDFixup.state = defaults.bool(forKey: "ThinkMuteLEDFixup") ? .on : .off
     }
 }

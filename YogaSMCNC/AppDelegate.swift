@@ -31,12 +31,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var fanTimer: Timer?
 
     @objc func thinkWakeup() {
-        if let current = scriptHelper(getMicVolumeAS, "MicMute"),
-           sendNumber("MicMuteLED", current.int32Value == 0 ? 2 : 0, conf.service) {
-            os_log("Mic Mute LED updated", type: .info)
-        } else {
-            os_log("Failed to update Mic Mute LED", type: .error)
-        }
+        micMuteLEDHelper(conf.service)
+        muteLEDHelper(conf.service)
 
         if fanHelper2 != nil {
             fanHelper2?.setFanLevel()
@@ -44,6 +40,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if fanHelper != nil {
             fanHelper?.setFanLevel()
         }
+    }
+
+    @objc func thinkMuteLEDFixup() {
+        muteLEDHelper(conf.service, false)
     }
 
     // MARK: - Menu
@@ -235,7 +235,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             isOpen = registerNotification()
             thinkWakeup()
             if !hide, !defaults.bool(forKey: "DisableFan") {
-                if ECCap != "RW" {
+                if ECCap == "RW" {
                     if !getBoolean("Dual fan", conf.service),
                        defaults.bool(forKey: "SecondThinkFan") {
                         fanHelper2 = ThinkFanHelper(appMenu, conf.connect, false, false)
@@ -260,6 +260,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             }
             NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(thinkWakeup),
                                                               name: NSWorkspace.didWakeNotification, object: nil)
+            if defaults.bool(forKey: "ThinkMuteLEDFixup") {
+                NotificationCenter.default.addObserver(self, selector: #selector(thinkMuteLEDFixup),
+                                                       name: VolumeObserver.volumeChanged, object: nil)
+                DistributedNotificationCenter.default.addObserver(self, selector: #selector(thinkMuteLEDFixup),
+                                                                  name: NSNotification.Name(rawValue: "com.apple.sound.settingsChangedNotification"), object: nil)
+            }
         case "YogaHIDD":
             conf.events = HIDDEvents
             _ = registerNotification()
