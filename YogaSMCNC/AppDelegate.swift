@@ -323,52 +323,51 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     func loadEvents() {
-        if let arr = defaults.object(forKey: "Events") as? [[String: Any]] {
-            for entry in arr {
-                if let eid = entry["id"] as? UInt32,
-                   let events = entry["events"] as? [[String: Any]] {
-                    var info = conf.events[eid] ?? [:]
-                    for event in events {
-                        if let data = event["data"] as? UInt32,
-                           let name = event["name"] as? String,
-                           let action = event["action"] as? String {
-                            let opt = event["option"] as? String
-                            if info[data] != nil,
-                               action == "nothing",
-                               (opt == "Unknown" || (opt == nil && name.hasPrefix("Event 0x"))) {
-                                os_log("Override unknown event 0x%04x : %d", type: .info, eid, data)
-                            } else {
-                                info[data] = EventDesc(
-                                    name,
-                                    event["image"] as? String,
-                                    act: EventAction(rawValue: action) ?? .nothing,
-                                    display: event["display"] as? Bool ?? true,
-                                    opt: opt)
-                            }
-                        } else {
-                            os_log("Invalid event for 0x%04x!", type: .info, eid)
-                        }
-                    }
-                    conf.events[eid] = info
-                } else {
-                    os_log("Invalid event!", type: .info)
-                }
-            }
-            os_log("Loaded %d events", type: .info, conf.events.capacity)
-        } else {
+        guard let dict = defaults.object(forKey: "Events") as? [String: Any] else {
             os_log("Events not found in preference, loading defaults", type: .info)
+            return
         }
+
+        for (sid, entries) in dict {
+            if let eid = UInt32(sid, radix: 16),
+               let events = entries as? [String: Any] {
+                var info = conf.events[eid] ?? [:]
+                for (sdata, entry) in events {
+                    if let data = UInt32(sdata, radix: 16),
+                       let event = entry as? [String: Any],
+                       let name = event["name"] as? String,
+                       let action = event["action"] as? String {
+                        let opt = event["option"] as? String
+                        if info[data] != nil,
+                           action == "nothing",
+                           (opt == "Unknown" || (opt == nil && name.hasPrefix("Event 0x"))) {
+                            os_log("Override unknown event 0x%04x : %d", type: .info, eid, data)
+                        } else {
+                            info[data] = EventDesc(
+                                name,
+                                event["image"] as? String,
+                                act: EventAction(rawValue: action) ?? .nothing,
+                                display: event["display"] as? Bool ?? true,
+                                opt: opt)
+                        }
+                    } else {
+                        os_log("Invalid event for 0x%04x : %s!", type: .info, eid, sdata)
+                    }
+                }
+                conf.events[eid] = info
+            } else {
+                os_log("Invalid event %s!", type: .info, sid)
+            }
+        }
+        os_log("Loaded %d events", type: .info, conf.events.count)
     }
 
     func saveEvents() {
-        var arr: [[String: Any]] = []
+        var dict: [String: Any] = [:]
         for (eid, info) in conf.events {
-            var events: [[String: Any]] = []
-            var entry: [String: Any] = [:]
-            entry["id"] = Int(eid)
+            var events: [String: Any] = [:]
             for (data, desc) in info {
                 var event: [String: Any] = [:]
-                event["data"] = Int(data)
                 event["name"] = desc.name
                 if let res = desc.image {
                     if let path = Bundle.main.resourcePath,
@@ -383,12 +382,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 if desc.option != nil {
                     event["option"] = desc.option
                 }
-                events.append(event)
+                events[String(data, radix: 16)] = event
             }
-            entry["events"] = events
-            arr.append(entry)
+            dict[String(eid, radix: 16)] = events
         }
-        defaults.setValue(arr, forKey: "Events")
+        defaults.setValue(dict, forKey: "Events")
     }
 
     func loadConfig() {
@@ -485,13 +483,12 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<Shar
         #if DEBUG
         os_log("%s: Do nothing", type: .info, desc.name)
         #endif
-        if desc.display {
-            if desc.name.hasPrefix("Event ") {
-                let prompt = NSLocalizedString("EventVar", comment: "Event ") + desc.name.dropFirst("Event ".count)
-                showOSDRaw(prompt, desc.image)
-            } else {
-                showOSD(desc.name, desc.image)
-            }
+        if !desc.display { return }
+        if desc.name.hasPrefix("Event ") {
+            let prompt = NSLocalizedString("EventVar", comment: "Event ") + desc.name.dropFirst("Event ".count)
+            showOSDRaw(prompt, desc.image)
+        } else {
+            showOSD(desc.name, desc.image)
         }
     case .script:
         if let scpt = desc.option {
