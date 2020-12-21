@@ -46,6 +46,7 @@
                 <outlet property="vMuteLEDFixup" destination="zvb-gN-ODn" id="ULa-0R-0Z1"/>
                 <outlet property="vPowerLEDSlider" destination="waU-W1-TYS" id="7Wx-IJ-18g"/>
                 <outlet property="vRapidChargeMode" destination="QxV-Zx-1xy" id="QQp-dH-Dad"/>
+                <outlet property="vSaveFanLevel" destination="kiH-8B-ZGj" id="9Nu-zJ-qUR"/>
                 <outlet property="vSecondFan" destination="fz3-OS-Dwq" id="pge-jF-NeS"/>
                 <outlet property="vStandbyLEDSlider" destination="96M-Na-T3c" id="kka-T4-nLV"/>
                 <outlet property="vThinkDotSlider" destination="IMC-QI-01L" id="Jhh-3P-USI"/>
@@ -1020,6 +1021,17 @@
                                             </buttonCell>
                                             <connections>
                                                 <action selector="vDisableFanSet:" target="-2" id="ruN-p3-7A8"/>
+                                            </connections>
+                                        </button>
+                                        <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="kiH-8B-ZGj">
+                                            <rect key="frame" x="294" y="97" width="109" height="18"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <buttonCell key="cell" type="check" title="SaveFanLevel" bezelStyle="regularSquare" imagePosition="left" inset="2" id="YDD-UZ-gjQ">
+                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                            <connections>
+                                                <action selector="vSaveFanLevelSet:" target="-2" id="kKm-Cc-kE3"/>
                                             </connections>
                                         </button>
                                         <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zvb-gN-ODn">

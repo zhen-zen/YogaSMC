@@ -89,6 +89,11 @@ extension YogaSMCPane {
         _ = scriptHelper(reloadAS, "Reload YogaSMCNC")
     }
 
+    @IBAction func vSaveFanLevelSet(_ sender: NSButton) {
+        defaults.setValue((vSaveFanLevel.state == .on), forKey: "SaveFanLevel")
+        _ = scriptHelper(reloadAS, "Reload YogaSMCNC")
+    }
+
     @IBAction func vMuteLEDFixupSet(_ sender: NSButton) {
         defaults.setValue((vMuteLEDFixup.state == .on), forKey: "ThinkMuteLEDFixup")
         _ = scriptHelper(reloadAS, "Reload YogaSMCNC")
@@ -160,6 +165,7 @@ extension YogaSMCPane {
             vCustomLEDSlider.isEnabled = true
         }
         vDisableFan.state = defaults.bool(forKey: "DisableFan") ? .on : .off
+        vSaveFanLevel.state = defaults.bool(forKey: "SaveFanLevel") ? .on : .off
         vMuteLEDFixup.state = defaults.bool(forKey: "ThinkMuteLEDFixup") ? .on : .off
     }
 }
