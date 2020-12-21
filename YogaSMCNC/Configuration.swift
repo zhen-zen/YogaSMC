@@ -62,6 +62,10 @@ struct EventDesc {
     }
 }
 
+fileprivate let commandFlag = UInt32(NSEvent.ModifierFlags.command.rawValue)
+fileprivate let controlFlag = UInt32(NSEvent.ModifierFlags.control.rawValue)
+fileprivate let optionFlag = UInt32(NSEvent.ModifierFlags.option.rawValue)
+
 let ideaEvents: [UInt32: [UInt32: EventDesc]] = [
     0x00: [
         0x00: EventDesc("Special Button", display: false),
@@ -82,16 +86,16 @@ let ideaEvents: [UInt32: [UInt32: EventDesc]] = [
     0x06: [0: EventDesc("Switch Video")],
     0x07: [
         0: EventDesc("Camera", .kCamera, act: .camera),
-        UInt32(NSEvent.ModifierFlags.option.rawValue): EventDesc("Photo Booth", act: .launchapp, display: false, opt: "Photo Booth")
+        optionFlag: EventDesc("Photo Booth", act: .launchapp, display: false, opt: "Photo Booth")
     ],
     0x08: [0: EventDesc("Mic Mute", act: .micmute)],
     0x0A: [0: EventDesc("TouchPad On", display: false)],
     0x0C: [0: EventDesc("Keyboard Backlight")],
     0x0D: [
         0: EventDesc("Airplane Mode", act: .airplane),
-        UInt32(NSEvent.ModifierFlags.control.rawValue): EventDesc("Bluetooth", act: .bluetooth),
-        UInt32(NSEvent.ModifierFlags.option.rawValue): EventDesc("BT Discoverable", act: .bluetoothdiscoverable),
-        UInt32(NSEvent.ModifierFlags.command.rawValue): EventDesc("Wireless", act: .wireless)
+        controlFlag: EventDesc("Bluetooth", act: .bluetooth),
+        optionFlag: EventDesc("BT Discoverable", act: .bluetoothdiscoverable),
+        commandFlag: EventDesc("Wireless", act: .wireless)
     ],
     0x10: [
         0: EventDesc("Yoga Mode", act: .yoga),
@@ -106,11 +110,11 @@ let ideaEvents: [UInt32: [UInt32: EventDesc]] = [
 let thinkEvents: [UInt32: [UInt32: EventDesc]] = [
     TP_HKEY_EV_SLEEP.rawValue: [
         0: EventDesc("Sleep", act: .sleep, display: false),
-        UInt32(NSEvent.ModifierFlags.option.rawValue): EventDesc("Sleep", act: .sleep)
+        optionFlag: EventDesc("Sleep", act: .sleep)
     ], // 0x1004
     TP_HKEY_EV_NETWORK.rawValue: [
         0: EventDesc("Wireless", act: .wireless),
-        UInt32(NSEvent.ModifierFlags.option.rawValue): EventDesc("Airplane Mode", act: .airplane)
+        optionFlag: EventDesc("Airplane Mode", act: .airplane)
     ], // 0x1005
     TP_HKEY_EV_DISPLAY.rawValue: [0: EventDesc("Second Display", .kSecondDisplay, act: .mirror)], // 0x1007
     TP_HKEY_EV_BRGHT_UP.rawValue: [0: EventDesc("Brightness Up", display: false)], // 0x1010
@@ -124,7 +128,7 @@ let thinkEvents: [UInt32: [UInt32: EventDesc]] = [
     TP_HKEY_EV_STAR.rawValue: [0: EventDesc("Custom Hotkey", .kStar, act: .script, opt: prefpaneAS)], // 0x1311
     TP_HKEY_EV_BLUETOOTH.rawValue: [
         0: EventDesc("Bluetooth", act: .bluetooth),
-        UInt32(NSEvent.ModifierFlags.option.rawValue): EventDesc("BT Discoverable", act: .bluetoothdiscoverable)
+        optionFlag: EventDesc("BT Discoverable", act: .bluetoothdiscoverable)
     ], // 0x1314
     TP_HKEY_EV_KEYBOARD.rawValue: [0: EventDesc("Keyboard Toggle", act: .keyboard)], // 0x1315
     TP_HKEY_EV_LID_CLOSE.rawValue: [0: EventDesc("LID Close", display: false)], // 0x5001
@@ -150,13 +154,13 @@ let thinkEvents: [UInt32: [UInt32: EventDesc]] = [
 let HIDDEvents: [UInt32: [UInt32: EventDesc]] = [
     0x08: [
         0: EventDesc("Airplane Mode", act: .airplane),
-        UInt32(NSEvent.ModifierFlags.control.rawValue): EventDesc("Bluetooth", act: .bluetooth),
-        UInt32(NSEvent.ModifierFlags.option.rawValue): EventDesc("BT Discoverable", act: .bluetoothdiscoverable),
-        UInt32(NSEvent.ModifierFlags.command.rawValue): EventDesc("Wireless", act: .wireless)
+        controlFlag: EventDesc("Bluetooth", act: .bluetooth),
+        optionFlag: EventDesc("BT Discoverable", act: .bluetoothdiscoverable),
+        commandFlag: EventDesc("Wireless", act: .wireless)
     ],
     0x0B: [
         0: EventDesc("Sleep", act: .sleep, display: false),
-        UInt32(NSEvent.ModifierFlags.option.rawValue): EventDesc("Sleep", act: .sleep)
+        optionFlag: EventDesc("Sleep", act: .sleep)
     ],
     0x0E: [0: EventDesc("STOPCD")],
     0xC8: [0: EventDesc("Rotate Lock")], // Down

@@ -79,7 +79,13 @@ func showOSDRes(_ prompt: String, _ image: EventImage, duration: UInt32 = 1000, 
     showOSDRaw(NSLocalizedString(prompt, comment: "LocalizedString"), img, duration: duration, priority: priority)
 }
 
-func showOSDRes(_ prompt: String, _ status: String, _ image: EventImage, duration: UInt32 = 1000, priority: UInt32 = 0x1f4) {
+func showOSDRes(
+    _ prompt: String,
+    _ status: String,
+    _ image: EventImage,
+    duration: UInt32 = 1000,
+    priority: UInt32 = 0x1f4
+) {
     var img: NSString?
     if let path = Bundle.main.pathForImageResource(String(image.rawValue.dropFirst(1))),
               path.hasPrefix("/Applications") {
