@@ -31,8 +31,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var fanTimer: Timer?
 
     @objc func thinkWakeup() {
-        micMuteLEDHelper(conf.service)
-        muteLEDHelper(conf.service)
+        AudioHelper.shared?.micMuteLEDHelper(conf.service)
+        AudioHelper.shared?.muteLEDHelper(conf.service)
 
         if fanHelper2 != nil {
             fanHelper2?.setFanLevel()
@@ -43,7 +43,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     @objc func thinkMuteLEDFixup() {
-        muteLEDHelper(conf.service, false)
+        AudioHelper.shared?.muteLEDHelper(conf.service, false)
     }
 
     // MARK: - Menu
@@ -98,7 +98,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 target: self,
                 selector: #selector(self.update),
                 userInfo: nil,
-                repeats: true)
+                repeats: true
+            )
 
             if self.fanTimer == nil {
                 return
@@ -199,10 +200,19 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             statusItem?.title = title
             statusItem?.toolTip = defaults.string(forKey: "ToolTip")
         } else {
-            _ = Timer.scheduledTimer(timeInterval: 0, target: self, selector: #selector(midnightTimer(sender:)),
-                                     userInfo: nil, repeats: true)
-            NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(iconWakeup),
-                                                              name: NSWorkspace.didWakeNotification, object: nil)
+            _ = Timer.scheduledTimer(
+                timeInterval: 0,
+                target: self,
+                selector: #selector(midnightTimer(sender:)),
+                userInfo: nil,
+                repeats: true
+            )
+            NSWorkspace.shared.notificationCenter.addObserver(
+                self,
+                selector: #selector(iconWakeup),
+                name: NSWorkspace.didWakeNotification,
+                object: nil
+            )
         }
 
         appMenu.delegate = self
@@ -236,8 +246,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             thinkWakeup()
             if !hide, !defaults.bool(forKey: "DisableFan") {
                 if ECCap == "RW" {
-                    if !getBoolean("Dual fan", conf.service),
-                       defaults.bool(forKey: "SecondThinkFan") {
+                    if !getBoolean("Dual fan", conf.service), defaults.bool(forKey: "SecondThinkFan") {
                         fanHelper2 = ThinkFanHelper(appMenu, conf.connect, false, false)
                         if defaults.bool(forKey: "SaveFanLevel") {
                             os_log("Restore Fan Level", type: .info)
@@ -258,13 +267,28 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                     showOSD("ECAccessUnavailable")
                 }
             }
-            NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(thinkWakeup),
-                                                              name: NSWorkspace.didWakeNotification, object: nil)
+
+            NSWorkspace.shared.notificationCenter.addObserver(
+                self,
+                selector: #selector(thinkWakeup),
+                name: NSWorkspace.didWakeNotification,
+                object: nil
+            )
+
             if defaults.bool(forKey: "ThinkMuteLEDFixup") {
-                NotificationCenter.default.addObserver(self, selector: #selector(thinkMuteLEDFixup),
-                                                       name: VolumeObserver.volumeChanged, object: nil)
-                DistributedNotificationCenter.default.addObserver(self, selector: #selector(thinkMuteLEDFixup),
-                                                                  name: NSNotification.Name(rawValue: "com.apple.sound.settingsChangedNotification"), object: nil)
+                NotificationCenter.default.addObserver(
+                    self,
+                    selector: #selector(thinkMuteLEDFixup),
+                    name: VolumeObserver.volumeChanged,
+                    object: nil
+                )
+
+                DistributedNotificationCenter.default.addObserver(
+                    self,
+                    selector: #selector(thinkMuteLEDFixup),
+                    name: NSNotification.Name(rawValue: "com.apple.sound.settingsChangedNotification"),
+                    object: nil
+                )
             }
         case "YogaHIDD":
             conf.events = HIDDEvents
@@ -274,9 +298,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             os_log("Unknown class", type: .error)
             showOSD("Unknown Class", duration: 2000)
         }
-        if isOpen {
-            loadEvents()
-        }
+        if isOpen { loadEvents() }
     }
 
     func flagsCallBack(event: NSEvent) {
@@ -354,7 +376,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                                     event["image"] as? String,
                                     act: EventAction(rawValue: action) ?? .nothing,
                                     display: event["display"] as? Bool ?? true,
-                                    opt: opt)
+                                    opt: opt
+                                )
                             }
                         } else {
                             os_log("Invalid event for 0x%04x!", type: .info, eid)
@@ -464,7 +487,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 }
 
-func notificationCallback(_ port: CFMachPort?, _ msg: UnsafeMutableRawPointer?, _ size: CFIndex, _ info: UnsafeMutableRawPointer?) {
+func notificationCallback(
+    _ port: CFMachPort?,
+    _ msg: UnsafeMutableRawPointer?,
+    _ size: CFIndex,
+    _ info: UnsafeMutableRawPointer?
+) {
     if let raw = info?.assumingMemoryBound(to: SharedConfig?.self),
        var conf = raw.pointee {
         if let notification = msg?.load(as: SMCNotificationMessage.self) {
@@ -562,7 +590,7 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<Shar
             showOSDRes("Keyboard", "Enabled", .kKeyboard)
         }
     case .micmute:
-        micMuteHelper(conf.pointee.service, desc.name)
+        AudioHelper.shared?.micMuteHelper(conf.pointee.service, desc.name)
     case .desktop:
         CoreDockSendNotification("com.apple.showdesktop.awake" as CFString, nil)
     case .expose:
