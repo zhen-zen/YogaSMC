@@ -239,27 +239,24 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         switch IOClass {
         case "IdeaVPC":
             conf.events = ideaEvents
-            isOpen = registerNotification()
+            isOpen = registerNotification(&conf)
         case "ThinkVPC":
             conf.events = thinkEvents
-            isOpen = registerNotification()
+            isOpen = registerNotification(&conf)
             thinkWakeup()
             if !hide, !defaults.bool(forKey: "DisableFan") {
                 if ECCap == "RW" {
                     if !getBoolean("Dual fan", conf.service), defaults.bool(forKey: "SecondThinkFan") {
                         fanHelper2 = ThinkFanHelper(appMenu, conf.connect, false, false)
-                        if defaults.bool(forKey: "SaveFanLevel") {
-                            os_log("Restore Fan Level", type: .info)
-                            if let level = defaults.object(forKey: "Fan2Level") as? UInt8 {
-                                fanHelper2?.setFanLevel(level)
-                            }
+                        if defaults.bool(forKey: "SaveFanLevel"),
+                           let level = defaults.object(forKey: "Fan2Level") as? UInt8 {
+                            fanHelper2?.setFanLevel(level)
                         }
                         fanHelper2?.update(true)
                     }
                     fanHelper = ThinkFanHelper(appMenu, conf.connect, true, fanHelper2 == nil)
                     if defaults.bool(forKey: "SaveFanLevel"),
                        let level = defaults.object(forKey: "FanLevel") as? UInt8 {
-                        os_log("Restore Fan Level", type: .info)
                         fanHelper?.setFanLevel(level)
                     }
                     fanHelper?.update(true)
@@ -292,13 +289,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             }
         case "YogaHIDD":
             conf.events = HIDDEvents
-            _ = registerNotification()
+            _ = registerNotification(&conf)
             os_log("Skip loadEvents", type: .info)
         default:
             os_log("Unknown class", type: .error)
             showOSD("Unknown Class", duration: 2000)
         }
-        if isOpen { loadEvents() }
+        if isOpen { loadEvents(&conf) }
     }
 
     func flagsCallBack(event: NSEvent) {
@@ -355,76 +352,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 //        }
     }
 
-    func loadEvents() {
-        if let arr = defaults.object(forKey: "Events") as? [[String: Any]] {
-            for entry in arr {
-                if let eid = entry["id"] as? UInt32,
-                   let events = entry["events"] as? [[String: Any]] {
-                    var info = conf.events[eid] ?? [:]
-                    for event in events {
-                        if let data = event["data"] as? UInt32,
-                           let name = event["name"] as? String,
-                           let action = event["action"] as? String {
-                            let opt = event["option"] as? String
-                            if info[data] != nil,
-                               action == "nothing",
-                               (opt == "Unknown" || (opt == nil && name.hasPrefix("Event 0x"))) {
-                                os_log("Override unknown event 0x%04x : %d", type: .info, eid, data)
-                            } else {
-                                info[data] = EventDesc(
-                                    name,
-                                    event["image"] as? String,
-                                    act: EventAction(rawValue: action) ?? .nothing,
-                                    display: event["display"] as? Bool ?? true,
-                                    opt: opt
-                                )
-                            }
-                        } else {
-                            os_log("Invalid event for 0x%04x!", type: .info, eid)
-                        }
-                    }
-                    conf.events[eid] = info
-                } else {
-                    os_log("Invalid event!", type: .info)
-                }
-            }
-            os_log("Loaded %d events", type: .info, conf.events.capacity)
-        } else {
-            os_log("Events not found in preference, loading defaults", type: .info)
-        }
-    }
-
-    func saveEvents() {
-        var arr: [[String: Any]] = []
-        for (eid, info) in conf.events {
-            var events: [[String: Any]] = []
-            var entry: [String: Any] = [:]
-            entry["id"] = Int(eid)
-            for (data, desc) in info {
-                var event: [String: Any] = [:]
-                event["data"] = Int(data)
-                event["name"] = desc.name
-                if let res = desc.image {
-                    if let path = Bundle.main.resourcePath,
-                       res.hasPrefix(path) {
-                        event["image"] = res.lastPathComponent
-                   } else {
-                        event["image"] = res
-                   }
-                }
-                event["action"] = desc.action.rawValue
-                event["display"] = desc.display
-                if desc.option != nil {
-                    event["option"] = desc.option
-                }
-                events.append(event)
-            }
-            entry["events"] = events
-            arr.append(entry)
-        }
-        defaults.setValue(arr, forKey: "Events")
-    }
-
     func loadConfig() {
         if defaults.object(forKey: "StartAtLogin") == nil {
             os_log("First launch", type: .info)
@@ -448,8 +375,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if !conf.events.isEmpty,
            Bundle.main.bundlePath.hasPrefix("/Applications"),
            IOClass != "YogaHIDD" {
-            saveEvents()
+            saveEvents(&conf)
         }
+
         if defaults.bool(forKey: "SaveFanLevel") {
             if fanHelper2 != nil {
                 defaults.setValue(fanHelper2?.savedLevel, forKey: "Fan2Level")
@@ -462,176 +390,4 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         // Save driver settings
         defaults.setValue(getNumber("AutoBacklight", conf.service), forKey: "AutoBacklight")
     }
-
-    // MARK: - Notification
-
-    func registerNotification() -> Bool {
-        // fix warning per https://forums.swift.org/t/swift-5-2-pointers-and-coretext/34862
-        var portContext: CFMachPortContext = withUnsafeMutableBytes(of: &conf) { conf in
-            CFMachPortContext(version: 0, info: conf.baseAddress, retain: nil, release: nil, copyDescription: nil)
-        }
-
-        guard let notificationPort = CFMachPortCreate(kCFAllocatorDefault, notificationCallback, &portContext, nil),
-           let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, notificationPort, 0) else {
-            os_log("Failed to create mach port", type: .error)
-            return false
-        }
-
-        CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .defaultMode)
-
-        if kIOReturnSuccess != IOConnectSetNotificationPort(conf.connect, 0, CFMachPortGetPort(notificationPort), 0) {
-            os_log("Failed to set notification port", type: .error)
-            return false
-        }
-        return true
-    }
-}
-
-func notificationCallback(
-    _ port: CFMachPort?,
-    _ msg: UnsafeMutableRawPointer?,
-    _ size: CFIndex,
-    _ info: UnsafeMutableRawPointer?
-) {
-    guard let raw = info?.assumingMemoryBound(to: SharedConfig?.self),
-       var conf = raw.pointee else {
-        os_log("Invalid conf", type: .error)
-        return
-    }
-
-    guard let notification = msg?.load(as: SMCNotificationMessage.self) else {
-        os_log("Invalid notification", type: .error)
-        return
-    }
-
-    if let events = conf.events[notification.event] {
-        let mod = conf.modifier.subtracting(.capsLock)
-        if !mod.isEmpty,
-           let desc = events[notification.data | UInt32(mod.rawValue)] {
-            eventActuator(desc, notification.data, &conf)
-        } else if let desc = events[notification.data] {
-            eventActuator(desc, notification.data, &conf)
-        } else if let desc = events[0] {
-            eventActuator(desc, notification.data, &conf)
-        } else {
-            let value = String(format: "0x%04x:%d", notification.event, notification.data)
-            showOSDRaw("\(NSLocalizedString("EventVar", comment: "Event "))\(value)")
-            os_log("Event %s default data not found", type: .error, value)
-        }
-    } else {
-        let value = String(format: "0x%04x:%d", notification.event, notification.data)
-        showOSDRaw("\(NSLocalizedString("EventVar", comment: "Event "))\(value)")
-        conf.events[notification.event] = [0: EventDesc("Event \(value)", nil, opt: "Unknown")]
-        #if DEBUG
-        os_log("Event %s", type: .debug, value)
-        #endif
-    }
-}
-
-func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<SharedConfig>) {
-    switch desc.action {
-    case .nothing:
-        #if DEBUG
-        os_log("%s: Do nothing", type: .info, desc.name)
-        #endif
-        if !desc.display { return }
-        if desc.name.hasPrefix("Event ") {
-            let prompt = NSLocalizedString("EventVar", comment: "Event ") + desc.name.dropFirst("Event ".count)
-            showOSDRaw(prompt, desc.image)
-        } else {
-            showOSD(desc.name, desc.image)
-        }
-    case .script:
-        if let scpt = desc.option {
-            _ = scriptHelper(scpt, desc.name, desc.display ? desc.image : nil)
-        } else {
-            os_log("%s: script not found", type: .error)
-        }
-    case .launchapp:
-        if let name = desc.option {
-            let scpt = "tell application \"" + name + "\" to activate"
-            _ = scriptHelper(scpt, desc.name, desc.display ? desc.image : nil)
-        } else {
-            os_log("%s: script not found", type: .error)
-        }
-    case .airplane:
-        airplaneModeHelper(desc.name, desc.display)
-    case .bluetooth:
-        bluetoothHelper(desc.name, desc.display)
-    case .bluetoothdiscoverable:
-        bluetoothDiscoverableHelper(desc.name, desc.display)
-    case .backlight:
-        if !desc.display { return }
-        switch data {
-        case 0:
-            showOSDRes("Backlight", "Off", .kBacklightOff)
-        case 1:
-            showOSDRes("Backlight", "Low", .kBacklightLow)
-        case 2:
-            showOSDRes("Backlight", "High", .kBacklightHigh)
-        default:
-            showOSDRes("Backlight", "\(data)", .kBacklightHigh)
-        }
-    case .fnlock:
-        if !desc.display { return }
-        switch data {
-        case 0:
-            showOSDRes("FnKey", "Disabled", .kFunctionKeyOff)
-        case 1:
-            showOSDRes("FnKey", "Enabled", .kFunctionKeyOn)
-        default:
-            // reserved for media keyboard
-            showOSDRes("FnKey", "\(data)", .kFunctionKeyOn)
-        }
-    case .keyboard:
-        if !desc.display { return }
-        if data == 0 {
-            showOSDRes("Keyboard", "Disabled", .kKeyboardOff)
-        } else {
-            showOSDRes("Keyboard", "Enabled", .kKeyboard)
-        }
-    case .micmute:
-        AudioHelper.shared?.micMuteHelper(conf.pointee.service, desc.name)
-    case .desktop:
-        CoreDockSendNotification("com.apple.showdesktop.awake" as CFString, nil)
-    case .expose:
-        CoreDockSendNotification("com.apple.expose.front.awake" as CFString, nil)
-    case .mission:
-        CoreDockSendNotification("com.apple.expose.awake" as CFString, nil)
-    case .launchpad:
-        CoreDockSendNotification("com.apple.launchpad.toggle" as CFString, nil)
-    case .prefpane:
-        prefpaneHelper()
-    case .sleep:
-        if desc.display {
-            showOSDRes(desc.name, .kSleep)
-            sleep(1)
-        }
-        _ = scriptHelper(sleepAS, desc.name)
-    case .search:
-        _ = scriptHelper(searchAS, desc.name)
-    case .siri:
-        _ = scriptHelper(siriAS, desc.name)
-    case .spotlight:
-        _ = scriptHelper(spotlightAS, desc.name)
-    case .thermal:
-        showOSD(desc.name, desc.image)
-        os_log("%s: thermal event", type: .info, desc.name)
-    case .wireless:
-        wirelessHelper(desc.name, desc.display)
-    default:
-        #if DEBUG
-        os_log("%s: Not implmented", type: .info, desc.name)
-        #endif
-        if desc.display {
-            showOSD(desc.name, desc.image)
-        }
-    }
-}
-
-struct SharedConfig {
-    var connect: io_connect_t = 0
-    var events: [UInt32: [UInt32: EventDesc]] = [:]
-    var modifier = NSEvent.ModifierFlags()
-    var service: io_service_t = 0
 }

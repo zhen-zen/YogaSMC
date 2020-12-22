@@ -119,6 +119,7 @@
 		6FA75308253D68C600EBE9D7 /* FunctionKey.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 6FA75307253D68C600EBE9D7 /* FunctionKey.pdf */; };
 		6FB5BE15255521E1001BFDFF /* ThinkFanHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FB5BE14255521E1001BFDFF /* ThinkFanHelper.swift */; };
 		6FC40F1F25909D83004A6D48 /* GeneralSMCPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FC40F1E25909D83004A6D48 /* GeneralSMCPane.swift */; };
+		6FC40F3A2592856A004A6D48 /* NotificationHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FC40F392592856A004A6D48 /* NotificationHandler.swift */; };
 		6FCF7F592474B74800A82B13 /* WMI.h in Headers */ = {isa = PBXBuildFile; fileRef = 6FCF7F572474B74800A82B13 /* WMI.h */; };
 		6FCF7F5A2474B74800A82B13 /* WMI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6FCF7F582474B74800A82B13 /* WMI.cpp */; };
 		6FCF7F5C2474B89000A82B13 /* common.h in Headers */ = {isa = PBXBuildFile; fileRef = 6FCF7F5B2474B89000A82B13 /* common.h */; };
@@ -288,6 +289,7 @@
 		6FA75307253D68C600EBE9D7 /* FunctionKey.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = FunctionKey.pdf; sourceTree = "<group>"; };
 		6FB5BE14255521E1001BFDFF /* ThinkFanHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThinkFanHelper.swift; sourceTree = "<group>"; };
 		6FC40F1E25909D83004A6D48 /* GeneralSMCPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSMCPane.swift; sourceTree = "<group>"; };
+		6FC40F392592856A004A6D48 /* NotificationHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationHandler.swift; sourceTree = "<group>"; };
 		6FCF7F572474B74800A82B13 /* WMI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WMI.h; sourceTree = "<group>"; };
 		6FCF7F582474B74800A82B13 /* WMI.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WMI.cpp; sourceTree = "<group>"; };
 		6FCF7F5B2474B89000A82B13 /* common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
@@ -424,6 +426,7 @@
 				6F8B1FEA2538D64B003DD8A8 /* YogaSMCNC.entitlements */,
 				6F0A987925343357002F9F65 /* AppDelegate.swift */,
 				6F861242253BD7FB008FB857 /* Configuration.swift */,
+				6FC40F392592856A004A6D48 /* NotificationHandler.swift */,
 				6F0A987D25343359002F9F65 /* Assets.xcassets */,
 				6F0A987F25343359002F9F65 /* Main.storyboard */,
 				6F0A988225343359002F9F65 /* Info.plist */,
@@ -898,6 +901,7 @@
 				6FB5BE15255521E1001BFDFF /* ThinkFanHelper.swift in Sources */,
 				6F14956F2580BF7200A3BA83 /* AudioHelper.swift in Sources */,
 				6F8B1F2E253808DC003DD8A8 /* OSDHelper.swift in Sources */,
+				6FC40F3A2592856A004A6D48 /* NotificationHandler.swift in Sources */,
 				6F8AF130254DEDEE00438EC8 /* DateHelper.swift in Sources */,
 				6F8B1F262538083A003DD8A8 /* PropertyHelper.swift in Sources */,
 				6F8611D5253AB59F008FB857 /* RFHelper.swift in Sources */,

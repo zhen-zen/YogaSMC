@@ -62,6 +62,13 @@ struct EventDesc {
     }
 }
 
+struct SharedConfig {
+    var connect: io_connect_t = 0
+    var events: [UInt32: [UInt32: EventDesc]] = [:]
+    var modifier = NSEvent.ModifierFlags()
+    var service: io_service_t = 0
+}
+
 private let commandFlag = UInt32(NSEvent.ModifierFlags.command.rawValue)
 private let controlFlag = UInt32(NSEvent.ModifierFlags.control.rawValue)
 private let optionFlag = UInt32(NSEvent.ModifierFlags.option.rawValue)
@@ -168,3 +175,73 @@ let HIDDEvents: [UInt32: [UInt32: EventDesc]] = [
     0xCC: [0: EventDesc("Convertible")], // Down
     0xCD: [0: EventDesc("Convertible", display: false)] // Up
 ]
+
+func loadEvents(_ conf: inout SharedConfig) {
+    if let arr = UserDefaults(suiteName: "org.zhen.YogaSMC")?.object(forKey: "Events") as? [[String: Any]] {
+        for entry in arr {
+            if let eid = entry["id"] as? UInt32,
+               let events = entry["events"] as? [[String: Any]] {
+                var info = conf.events[eid] ?? [:]
+                for event in events {
+                    if let data = event["data"] as? UInt32,
+                       let name = event["name"] as? String,
+                       let action = event["action"] as? String {
+                        let opt = event["option"] as? String
+                        if info[data] != nil,
+                           action == "nothing",
+                           (opt == "Unknown" || (opt == nil && name.hasPrefix("Event 0x"))) {
+                            os_log("Override unknown event 0x%04x : %d", type: .info, eid, data)
+                        } else {
+                            info[data] = EventDesc(
+                                name,
+                                event["image"] as? String,
+                                act: EventAction(rawValue: action) ?? .nothing,
+                                display: event["display"] as? Bool ?? true,
+                                opt: opt
+                            )
+                        }
+                    } else {
+                        os_log("Invalid event for 0x%04x!", type: .info, eid)
+                    }
+                }
+                conf.events[eid] = info
+            } else {
+                os_log("Invalid event!", type: .info)
+            }
+        }
+        os_log("Loaded %d events", type: .info, conf.events.capacity)
+    } else {
+        os_log("Events not found in preference, loading defaults", type: .info)
+    }
+}
+
+func saveEvents(_ conf: inout SharedConfig) {
+    var arr: [[String: Any]] = []
+    for (eid, info) in conf.events {
+        var events: [[String: Any]] = []
+        var entry: [String: Any] = [:]
+        entry["id"] = Int(eid)
+        for (data, desc) in info {
+            var event: [String: Any] = [:]
+            event["data"] = Int(data)
+            event["name"] = desc.name
+            if let res = desc.image {
+                if let path = Bundle.main.resourcePath,
+                   res.hasPrefix(path) {
+                    event["image"] = res.lastPathComponent
+               } else {
+                    event["image"] = res
+               }
+            }
+            event["action"] = desc.action.rawValue
+            event["display"] = desc.display
+            if desc.option != nil {
+                event["option"] = desc.option
+            }
+            events.append(event)
+        }
+        entry["events"] = events
+        arr.append(entry)
+    }
+    UserDefaults(suiteName: "org.zhen.YogaSMC")?.setValue(arr, forKey: "Events")
+}
