@@ -177,53 +177,51 @@ let HIDDEvents: [UInt32: [UInt32: EventDesc]] = [
 ]
 
 func loadEvents(_ conf: inout SharedConfig) {
-    if let arr = UserDefaults(suiteName: "org.zhen.YogaSMC")?.object(forKey: "Events") as? [[String: Any]] {
-        for entry in arr {
-            if let eid = entry["id"] as? UInt32,
-               let events = entry["events"] as? [[String: Any]] {
-                var info = conf.events[eid] ?? [:]
-                for event in events {
-                    if let data = event["data"] as? UInt32,
-                       let name = event["name"] as? String,
-                       let action = event["action"] as? String {
-                        let opt = event["option"] as? String
-                        if info[data] != nil,
-                           action == "nothing",
-                           (opt == "Unknown" || (opt == nil && name.hasPrefix("Event 0x"))) {
-                            os_log("Override unknown event 0x%04x : %d", type: .info, eid, data)
-                        } else {
-                            info[data] = EventDesc(
-                                name,
-                                event["image"] as? String,
-                                act: EventAction(rawValue: action) ?? .nothing,
-                                display: event["display"] as? Bool ?? true,
-                                opt: opt
-                            )
-                        }
-                    } else {
-                        os_log("Invalid event for 0x%04x!", type: .info, eid)
-                    }
-                }
-                conf.events[eid] = info
-            } else {
-                os_log("Invalid event!", type: .info)
-            }
-        }
-        os_log("Loaded %d events", type: .info, conf.events.capacity)
-    } else {
+    guard let dict = UserDefaults(suiteName: "org.zhen.YogaSMC")?.object(forKey: "Events") as? [String: Any] else {
         os_log("Events not found in preference, loading defaults", type: .info)
+        return
     }
+
+    for (sid, entries) in dict {
+        if let eid = UInt32(sid, radix: 16),
+           let events = entries as? [String: Any] {
+            var info = conf.events[eid] ?? [:]
+            for (sdata, entry) in events {
+                if let data = UInt32(sdata, radix: 16),
+                   let event = entry as? [String: Any],
+                   let name = event["name"] as? String,
+                   let action = event["action"] as? String {
+                    let opt = event["option"] as? String
+                    if info[data] != nil,
+                       action == "nothing",
+                       (opt == "Unknown" || (opt == nil && name.hasPrefix("Event 0x"))) {
+                        os_log("Override unknown event 0x%04x : %d", type: .info, eid, data)
+                    } else {
+                        info[data] = EventDesc(
+                            name,
+                            event["image"] as? String,
+                            act: EventAction(rawValue: action) ?? .nothing,
+                            display: event["display"] as? Bool ?? true,
+                            opt: opt)
+                    }
+                } else {
+                    os_log("Invalid event for 0x%04x : %s!", type: .info, eid, sdata)
+                }
+            }
+            conf.events[eid] = info
+        } else {
+            os_log("Invalid event %s!", type: .info, sid)
+        }
+    }
+    os_log("Loaded %d events", type: .info, conf.events.count)
 }
 
 func saveEvents(_ conf: inout SharedConfig) {
-    var arr: [[String: Any]] = []
+    var dict: [String: Any] = [:]
     for (eid, info) in conf.events {
-        var events: [[String: Any]] = []
-        var entry: [String: Any] = [:]
-        entry["id"] = Int(eid)
+        var events: [String: Any] = [:]
         for (data, desc) in info {
             var event: [String: Any] = [:]
-            event["data"] = Int(data)
             event["name"] = desc.name
             if let res = desc.image {
                 if let path = Bundle.main.resourcePath,
@@ -238,10 +236,9 @@ func saveEvents(_ conf: inout SharedConfig) {
             if desc.option != nil {
                 event["option"] = desc.option
             }
-            events.append(event)
+            events[String(data, radix: 16)] = event
         }
-        entry["events"] = events
-        arr.append(entry)
+        dict[String(eid, radix: 16)] = events
     }
-    UserDefaults(suiteName: "org.zhen.YogaSMC")?.setValue(arr, forKey: "Events")
+    UserDefaults(suiteName: "org.zhen.YogaSMC")?.setValue(dict, forKey: "Events")
 }
