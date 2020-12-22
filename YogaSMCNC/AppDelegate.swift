@@ -493,36 +493,38 @@ func notificationCallback(
     _ size: CFIndex,
     _ info: UnsafeMutableRawPointer?
 ) {
-    if let raw = info?.assumingMemoryBound(to: SharedConfig?.self),
-       var conf = raw.pointee {
-        if let notification = msg?.load(as: SMCNotificationMessage.self) {
-            if let events = conf.events[notification.event] {
-                let mod = conf.modifier.subtracting(.capsLock)
-                if !mod.isEmpty,
-                   let desc = events[notification.data | UInt32(mod.rawValue)] {
-                    eventActuator(desc, notification.data, &conf)
-                } else if let desc = events[notification.data] {
-                    eventActuator(desc, notification.data, &conf)
-                } else if let desc = events[0] {
-                    eventActuator(desc, notification.data, &conf)
-                } else {
-                    let value = String(format: "0x%04x:%d", notification.event, notification.data)
-                    showOSDRaw("\(NSLocalizedString("EventVar", comment: "Event "))\(value)")
-                    os_log("Event %s default data not found", type: .error, value)
-                }
-            } else {
-                let value = String(format: "0x%04x:%d", notification.event, notification.data)
-                showOSDRaw("\(NSLocalizedString("EventVar", comment: "Event "))\(value)")
-                conf.events[notification.event] = [0: EventDesc("Event \(value)", nil, opt: "Unknown")]
-                #if DEBUG
-                os_log("Event %s", type: .debug, value)
-                #endif
-            }
+    guard let raw = info?.assumingMemoryBound(to: SharedConfig?.self),
+       var conf = raw.pointee else {
+        os_log("Invalid conf", type: .error)
+        return
+    }
+
+    guard let notification = msg?.load(as: SMCNotificationMessage.self) else {
+        os_log("Invalid notification", type: .error)
+        return
+    }
+
+    if let events = conf.events[notification.event] {
+        let mod = conf.modifier.subtracting(.capsLock)
+        if !mod.isEmpty,
+           let desc = events[notification.data | UInt32(mod.rawValue)] {
+            eventActuator(desc, notification.data, &conf)
+        } else if let desc = events[notification.data] {
+            eventActuator(desc, notification.data, &conf)
+        } else if let desc = events[0] {
+            eventActuator(desc, notification.data, &conf)
         } else {
-            os_log("Invalid notification", type: .error)
+            let value = String(format: "0x%04x:%d", notification.event, notification.data)
+            showOSDRaw("\(NSLocalizedString("EventVar", comment: "Event "))\(value)")
+            os_log("Event %s default data not found", type: .error, value)
         }
     } else {
-        os_log("Invalid conf", type: .error)
+        let value = String(format: "0x%04x:%d", notification.event, notification.data)
+        showOSDRaw("\(NSLocalizedString("EventVar", comment: "Event "))\(value)")
+        conf.events[notification.event] = [0: EventDesc("Event \(value)", nil, opt: "Unknown")]
+        #if DEBUG
+        os_log("Event %s", type: .debug, value)
+        #endif
     }
 }
 
@@ -532,13 +534,12 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<Shar
         #if DEBUG
         os_log("%s: Do nothing", type: .info, desc.name)
         #endif
-        if desc.display {
-            if desc.name.hasPrefix("Event ") {
-                let prompt = NSLocalizedString("EventVar", comment: "Event ") + desc.name.dropFirst("Event ".count)
-                showOSDRaw(prompt, desc.image)
-            } else {
-                showOSD(desc.name, desc.image)
-            }
+        if !desc.display { return }
+        if desc.name.hasPrefix("Event ") {
+            let prompt = NSLocalizedString("EventVar", comment: "Event ") + desc.name.dropFirst("Event ".count)
+            showOSDRaw(prompt, desc.image)
+        } else {
+            showOSD(desc.name, desc.image)
         }
     case .script:
         if let scpt = desc.option {
@@ -603,11 +604,7 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<Shar
         prefpaneHelper()
     case .sleep:
         if desc.display {
-            if let img = desc.image {
-                showOSD(desc.name, img)
-            } else {
-                showOSDRes(desc.name, .kSleep)
-            }
+            showOSDRes(desc.name, .kSleep)
             sleep(1)
         }
         _ = scriptHelper(sleepAS, desc.name)

@@ -62,9 +62,9 @@ struct EventDesc {
     }
 }
 
-fileprivate let commandFlag = UInt32(NSEvent.ModifierFlags.command.rawValue)
-fileprivate let controlFlag = UInt32(NSEvent.ModifierFlags.control.rawValue)
-fileprivate let optionFlag = UInt32(NSEvent.ModifierFlags.option.rawValue)
+private let commandFlag = UInt32(NSEvent.ModifierFlags.command.rawValue)
+private let controlFlag = UInt32(NSEvent.ModifierFlags.control.rawValue)
+private let optionFlag = UInt32(NSEvent.ModifierFlags.option.rawValue)
 
 let ideaEvents: [UInt32: [UInt32: EventDesc]] = [
     0x00: [
