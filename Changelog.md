@@ -1,7 +1,7 @@
 YogaSMC Changelog
 ============================
 
-#### v1.3.1
+#### v1.4.0
 - Pane: debug: enable RapidChargeMode checkbox
 - ThinkVPC: fix forgotten break in switch case, thx @junaedahmed
 - NC: update presets, thx @antoniomcr96 @Ab2774
@@ -28,6 +28,15 @@ YogaSMC Changelog
 - NC: support modifier
 - NC: support Caps Lock monitor
 - ThinkVPC: evaluate GMKS for FnLock state
+- NC: add launchapp action
+- YogaBaseService: add identifier for Alter version
+- NC: fix ECCap detection, thanks @buyddy
+- Pane: support ClamshellMode
+- Pane: fix battery detection
+- NC: improve audio status handling
+- NC: support SaveFanLevel
+- IdeaVPC: workaround for buggy event evaluation
+- NC: improve config readability, backup your customizations first! 
 
 #### v1.3.0
 - Pane: fix loading prior to 10.14.4 with embedded swift runtime, thx @Charlyo

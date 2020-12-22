@@ -16,7 +16,7 @@ DefinitionBlock ("", "SSDT", 2, "hack", "Think", 0x00000000)
     {
         If (_OSI ("Darwin"))
         {
-            // Initialze mute button mode like Linux.
+            // Initialze mute button mode like Linux when it's broken, may be combined with MuteLEDFixup in prefpane.
             LNUX = 0x01
             // Enable DYTC thermal-management on newer Thinkpads. Please check \_SB.PCI0.LPCB.EC.HKEY.DYTC()
             WNTF = 0x01
