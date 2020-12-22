@@ -425,7 +425,6 @@
 				6F86121D253AF7FA008FB857 /* Resources */,
 				6F8B1FEA2538D64B003DD8A8 /* YogaSMCNC.entitlements */,
 				6F0A987925343357002F9F65 /* AppDelegate.swift */,
-				6F861242253BD7FB008FB857 /* Configuration.swift */,
 				6FC40F392592856A004A6D48 /* NotificationHandler.swift */,
 				6F0A987D25343359002F9F65 /* Assets.xcassets */,
 				6F0A987F25343359002F9F65 /* Main.storyboard */,
@@ -548,6 +547,7 @@
 			isa = PBXGroup;
 			children = (
 				6F14956E2580BF7200A3BA83 /* AudioHelper.swift */,
+				6F861242253BD7FB008FB857 /* Configuration.swift */,
 				6F8AF12F254DEDEE00438EC8 /* DateHelper.swift */,
 				6F8B1F2C253808DC003DD8A8 /* OSDHelper.swift */,
 				6F8B1F242538083A003DD8A8 /* PropertyHelper.swift */,

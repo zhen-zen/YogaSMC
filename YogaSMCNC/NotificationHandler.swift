@@ -31,14 +31,13 @@ func registerNotification(_ conf: inout SharedConfig) -> Bool {
 }
 
 func notificationCallback(
-_ port: CFMachPort?,
-_ msg: UnsafeMutableRawPointer?,
-_ size: CFIndex,
-_ info: UnsafeMutableRawPointer?
+    _ port: CFMachPort?,
+    _ msg: UnsafeMutableRawPointer?,
+    _ size: CFIndex,
+    _ info: UnsafeMutableRawPointer?
 ) {
-    guard let raw = info?.assumingMemoryBound(to: SharedConfig?.self),
-       var conf = raw.pointee else {
-        os_log("Invalid conf", type: .error)
+    guard var conf = info?.load(as: SharedConfig.self) else {
+        os_log("Invalid config", type: .error)
         return
     }
 
@@ -71,7 +70,7 @@ _ info: UnsafeMutableRawPointer?
     }
 }
 
-func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<SharedConfig>) {
+func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: inout SharedConfig) {
     switch desc.action {
     case .nothing:
         #if DEBUG
@@ -134,7 +133,7 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: UnsafePointer<Shar
             showOSDRes("Keyboard", "Enabled", .kKeyboard)
         }
     case .micmute:
-        AudioHelper.shared?.micMuteHelper(conf.pointee.service, desc.name)
+        AudioHelper.shared?.micMuteHelper(conf.service, desc.name)
     case .desktop:
         CoreDockSendNotification("com.apple.showdesktop.awake" as CFString, nil)
     case .expose:
