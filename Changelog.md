@@ -1,6 +1,8 @@
 YogaSMC Changelog
 ============================
 
+#### v1.4.1
+
 #### v1.4.0
 - Pane: debug: enable RapidChargeMode checkbox
 - ThinkVPC: fix forgotten break in switch case, thx @junaedahmed
