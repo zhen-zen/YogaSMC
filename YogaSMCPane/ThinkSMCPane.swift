@@ -8,45 +8,40 @@
 
 import AppKit
 import Foundation
+import os.log
 
 extension YogaSMCPane {
-    @IBAction func vChargeThresholdStartSet(_ sender: NSTextFieldCell) {
-        if let dict = getDictionary(thinkBatteryName[thinkBatteryNumber], service) {
-            if let vStart = dict["BCTG"] as? NSNumber,
-               vStart.intValue >= 0 {
-                var current = (vStart.intValue) & 0xff
-                if current < 0 || current > 99 {
-                    vChargeThresholdStart.isEnabled = false
-                    return
-                }
-                if current == vChargeThresholdStart.integerValue { return }
-                current = vChargeThresholdStart.integerValue
-                #if DEBUG
-                showOSD(String(format: "Start %d", current))
-                #endif
-                _ = sendNumber("setCMstart", current, service)
-            }
+    @IBAction func vChargeThresholdStartSet(_ sender: NSTextField) {
+        let target = sender.integerValue
+        #if DEBUG
+        showOSD(String(format: "Start %d", target))
+        #endif
+
+        if thinkBatteryNumber != sender.tag, !updateThinkBattery(sender.tag) {
+            os_log("Failed to update battery %d", type: .error, sender.tag)
+            sender.isEnabled = false
+            return
         }
+
+        if target == sender.integerValue { return }
+        _ = sendNumber("setCMstart", target, service)
+        sender.integerValue = target
     }
 
     @IBAction func vChargeThresholdStopSet(_ sender: NSTextField) {
-        if let dict = getDictionary(thinkBatteryName[thinkBatteryNumber], service) {
-            if let vStop = dict["BCSG"] as? NSNumber,
-               vStop.intValue >= 0 {
-                var current = (vStop.intValue) & 0xff
-                if current < 0 || current > 99 {
-                    vChargeThresholdStop.isEnabled = false
-                    return
-                }
-                if current == 0 { current = 100 }
-                if current == vChargeThresholdStop.integerValue { return }
-                current = vChargeThresholdStop.integerValue
-                #if DEBUG
-                showOSD(String(format: "Stop %d", current))
-                #endif
-                _ = sendNumber("setCMstop", current == 100 ? 0 : current, service)
-            }
+        let target = sender.integerValue
+
+        if thinkBatteryNumber != sender.tag, !updateThinkBattery(sender.tag) {
+            os_log("Failed to update battery %d", type: .error, sender.tag)
+            return
         }
+
+        if target == sender.integerValue { return }
+        #if DEBUG
+        showOSD(String(format: "Stop %d", target))
+        #endif
+        _ = sendNumber("setCMstop", target == 100 ? 0 : target, service)
+        sender.integerValue = target
     }
 
     @IBAction func vPowerLEDSet(_ sender: NSSlider) {
@@ -99,21 +94,35 @@ extension YogaSMCPane {
         _ = scriptHelper(reloadAS, "Reload YogaSMCNC")
     }
 
-    func updateThinkBattery() -> Bool {
-        _ = sendNumber("Battery", thinkBatteryNumber, service)
-        if let dict = getDictionary(thinkBatteryName[thinkBatteryNumber], service),
-           let vStart = dict["BCTG"] as? NSNumber,
-           let vStop = dict["BCSG"] as? NSNumber,
-           vStart.int32Value >= 0,
-           vStop.int32Value >= 0 {
-            vChargeThresholdStart.isEnabled = true
-            vChargeThresholdStop.isEnabled = true
-            vChargeThresholdStart.integerValue = vStart.intValue & 0xff
-            vChargeThresholdStop.integerValue = (vStop.intValue & 0xff) == 0 ? 100 : vStop.intValue & 0xff
-            return true
+    func updateThinkBattery(_ index: Int) -> Bool {
+        if !sendNumber("Battery", index, service) { return false }
+
+        var startThreshold: NSTextField
+        var stopThreshold: NSTextField
+
+        switch index {
+        case 0:
+            startThreshold = vChargeThresholdStart
+            stopThreshold = vChargeThresholdStop
+        default:
+            return false
         }
-        thinkBatteryNumber += 1
-        return false
+
+        guard let dict = getDictionary(thinkBatteryName[index], service),
+              let vStart = dict["BCTG"] as? NSNumber,
+              let vStop = dict["BCSG"] as? NSNumber,
+              vStart.int32Value >= 0,
+              vStart.int32Value & 0xff < 100,
+              vStop.int32Value >= 0,
+              vStop.int32Value & 0xff < 100 else { return false }
+
+        startThreshold.isEnabled = true
+        stopThreshold.isEnabled = true
+        startThreshold.integerValue = vStart.intValue & 0xff
+        stopThreshold.integerValue = (vStop.intValue & 0xff) == 0 ? 100 : vStop.intValue & 0xff
+
+        thinkBatteryNumber = index
+        return true
     }
 
     func updateThinkFan() {
@@ -135,11 +144,10 @@ extension YogaSMCPane {
     }
 
     func updateThink(_ props: NSDictionary) {
-        while thinkBatteryNumber <= 2 {
-            if updateThinkBattery() {
-                break
-            }
-        }
+        _ = updateThinkBattery(0)
+        _ = updateThinkBattery(1)
+        _ = updateThinkBattery(2)
+
         if let val = props["FnlockMode"] as? Bool {
             vFnKeyRadio.title = "FnKey"
             if val {

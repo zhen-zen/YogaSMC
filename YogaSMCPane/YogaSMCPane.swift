@@ -20,7 +20,7 @@ class YogaSMCPane: NSPreferencePane {
     let service = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("YogaVPC"))
     let defaults = UserDefaults(suiteName: "org.zhen.YogaSMC")!
 
-    var thinkBatteryNumber = 0
+    var thinkBatteryNumber = -1
 
     @IBOutlet weak var vVersion: NSTextField!
     @IBOutlet weak var vClass: NSTextField!
@@ -83,6 +83,10 @@ class YogaSMCPane: NSPreferencePane {
 
     @IBOutlet weak var vChargeThresholdStart: NSTextField!
     @IBOutlet weak var vChargeThresholdStop: NSTextField!
+    @IBOutlet weak var vPrimaryChargeThresholdStart: NSTextField!
+    @IBOutlet weak var vPrimaryChargeThresholdStop: NSTextField!
+    @IBOutlet weak var vSecondaryChargeThresholdStart: NSTextField!
+    @IBOutlet weak var vSecondaryChargeThresholdStop: NSTextField!
 
     @IBOutlet weak var vPowerLEDSlider: NSSlider!
     @IBOutlet weak var vStandbyLEDSlider: NSSlider!
