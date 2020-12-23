@@ -109,90 +109,68 @@ struct AudioProperty<T> {
     }
 }
 
-class AudioHelper {
-    let inputDevice: AudioDeviceID
-    let outputDevice: AudioDeviceID
+let inputDevice = try! AudioProperty<AudioDeviceID>(device: nil, emptyValue: nil, prop: defaultInputDeviceProp).get().get()
+let outputDevice = try! AudioProperty<AudioDeviceID>(device: nil, emptyValue: nil, prop: defaultOutputDeviceProp).get().get()
 
-    let inputVolume: AudioProperty<Float>
-    let outputVolume: AudioProperty<Float>
+let inputVolume = AudioProperty<Float>(device: inputDevice, emptyValue: 0, prop: primaryInputVolumeProp)
+let outputVolume = AudioProperty<Float>(device: outputDevice, emptyValue: 0, prop: primaryOutputVolumeProp)
 
-    let inputMute: AudioProperty<UInt32>
-    let outputMute: AudioProperty<UInt32>
+let inputMute = AudioProperty<UInt32>(device: inputDevice, emptyValue: 0, prop: muteInputVolumeProp)
+let outputMute = AudioProperty<UInt32>(device: outputDevice, emptyValue: 0, prop: muteOutputVolumeProp)
 
-    var muteLEDStatus = false
-
-    static let shared = AudioHelper()
-
-    init?() {
-        do {
-            try inputDevice = AudioProperty<AudioDeviceID>(device: nil, emptyValue: nil,
-                                                           prop: defaultInputDeviceProp).get().get()
-            try outputDevice = AudioProperty<AudioDeviceID>(device: nil, emptyValue: nil,
-                                                            prop: defaultOutputDeviceProp).get().get()
-        } catch {
-            os_log("Failed to initialize AudioHelper!", type: .error)
-            return nil
-        }
-
-        self.inputVolume = AudioProperty<Float>(device: inputDevice, emptyValue: 0, prop: primaryInputVolumeProp)
-        self.outputVolume = AudioProperty<Float>(device: outputDevice, emptyValue: 0, prop: primaryOutputVolumeProp)
-
-        self.inputMute = AudioProperty<UInt32>(device: inputDevice, emptyValue: 0, prop: muteInputVolumeProp)
-        self.outputMute = AudioProperty<UInt32>(device: outputDevice, emptyValue: 0, prop: muteOutputVolumeProp)
-    }
-
-    func micMuteHelper(_ service: io_service_t, _ name: String) {
-        do {
-            if try inputMute.get().get() != 0 {
-                if try inputVolume.get().get() == 0 {
-                    guard try inputVolume.set(0.50).get() == 0.50 else {
-                        throw AudioPropertyError.emptyResult
-                    }
+func micMuteHelper(_ service: io_service_t, _ name: String) {
+    do {
+        if try inputMute.get().get() != 0 {
+            if try inputVolume.get().get() == 0 {
+                guard try inputVolume.set(0.50).get() == 0.50 else {
+                    throw AudioPropertyError.emptyResult
                 }
-                guard try inputMute.set(0).get() == 0,
-                      sendNumber("MicMuteLED", 0, service) else {
-                    throw AudioPropertyError.noProperty
-                }
-                showOSDRes(name, "Unmute", .kMic)
-            } else {
-                guard try inputMute.set(1).get() == 1,
-                      sendNumber("MicMuteLED", 2, service) else {
-                    throw AudioPropertyError.noProperty
-                }
-                showOSDRes(name, "Mute", .kMicOff)
             }
-        } catch {
-            showOSDRes("Mic", "Toggle failed", .kMic)
-            os_log("Mic toggle failed!", type: .error)
-        }
-    }
-
-    func micMuteLEDHelper(_ service: io_service_t) {
-        do {
-            let mute = try inputMute.get().get() != 0
-            guard sendNumber("MicMuteLED", mute ? 2 : 0, service) else {
+            guard try inputMute.set(0).get() == 0,
+                  sendNumber("MicMuteLED", 0, service) else {
                 throw AudioPropertyError.noProperty
             }
-            os_log("Mic Mute LED updated", type: .info)
-        } catch {
-            os_log("Failed to update Mic Mute LED", type: .error)
-        }
-    }
-
-    func muteLEDHelper(_ service: io_service_t, _ wake: Bool = true) {
-        do {
-            let mute = try outputMute.get().get() != 0
-            if !wake, mute == muteLEDStatus {
-                return
-            }
-            guard sendBoolean("MuteLED", mute, service) else {
+            showOSDRes(name, "Unmute", .kMic)
+        } else {
+            guard try inputMute.set(1).get() == 1,
+                  sendNumber("MicMuteLED", 2, service) else {
                 throw AudioPropertyError.noProperty
             }
-            muteLEDStatus = mute
-            os_log("Mute LED updated", type: .info)
-        } catch {
-            os_log("Failed to update Mute LED", type: .error)
+            showOSDRes(name, "Mute", .kMicOff)
         }
+    } catch {
+        showOSDRes("Mic", "Toggle failed", .kMic)
+        os_log("Mic toggle failed!", type: .error)
+    }
+}
+
+func micMuteLEDHelper(_ service: io_service_t) {
+    do {
+        let mute = try inputMute.get().get() != 0
+        guard sendNumber("MicMuteLED", mute ? 2 : 0, service) else {
+            throw AudioPropertyError.noProperty
+        }
+        os_log("Mic Mute LED updated", type: .info)
+    } catch {
+        os_log("Failed to update Mic Mute LED", type: .error)
+    }
+}
+
+var muteLEDStatus = false
+
+func muteLEDHelper(_ service: io_service_t, _ wake: Bool = true) {
+    do {
+        let mute = try outputMute.get().get() != 0
+        if !wake, mute == muteLEDStatus {
+            return
+        }
+        guard sendBoolean("MuteLED", mute, service) else {
+            throw AudioPropertyError.noProperty
+        }
+        muteLEDStatus = mute
+        os_log("Mute LED updated", type: .info)
+    } catch {
+        os_log("Failed to update Mute LED", type: .error)
     }
 }
 
