@@ -2,6 +2,7 @@ YogaSMC Changelog
 ============================
 
 #### v1.4.1
+- ThinkVPC: fix LEDSupport evaluation, thx @tylernguyen
 
 #### v1.4.0
 - Pane: debug: enable RapidChargeMode checkbox

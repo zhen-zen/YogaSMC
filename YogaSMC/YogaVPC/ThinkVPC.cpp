@@ -228,7 +228,7 @@ bool ThinkVPC::initVPC() {
         setProperty(backlightPrompt, "unsupported");
 
     setProperty(autoBacklightPrompt, automaticBacklightMode, 8);
-    if (vpc->validateObject(setLED) == kIOReturnSuccess) {
+    if (ec->validateObject(setLED) == kIOReturnSuccess) {
         LEDsupport = true;
         setProperty("LEDSupport", true);
     } else {
