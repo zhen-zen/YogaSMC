@@ -31,8 +31,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var fanTimer: Timer?
 
     @objc func thinkWakeup() {
-        AudioHelper.shared?.micMuteLEDHelper(conf.service)
-        AudioHelper.shared?.muteLEDHelper(conf.service)
+        micMuteLEDHelper(conf.service)
+        muteLEDHelper(conf.service)
 
         if fanHelper2 != nil {
             fanHelper2?.setFanLevel()
@@ -43,7 +43,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     @objc func thinkMuteLEDFixup() {
-        AudioHelper.shared?.muteLEDHelper(conf.service, false)
+        muteLEDHelper(conf.service, false)
     }
 
     // MARK: - Menu
