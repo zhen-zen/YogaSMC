@@ -133,7 +133,7 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: inout SharedConfig
             showOSDRes("Keyboard", "Enabled", .kKeyboard)
         }
     case .micmute:
-        micMuteHelper(conf.service, desc.name)
+        AudioHelper.shared?.micMuteHelper(conf.service, desc.name)
     case .desktop:
         CoreDockSendNotification("com.apple.showdesktop.awake" as CFString, nil)
     case .expose:

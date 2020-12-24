@@ -31,8 +31,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var fanTimer: Timer?
 
     @objc func thinkWakeup() {
-        micMuteLEDHelper(conf.service)
-        muteLEDHelper(conf.service)
+        AudioHelper.shared?.micMuteLEDHelper(conf.service)
+        AudioHelper.shared?.muteLEDHelper(conf.service)
 
         if fanHelper2 != nil {
             fanHelper2?.setFanLevel()
@@ -43,7 +43,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     @objc func thinkMuteLEDFixup() {
-        muteLEDHelper(conf.service, false)
+        AudioHelper.shared?.muteLEDHelper(conf.service, false)
     }
 
     // MARK: - Menu
@@ -375,8 +375,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if !conf.events.isEmpty,
            Bundle.main.bundlePath.hasPrefix("/Applications"),
            IOClass != "YogaHIDD" {
-//            CFPreferencesAppSynchronize("org.zhen.YogaSMC" as CFString)
-//            loadEvents()
             saveEvents(&conf)
         }
 
