@@ -1,6 +1,8 @@
 YogaSMC Changelog
 ============================
 
+#### v1.4.2
+
 #### v1.4.1
 - ThinkVPC: fix LEDSupport evaluation, thx @tylernguyen
 - NC: add AudioHelper workaround
