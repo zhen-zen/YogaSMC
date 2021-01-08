@@ -113,23 +113,23 @@ bool YogaSMC::vsmcNotificationHandler(void *sensors, void *refCon, IOService *vs
 }
 
 YogaSMC* YogaSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) {
-    YogaSMC* dev = OSTypeAlloc(YogaSMC);
+    YogaSMC* drv = OSTypeAlloc(YogaSMC);
 
-    dev->conf = OSDictionary::withDictionary(OSDynamicCast(OSDictionary, provider->getProperty("Sensors")));
+    drv->conf = OSDictionary::withDictionary(OSDynamicCast(OSDictionary, provider->getProperty("Sensors")));
 
     OSDictionary *dictionary = OSDictionary::withCapacity(1);
-    dictionary->setObject("Sensors", dev->conf);
+    dictionary->setObject("Sensors", drv->conf);
 
-    dev->ec = device;
-    dev->name = device->getName();
+    drv->ec = device;
+    drv->name = device->getName();
 
-    if (!dev->init(dictionary) ||
-        !dev->attach(provider)) {
-        OSSafeReleaseNULL(dev);
+    if (!drv->init(dictionary) ||
+        !drv->attach(provider)) {
+        OSSafeReleaseNULL(drv);
     }
 
     dictionary->release();
-    return dev;
+    return drv;
 }
 
 void YogaSMC::updateEC() {
