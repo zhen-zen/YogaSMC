@@ -141,6 +141,15 @@ protected:
     virtual bool initVPC();
 
     /**
+     *  Probe VPC
+     *
+     *  @param provider service provider
+     *
+     *  @return true if success
+     */
+    inline virtual bool probeVPC(IOService *provider) {return true;};
+
+    /**
      *  Update VPC EC status
      */
     inline virtual void updateVPC() {return;};

@@ -16,6 +16,9 @@ IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
     if (!super::probe(provider, score))
         return nullptr;
  
+    if (!probeVPC(provider))
+        return nullptr;
+ 
     DebugLog("Probing");
 
     if ((vpc = OSDynamicCast(IOACPIPlatformDevice, provider))) {
