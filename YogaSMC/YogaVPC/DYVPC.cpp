@@ -105,3 +105,81 @@ IOReturn DYVPC::message(UInt32 type, IOService *provider, void *argument) {
 
     return kIOReturnSuccess;
 }
+
+bool DYVPC::WMIQuery(UInt32 query, void *buffer, enum hp_wmi_command command, UInt32 insize, UInt32 outsize) {
+    struct bios_args args = {
+        .signature = 0x55434553,
+        .command = command,
+        .commandtype = query,
+        .datasize = insize,
+        .data = { 0 },
+    };
+
+    if (insize > sizeof(args.data))
+        return false;
+
+    UInt32 mid;
+    if (outsize > 4096)
+        return false;
+    else if (outsize > 1024)
+        mid = 5;
+    else if (outsize > 128)
+        mid = 4;
+    else if (outsize > 4)
+        mid = 4;
+    else if (outsize > 0)
+        mid = 2;
+    else
+        mid = 1;
+
+    memcpy(&args.data[0], buffer, insize);
+
+    OSObject *params[] = {
+        OSNumber::withNumber(0ULL, 32),
+        OSNumber::withNumber(mid, 32),
+        OSData::withBytes(&args, sizeof(struct bios_args)),
+    };
+
+    OSObject *result;
+
+    bool ret = YWMI->executeMethod(BIOS_QUERY_WMI_METHOD, &result, params, 3);
+    params[0]->release();
+    params[1]->release();
+
+    if (!ret) {
+        AlwaysLog("BIOS query failed");
+        OSSafeReleaseNULL(result);
+        return false;
+    }
+
+    OSData *output = OSDynamicCast(OSData, result);
+    if (output == nullptr) {
+        DebugLog("Unknown output type");
+        OSSafeReleaseNULL(result);
+        return false;
+    }
+
+    const struct bios_return *biosRet = reinterpret_cast<const struct bios_return*>(output->getBytesNoCopy());
+    switch (biosRet->return_code) {
+        case 0:
+            break;
+            
+        case HPWMI_RET_UNKNOWN_CMDTYPE:
+            DebugLog("Unknown CMDTYPE");
+//            break;
+            
+        default:
+            DebugLog("Return code error");
+            output->release();
+            return false;
+    }
+
+    if (outsize != 0) {
+        memset(buffer, 0, outsize);
+        outsize = min(outsize, output->getLength() - sizeof(*biosRet));
+        memcpy(buffer, output->getBytesNoCopy(sizeof(*biosRet), outsize), outsize);
+    }
+
+    output->release();
+    return true;
+}
