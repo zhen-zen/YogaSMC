@@ -78,7 +78,7 @@ bool YogaHIDD::exitVPC() {
     evaluateHIDD(INTEL_HID_DSM_HDSM_FN, nullptr, false);
     if (arrayCap != 0)
         evaluateHIDD(INTEL_HID_DSM_BTNE_FN, nullptr, 1);
-    return false;
+    return super::exitVPC();
 }
 
 IOReturn YogaHIDD::message(UInt32 type, IOService *provider, void *argument) {
