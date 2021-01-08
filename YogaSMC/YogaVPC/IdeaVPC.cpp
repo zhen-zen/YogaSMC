@@ -489,11 +489,11 @@ bool IdeaVPC::updateBattery(bool update) {
     conservationMode = BIT(BM_CONSERVATION_BIT) & state;
     rapidChargeMode = BIT(BM_RAPIDCHARGE_BIT) & state;
 
-    if (update) {
+    if (update)
         DebugLog(updateSuccess, batteryPrompt, state);
-        setProperty(conservationPrompt, conservationMode);
-        setProperty(rapidChargePrompt, rapidChargeMode);
-    }
+
+    setProperty(conservationPrompt, conservationMode);
+    setProperty(rapidChargePrompt, rapidChargeMode);
 
     return true;
 }
@@ -519,13 +519,13 @@ bool IdeaVPC::updateKeyboard(bool update) {
         backlightLevel = (BIT(HA_BACKLIGHT_BIT) & state) ? (backlightLevel ? 2 : 1) : 0;
     }
 
-    if (update) {
+    if (update)
         DebugLog(updateSuccess, KeyboardPrompt, state);
-        if (FnlockCap)
-            setProperty(FnKeyPrompt, FnlockMode);
-        if (backlightCap)
-            setProperty(backlightPrompt, backlightLevel, 32);
-    }
+
+    if (FnlockCap)
+        setProperty(FnKeyPrompt, FnlockMode);
+    if (backlightCap)
+        setProperty(backlightPrompt, backlightLevel, 32);
 
     return true;
 }
