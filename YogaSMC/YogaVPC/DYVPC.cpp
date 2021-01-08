@@ -25,6 +25,11 @@ bool DYVPC::initVPC() {
     if (inputCap)
         YWMI->enableEvent(INPUT_WMI_EVENT, true);
 
+    if (BIOSCap) {
+        UInt32 value;
+        if (WMIQuery(HPWMI_POSTCODEERROR_QUERY, &value))
+            setProperty("POSTCODE", value, 32);
+    }
     return true;
 }
 
@@ -108,11 +113,11 @@ IOReturn DYVPC::message(UInt32 type, IOService *provider, void *argument) {
 
 bool DYVPC::WMIQuery(UInt32 query, void *buffer, enum hp_wmi_command command, UInt32 insize, UInt32 outsize) {
     struct bios_args args = {
-        .signature = 0x55434553,
-        .command = command,
-        .commandtype = query,
-        .datasize = insize,
-        .data = { 0 },
+        .signature      = 0x55434553,
+        .command        = command,
+        .commandtype    = query,
+        .datasize       = insize,
+        .data           = { 0 },
     };
 
     if (insize > sizeof(args.data))
