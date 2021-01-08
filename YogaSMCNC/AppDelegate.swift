@@ -31,13 +31,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc func showCapslock(sender: Timer) {
         let current = GetCurrentKeyModifiers() & UInt32(alphaLock) != 0
         if current != capslockState {
-            if current {
-                showOSDRes("Caps Lock", "On", .kCapslockOn)
-                os_log("capslockon")
-            } else {
-                showOSDRes("Caps Lock", "Off", .kCapslockOff)
-                os_log("capslockoff")
-            }
+            showOSDRes("Caps Lock", current ? "On" : "Off", current ? .kCapslockOn : .kCapslockOff)
             capslockState = current
         }
     }

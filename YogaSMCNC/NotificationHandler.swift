@@ -127,11 +127,7 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: inout SharedConfig
         }
     case .keyboard:
         if !desc.display { return }
-        if data == 0 {
-            showOSDRes("Keyboard", "Disabled", .kKeyboardOff)
-        } else {
-            showOSDRes("Keyboard", "Enabled", .kKeyboard)
-        }
+        showOSDRes("Keyboard", (data != 0) ? "Enabled" : "Disabled", (data != 0) ? .kKeyboard : .kKeyboardOff)
     case .micmute:
         micMuteHelper(conf.service, desc.name)
     case .desktop:
