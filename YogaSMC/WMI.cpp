@@ -202,17 +202,20 @@ bool WMI::hasMethod(const char * guid, UInt8 flg)
 {
     OSDictionary *method = getMethod(guid, flg);
     
-    if (method) {
-        if (flg == ACPI_WMI_EVENT) {
-            DebugLog("Found event with guid %s", guid);
-            return true;
-        }
-        OSString *methodId = OSDynamicCast(OSString, method->getObject(kWMIObjectId));
+    if (!method) {
+        return false;
+    }
 
-        if (methodId) {
-            DebugLog("Found method %s with guid %s", methodId->getCStringNoCopy(), guid);
-            return true;
-        }
+    if (flg == ACPI_WMI_EVENT) {
+        DebugLog("Found event with guid %s", guid);
+        return true;
+    }
+
+    OSString *methodId = OSDynamicCast(OSString, method->getObject(kWMIObjectId));
+
+    if (methodId) {
+        DebugLog("Found method %s with guid %s", methodId->getCStringNoCopy(), guid);
+        return true;
     }
 
     return false;
@@ -221,30 +224,40 @@ bool WMI::hasMethod(const char * guid, UInt8 flg)
 bool WMI::executeMethod(const char * guid, OSObject ** result, OSObject * params[], IOItemCount paramCount)
 {
     char methodName[5];
+
     OSDictionary *method = getMethod(guid);
+    if (!method) return false;
 
-    if (method)
-    {
-        OSString *methodId = OSDynamicCast(OSString, method->getObject(kWMIObjectId));
+    OSNumber *flags = OSDynamicCast(OSNumber, method->getObject(kWMIFlags));
+    if (flags == nullptr) return false;
 
-        if (methodId) {
-            OSNumber *flags = OSDynamicCast(OSNumber, method->getObject(kWMIFlags));
-            if (flags->unsigned8BitValue() & ACPI_WMI_METHOD) {
-                snprintf(methodName, 5, ACPIMethodName, methodId->getCStringNoCopy());
-            } else if (flags->unsigned8BitValue() & ACPI_WMI_STRING) {
-                snprintf(methodName, 5, ACPIBufferName, methodId->getCStringNoCopy());
-            } else {
-                DebugLog("Type 0x%x not available for method %s", flags->unsigned8BitValue(), methodId->getCStringNoCopy());
-                return false;
-            }
+    OSString *objectId = OSDynamicCast(OSString, method->getObject(kWMIObjectId));
+    OSNumber *notifyId = OSDynamicCast(OSNumber, method->getObject(kWMINotifyId));
 
-            DebugLog("Calling method %s", methodName);
-            if (mDevice->evaluateObject(methodName, result, params, paramCount) == kIOReturnSuccess)
-                return true;
-        }
+    if (flags->unsigned8BitValue() & ACPI_WMI_METHOD) {
+        if (!objectId)
+            return false;
+        snprintf(methodName, 5, ACPIMethodName, objectId->getCStringNoCopy());
+    } else if (flags->unsigned8BitValue() & ACPI_WMI_STRING) {
+        if (!objectId)
+            return false;
+        snprintf(methodName, 5, ACPIBufferName, objectId->getCStringNoCopy());
+    } else if (flags->unsigned8BitValue() & ACPI_WMI_EVENT) {
+        if (notifyId == nullptr)
+            return false;
+        snprintf(methodName, 5, ACPIEventName, notifyId->unsigned8BitValue());
+        if (mDevice->validateObject(methodName) == kIOReturnNotFound)
+            return true;
+    } else {
+        DebugLog("Type 0x%x not implemented", flags->unsigned8BitValue());
+        return false;
     }
 
-    return false;
+    DebugLog("Calling method %s", methodName);
+    if (mDevice->evaluateObject(methodName, result, params, paramCount) != kIOReturnSuccess)
+        return false;
+
+    return true;
 }
 
 bool WMI::executeInteger(const char * guid, UInt32 * result, OSObject * params[], IOItemCount paramCount)
@@ -260,6 +273,30 @@ bool WMI::executeInteger(const char * guid, UInt32 * result, OSObject * params[]
     }
     if (obj) obj->release();
     return ret;
+}
+
+bool WMI::enableEvent(const char * guid, bool enable)
+{
+    OSObject *params[] = {
+        OSNumber::withNumber(enable, 8)
+    };
+
+    bool ret = executeMethod(guid, nullptr, params, 1);
+
+    params[0]->release();
+    return ret;
+}
+
+bool WMI::getEventData(UInt32 event, OSObject **result)
+{
+    OSObject *params[] = {
+        OSNumber::withNumber(event, 32)
+    };
+
+    if (mDevice->evaluateObject(ACPINotifyName, result, params, 1) != kIOReturnSuccess)
+        return false;
+
+    return true;
 }
 
 bool WMI::extractBMF(struct WMI_DATA* block)
