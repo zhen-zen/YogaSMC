@@ -45,16 +45,6 @@ IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
                     DebugLog("Skip Thunderbolt interface");
                     continue;
                 }
-                IOService *instance = OSDynamicCast(IOService, dev->getChildEntry(gIOServicePlane));
-                if (instance != nullptr) {
-                    DebugLog("Service already attached");
-                    if (strncmp(instance->getName(), "YogaWMI", sizeof("YogaWMI")) != 0) {
-                        DebugLog("Skip %s", instance->getName());
-                        continue;
-                    }
-                    instance->stop(dev);
-                    instance->detach(dev);
-                }
                 if (auto wmi = initWMI(dev)) {
                     DebugLog("WMI available at %s", dev->getName());
                     WMICollection->setObject(wmi);
