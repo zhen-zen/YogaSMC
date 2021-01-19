@@ -12,7 +12,7 @@ import IOKit
 import PreferencePanes
 import os.log
 
-let DYTCCommand = ["L", "M", "H"]
+let DYTCCommand = ["1", "2", "3", "4", "D", "5", "6", "7", "8"]
 let thinkLEDCommand = [0, 0x80, 0xA0, 0xC0]
 let thinkBatteryName = ["BAT_ANY", "BAT_PRIMARY", "BAT_SECONDARY"]
 

@@ -69,15 +69,34 @@ extension YogaSMCPane {
             vDYTCFuncMode.stringValue = "Unknown"
         }
         if let perfMode = dict["PerfMode"] as? String {
-            if perfMode == "Quiet" {
+            if perfMode == "Quiet 1" {
                 DYTCSlider.integerValue = 0
-            } else if perfMode == "Balance" {
+            }
+            else if perfMode == "Quiet 2" {
                 DYTCSlider.integerValue = 1
-            } else if perfMode == "Performance" {
+            }
+            else if perfMode == "Quiet 3" {
                 DYTCSlider.integerValue = 2
-            } else if perfMode == "Performance (Reduced as lapmode active)" {
-                DYTCSlider.integerValue = 2
-            } else {
+            }
+            else if perfMode == "Quiet 4" {
+                DYTCSlider.integerValue = 3
+            }
+            else if perfMode == "Standard" {
+                DYTCSlider.integerValue = 4
+            }
+            else if perfMode == "Performance 1" {
+                DYTCSlider.integerValue = 5
+            }
+            else if perfMode == "Performance 2" {
+                DYTCSlider.integerValue = 6
+            }
+            else if perfMode == "Performance 3" {
+                DYTCSlider.integerValue = 7
+            }
+            else if perfMode == "Performance 4" {
+                DYTCSlider.integerValue = 8
+            }
+            else {
                 DYTCSlider.isEnabled = false
             }
         } else {

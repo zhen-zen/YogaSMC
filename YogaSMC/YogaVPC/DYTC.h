@@ -47,6 +47,19 @@ enum {
 #define DYTC_MODE_QUIET       3  /* low power mode aka quiet */
 #define DYTC_MODE_BALANCE   0xF  /* default mode aka balance */
 
+// available mode for the DYTC_FUNCTION_PSC (0xD)
+#define DYTC_MODE_NEW_1       1 // pretty much unusable, cripples the cpu
+#define DYTC_MODE_NEW_2       2 // thermal throttle 55-60c, low fans, low to none boost
+#define DYTC_MODE_NEW_3       3 // thermal throttle 55-60c, low fans, low to none boost
+#define DYTC_MODE_NEW_4       4 // thermal throttle 55-60c, low fans, low to none boost (seems like this is what windows sets it by default to)
+#define DYTC_MODE_NEW_5       5 // thermal throttle 75-80c, normal fans, standard boost
+#define DYTC_MODE_NEW_6       6 // thermal throttle 75-80c, normal fans, standard boost++
+#define DYTC_MODE_NEW_7       7 // thermal throttle 80c+, normal fans, lots of boost
+#define DYTC_MODE_NEW_8       8 // thermal throttle 80c+, normal fans, lots of boost++
+#define DYTC_MODE_NEW_DEFAULT 0xF
+
+
+
 // Error code
 #define DYTC_EXCEPTION        0
 #define DYTC_SUCCESS          1
