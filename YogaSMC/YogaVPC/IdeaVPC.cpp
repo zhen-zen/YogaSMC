@@ -18,6 +18,8 @@ void IdeaVPC::updateAll() {
 
 bool IdeaVPC::initVPC() {
     super::initVPC();
+
+    UInt32 config;
     if (vpc->evaluateInteger(getVPCConfig, &config) != kIOReturnSuccess) {
         AlwaysLog(initFailure, getVPCConfig);
         return false;
@@ -25,15 +27,17 @@ bool IdeaVPC::initVPC() {
 
     DebugLog(updateSuccess, VPCPrompt, config);
     setProperty(VPCPrompt, config, 32);
-    cap_graphics = config >> CFG_GRAPHICS_BIT & 0x7;
-    cap_bt       = config >> CFG_BT_BIT & 0x1;
-    cap_3g       = config >> CFG_3G_BIT & 0x1;
-    cap_wifi     = config >> CFG_WIFI_BIT & 0x1;
-    cap_camera   = config >> CFG_CAMERA_BIT & 0x1;
 
-    OSDictionary *capabilities = OSDictionary::withCapacity(5);
+    OSDictionary *capabilities = OSDictionary::withCapacity(6);
     OSString *value;
 
+    setPropertyBoolean(capabilities, "Bluetooth", (config >> CFG_BT_BIT) & 0x1);
+    setPropertyBoolean(capabilities, "3G", (config >> CFG_3G_BIT) & 0x1);
+    setPropertyBoolean(capabilities, "Wireless", (config >> CFG_WIFI_BIT) & 0x1);
+    setPropertyBoolean(capabilities, "Camera", (config >> CFG_CAMERA_BIT) & 0x1);
+    setPropertyBoolean(capabilities, "Touchpad", (config >> CFG_TOUCHPAD_BIT) & 0x1);
+
+    UInt8 cap_graphics = config >> CFG_GRAPHICS_BIT & 0x7;
     switch (cap_graphics) {
         case 1:
             setPropertyString(capabilities, "Graphics", "Intel");
@@ -61,10 +65,6 @@ bool IdeaVPC::initVPC() {
             setPropertyString(capabilities, "Graphics", Unknown);
             break;
     }
-    setPropertyBoolean(capabilities, "Bluetooth", cap_bt);
-    setPropertyBoolean(capabilities, "3G", cap_3g);
-    setPropertyBoolean(capabilities, "Wireless", cap_wifi);
-    setPropertyBoolean(capabilities, "Camera", cap_camera);
     setProperty("Capability", capabilities);
     capabilities->release();
 

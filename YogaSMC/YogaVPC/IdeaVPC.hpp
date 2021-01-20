@@ -30,11 +30,14 @@
 #define HA_FNLOCK_BIT        (10)
 #define HA_PRIMEKEY_BIT      (11)
 
-#define CFG_GRAPHICS_BIT     (8)
-#define CFG_BT_BIT           (16)
-#define CFG_3G_BIT           (17)
-#define CFG_WIFI_BIT         (18)
-#define CFG_CAMERA_BIT       (19)
+enum {
+    CFG_GRAPHICS_BIT       = 8,
+    CFG_BT_BIT             = 16,
+    CFG_3G_BIT             = 17,
+    CFG_WIFI_BIT           = 18,
+    CFG_CAMERA_BIT         = 19,
+    CFG_TOUCHPAD_BIT       = 30,
+};
 
 enum {
     BMCMD_CONSERVATION_ON = 3,
@@ -94,16 +97,6 @@ private:
     static constexpr const char *setKeyboardMode      = "SALS";
     static constexpr const char *readVPCStatus        = "VPCR";
     static constexpr const char *writeVPCStatus       = "VPCW";
-
-    /**
-     * VPC0 config
-     */
-    UInt32 config;
-    UInt8 cap_graphics;
-    bool cap_bt;
-    bool cap_3g;
-    bool cap_wifi;
-    bool cap_camera;
 
     bool initVPC() APPLE_KEXT_OVERRIDE;
     void setPropertiesGated(OSObject* props) APPLE_KEXT_OVERRIDE;
