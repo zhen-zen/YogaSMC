@@ -183,7 +183,16 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
 
     if (i) {
         while (OSString* key = OSDynamicCast(OSString, i->getNextObject())) {
-            if (key->isEqualTo(conservationPrompt)) {
+            if (key->isEqualTo(alwaysOnUSBPrompt)) {
+                OSBoolean *value;
+                getPropertyBoolean(alwaysOnUSBPrompt);
+                updateKeyboard(false);
+
+                if (value->getValue() == alwaysOnUSBMode)
+                    DebugLog(valueMatched, alwaysOnUSBPrompt, alwaysOnUSBMode);
+                else
+                    toggleAlwaysOnUSB();
+            } else if (key->isEqualTo(conservationPrompt)) {
 #ifdef DEBUG
                 OSNumber *raw = OSDynamicCast(OSNumber, dict->getObject(conservationPrompt));
                 if (raw != nullptr) {
@@ -324,6 +333,10 @@ void IdeaVPC::updateKeyboardStats(UInt32 kbdState) {
         setProperty("PrimeKeyType", "HotKey");
     else
         setProperty("PrimeKeyType", "FnKey");
+
+    alwaysOnUSBCap = BIT(HA_AOUSB_CAP_BIT) & kbdState;
+    if (!alwaysOnUSBCap)
+        setProperty(alwaysOnUSBPrompt, "unsupported");
 }
 
 void IdeaVPC::updateBatteryStats(UInt32 batState) {
@@ -509,8 +522,6 @@ bool IdeaVPC::updateKeyboard(bool update) {
         return false;
     }
 
-    if (FnlockCap)
-        FnlockMode = BIT(HA_FNLOCK_BIT) & state;
     if (backlightCap) {
         // Preserve low / high level on non keyboard triggered events
         if (!update && backlightLevel)
@@ -518,14 +529,45 @@ bool IdeaVPC::updateKeyboard(bool update) {
         // Inference from brightness cycle: 0 -> 1 -> 2 -> 0
         backlightLevel = (BIT(HA_BACKLIGHT_BIT) & state) ? (backlightLevel ? 2 : 1) : 0;
     }
+    if (FnlockCap)
+        FnlockMode = BIT(HA_FNLOCK_BIT) & state;
+    if (alwaysOnUSBCap)
+        alwaysOnUSBMode = BIT(HA_AOUSB_BIT) & state;
 
     if (update)
         DebugLog(updateSuccess, KeyboardPrompt, state);
 
-    if (FnlockCap)
-        setProperty(FnKeyPrompt, FnlockMode);
     if (backlightCap)
         setProperty(backlightPrompt, backlightLevel, 32);
+    if (FnlockCap)
+        setProperty(FnKeyPrompt, FnlockMode);
+    if (alwaysOnUSBCap)
+        setProperty(alwaysOnUSBPrompt, alwaysOnUSBMode);
+
+    return true;
+}
+
+bool IdeaVPC::toggleAlwaysOnUSB() {
+    if (!alwaysOnUSBCap)
+        return true;
+
+    UInt32 result;
+
+    OSObject* params[1] = {
+        OSNumber::withNumber((!alwaysOnUSBMode ? HACMD_AOUSB_ON : HACMD_AOUSB_OFF), 32)
+    };
+
+    IOReturn ret = vpc->evaluateInteger(setKeyboardMode, &result, params, 1);
+    params[0]->release();
+
+    if (ret != kIOReturnSuccess || result != 0) {
+        AlwaysLog(toggleFailure, alwaysOnUSBPrompt);
+        return false;
+    }
+
+    alwaysOnUSBMode = !alwaysOnUSBMode;
+    DebugLog(toggleSuccess, alwaysOnUSBPrompt, (alwaysOnUSBMode ? HACMD_AOUSB_ON : HACMD_AOUSB_OFF), (alwaysOnUSBMode ? "on" : "off"));
+    setProperty(alwaysOnUSBPrompt, alwaysOnUSBMode);
 
     return true;
 }

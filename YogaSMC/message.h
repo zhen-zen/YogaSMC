@@ -25,6 +25,7 @@ static IOPMPowerState IOPMPowerStates[kIOPMNumberPowerStates] = {
 
 #define kDeliverNotifications   "RM,deliverNotifications"
 
+#define alwaysOnUSBPrompt "AlwaysOnUSBMode"
 #define autoBacklightPrompt "AutoBacklight"
 #define batteryPrompt "Battery"
 #define backlightPrompt "BacklightLevel"
