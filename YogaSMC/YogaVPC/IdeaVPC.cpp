@@ -206,6 +206,7 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                         AlwaysLog(toggleFailure, conservationPrompt);
                     else
                         AlwaysLog(toggleSuccess, conservationPrompt, raw->unsigned32BitValue(), "see ioreg");
+                    params[0]->release();
                     continue;
                 }
 #endif
@@ -446,7 +447,10 @@ bool IdeaVPC::updateBatteryInfo(OSDictionary *bat0, OSDictionary *bat1) {
         OSNumber::withNumber(0ULL, 32)
     };
 
-    if (vpc->evaluateObject(getBatteryInfo, &result, params, 1) != kIOReturnSuccess) {
+    IOReturn ret = vpc->evaluateObject(getBatteryInfo, &result, params, 1);
+    params[0]->release();
+
+    if (ret != kIOReturnSuccess) {
         AlwaysLog(updateFailure, "Battery Info");
         return false;
     }
@@ -579,7 +583,10 @@ bool IdeaVPC::toggleConservation() {
         OSNumber::withNumber((!conservationMode ? BMCMD_CONSERVATION_ON : BMCMD_CONSERVATION_OFF), 32)
     };
 
-    if (vpc->evaluateInteger(setBatteryMode, &result, params, 1) != kIOReturnSuccess || result != 0) {
+    IOReturn ret = vpc->evaluateInteger(setBatteryMode, &result, params, 1);
+    params[0]->release();
+
+    if (ret != kIOReturnSuccess || result != 0) {
         AlwaysLog(toggleFailure, conservationPrompt);
         return false;
     }
@@ -602,7 +609,10 @@ bool IdeaVPC::toggleRapidCharge() {
         OSNumber::withNumber((!rapidChargeMode ? BMCMD_RAPIDCHARGE_ON : BMCMD_RAPIDCHARGE_OFF), 32)
     };
 
-    if (vpc->evaluateInteger(setBatteryMode, &result, params, 1) != kIOReturnSuccess || result != 0) {
+    IOReturn ret = vpc->evaluateInteger(setBatteryMode, &result, params, 1);
+    params[0]->release();
+
+    if (ret != kIOReturnSuccess || result != 0) {
         AlwaysLog(toggleFailure, rapidChargePrompt);
         return false;
     }
@@ -624,7 +634,10 @@ bool IdeaVPC::setBacklight(UInt32 level) {
         OSNumber::withNumber((level ? HACMD_BACKLIGHT_ON : HACMD_BACKLIGHT_OFF), 32)
     };
 
-    if (vpc->evaluateInteger(setKeyboardMode, &result, params, 1) != kIOReturnSuccess || result != 0) {
+    IOReturn ret = vpc->evaluateInteger(setKeyboardMode, &result, params, 1);
+    params[0]->release();
+
+    if (ret != kIOReturnSuccess || result != 0) {
         AlwaysLog(toggleFailure, backlightPrompt);
         return false;
     }
@@ -647,7 +660,10 @@ bool IdeaVPC::toggleFnlock() {
         OSNumber::withNumber((!FnlockMode ? HACMD_FNLOCK_ON : HACMD_FNLOCK_OFF), 32)
     };
 
-    if (vpc->evaluateInteger(setKeyboardMode, &result, params, 1) != kIOReturnSuccess || result != 0) {
+    IOReturn ret = vpc->evaluateInteger(setKeyboardMode, &result, params, 1);
+    params[0]->release();
+
+    if (ret != kIOReturnSuccess || result != 0) {
         AlwaysLog(toggleFailure, FnKeyPrompt);
         return false;
     }
@@ -891,7 +907,10 @@ bool IdeaVPC::method_vpcr(UInt32 cmd, UInt32 *result) {
         OSNumber::withNumber(cmd, 32)
     };
 
-    return (vpc->evaluateInteger(readVPCStatus, result, params, 1) == kIOReturnSuccess);
+    IOReturn ret = vpc->evaluateInteger(readVPCStatus, result, params, 1);
+    params[0]->release();
+
+    return (ret == kIOReturnSuccess);
 }
 
 bool IdeaVPC::method_vpcw(UInt32 cmd, UInt32 data) {
@@ -902,5 +921,9 @@ bool IdeaVPC::method_vpcw(UInt32 cmd, UInt32 data) {
         OSNumber::withNumber(data, 32)
     };
 
-    return (vpc->evaluateInteger(writeVPCStatus, &result, params, 2) == kIOReturnSuccess);
+    IOReturn ret = vpc->evaluateInteger(writeVPCStatus, &result, params, 2);
+    params[0]->release();
+    params[1]->release();
+
+    return (ret == kIOReturnSuccess);
 }
