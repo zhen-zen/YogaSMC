@@ -297,7 +297,7 @@ void YogaBaseService::validateEC() {
         return;
     if (ec->validateObject(readECOneByte) != kIOReturnSuccess ||
         ec->validateObject(readECBytes) != kIOReturnSuccess) {
-        setProperty("EC Capability", "False");
+        setProperty("EC Capability", "Basic");
         return;
     }
     ECAccessCap |= BIT(0);
