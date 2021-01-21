@@ -27,7 +27,7 @@
 			<key>IOClass</key>
 			<string>DYVPC</string>
 			<key>IONameMatch</key>
-			<string>WMID</string>
+			<string>PNP0C14</string>
 			<key>IOProbeScore</key>
 			<integer>200</integer>
 			<key>IOProviderClass</key>
