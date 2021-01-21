@@ -232,6 +232,8 @@ IOReturn YogaBaseService::method_re1b(UInt32 offset, UInt8 *result) {
     };
 
     IOReturn ret = ec->evaluateInteger(readECOneByte, &raw, params, 1);
+    params[0]->release();
+
     if (ret != kIOReturnSuccess)
         AlwaysLog("read 0x%02x failed", offset);
 
@@ -252,6 +254,9 @@ IOReturn YogaBaseService::method_recb(UInt32 offset, UInt32 size, OSData **data)
     OSObject* result;
 
     IOReturn ret = ec->evaluateObject(readECBytes, &result, params, 2);
+    params[0]->release();
+    params[1]->release();
+
     if (ret != kIOReturnSuccess || !(*data = OSDynamicCast(OSData, result))) {
         AlwaysLog("read %d bytes @ 0x%02x failed", size, offset);
         OSSafeReleaseNULL(result);
@@ -277,6 +282,9 @@ IOReturn YogaBaseService::method_we1b(UInt32 offset, UInt8 value) {
     };
 
     IOReturn ret = ec->evaluateObject(writeECOneByte, nullptr, params, 2);
+    params[0]->release();
+    params[1]->release();
+
     if (ret != kIOReturnSuccess)
         AlwaysLog("write 0x%02x @ 0x%02x failed", value, offset);
     else
