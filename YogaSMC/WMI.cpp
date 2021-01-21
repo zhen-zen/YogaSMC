@@ -92,16 +92,19 @@ OSString * parseWMIFlags(UInt8 flags)
 
 bool WMI::initialize()
 {
-    if (mDevice) {
-        name = mDevice->getName();
-        mData = OSDictionary::withCapacity(1);
-        mEvent = OSDictionary::withCapacity(1);
-        if (extractData())
-            return true;
+    if (!mDevice)
+        return false;
 
+    name = mDevice->getName();
+    mData = OSDictionary::withCapacity(1);
+    mEvent = OSDictionary::withCapacity(1);
+
+    if (!extractData()) {
         AlwaysLog("WMI method %s not found", kWMIMethod);
+        return false;
     }
-    return false;
+
+    return true;
 }
 
 WMI::~WMI()
@@ -201,10 +204,9 @@ OSDictionary* WMI::getMethod(const char * guid, UInt8 flg)
 bool WMI::hasMethod(const char * guid, UInt8 flg)
 {
     OSDictionary *method = getMethod(guid, flg);
-    
-    if (!method) {
+
+    if (!method)
         return false;
-    }
 
     if (flg == ACPI_WMI_EVENT) {
         DebugLog("Found event with guid %s", guid);
@@ -282,8 +284,8 @@ bool WMI::enableEvent(const char * guid, bool enable)
     };
 
     bool ret = executeMethod(guid, nullptr, params, 1);
-
     params[0]->release();
+
     return ret;
 }
 
@@ -293,10 +295,10 @@ bool WMI::getEventData(UInt32 event, OSObject **result)
         OSNumber::withNumber(event, 32)
     };
 
-    if (mDevice->evaluateObject(ACPINotifyName, result, params, 1) != kIOReturnSuccess)
-        return false;
+    IOReturn ret = mDevice->evaluateObject(ACPINotifyName, result, params, 1);
+    params[0]->release();
 
-    return true;
+    return (ret == kIOReturnSuccess);
 }
 
 bool WMI::extractBMF(struct WMI_DATA* block)
