@@ -13,8 +13,8 @@
 
 // from linux/drivers/platform/x86/hp-wmi.c
 
-#define INPUT_WMI_EVENT "95F24279-4D7B-4334-9387-ACCDC67EF61C"
-#define BIOS_QUERY_WMI_METHOD "5FB7F034-2C63-45e9-BE91-3D44E2C707E4"
+#define INPUT_WMI_EVENT "95f24279-4d7b-4334-9387-accdc67ef61c"
+#define BIOS_QUERY_WMI_METHOD "5fb7f034-2c63-45e9-be91-3d44e2c707e4"
 
 enum hp_wmi_radio {
     HPWMI_WIFI    = 0x0,
