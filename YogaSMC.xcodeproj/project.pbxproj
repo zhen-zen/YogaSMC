@@ -75,7 +75,6 @@
 		6F88067A24EB575F00ACD6C8 /* YogaVPC.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F96A30B24B93D25006562EC /* YogaVPC.hpp */; };
 		6F88067B24EB575F00ACD6C8 /* bmfparser.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6FD2BB8C247B37A20018EA36 /* bmfparser.hpp */; };
 		6F88067C24EB575F00ACD6C8 /* common.h in Headers */ = {isa = PBXBuildFile; fileRef = 6FCF7F5B2474B89000A82B13 /* common.h */; };
-		6F88067D24EB575F00ACD6C8 /* bmfdec.h in Headers */ = {isa = PBXBuildFile; fileRef = 6FD2BB46247721040018EA36 /* bmfdec.h */; };
 		6F88067E24EB575F00ACD6C8 /* YogaWMI.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F08ACE724746B8B00681A63 /* YogaWMI.hpp */; };
 		6F88067F24EB575F00ACD6C8 /* ThinkVPC.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F6CEDA324BC14C2004D553F /* ThinkVPC.hpp */; };
 		6F88068124EB575F00ACD6C8 /* IdeaWMI.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F48676224A293A0003AD4CA /* IdeaWMI.hpp */; };
@@ -125,7 +124,6 @@
 		6FCF7F5C2474B89000A82B13 /* common.h in Headers */ = {isa = PBXBuildFile; fileRef = 6FCF7F5B2474B89000A82B13 /* common.h */; };
 		6FD082B32537DA1A00491976 /* OSD.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FD082B22537DA1A00491976 /* OSD.framework */; };
 		6FD082B42537DA1A00491976 /* OSD.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FD082B22537DA1A00491976 /* OSD.framework */; };
-		6FD2BB48247721040018EA36 /* bmfdec.h in Headers */ = {isa = PBXBuildFile; fileRef = 6FD2BB46247721040018EA36 /* bmfdec.h */; };
 		6FD2BB49247721040018EA36 /* bmfdec.c in Sources */ = {isa = PBXBuildFile; fileRef = 6FD2BB47247721040018EA36 /* bmfdec.c */; };
 		6FD2BB8D247B37A20018EA36 /* bmfparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6FD2BB8B247B37A20018EA36 /* bmfparser.cpp */; };
 		6FD2BB8E247B37A20018EA36 /* bmfparser.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6FD2BB8C247B37A20018EA36 /* bmfparser.hpp */; };
@@ -295,7 +293,6 @@
 		6FCF7F5B2474B89000A82B13 /* common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
 		6FD082B22537DA1A00491976 /* OSD.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OSD.framework; path = /System/Library/PrivateFrameworks/OSD.framework; sourceTree = "<absolute>"; };
 		6FD083002537E87400491976 /* YogaSMC-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "YogaSMC-Bridging-Header.h"; sourceTree = "<group>"; };
-		6FD2BB46247721040018EA36 /* bmfdec.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bmfdec.h; sourceTree = "<group>"; };
 		6FD2BB47247721040018EA36 /* bmfdec.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = bmfdec.c; sourceTree = "<group>"; };
 		6FD2BB8B247B37A20018EA36 /* bmfparser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = bmfparser.cpp; sourceTree = "<group>"; };
 		6FD2BB8C247B37A20018EA36 /* bmfparser.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = bmfparser.hpp; sourceTree = "<group>"; };
@@ -394,7 +391,6 @@
 				6F48676024A2937E003AD4CA /* YogaWMI */,
 				6FCF7F572474B74800A82B13 /* WMI.h */,
 				6FCF7F582474B74800A82B13 /* WMI.cpp */,
-				6FD2BB46247721040018EA36 /* bmfdec.h */,
 				6FD2BB47247721040018EA36 /* bmfdec.c */,
 				6FD2BB8C247B37A20018EA36 /* bmfparser.hpp */,
 				6FD2BB8B247B37A20018EA36 /* bmfparser.cpp */,
@@ -588,7 +584,6 @@
 				6F861253253BF805008FB857 /* YogaBaseService.hpp in Headers */,
 				6FD2BB8E247B37A20018EA36 /* bmfparser.hpp in Headers */,
 				6FCF7F5C2474B89000A82B13 /* common.h in Headers */,
-				6FD2BB48247721040018EA36 /* bmfdec.h in Headers */,
 				6F08ACE824746B8B00681A63 /* YogaWMI.hpp in Headers */,
 				6F6CEDA524BC14C2004D553F /* ThinkVPC.hpp in Headers */,
 				6F87BF8124D26A5D00D64375 /* YogaSMC.hpp in Headers */,
@@ -614,7 +609,6 @@
 				6F88067A24EB575F00ACD6C8 /* YogaVPC.hpp in Headers */,
 				6F88067B24EB575F00ACD6C8 /* bmfparser.hpp in Headers */,
 				6F88067C24EB575F00ACD6C8 /* common.h in Headers */,
-				6F88067D24EB575F00ACD6C8 /* bmfdec.h in Headers */,
 				6F88067E24EB575F00ACD6C8 /* YogaWMI.hpp in Headers */,
 				6F88067F24EB575F00ACD6C8 /* ThinkVPC.hpp in Headers */,
 				6F88068124EB575F00ACD6C8 /* IdeaWMI.hpp in Headers */,
