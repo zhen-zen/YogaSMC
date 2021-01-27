@@ -22,7 +22,19 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var statusItem: NSStatusItem?
     @IBOutlet weak var appMenu: NSMenu!
     var hide = false
+
+    // MARK: - CapsLock
+
     var hideCapslock = false
+    var capslockTimer: Timer?
+    var capslockState = false
+    @objc func showCapslock(sender: Timer) {
+        let current = GetCurrentKeyModifiers() & UInt32(alphaLock) != 0
+        if current != capslockState {
+            showOSDRes("Caps Lock", current ? "On" : "Off", current ? .kCapslockOn : .kCapslockOff)
+            capslockState = current
+        }
+    }
 
     // MARK: - Think
 
@@ -174,7 +186,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         initMenu(props["VersionInfo"] as? String ?? NSLocalizedString("Unknown Version", comment: ""))
         initNotification(props["EC Capability"] as? String)
 
-        if GetCurrentKeyModifiers() & UInt32(alphaLock) != 0 {
+        capslockState = GetCurrentKeyModifiers() & UInt32(alphaLock) != 0
+        if capslockState {
             conf.modifier.insert(.capsLock)
         }
         NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged, handler: flagsCallBack)
@@ -318,12 +331,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 //        }
         // 1 << 16
         if !hideCapslock {
-            if event.modifierFlags.contains(.capsLock) {
-                if !conf.modifier.contains(.capsLock) {
-                    showOSDRes("Caps Lock", "On", .kCapslockOn)
-                }
-            } else if conf.modifier.contains(.capsLock) {
-                showOSDRes("Caps Lock", "Off", .kCapslockOff)
+            if event.modifierFlags.contains(.capsLock) != conf.modifier.contains(.capsLock) {
+                capslockTimer = Timer.scheduledTimer(
+                    timeInterval: 0.05,
+                    target: self,
+                    selector: #selector(showCapslock(sender:)),
+                    userInfo: nil,
+                    repeats: false
+                )
             }
         }
         conf.modifier = event.modifierFlags.intersection(.deviceIndependentFlagsMask)

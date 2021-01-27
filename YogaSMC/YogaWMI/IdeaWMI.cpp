@@ -80,15 +80,19 @@ void IdeaWMI::processWMI() {
 }
 
 void IdeaWMI::updateYogaMode() {
+    UInt32 value;
     OSObject* params[3] = {
         OSNumber::withNumber(0ULL, 32),
         OSNumber::withNumber(0ULL, 32),
         OSNumber::withNumber(0ULL, 32)
     };
 
-    UInt32 value;
-    
-    if (!YWMI->executeInteger(GSENSOR_DATA_WMI_METHOD, &value, params, 3)) {
+    bool ret = YWMI->executeInteger(GSENSOR_DATA_WMI_METHOD, &value, params, 3);
+    params[0]->release();
+    params[1]->release();
+    params[2]->release();
+
+    if (!ret) {
         setProperty("YogaMode", false);
         AlwaysLog("YogaMode: detection failed");
         return;
@@ -150,6 +154,7 @@ bool IdeaWMI::getBatteryInfo(UInt32 index, OSArray *bat) {
 
     ret = YWMI->executeMethod(BAT_INFO_WMI_STRING, &result, params, 1);
     params[0]->release();
+
     if (ret) {
         OSString *info = OSDynamicCast(OSString, result);
         if (info != nullptr) {
@@ -159,10 +164,10 @@ bool IdeaWMI::getBatteryInfo(UInt32 index, OSArray *bat) {
             AlwaysLog("WBAT result not a string");
             ret = false;
         }
-        result->release();
     } else {
         AlwaysLog("WBAT evaluation failed");
     }
+    OSSafeReleaseNULL(result);
     return ret;
 }
 

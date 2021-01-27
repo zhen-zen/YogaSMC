@@ -20,31 +20,46 @@
 
 // from linux/drivers/platform/x86/ideapad-laptop.c
 
-#define BM_RAPIDCHARGE_BIT   (2)
-#define BM_BATTERY0BAD_BIT   (3)
-#define BM_BATTERY1BAD_BIT   (4)
-#define BM_CONSERVATION_BIT  (5)
-#define HA_BACKLIGHT_CAP_BIT (4)
-#define HA_BACKLIGHT_BIT     (5)
-#define HA_FNLOCK_CAP_BIT    (9)
-#define HA_FNLOCK_BIT        (10)
-#define HA_PRIMEKEY_BIT      (11)
-
-#define CFG_GRAPHICS_BIT     (8)
-#define CFG_BT_BIT           (16)
-#define CFG_3G_BIT           (17)
-#define CFG_WIFI_BIT         (18)
-#define CFG_CAMERA_BIT       (19)
+enum {
+    CFG_GRAPHICS_BIT       = 8,
+    CFG_BT_BIT             = 16,
+    CFG_3G_BIT             = 17,
+    CFG_WIFI_BIT           = 18,
+    CFG_CAMERA_BIT         = 19,
+    CFG_TOUCHPAD_BIT       = 30,
+};
 
 enum {
-    BMCMD_CONSERVATION_ON = 3,
-    BMCMD_CONSERVATION_OFF = 5,
-    BMCMD_RAPIDCHARGE_ON = 7,
-    BMCMD_RAPIDCHARGE_OFF = 8,
-    HACMD_BACKLIGHT_ON = 0x8,
-    HACMD_BACKLIGHT_OFF = 0x9,
-    HACMD_FNLOCK_ON = 0xe,
-    HACMD_FNLOCK_OFF = 0xf,
+    BM_RAPIDCHARGE_BIT     = 2,
+    BM_BATTERY0BAD_BIT     = 3,
+    BM_BATTERY1BAD_BIT     = 4,
+    BM_CONSERVATION_BIT    = 5,
+};
+
+enum {
+    BMCMD_CONSERVATION_ON  = 0x3,
+    BMCMD_CONSERVATION_OFF = 0x5,
+    BMCMD_RAPIDCHARGE_ON   = 0x7,
+    BMCMD_RAPIDCHARGE_OFF  = 0x8,
+};
+
+enum {
+    HA_BACKLIGHT_CAP_BIT   = 4,
+    HA_BACKLIGHT_BIT       = 5,
+    HA_AOUSB_CAP_BIT       = 6,
+    HA_AOUSB_BIT           = 7,
+    HA_FNLOCK_CAP_BIT      = 9,
+    HA_FNLOCK_BIT          = 10,
+    HA_PRIMEKEY_BIT        = 11,
+};
+
+enum {
+    HACMD_BACKLIGHT_ON     = 0x8,
+    HACMD_BACKLIGHT_OFF    = 0x9,
+    HACMD_AOUSB_ON         = 0xa,
+    HACMD_AOUSB_OFF        = 0xb,
+    HACMD_FNLOCK_ON        = 0xe,
+    HACMD_FNLOCK_OFF       = 0xf,
 };
 
 enum {
@@ -95,21 +110,21 @@ private:
     static constexpr const char *readVPCStatus        = "VPCR";
     static constexpr const char *writeVPCStatus       = "VPCW";
 
-    /**
-     * VPC0 config
-     */
-    UInt32 config;
-    UInt8 cap_graphics;
-    bool cap_bt;
-    bool cap_3g;
-    bool cap_wifi;
-    bool cap_camera;
-
     bool initVPC() APPLE_KEXT_OVERRIDE;
     void setPropertiesGated(OSObject* props) APPLE_KEXT_OVERRIDE;
     void updateAll() APPLE_KEXT_OVERRIDE;
     void updateVPC() APPLE_KEXT_OVERRIDE;
     bool exitVPC() APPLE_KEXT_OVERRIDE;
+
+    /**
+     *  Always on USB mode capability, will be update on init
+     */
+    bool alwaysOnUSBCap {false};
+
+    /**
+     *  Always on USB mode status
+     */
+    bool alwaysOnUSBMode {false};
 
     /**
      *  Saved brightness level
@@ -129,7 +144,7 @@ private:
     /**
      *  Battery conservation mode status
      */
-    bool conservationMode;
+    bool conservationMode {false};
     
     /**
      *  Prohibit early conservation mode manipulation
@@ -271,6 +286,13 @@ private:
 
     inline bool updateBacklight(bool update=false) APPLE_KEXT_OVERRIDE {return updateKeyboard(update);};
     bool setBacklight(UInt32 level) APPLE_KEXT_OVERRIDE;
+
+    /**
+     *  Toggle always on USB mode
+     *
+     *  @return true if success
+     */
+    bool toggleAlwaysOnUSB();
 
     /**
      *  Toggle battery conservation mode
