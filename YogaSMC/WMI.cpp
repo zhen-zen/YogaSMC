@@ -19,7 +19,6 @@
  * and the-darkvoid's revision (https://github.com/the-darkvoid/macOS-IOElectrify/)
  */
 
-#include "bmfdec.h"
 #include "bmfparser.hpp"
 #include "common.h"
 
@@ -43,6 +42,8 @@ struct __attribute__((packed)) WMI_DATA
 };
 
 #define WMI_DATA_SIZE sizeof(WMI_DATA)
+
+extern "C" int ds_dec(void* pin,int lin, void* pout, int lout, int flg);
 
 // Convert UUID to little endian
 void le_uuid_dec(uuid_t *in, uuid_t *out)
