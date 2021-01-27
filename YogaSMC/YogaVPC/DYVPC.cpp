@@ -11,17 +11,23 @@ OSDefineMetaClassAndStructors(DYVPC, YogaVPC);
 
 bool DYVPC::probeVPC(IOService *provider) {
     YWMI = new WMI(provider);
-    YWMI->initialize();
+    if (!YWMI->initialize())
+        return false;;
+
     inputCap = YWMI->hasMethod(INPUT_WMI_EVENT, ACPI_WMI_EVENT);
     BIOSCap = YWMI->hasMethod(BIOS_QUERY_WMI_METHOD);
+
     if (!inputCap && !BIOSCap) {
         delete YWMI;
         return false;
     }
+
     return true;
 }
 
 bool DYVPC::initVPC() {
+    YWMI->extractBMF();
+
     if (inputCap)
         YWMI->enableEvent(INPUT_WMI_EVENT, true);
 
