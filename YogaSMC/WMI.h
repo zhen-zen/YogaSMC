@@ -79,7 +79,7 @@ private:
     bool extractData();
     void parseWDGEntry(struct WMI_DATA * block);
 
-    bool extractBMF(struct WMI_DATA* block);
+    bool extractBMF(const char *methodName);
     bool foundBMF {false};
 };
 
