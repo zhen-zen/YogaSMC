@@ -17,7 +17,7 @@ extension YogaSMCPane {
         showOSD(String(format: "Start %d", target))
         #endif
 
-        if thinkBatteryNumber != sender.tag, !updateThinkBattery(sender.tag) {
+        if thinkBatteryNumber != sender.tag, !updateThinkBatteryIndex(sender.tag) {
             os_log("Failed to update battery %d", type: .error, sender.tag)
             sender.isEnabled = false
             return
@@ -31,7 +31,7 @@ extension YogaSMCPane {
     @IBAction func vChargeThresholdStopSet(_ sender: NSTextField) {
         let target = sender.integerValue
 
-        if thinkBatteryNumber != sender.tag, !updateThinkBattery(sender.tag) {
+        if thinkBatteryNumber != sender.tag, !updateThinkBatteryIndex(sender.tag) {
             os_log("Failed to update battery %d", type: .error, sender.tag)
             return
         }
@@ -94,19 +94,24 @@ extension YogaSMCPane {
         _ = scriptHelper(reloadAS, "Reload YogaSMCNC")
     }
 
-    func updateThinkBattery(_ index: Int) -> Bool {
+    func updateThinkBatteryIndex(_ index: Int) -> Bool {
         if !sendNumber("Battery", index, service) { return false }
-
-        var startThreshold: NSTextField
-        var stopThreshold: NSTextField
 
         switch index {
         case 0:
-            startThreshold = vChargeThresholdStart
-            stopThreshold = vChargeThresholdStop
+            return updateThinkBattery(vChargeThresholdStart, vChargeThresholdStop)
+        case 1:
+            return updateThinkBattery(vPrimaryChargeThresholdStart, vPrimaryChargeThresholdStop)
+        case 2:
+            return updateThinkBattery(vSecondaryChargeThresholdStart, vSecondaryChargeThresholdStop)
         default:
             return false
         }
+    }
+
+    func updateThinkBattery(_ startThreshold: NSTextField, _ stopThreshold: NSTextField) -> Bool {
+        guard startThreshold.tag == stopThreshold.tag else { return false}
+        let index = startThreshold.tag
 
         guard let dict = getDictionary(thinkBatteryName[index], service),
               let vStart = dict["BCTG"] as? NSNumber,
@@ -144,9 +149,9 @@ extension YogaSMCPane {
     }
 
     func updateThink(_ props: NSDictionary) {
-        _ = updateThinkBattery(0)
-        _ = updateThinkBattery(1)
-        _ = updateThinkBattery(2)
+        _ = updateThinkBatteryIndex(0)
+        _ = updateThinkBatteryIndex(1)
+        _ = updateThinkBatteryIndex(2)
 
         if let val = props["FnlockMode"] as? Bool {
             vFnKeyRadio.title = "FnKey"
