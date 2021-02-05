@@ -95,7 +95,6 @@ class YogaSMCPane: NSPreferencePane {
     @IBOutlet weak var vCustomLEDSlider: NSSlider!
     @IBOutlet weak var vCustomLEDList: NSPopUpButton!
 
-    @IBOutlet weak var vFanSpeed: NSTextField!
     @IBOutlet weak var vSecondFan: NSButton!
     @IBOutlet weak var vFanStop: NSButton!
     @IBOutlet weak var vDisableFan: NSButton!

@@ -130,24 +130,6 @@ extension YogaSMCPane {
         return true
     }
 
-    func updateThinkFan() {
-        var connect: io_connect_t = 0
-        if kIOReturnSuccess == IOServiceOpen(service, mach_task_self_, 0, &connect),
-           connect != 0 {
-            if kIOReturnSuccess == IOConnectCallScalarMethod(connect, UInt32(kYSMCUCOpen), nil, 0, nil, nil) {
-                var input: UInt64 = 0x84
-                var outputSize = 2
-                var output: [UInt8] = Array(repeating: 0, count: 2)
-                if kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadEC),
-                                                           &input, 1, nil, 0, nil, nil, &output, &outputSize),
-                   outputSize == 2 {
-                    vFanSpeed.intValue = Int32(output[0]) | Int32(output[1]) << 8
-                }
-            }
-            IOServiceClose(connect)
-        }
-    }
-
     func updateThink(_ props: NSDictionary) {
         _ = updateThinkBatteryIndex(0)
         _ = updateThinkBatteryIndex(1)
@@ -161,7 +143,6 @@ extension YogaSMCPane {
                 vFxKeyRadio.state = .on
             }
         }
-        updateThinkFan()
         #if DEBUG
         if let val = props["Dual fan"] as? Bool,
            val == true {
