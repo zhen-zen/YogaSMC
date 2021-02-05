@@ -16,6 +16,12 @@ extension YogaSMCPane {
         }
     }
 
+    @IBAction func vAlwaysOnUSBModeSet(_ sender: NSButton) {
+        if !sendBoolean("AlwaysOnUSBMode", vAlwaysOnUSBMode.state == .on, service) {
+            vAlwaysOnUSBMode.state = getBoolean("AlwaysOnUSBMode", service) ? .on : .off
+        }
+    }
+
     @IBAction func vConservationModeSet(_ sender: NSButton) {
         if !sendBoolean("ConservationMode", vConservationMode.state == .on, service) {
             vConservationMode.state = getBoolean("ConservationMode", service) ? .on : .off
@@ -72,10 +78,14 @@ extension YogaSMCPane {
             vFnKeyRadio.title = "Unknown"
         }
 
+        if let val = props["AlwaysOnUSBMode"] as? Bool {
+            vAlwaysOnUSBMode.state = val ? .on : .off
+            vAlwaysOnUSBMode.isEnabled = true
+        }
+
         if let val = props["ConservationMode"] as? Bool {
             vConservationMode.state = val ? .on : .off
-        } else {
-            vConservationMode.isEnabled = false
+            vConservationMode.isEnabled = true
         }
 
         if let val = props["RapidChargeMode"] as? Bool {
@@ -83,8 +93,6 @@ extension YogaSMCPane {
             #if DEBUG
             vRapidChargeMode.isEnabled = true
             #endif
-        } else {
-            vRapidChargeMode.isEnabled = false
         }
 
         if let dict = props["Battery 0"] as? NSDictionary {

@@ -41,10 +41,10 @@ func setHolidayIcon(_ button: NSStatusItem) {
     case (11, _, 5, 4):
         button.title = "🦃"
         button.toolTip = NSLocalizedString("Thanksgiving", comment: "")
-    case (12, 25, _, _):
+    case (12, 24, _, _):
         button.title = "🎄"
         button.toolTip = NSLocalizedString("Christmas Eve", comment: "")
-    case (12, 26, _, _):
+    case (12, 25, _, _):
         button.title = "🎁"
         button.toolTip = NSLocalizedString("Christmas Day", comment: "")
     case (12, 31, _, _):

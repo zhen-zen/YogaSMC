@@ -16,6 +16,7 @@
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
 #include "common.h"
 #include "message.h"
+#include "WMI.h"
 //#include "YogaSMCUserClientPrivate.hpp"
 
 class YogaBaseService : public IOService {
@@ -43,6 +44,11 @@ protected:
      *  UserClient
      */
 //    YogaSMCUserClient *client {nullptr};
+
+    /**
+     *  WMI device, in place of provider and direct ACPI evaluations
+     */
+    WMI* YWMI {nullptr};
 
     /**
      *  Iterate over IOACPIPlane for PNP device

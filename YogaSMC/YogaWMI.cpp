@@ -77,7 +77,7 @@ bool YogaWMI::start(IOService *provider)
 
     YWMI = new WMI(provider);
     YWMI->initialize();
-
+    YWMI->extractBMF();
     processWMI();
 
     Event = YWMI->getEvent();

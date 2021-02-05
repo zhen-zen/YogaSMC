@@ -7,7 +7,6 @@
 //  Copyright © 2020 Zhen. All rights reserved.
 //
 
-#include "WMI.h"
 #include "YogaBaseService.hpp"
 
 class YogaWMI : public YogaBaseService
@@ -16,11 +15,6 @@ class YogaWMI : public YogaBaseService
     OSDeclareDefaultStructors(YogaWMI)
 
 protected:
-    /**
-     *  WMI device, in place of provider and direct ACPI evaluations
-     */
-    WMI* YWMI {nullptr};
-
     /**
      *  Find notify id and other properties of an event
      *

@@ -18,6 +18,8 @@ void IdeaVPC::updateAll() {
 
 bool IdeaVPC::initVPC() {
     super::initVPC();
+
+    UInt32 config;
     if (vpc->evaluateInteger(getVPCConfig, &config) != kIOReturnSuccess) {
         AlwaysLog(initFailure, getVPCConfig);
         return false;
@@ -25,15 +27,17 @@ bool IdeaVPC::initVPC() {
 
     DebugLog(updateSuccess, VPCPrompt, config);
     setProperty(VPCPrompt, config, 32);
-    cap_graphics = config >> CFG_GRAPHICS_BIT & 0x7;
-    cap_bt       = config >> CFG_BT_BIT & 0x1;
-    cap_3g       = config >> CFG_3G_BIT & 0x1;
-    cap_wifi     = config >> CFG_WIFI_BIT & 0x1;
-    cap_camera   = config >> CFG_CAMERA_BIT & 0x1;
 
-    OSDictionary *capabilities = OSDictionary::withCapacity(5);
+    OSDictionary *capabilities = OSDictionary::withCapacity(6);
     OSString *value;
 
+    setPropertyBoolean(capabilities, "Bluetooth", (config >> CFG_BT_BIT) & 0x1);
+    setPropertyBoolean(capabilities, "3G", (config >> CFG_3G_BIT) & 0x1);
+    setPropertyBoolean(capabilities, "Wireless", (config >> CFG_WIFI_BIT) & 0x1);
+    setPropertyBoolean(capabilities, "Camera", (config >> CFG_CAMERA_BIT) & 0x1);
+    setPropertyBoolean(capabilities, "Touchpad", (config >> CFG_TOUCHPAD_BIT) & 0x1);
+
+    UInt8 cap_graphics = config >> CFG_GRAPHICS_BIT & 0x7;
     switch (cap_graphics) {
         case 1:
             setPropertyString(capabilities, "Graphics", "Intel");
@@ -61,10 +65,6 @@ bool IdeaVPC::initVPC() {
             setPropertyString(capabilities, "Graphics", Unknown);
             break;
     }
-    setPropertyBoolean(capabilities, "Bluetooth", cap_bt);
-    setPropertyBoolean(capabilities, "3G", cap_3g);
-    setPropertyBoolean(capabilities, "Wireless", cap_wifi);
-    setPropertyBoolean(capabilities, "Camera", cap_camera);
     setProperty("Capability", capabilities);
     capabilities->release();
 
@@ -183,7 +183,16 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
 
     if (i) {
         while (OSString* key = OSDynamicCast(OSString, i->getNextObject())) {
-            if (key->isEqualTo(conservationPrompt)) {
+            if (key->isEqualTo(alwaysOnUSBPrompt)) {
+                OSBoolean *value;
+                getPropertyBoolean(alwaysOnUSBPrompt);
+                updateKeyboard(false);
+
+                if (value->getValue() == alwaysOnUSBMode)
+                    DebugLog(valueMatched, alwaysOnUSBPrompt, alwaysOnUSBMode);
+                else
+                    toggleAlwaysOnUSB();
+            } else if (key->isEqualTo(conservationPrompt)) {
 #ifdef DEBUG
                 OSNumber *raw = OSDynamicCast(OSNumber, dict->getObject(conservationPrompt));
                 if (raw != nullptr) {
@@ -197,6 +206,7 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                         AlwaysLog(toggleFailure, conservationPrompt);
                     else
                         AlwaysLog(toggleSuccess, conservationPrompt, raw->unsigned32BitValue(), "see ioreg");
+                    params[0]->release();
                     continue;
                 }
 #endif
@@ -324,6 +334,10 @@ void IdeaVPC::updateKeyboardStats(UInt32 kbdState) {
         setProperty("PrimeKeyType", "HotKey");
     else
         setProperty("PrimeKeyType", "FnKey");
+
+    alwaysOnUSBCap = BIT(HA_AOUSB_CAP_BIT) & kbdState;
+    if (!alwaysOnUSBCap)
+        setProperty(alwaysOnUSBPrompt, "unsupported");
 }
 
 void IdeaVPC::updateBatteryStats(UInt32 batState) {
@@ -433,7 +447,10 @@ bool IdeaVPC::updateBatteryInfo(OSDictionary *bat0, OSDictionary *bat1) {
         OSNumber::withNumber(0ULL, 32)
     };
 
-    if (vpc->evaluateObject(getBatteryInfo, &result, params, 1) != kIOReturnSuccess) {
+    IOReturn ret = vpc->evaluateObject(getBatteryInfo, &result, params, 1);
+    params[0]->release();
+
+    if (ret != kIOReturnSuccess) {
         AlwaysLog(updateFailure, "Battery Info");
         return false;
     }
@@ -489,11 +506,11 @@ bool IdeaVPC::updateBattery(bool update) {
     conservationMode = BIT(BM_CONSERVATION_BIT) & state;
     rapidChargeMode = BIT(BM_RAPIDCHARGE_BIT) & state;
 
-    if (update) {
+    if (update)
         DebugLog(updateSuccess, batteryPrompt, state);
-        setProperty(conservationPrompt, conservationMode);
-        setProperty(rapidChargePrompt, rapidChargeMode);
-    }
+
+    setProperty(conservationPrompt, conservationMode);
+    setProperty(rapidChargePrompt, rapidChargeMode);
 
     return true;
 }
@@ -509,8 +526,6 @@ bool IdeaVPC::updateKeyboard(bool update) {
         return false;
     }
 
-    if (FnlockCap)
-        FnlockMode = BIT(HA_FNLOCK_BIT) & state;
     if (backlightCap) {
         // Preserve low / high level on non keyboard triggered events
         if (!update && backlightLevel)
@@ -518,14 +533,45 @@ bool IdeaVPC::updateKeyboard(bool update) {
         // Inference from brightness cycle: 0 -> 1 -> 2 -> 0
         backlightLevel = (BIT(HA_BACKLIGHT_BIT) & state) ? (backlightLevel ? 2 : 1) : 0;
     }
+    if (FnlockCap)
+        FnlockMode = BIT(HA_FNLOCK_BIT) & state;
+    if (alwaysOnUSBCap)
+        alwaysOnUSBMode = BIT(HA_AOUSB_BIT) & state;
 
-    if (update) {
+    if (update)
         DebugLog(updateSuccess, KeyboardPrompt, state);
-        if (FnlockCap)
-            setProperty(FnKeyPrompt, FnlockMode);
-        if (backlightCap)
-            setProperty(backlightPrompt, backlightLevel, 32);
+
+    if (backlightCap)
+        setProperty(backlightPrompt, backlightLevel, 32);
+    if (FnlockCap)
+        setProperty(FnKeyPrompt, FnlockMode);
+    if (alwaysOnUSBCap)
+        setProperty(alwaysOnUSBPrompt, alwaysOnUSBMode);
+
+    return true;
+}
+
+bool IdeaVPC::toggleAlwaysOnUSB() {
+    if (!alwaysOnUSBCap)
+        return true;
+
+    UInt32 result;
+
+    OSObject* params[1] = {
+        OSNumber::withNumber((!alwaysOnUSBMode ? HACMD_AOUSB_ON : HACMD_AOUSB_OFF), 32)
+    };
+
+    IOReturn ret = vpc->evaluateInteger(setKeyboardMode, &result, params, 1);
+    params[0]->release();
+
+    if (ret != kIOReturnSuccess || result != 0) {
+        AlwaysLog(toggleFailure, alwaysOnUSBPrompt);
+        return false;
     }
+
+    alwaysOnUSBMode = !alwaysOnUSBMode;
+    DebugLog(toggleSuccess, alwaysOnUSBPrompt, (alwaysOnUSBMode ? HACMD_AOUSB_ON : HACMD_AOUSB_OFF), (alwaysOnUSBMode ? "on" : "off"));
+    setProperty(alwaysOnUSBPrompt, alwaysOnUSBMode);
 
     return true;
 }
@@ -537,7 +583,10 @@ bool IdeaVPC::toggleConservation() {
         OSNumber::withNumber((!conservationMode ? BMCMD_CONSERVATION_ON : BMCMD_CONSERVATION_OFF), 32)
     };
 
-    if (vpc->evaluateInteger(setBatteryMode, &result, params, 1) != kIOReturnSuccess || result != 0) {
+    IOReturn ret = vpc->evaluateInteger(setBatteryMode, &result, params, 1);
+    params[0]->release();
+
+    if (ret != kIOReturnSuccess || result != 0) {
         AlwaysLog(toggleFailure, conservationPrompt);
         return false;
     }
@@ -560,7 +609,10 @@ bool IdeaVPC::toggleRapidCharge() {
         OSNumber::withNumber((!rapidChargeMode ? BMCMD_RAPIDCHARGE_ON : BMCMD_RAPIDCHARGE_OFF), 32)
     };
 
-    if (vpc->evaluateInteger(setBatteryMode, &result, params, 1) != kIOReturnSuccess || result != 0) {
+    IOReturn ret = vpc->evaluateInteger(setBatteryMode, &result, params, 1);
+    params[0]->release();
+
+    if (ret != kIOReturnSuccess || result != 0) {
         AlwaysLog(toggleFailure, rapidChargePrompt);
         return false;
     }
@@ -582,7 +634,10 @@ bool IdeaVPC::setBacklight(UInt32 level) {
         OSNumber::withNumber((level ? HACMD_BACKLIGHT_ON : HACMD_BACKLIGHT_OFF), 32)
     };
 
-    if (vpc->evaluateInteger(setKeyboardMode, &result, params, 1) != kIOReturnSuccess || result != 0) {
+    IOReturn ret = vpc->evaluateInteger(setKeyboardMode, &result, params, 1);
+    params[0]->release();
+
+    if (ret != kIOReturnSuccess || result != 0) {
         AlwaysLog(toggleFailure, backlightPrompt);
         return false;
     }
@@ -605,7 +660,10 @@ bool IdeaVPC::toggleFnlock() {
         OSNumber::withNumber((!FnlockMode ? HACMD_FNLOCK_ON : HACMD_FNLOCK_OFF), 32)
     };
 
-    if (vpc->evaluateInteger(setKeyboardMode, &result, params, 1) != kIOReturnSuccess || result != 0) {
+    IOReturn ret = vpc->evaluateInteger(setKeyboardMode, &result, params, 1);
+    params[0]->release();
+
+    if (ret != kIOReturnSuccess || result != 0) {
         AlwaysLog(toggleFailure, FnKeyPrompt);
         return false;
     }
@@ -849,7 +907,10 @@ bool IdeaVPC::method_vpcr(UInt32 cmd, UInt32 *result) {
         OSNumber::withNumber(cmd, 32)
     };
 
-    return (vpc->evaluateInteger(readVPCStatus, result, params, 1) == kIOReturnSuccess);
+    IOReturn ret = vpc->evaluateInteger(readVPCStatus, result, params, 1);
+    params[0]->release();
+
+    return (ret == kIOReturnSuccess);
 }
 
 bool IdeaVPC::method_vpcw(UInt32 cmd, UInt32 data) {
@@ -860,5 +921,9 @@ bool IdeaVPC::method_vpcw(UInt32 cmd, UInt32 data) {
         OSNumber::withNumber(data, 32)
     };
 
-    return (vpc->evaluateInteger(writeVPCStatus, &result, params, 2) == kIOReturnSuccess);
+    IOReturn ret = vpc->evaluateInteger(writeVPCStatus, &result, params, 2);
+    params[0]->release();
+    params[1]->release();
+
+    return (ret == kIOReturnSuccess);
 }

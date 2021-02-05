@@ -70,7 +70,7 @@ class YogaSMCPane: NSPreferencePane {
     @IBOutlet weak var vCycleCount: NSTextField!
     @IBOutlet weak var vMfgDate: NSTextField!
 
-    
+    @IBOutlet weak var vAlwaysOnUSBMode: NSButton!
     @IBOutlet weak var vConservationMode: NSButton!
     @IBOutlet weak var vRapidChargeMode: NSButton!
 

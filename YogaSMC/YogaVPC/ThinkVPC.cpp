@@ -46,6 +46,7 @@ bool ThinkVPC::updateConservation(const char * method, OSDictionary *bat, bool u
 
     IOReturn ret = vpc->evaluateInteger(method, &result, params, 1);
     params[0]->release();
+
     if (ret != kIOReturnSuccess) {
         AlwaysLog(updateFailure, method);
         return false;
@@ -69,6 +70,7 @@ bool ThinkVPC::setConservation(const char * method, UInt8 value) {
 
     IOReturn ret = vpc->evaluateInteger(method, &result, params, 1);
     params[0]->release();
+
     if (ret != kIOReturnSuccess) {
         AlwaysLog(updateFailure, method);
         return false;
@@ -108,6 +110,7 @@ bool ThinkVPC::setMutestatus(UInt32 value) {
 
     IOReturn ret = vpc->evaluateInteger(setAudioMutestatus, &result, params, 1);
     params[0]->release();
+
     if (ret != kIOReturnSuccess) {
         AlwaysLog(toggleFailure, __func__);
         return false;
@@ -127,6 +130,7 @@ void ThinkVPC::getNotificationMask(UInt32 index, OSDictionary *KBDPresent) {
 
     IOReturn ret = vpc->evaluateInteger(getHKEYmask, &result, params, 1);
     params[0]->release();
+
     if (ret != kIOReturnSuccess) {
         AlwaysLog(toggleFailure, __func__);
         return;
@@ -156,9 +160,11 @@ bool ThinkVPC::setNotificationMask(UInt32 i, UInt32 all_mask, UInt32 offset, boo
         OSNumber::withNumber(i + offset + 1, 32),
         OSNumber::withNumber(enable, 32),
     };
+
     IOReturn ret = vpc->evaluateObject(setHKEYmask, nullptr, params, 2);
     params[0]->release();
     params[1]->release();
+
     if (ret != kIOReturnSuccess) {
         AlwaysLog("set HKEY mask BIT %x failed", i);
         return false;
@@ -221,6 +227,7 @@ bool ThinkVPC::initVPC() {
 
     IOReturn ret = vpc->evaluateInteger(getKBDBacklightLevel, &state, params, 1);
     params[0]->release();
+
     if (ret == kIOReturnSuccess)
         backlightCap = BIT(KBD_BACKLIGHT_CAP_BIT) & state;
 
@@ -228,7 +235,7 @@ bool ThinkVPC::initVPC() {
         setProperty(backlightPrompt, "unsupported");
 
     setProperty(autoBacklightPrompt, automaticBacklightMode, 8);
-    if (vpc->validateObject(setLED) == kIOReturnSuccess) {
+    if (ec->validateObject(setLED) == kIOReturnSuccess) {
         LEDsupport = true;
         setProperty("LEDSupport", true);
     } else {
@@ -257,6 +264,7 @@ bool ThinkVPC::updateAdaptiveKBD(int arg) {
 
         IOReturn ret = vpc->evaluateInteger(getHKEYAdaptive, &result, params, 1);
         params[0]->release();
+
         if (ret != kIOReturnSuccess) {
             AlwaysLog(updateFailure, __func__);
             return false;
@@ -373,6 +381,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 OSObject* params[1] = {
                     value
                 };
+
                 ret = vpc->evaluateInteger("GSKL", &result, params, 1);
                 if (ret == kIOReturnSuccess)
                     DebugLog(updateSuccess, "GSKL", result);
@@ -383,7 +392,10 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 OSObject* params[1] = {
                     OSNumber::withNumber(0ULL, 32)
                 };
+
                 ret = vpc->evaluateInteger("GHKL", &result, params, 1);
+                params[0]->release();
+
                 if (ret == kIOReturnSuccess)
                     DebugLog(updateSuccess, "GHSL", result);
                 else
@@ -396,6 +408,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                     OSObject* params[1] = {
                         value
                     };
+
                     ret = vpc->evaluateObject("CFSP", nullptr, params, 1);
                     if (ret == kIOReturnSuccess)
                         DebugLog(updateSuccess, "CFSP", value->unsigned8BitValue());
@@ -416,6 +429,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                     OSObject* params[1] = {
                         value
                     };
+
                     ret = vpc->evaluateObject("CFNI", nullptr, params, 1);
                     if (ret == kIOReturnSuccess)
                         DebugLog(updateSuccess, "CFNI", value->unsigned8BitValue());
@@ -434,6 +448,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 OSObject* params[1] = {
                     value
                 };
+
                 ret = vpc->evaluateObject("CRST", nullptr, params, 1);
                 if (ret == kIOReturnSuccess)
                     DebugLog(updateSuccess, "CRST", value->unsigned8BitValue());
@@ -476,12 +491,10 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 }
                 OSNumber *value;
                 getPropertyNumber(LEDPrompt);
-                if (value->unsigned32BitValue() > 0xff) {
+                if (value->unsigned32BitValue() > 0xff)
                     AlwaysLog(valueInvalid, LEDPrompt);
-                    continue;
-                } else {
+                else
                     setLEDStatus(value->unsigned8BitValue());
-                }
             } else if (key->isEqualTo(fanControlPrompt)) {
                 OSNumber *value;
                 getPropertyNumber(fanControlPrompt);

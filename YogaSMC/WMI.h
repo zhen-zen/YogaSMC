@@ -34,7 +34,7 @@
 #define ACPIBufferName  "WQ%s" // MOF
 #define ACPIDataSetName "WS%s" // Arg0 = index, Arg1 = buffer
 #define ACPIMethodName  "WM%s" // ACPI_WMI_METHOD, Arg0 = index, Arg1 = ID, Arg2 = input
-#define ACPIEventName   "WE%s" // ACPI_WMI_EXPENSIVE, Arg0 = 0 to disable and 1 to enable
+#define ACPIEventName   "WE%02X" // ACPI_WMI_EXPENSIVE, Arg0 = 0 to disable and 1 to enable
 #define ACPICollectName "WC%s" // Arg0 = 0 to disable and 1 to enable
 #define ACPINotifyName  "_WED" // Arg0 = notification code
 
@@ -55,6 +55,7 @@ class WMI
     IOACPIPlatformDevice* mDevice {nullptr};
     OSDictionary* mData = {nullptr};
     OSDictionary* mEvent = {nullptr};
+    OSDictionary* mBMFCandidate = {nullptr};
     const char* name;
 
 public:
@@ -64,11 +65,15 @@ public:
     ~WMI();
 
     bool initialize();
+    void extractBMF();
+
     bool hasMethod(const char * guid, UInt8 flg = ACPI_WMI_METHOD);
+    bool enableEvent(const char * guid, bool enable);
     bool executeMethod(const char * guid, OSObject ** result = 0, OSObject * params[] = 0, IOItemCount paramCount = 0);
     bool executeInteger(const char * guid, UInt32 * result, OSObject * params[] = 0, IOItemCount paramCount = 0);
     inline IOACPIPlatformDevice* getACPIDevice() { return mDevice; }
     inline OSDictionary* getEvent() { return mEvent; }
+    bool getEventData(UInt32 event, OSObject ** result);
 
 private:
     inline const char *getName() {return mDevice->getName();}
@@ -77,7 +82,7 @@ private:
     bool extractData();
     void parseWDGEntry(struct WMI_DATA * block);
 
-    bool extractBMF(struct WMI_DATA* block);
+    bool parseBMF(OSDictionary* dict);
     bool foundBMF {false};
 };
 

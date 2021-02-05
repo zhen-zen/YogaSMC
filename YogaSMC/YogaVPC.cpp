@@ -187,11 +187,10 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
                 OSBoolean *value;
                 getPropertyBoolean(clamshellPrompt);
                 updateClamshell(false);
-                if (value->getValue() == clamshellMode) {
+                if (value->getValue() == clamshellMode)
                     DebugLog(valueMatched, clamshellPrompt, clamshellMode);
-                } else {
+                else
                     toggleClamshell();
-                }
             } else if (key->isEqualTo(backlightPrompt)) {
                 OSNumber *value;
                 getPropertyNumber(backlightPrompt);
@@ -330,7 +329,10 @@ bool YogaVPC::toggleClamshell() {
         OSNumber::withNumber(!clamshellMode, 32)
     };
 
-    if (vpc->evaluateInteger(setClamshellMode, &result, params, 1) != kIOReturnSuccess || result != 0) {
+    IOReturn ret = vpc->evaluateInteger(setClamshellMode, &result, params, 1);
+    params[0]->release();
+
+    if (ret != kIOReturnSuccess || result != 0) {
         AlwaysLog(toggleFailure, clamshellPrompt);
         return false;
     }
@@ -374,7 +376,10 @@ bool YogaVPC::DYTCCommand(DYTC_CMD command, DYTC_RESULT* result, UInt8 ICFunc, U
         OSNumber::withNumber(command.raw, 32)
     };
 
-    if (vpc->evaluateInteger(setThermalControl, &(result->raw), params, 1) != kIOReturnSuccess) {
+    IOReturn ret = vpc->evaluateInteger(setThermalControl, &(result->raw), params, 1);
+    params[0]->release();
+
+    if (ret != kIOReturnSuccess) {
         AlwaysLog(toggleFailure, DYTCPrompt);
         DYTCCap = false;
         setProperty("DYTC", false);

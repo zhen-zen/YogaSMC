@@ -125,10 +125,16 @@ class AudioHelper {
 
     init?() {
         do {
-            try inputDevice = AudioProperty<AudioDeviceID>(device: nil, emptyValue: nil,
-                                                           prop: defaultInputDeviceProp).get().get()
-            try outputDevice = AudioProperty<AudioDeviceID>(device: nil, emptyValue: nil,
-                                                            prop: defaultOutputDeviceProp).get().get()
+            try inputDevice = AudioProperty<AudioDeviceID>(
+                device: nil,
+                emptyValue: nil,
+                prop: defaultInputDeviceProp
+            ).get().get()
+            try outputDevice = AudioProperty<AudioDeviceID>(
+                device: nil,
+                emptyValue: nil,
+                prop: defaultOutputDeviceProp
+            ).get().get()
         } catch {
             os_log("Failed to initialize AudioHelper!", type: .error)
             return nil
@@ -179,12 +185,10 @@ class AudioHelper {
         }
     }
 
-    func muteLEDHelper(_ service: io_service_t, _ wake: Bool = true) {
+    func muteLEDHelper(_ service: io_service_t, _ wake: Bool) {
         do {
             let mute = try outputMute.get().get() != 0
-            if !wake, mute == muteLEDStatus {
-                return
-            }
+            if !wake, mute == muteLEDStatus { return }
             guard sendBoolean("MuteLED", mute, service) else {
                 throw AudioPropertyError.noProperty
             }
@@ -219,6 +223,57 @@ class VolumeObserver: NSApplication {
             NotificationCenter.default.post(name: VolumeObserver.volumeChanged, object: self)
         default:
             break
+        }
+    }
+}
+
+func micMuteLEDHelper(_ service: io_service_t) {
+    if AudioHelper.shared != nil {
+        AudioHelper.shared?.micMuteLEDHelper(service)
+    }
+
+    guard let current = scriptHelper(getMicVolumeAS, "MicMute") else { return }
+    _ = sendNumber("MicMuteLED", current.int32Value != 0 ? 0 : 2, service)
+}
+
+var muteLEDStatus = false
+
+func muteLEDHelper(_ service: io_service_t, _ wake: Bool = true) {
+    if AudioHelper.shared != nil {
+        AudioHelper.shared?.muteLEDHelper(service, wake)
+        return
+    }
+
+    guard let current = scriptHelper(getAudioMutedAS, "Mute") else { return }
+    if !wake, current.booleanValue == muteLEDStatus { return }
+    guard sendBoolean("MuteLED", current.booleanValue, service) else {
+        os_log("Failed to update Mute LED", type: .error)
+        return
+    }
+    muteLEDStatus = current.booleanValue
+    os_log("Mute LED updated", type: .info)
+}
+
+var muteVolume: Int32 = 50
+
+func micMuteHelper(_ service: io_service_t, _ name: String) {
+    if AudioHelper.shared != nil {
+        AudioHelper.shared?.micMuteHelper(service, name)
+        return
+    }
+
+    guard let current = scriptHelper(getMicVolumeAS, "MicMute") else { return }
+    if current.int32Value != 0 {
+        if scriptHelper(String(format: setMicVolumeAS, 0), "MicMute") != nil {
+            muteVolume = current.int32Value
+            _ = sendNumber("MicMuteLED", 2, service)
+            showOSDRes(name, "Mute", .kMicOff)
+        }
+    } else {
+        if scriptHelper(String(format: setMicVolumeAS, muteVolume), "MicMute") != nil {
+            muteVolume = current.int32Value
+            _ = sendNumber("MicMuteLED", 0, service)
+            showOSDRes(name, "Unmute", .kMic)
         }
     }
 }
