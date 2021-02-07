@@ -58,8 +58,6 @@ enum {
 #define DYTC_MODE_NEW_8       8 // thermal throttle 80c+, normal fans, lots of boost++
 #define DYTC_MODE_NEW_DEFAULT 0xF
 
-
-
 // Error code
 #define DYTC_EXCEPTION        0
 #define DYTC_SUCCESS          1

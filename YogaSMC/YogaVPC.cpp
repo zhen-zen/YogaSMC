@@ -237,22 +237,15 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
                     AlwaysLog(notSupported, DYTCPrompt);
                     continue;
                 }
-                
+                bool ret;
+                UInt32 mode;
                 OSNumber *raw = OSDynamicCast(OSNumber, dict->getObject(DYTCPrompt));
-                if (raw != nullptr && (raw->unsigned32BitValue() < 1 || raw->unsigned32BitValue() > 8)) {
-                    DYTC_CMD cmd = {.raw = raw->unsigned32BitValue()};
+                if (raw != nullptr) {
+                    mode = raw->unsigned32BitValue();
+                    DYTC_CMD cmd = {.raw = mode};
                     DYTC_RESULT res;
-                    if (DYTCCommand(cmd, &res) && parseDYTC(res))
-                        AlwaysLog(toggleSuccess, DYTCPrompt, raw->unsigned32BitValue(), "see ioreg");
-                    else
-                        AlwaysLog(toggleFailure, DYTCPrompt);
-                    continue;
-                }
-                
-                int mode;
-                if (raw != nullptr)
-                    mode = raw->unsigned32BitValue(); // 1-8
-                else {
+                    ret = DYTCCommand(cmd, &res) && parseDYTC(res);
+                } else {
                     OSString *value;
                     getPropertyString(DYTCPrompt);
                     switch (value->getChar(0)) {
@@ -260,27 +253,32 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
                         case 'L':
                         case 'q':
                         case 'Q':
-                            mode = DYTC_MODE_NEW_1;
+                            mode = DYTC_MODE_QUIET;
+                            ret = setDYTCMMC(mode);
                             break;
 
                         case 'b':
                         case 'B':
                         case 'm':
                         case 'M':
-                            
+                            mode = DYTC_MODE_BALANCE;
+                            ret = setDYTCMMC(mode);
+                            break;
+
                         case 'd':
                         case 'D':
                             mode = DYTC_MODE_NEW_DEFAULT;
+                            ret = setDYTCPSC(mode);
                             break;
 
                         case 'h':
                         case 'H':
                         case 'p':
                         case 'P':
-                            mode = DYTC_MODE_NEW_8;
+                            mode = DYTC_MODE_PERFORM;
+                            ret = setDYTCMMC(mode);
                             break;
-                            
-    
+
                         case '1':
                         case '2':
                         case '3':
@@ -290,6 +288,7 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
                         case '7':
                         case '8':
                             mode = DYTC_MODE_NEW_1 + (value->getChar(0) - '1');
+                            ret = setDYTCPSC(mode);
                             break;
 
                         default:
@@ -297,13 +296,10 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
                             continue;
                     }
                 }
-                
-                if (!setDYTC(mode)) {
-                    AlwaysLog(toggleFailure, DYTCPrompt);
-                    updateDYTC();
-                } else {
+                if (ret)
                     DebugLog(toggleSuccess, DYTCPrompt, mode, "see ioreg");
-                }
+                else
+                    AlwaysLog(toggleFailure, DYTCPrompt);
             } else if (key->isEqualTo(updatePrompt)) {
                 updateAll();
             } else {
@@ -432,7 +428,7 @@ bool YogaVPC::DYTCCommand(DYTC_CMD command, DYTC_RESULT* result, UInt8 ICFunc, U
 bool YogaVPC::parseDYTC(DYTC_RESULT result) {
     OSDictionary *status = OSDictionary::withDictionary(DYTCVersion);
     OSObject *value;
-    
+
     switch (result.get.funcmode) {
         case DYTC_FUNCTION_STD:
             setPropertyString(status, "FuncMode", "Standard");
@@ -451,7 +447,7 @@ bool YogaVPC::parseDYTC(DYTC_RESULT result) {
             setPropertyString(status, "FuncMode", "Lap (Reduced thermals)");
             break;
         case DYTC_FUNCTION_MMC:
-            setPropertyString(status, "FuncMode", "Controlled");
+            setPropertyString(status, "FuncMode", "Desk");
             break;
         case DYTC_FUNCTION_PSC:
             setPropertyString(status, "FuncMode", "Controlled");
@@ -463,49 +459,65 @@ bool YogaVPC::parseDYTC(DYTC_RESULT result) {
             setPropertyString(status, "FuncMode", Unknown);
             break;
     }
-    
-    // map old codes to new ones
-    if (result.get.funcmode == DYTC_FUNCTION_MMC && result.get.perfmode == DYTC_MODE_QUIET)
-        result.get.perfmode = DYTC_MODE_NEW_1;
-    else if (result.get.funcmode == DYTC_FUNCTION_MMC && result.get.perfmode == DYTC_MODE_PERFORM)
-        result.get.perfmode = DYTC_MODE_NEW_8;
-    else if (result.get.funcmode == DYTC_FUNCTION_MMC && result.get.perfmode == DYTC_MODE_BALANCE)
-        result.get.perfmode = DYTC_MODE_NEW_DEFAULT;
-    
-    switch (result.get.perfmode) {
-        case DYTC_MODE_NEW_1:
-        case DYTC_MODE_NEW_2:
-        case DYTC_MODE_NEW_3:
-        case DYTC_MODE_NEW_4: {
-            char pm[20];
-            snprintf(pm, sizeof(pm), "Quiet %d", result.get.perfmode - DYTC_MODE_NEW_1 + 1);
-            setPropertyString(status, "PerfMode", pm);
-            break;
-        }
-            
-        case DYTC_MODE_NEW_DEFAULT: {
-            setPropertyString(status, "PerfMode", "Standard");
-            break;
-        }
-            
-        case DYTC_MODE_NEW_5:
-        case DYTC_MODE_NEW_6:
-        case DYTC_MODE_NEW_7:
-        case DYTC_MODE_NEW_8: {
-            char pm[20];
-            snprintf(pm, sizeof(pm), "Performance %d", result.get.perfmode - DYTC_MODE_NEW_5 + 1);
-            setPropertyString(status, "PerfMode", pm);
-            break;
-        }
-            
 
-            
-        default:
-            AlwaysLog(valueUnknown, DYTCPerfPrompt, result.get.perfmode);
-            char Unknown[10];
-            snprintf(Unknown, sizeof(Unknown), "Unknown:%1x", result.get.perfmode);
-            setPropertyString(status, "PerfMode", Unknown);
-            break;
+    if (result.get.funcmode ==  DYTC_FUNCTION_PSC) {
+        switch (result.get.perfmode) {
+            case DYTC_MODE_NEW_1:
+            case DYTC_MODE_NEW_2:
+            case DYTC_MODE_NEW_3:
+            case DYTC_MODE_NEW_4: {
+                char pm[20];
+                snprintf(pm, sizeof(pm), "Quiet %d", result.get.perfmode - DYTC_MODE_NEW_1 + 1);
+                setPropertyString(status, "PerfMode", pm);
+                break;
+            }
+
+            case DYTC_MODE_NEW_DEFAULT: {
+                setPropertyString(status, "PerfMode", "Balance");
+                break;
+            }
+
+            case DYTC_MODE_NEW_5:
+            case DYTC_MODE_NEW_6:
+            case DYTC_MODE_NEW_7:
+            case DYTC_MODE_NEW_8: {
+                char pm[20];
+                snprintf(pm, sizeof(pm), "Performance %d", result.get.perfmode - DYTC_MODE_NEW_5 + 1);
+                setPropertyString(status, "PerfMode", pm);
+                break;
+            }
+
+            default:
+                AlwaysLog(valueUnknown, DYTCPerfPrompt, result.get.perfmode);
+                char Unknown[10];
+                snprintf(Unknown, sizeof(Unknown), "Unknown:%1x", result.get.perfmode);
+                setPropertyString(status, "PerfMode", Unknown);
+                break;
+        }
+    } else {
+        switch (result.get.perfmode) {
+            case DYTC_MODE_PERFORM:
+                if (result.get.funcmode == DYTC_FUNCTION_CQL)
+                    setPropertyString(status, "PerfMode", "Performance (Reduced as lapmode active)");
+                else
+                    setPropertyString(status, "PerfMode", "Performance");
+                break;
+
+            case DYTC_MODE_QUIET:
+                setPropertyString(status, "PerfMode", "Quiet");
+                break;
+
+            case DYTC_MODE_BALANCE:
+                setPropertyString(status, "PerfMode", "Balance");
+                break;
+
+            default:
+                AlwaysLog(valueUnknown, DYTCPerfPrompt, result.get.perfmode);
+                char Unknown[10];
+                snprintf(Unknown, sizeof(Unknown), "Unknown:%1x", result.get.perfmode);
+                setPropertyString(status, "PerfMode", Unknown);
+                break;
+        }
     }
 
     for (int func_bit = 0; func_bit < 16; func_bit++) {
@@ -557,18 +569,43 @@ bool YogaVPC::updateDYTC() {
     return parseDYTC(result);
 }
 
-bool YogaVPC::setDYTC(int newPerfMode) {
+bool YogaVPC::setDYTCMMC(int perfmode) {
     if (!DYTCCap)
         return true;
-    
+
+    DYTC_RESULT result;
+    if (perfmode == DYTC_MODE_BALANCE) {
+        // Or set DYTC_FUNCTION_MMC / DYTC_MODE_BALANCE / false
+        if (!DYTCCommand(dytc_reset_cmd, &result))
+            return false;
+    } else {
+        if (!DYTCCommand(dytc_get_cmd, &result))
+            return false;
+        if (result.get.funcmode == DYTC_FUNCTION_CQL) {
+            if (!DYTCCommand(dytc_set_cmd, &result, DYTC_FUNCTION_CQL, 0xf, false) ||
+                !DYTCCommand(dytc_set_cmd, &result, DYTC_FUNCTION_MMC, perfmode, true) ||
+                !DYTCCommand(dytc_set_cmd, &result, DYTC_FUNCTION_CQL, 0xf, true))
+                return false;
+        } else {
+            if (!DYTCCommand(dytc_set_cmd, &result, DYTC_FUNCTION_MMC, perfmode, true))
+                return false;
+        }
+    }
+    return parseDYTC(result);
+}
+
+bool YogaVPC::setDYTCPSC(int newPerfMode) {
+    if (!DYTCCap)
+        return true;
+
     DYTC_RESULT result;
     // retrieve current state
     if (!DYTCCommand(dytc_get_cmd, &result))
         return false;
-    
+
     int curFuncMode = result.get.funcmode;
     int curPerfMode = result.get.perfmode;
-    
+
     bool lapMode = false;
     if (curFuncMode == DYTC_FUNCTION_CQL) {
         // the result of disable command will contain real funcmode & perfmode
@@ -580,16 +617,7 @@ bool YogaVPC::setDYTC(int newPerfMode) {
         curPerfMode = temp.get.perfmode;
         lapMode = true;
     }
-        
-    // map MMC(0xB) codes to PSC(0xD) codes
-    if (curFuncMode != DYTC_FUNCTION_PSC && curPerfMode == DYTC_MODE_QUIET)
-        curPerfMode = DYTC_MODE_NEW_1;
-    else if (curFuncMode != DYTC_FUNCTION_PSC && curPerfMode == DYTC_MODE_PERFORM)
-        curPerfMode = DYTC_MODE_NEW_8;
-    else if (curFuncMode != DYTC_FUNCTION_PSC && curPerfMode == DYTC_MODE_BALANCE)
-        curPerfMode = DYTC_MODE_NEW_DEFAULT;
-    
-    
+
     if (curFuncMode == DYTC_FUNCTION_PSC) {
         // psc mode tends to be glitchy (at least on my laptop), and can lock up cpu in low mhz state so we need to bombard it with resets first
         // and yes, 1 reset is not enough at some cases so why not hold up kernel while we bombard it with resets :)))

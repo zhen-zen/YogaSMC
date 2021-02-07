@@ -221,13 +221,22 @@ protected:
     bool updateDYTC();
 
     /**
-     *  Set DYTC status
+     *  Set DYTC status for MMC functions
      *
      *  @param perfmode Performance mode
      *
      *  @return true if success
      */
-    bool setDYTC(int perfmode);
+    bool setDYTCMMC(int perfmode);
+
+    /**
+     *  Set DYTC status for PSC functions
+     *
+     *  @param newPerfMode Performance mode
+     *
+     *  @return true if success
+     */
+    bool setDYTCPSC(int newPerfMode);
 
 public:
     virtual IOService *probe(IOService *provider, SInt32 *score) APPLE_KEXT_OVERRIDE;
