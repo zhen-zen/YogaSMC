@@ -12,7 +12,8 @@ import IOKit
 import PreferencePanes
 import os.log
 
-let DYTCCommand = ["1", "2", "3", "4", "D", "5", "6", "7", "8"]
+let DYTCCommandMMC = ["L", "M", "H"]
+let DYTCCommandPSC = ["1", "2", "3", "4", "D", "5", "6", "7", "8"]
 let thinkLEDCommand = [0, 0x80, 0xA0, 0xC0]
 let thinkBatteryName = ["BAT_ANY", "BAT_PRIMARY", "BAT_SECONDARY"]
 
@@ -21,6 +22,7 @@ class YogaSMCPane: NSPreferencePane {
     let defaults = UserDefaults(suiteName: "org.zhen.YogaSMC")!
 
     var thinkBatteryNumber = 0
+    var DYTCPSCAvailable = false
 
     @IBOutlet weak var vVersion: NSTextField!
     @IBOutlet weak var vClass: NSTextField!
@@ -107,7 +109,8 @@ class YogaSMCPane: NSPreferencePane {
     @IBOutlet weak var vDYTCRevision: NSTextField!
     @IBOutlet weak var vDYTCFuncMode: NSTextField!
     @IBOutlet weak var DYTCSlider: NSSlider!
-
+    @IBOutlet weak var vDYTCPSCAvailable: NSButton!
+    
     @IBOutlet weak var backlightSlider: NSSlider!
 
     @IBOutlet weak var autoSleepCheck: NSButton!

@@ -11,7 +11,16 @@ import Foundation
 
 extension YogaSMCPane {
     @IBAction func DYTCset(_ sender: NSSlider) {
-        _ = sendString("DYTCMode", DYTCCommand[DYTCSlider.integerValue], service)
+        let funcMode = DYTCPSCAvailable ? DYTCCommandPSC[DYTCSlider.integerValue] : DYTCCommandMMC[DYTCSlider.integerValue]
+        _ = sendString("DYTCMode", funcMode, service)
+        if let dict = getDictionary("DYTC", service) {
+            updateDYTC(dict)
+        }
+    }
+
+    @IBAction func vDYTCPSCset(_ sender: NSButton) {
+        DYTCPSCAvailable = (sender.state == .on)
+        defaults.setValue(DYTCPSCAvailable, forKey: "DYTCPSCAvailable")
         if let dict = getDictionary("DYTC", service) {
             updateDYTC(dict)
         }
@@ -60,6 +69,14 @@ extension YogaSMCPane {
         if let ver = dict["Revision"] as? NSNumber,
            let subver = dict["SubRevision"] as? NSNumber {
             vDYTCRevision.stringValue = "\(ver.intValue).\(subver.intValue)"
+            if ver.intValue >= 5 || (ver.intValue == 4 && subver.intValue >= 0) {
+                DYTCPSCAvailable = defaults.bool(forKey: "DYTCPSCAvailable")
+                vDYTCPSCAvailable.isEnabled = true
+                vDYTCPSCAvailable.state = DYTCPSCAvailable ? .on : .off
+            }
+            DYTCSlider.numberOfTickMarks = DYTCPSCAvailable ? 9 : 3
+            DYTCSlider.maxValue = DYTCPSCAvailable ? 8 : 2
+            DYTCSlider.isEnabled = true
         } else {
             vDYTCRevision.stringValue = "Unknown"
         }
@@ -69,35 +86,41 @@ extension YogaSMCPane {
             vDYTCFuncMode.stringValue = "Unknown"
         }
         if let perfMode = dict["PerfMode"] as? String {
-            if perfMode == "Quiet 1" {
-                DYTCSlider.integerValue = 0
-            }
-            else if perfMode == "Quiet 2" {
-                DYTCSlider.integerValue = 1
-            }
-            else if perfMode == "Quiet 3" {
-                DYTCSlider.integerValue = 2
-            }
-            else if perfMode == "Quiet 4" {
-                DYTCSlider.integerValue = 3
-            }
-            else if perfMode == "Standard" {
-                DYTCSlider.integerValue = 4
-            }
-            else if perfMode == "Performance 1" {
-                DYTCSlider.integerValue = 5
-            }
-            else if perfMode == "Performance 2" {
-                DYTCSlider.integerValue = 6
-            }
-            else if perfMode == "Performance 3" {
-                DYTCSlider.integerValue = 7
-            }
-            else if perfMode == "Performance 4" {
-                DYTCSlider.integerValue = 8
-            }
-            else {
-                DYTCSlider.isEnabled = false
+            if DYTCPSCAvailable {
+                switch perfMode {
+                case "Quiet 1":
+                    DYTCSlider.integerValue = 0
+                case "Quiet 2":
+                    DYTCSlider.integerValue = 1
+                case "Quiet 3":
+                    DYTCSlider.integerValue = 2
+                case "Quiet 4":
+                    DYTCSlider.integerValue = 3
+                case "Balance":
+                    DYTCSlider.integerValue = 4
+                case "Performance 1":
+                    DYTCSlider.integerValue = 5
+                case "Performance 2":
+                    DYTCSlider.integerValue = 6
+                case "Performance 3":
+                    DYTCSlider.integerValue = 7
+                case "Performance 4":
+                    DYTCSlider.integerValue = 8
+                default:
+                    DYTCSlider.isEnabled = false
+                }
+            } else {
+                if perfMode == "Quiet" {
+                    DYTCSlider.integerValue = 0
+                } else if perfMode == "Balance" {
+                    DYTCSlider.integerValue = 1
+                } else if perfMode == "Performance" {
+                    DYTCSlider.integerValue = 2
+                } else if perfMode == "Performance (Reduced as lapmode active)" {
+                    DYTCSlider.integerValue = 2
+                } else {
+                    DYTCSlider.isEnabled = false
+                }
             }
         } else {
             DYTCSlider.isEnabled = false
