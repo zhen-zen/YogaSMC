@@ -344,6 +344,15 @@ bool YogaVPC::toggleClamshell() {
     return true;
 }
 
+bool YogaVPC::notifyBattery() {
+    if (ec->validateObject("NBAT") != kIOReturnSuccess ||
+        ec->evaluateObject("NBAT") != kIOReturnSuccess ) {
+        DebugLog(toggleFailure, "NBAT");
+        return false;
+    }
+    return true;
+}
+
 IOReturn YogaVPC::setPowerState(unsigned long powerState, IOService *whatDevice){
     DebugLog("powerState %ld : %s", powerState, powerState ? "on" : "off");
 

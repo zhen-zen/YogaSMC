@@ -7,7 +7,8 @@
  */
 DefinitionBlock ("", "SSDT", 2, "hack", "ECRW", 0x00000000)
 {
-    External (_SB_.PCI0.LPCB.H_EC, DeviceObj)    // EC path
+    External (_SB_.PCI0.LPCB.H_EC, DeviceObj)         // EC path
+    External (_SB_.PCI0.LPCB.H_EC.BAT1, DeviceObj)    // Battery path
 
     Scope (_SB.PCI0.LPCB.H_EC)
     {
@@ -61,6 +62,17 @@ DefinitionBlock ("", "SSDT", 2, "hack", "ECRW", 0x00000000)
                 WE1B (Arg0, DerefOf (TEMP [Local0]))
                 Arg0++
                 Local0++
+            }
+        }
+
+        /*
+         * Optional: Notify battery on conservation mode change
+         */
+        Method (NBAT, 0, Serialized)
+        {
+            If (CondRefOf (BAT1))
+            {
+                Notify (BAT1, 0x80)
             }
         }
     }

@@ -595,6 +595,7 @@ bool IdeaVPC::toggleConservation() {
     DebugLog(toggleSuccess, conservationPrompt, (conservationMode ? BMCMD_CONSERVATION_ON : BMCMD_CONSERVATION_OFF), (conservationMode ? "on" : "off"));
     setProperty(conservationPrompt, conservationMode);
 
+    notifyBattery();
     return true;
 }
 
