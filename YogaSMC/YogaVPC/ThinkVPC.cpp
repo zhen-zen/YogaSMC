@@ -33,6 +33,7 @@ void ThinkVPC::updateAll() {
     updateMutestatus();
     updateMuteLEDStatus();
     updateMicMuteLEDStatus();
+    updateKBDLocale();
     updateVPC();
     setMicMuteLEDStatus(0);
 }
@@ -374,19 +375,6 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 OSNumber *value;
                 getPropertyNumber("setCMPeakShiftState");
                 setConservation(setCMPeakShiftState, value->unsigned8BitValue());
-            } else if (key->isEqualTo("GSKL")) {
-                OSNumber *value;
-                getPropertyNumber("GSKL");
-                UInt32 result;
-                OSObject* params[1] = {
-                    value
-                };
-
-                ret = vpc->evaluateInteger("GSKL", &result, params, 1);
-                if (ret == kIOReturnSuccess)
-                    DebugLog(updateSuccess, "GSKL", result);
-                else
-                    AlwaysLog("%s evaluation failed 0x%x", "GSKL", ret);
             } else if (key->isEqualTo("GHSL")) {
                 UInt32 result;
                 OSObject* params[1] = {
@@ -422,6 +410,10 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 else
                     AlwaysLog("%s evaluation failed 0x%x", "HFSP", ret);
 #ifdef DEBUG
+            } else if (key->isEqualTo(LocalePrompt)) {
+                OSNumber *value;
+                getPropertyNumber(LocalePrompt);
+                setKBDLocale(value->unsigned16BitValue());
             } else if (key->isEqualTo("CFNI")) {
                 OSNumber *value;
                 getPropertyNumber("CFNI");
@@ -1163,7 +1155,57 @@ bool ThinkVPC::setSSTStatus(UInt32 value) {
     return status;
 }
 
-IOReturn ThinkVPC::setPowerState(unsigned long powerState, IOService *whatDevice){
+bool ThinkVPC::updateKBDLocale(bool update) {
+    IOReturn ret;
+
+    ret = vpc->validateObject("GSKL");
+    if (ret == kIOReturnNoDevice) {
+        return true;
+    } else if (ret != kIOReturnSuccess) {
+        AlwaysLog(updateFailure, LocalePrompt);
+        return false;
+    }
+
+    UInt32 locale;
+    OSObject* params[] = {
+        OSNumber::withNumber(0x02000000, 32)
+    };
+
+    ret = vpc->evaluateInteger(getKBDLang, &locale, params, 1);
+    params[0]->release();
+    if (ret != kIOReturnSuccess) {
+        AlwaysLog(updateFailure, LocalePrompt);
+        return false;
+    }
+
+    if (update)
+        DebugLog(updateSuccess, LocalePrompt, locale);
+    setProperty(LocalePrompt, locale, 32);
+
+    return true;
+
+}
+
+bool ThinkVPC::setKBDLocale(UInt32 value) {
+    UInt32 result;
+
+    OSObject* params[] = {
+        OSNumber::withNumber(value | 1 << 24, 32)
+    };
+
+    IOReturn ret = vpc->evaluateInteger(setKBDLang, &result, params, 1);
+    params[0]->release();
+    if (ret != kIOReturnSuccess) {
+        AlwaysLog(toggleFailure, LocalePrompt);
+        return false;
+    }
+
+    DebugLog(toggleSuccess, LocalePrompt, value, "-");
+    setProperty(LocalePrompt, value, 32);
+    return true;
+}
+
+IOReturn ThinkVPC::setPowerState(unsigned long powerState, IOService *whatDevice) {
     if (super::setPowerState(powerState, whatDevice) != kIOPMAckImplied)
         return kIOReturnInvalid;
 

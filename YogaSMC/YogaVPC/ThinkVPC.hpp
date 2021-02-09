@@ -106,6 +106,9 @@ private:
     static constexpr const char *getKBDBacklightLevel  = "MLCG";
     static constexpr const char *setKBDBacklightLevel  = "MLCS";
 
+    static constexpr const char *getKBDLang            = "GSKL";
+    static constexpr const char *setKBDLang            = "SSKL";
+
     static constexpr const char *getAudioMutestatus    = "HAUM"; // EC
     static constexpr const char *setAudioMutestatus    = "SAUM";
     static constexpr const char *getAudioMuteLED       = "GSMS";
@@ -384,6 +387,24 @@ private:
      *  @return true if success
      */
     bool setSSTStatus(UInt32 value);
+
+    /**
+     *  Update keyboard locale
+     *
+     *  @param update only update internal status when false
+     *
+     *  @return true if success
+     */
+    bool updateKBDLocale(bool update=true);
+
+    /**
+     *  Set keyboard locale
+     *
+     *  @param value locale
+     *
+     *  @return true if success
+     */
+    bool setKBDLocale(UInt32 value);
 
 public:
     IOReturn message(UInt32 type, IOService *provider, void *argument) APPLE_KEXT_OVERRIDE;
