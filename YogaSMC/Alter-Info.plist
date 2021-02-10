@@ -27,7 +27,7 @@
 			<key>IOClass</key>
 			<string>IdeaVPC</string>
 			<key>IONameMatch</key>
-			<string>HWMI</string>
+			<string>AMW0</string>
 			<key>IOProbeScore</key>
 			<integer>200</integer>
 			<key>IOProviderClass</key>
