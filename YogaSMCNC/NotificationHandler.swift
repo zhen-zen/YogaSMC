@@ -6,7 +6,7 @@
 //  Copyright © 2020 Zhen. All rights reserved.
 //
 
-import Foundation
+import AppKit
 import os.log
 
 func registerNotification(_ conf: inout SharedConfig) -> Bool {
@@ -87,15 +87,55 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: inout SharedConfig
         if let scpt = desc.option {
             _ = scriptHelper(scpt, desc.name, desc.display ? desc.image : nil)
         } else {
-            os_log("%s: script not found", type: .error)
+            os_log("%s: script not found", type: .error, desc.name)
         }
     case .launchapp:
-        if let name = desc.option {
-            let scpt = "tell application \"" + name + "\" to activate"
-            _ = scriptHelper(scpt, desc.name, desc.display ? desc.image : nil)
+        if let name = desc.option,
+           NSWorkspace.shared.launchApplication(name) {
+            if desc.display { showOSD(desc.name, desc.image) }
         } else {
-            os_log("%s: script not found", type: .error)
+            os_log("%s: app name not found", type: .error, desc.name)
         }
+    case .launchbundle:
+        guard let identifier = desc.option else {
+            os_log("%s: bundle not found", type: .error)
+            return
+        }
+        let collection = NSRunningApplication.runningApplications(withBundleIdentifier: identifier)
+        if collection.isEmpty {
+            if #available(OSX 10.15, *) {
+                guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: identifier) else {
+                    os_log("%s: app url not found", type: .error, desc.name)
+                    return
+                }
+                NSWorkspace.shared.openApplication(at: url, configuration: .init(), completionHandler: nil)
+            } else {
+                guard NSWorkspace.shared.launchApplication(withBundleIdentifier: identifier,
+                                                           options: .default,
+                                                           additionalEventParamDescriptor: nil,
+                                                           launchIdentifier: nil) else {
+                    os_log("%s: app identifier not found", type: .error, desc.name)
+                    return
+                }
+            }
+        } else {
+            var hide = false
+            for app in collection {
+                if !app.isHidden {
+                    hide = true
+                    break
+                }
+            }
+            for app in collection {
+                if hide {
+                    app.hide()
+                } else {
+                    app.activate(options: .activateIgnoringOtherApps)
+                }
+            }
+            if hide { return }
+        }
+        if desc.display { showOSD(desc.name, desc.image) }
     case .airplane:
         airplaneModeHelper(desc.name, desc.display)
     case .bluetooth:
