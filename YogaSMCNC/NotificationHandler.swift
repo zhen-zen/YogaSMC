@@ -120,11 +120,9 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: inout SharedConfig
             }
         } else {
             var hide = false
-            for app in collection {
-                if !app.isHidden {
-                    hide = true
-                    break
-                }
+            for app in collection where !app.isHidden {
+                hide = true
+                break
             }
             for app in collection {
                 if hide {
