@@ -12,13 +12,9 @@ import AppKit
 // based on https://stackoverflow.com/questions/4311930/list-of-all-american-holidays-as-nsdates
 func setHolidayIcon(_ button: NSStatusItem) {
     button.title = "⎇"
+    button.toolTip = nil
 
-    for lang in Locale.preferredLanguages {
-        if lang.hasPrefix("zh") {
-            if setHolidayIconLunar(button) { return }
-            break
-        }
-    }
+    if applyHolidayIconLunar(), setHolidayIconLunar(button) { return }
 
     let components = Calendar.current.dateComponents([.year, .month, .day, .weekday, .weekdayOrdinal], from: Date())
     guard let year = components.year,
@@ -89,6 +85,16 @@ func dateComponentsForEaster(year: Int) -> DateComponents? {
     return Calendar.current.dateComponents([.year, .month, .day, .weekday, .weekdayOrdinal], from: easter)
 }
 
+func applyHolidayIconLunar() -> Bool {
+    if let defaults = UserDefaults(suiteName: "org.zhen.YogaSMC"),
+       let res = defaults.object(forKey: "Lunar") as? Bool { return res }
+
+    for lang in Locale.preferredLanguages {
+        if lang.hasPrefix("zh") { return true }
+    }
+    return false
+}
+
 func setHolidayIconLunar(_ button: NSStatusItem) -> Bool {
     let calendar: Calendar = Calendar(identifier: .chinese)
     let components = calendar.dateComponents([.year, .month, .day], from: Date())
@@ -129,7 +135,6 @@ func setHolidayIconLunar(_ button: NSStatusItem) -> Bool {
         let formatter = DateFormatter()
         formatter.calendar = calendar
         formatter.dateStyle = .medium
-        formatter.locale = Locale(identifier: "zh_CN")
         button.toolTip = formatter.string(from: Date())
         return false
     }
