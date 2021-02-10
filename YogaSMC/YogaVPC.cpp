@@ -353,15 +353,13 @@ bool YogaVPC::notifyBattery() {
     return true;
 }
 
-IOReturn YogaVPC::setPowerState(unsigned long powerState, IOService *whatDevice){
-    DebugLog("powerState %ld : %s", powerState, powerState ? "on" : "off");
-
-    if (whatDevice != this)
+IOReturn YogaVPC::setPowerState(unsigned long powerStateOrdinal, IOService * whatDevice) {
+    if (super::setPowerState(powerStateOrdinal, whatDevice) != kIOPMAckImplied)
         return kIOReturnInvalid;
 
     if (backlightCap && (automaticBacklightMode & BIT(0))) {
         updateBacklight();
-        if (powerState == 0) {
+        if (powerStateOrdinal == 0) {
             backlightLevelSaved = backlightLevel;
             if (backlightLevel)
                 setBacklight(0);

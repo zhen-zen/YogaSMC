@@ -69,7 +69,7 @@ public:
     void stop(IOService *provider) APPLE_KEXT_OVERRIDE;
     static IdeaWMI *withDevice(IOService *provider);
 
-    IOReturn setPowerState(unsigned long powerState, IOService * whatDevice) APPLE_KEXT_OVERRIDE;
+    IOReturn setPowerState(unsigned long powerStateOrdinal, IOService * whatDevice) APPLE_KEXT_OVERRIDE;
 };
 
 #endif /* IdeaWMI_hpp */

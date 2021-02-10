@@ -196,7 +196,7 @@ bool YogaBaseService::updateTopCase() {
     return true;
 }
 
-IOReturn YogaBaseService::setPowerState(unsigned long powerStateOrdinal, IOService *whatDevice){
+IOReturn YogaBaseService::setPowerState(unsigned long powerStateOrdinal, IOService * whatDevice) {
     DebugLog("powerState %ld : %s", powerStateOrdinal, powerStateOrdinal ? "on" : "off");
     if (whatDevice != this)
         return kIOReturnInvalid;

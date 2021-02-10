@@ -1205,11 +1205,11 @@ bool ThinkVPC::setKBDLocale(UInt32 value) {
     return true;
 }
 
-IOReturn ThinkVPC::setPowerState(unsigned long powerState, IOService *whatDevice) {
-    if (super::setPowerState(powerState, whatDevice) != kIOPMAckImplied)
+IOReturn ThinkVPC::setPowerState(unsigned long powerStateOrdinal, IOService * whatDevice) {
+    if (super::setPowerState(powerStateOrdinal, whatDevice) != kIOPMAckImplied)
         return kIOReturnInvalid;
 
-    if (powerState == 0) {
+    if (powerStateOrdinal == 0) {
         if (automaticBacklightMode & BIT(2))
             setSSTStatus(3);
         if ((automaticBacklightMode & BIT(3))) {
