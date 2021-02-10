@@ -1,5 +1,5 @@
 /*
- * Sample DSDT for EC read / write access
+ * Sample SSDT for EC read / write access
  *
  * Check for conflict if you have patched battery reading
  * Taken from RehabMan's battery patch guide:

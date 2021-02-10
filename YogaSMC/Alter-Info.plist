@@ -20,21 +20,6 @@
 	<string>$(MODULE_VERSION)</string>
 	<key>IOKitPersonalities</key>
 	<dict>
-		<key>YogaVPC</key>
-		<dict>
-			<key>CFBundleIdentifier</key>
-			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-			<key>IOClass</key>
-			<string>IdeaVPC</string>
-			<key>IONameMatch</key>
-			<string>AMW0</string>
-			<key>IOProbeScore</key>
-			<integer>200</integer>
-			<key>IOProviderClass</key>
-			<string>IOACPIPlatformDevice</string>
-			<key>IOUserClientClass</key>
-			<string>YogaSMCUserClient</string>
-		</dict>
 		<key>IdeaVPC</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
@@ -97,6 +82,21 @@
 					<string>INTC1054</string>
 				</dict>
 			</array>
+			<key>IOProviderClass</key>
+			<string>IOACPIPlatformDevice</string>
+			<key>IOUserClientClass</key>
+			<string>YogaSMCUserClient</string>
+		</dict>
+		<key>YogaVPC</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>YogaVPC</string>
+			<key>IONameMatch</key>
+			<string>VPC0000</string>
+			<key>IOProbeScore</key>
+			<integer>200</integer>
 			<key>IOProviderClass</key>
 			<string>IOACPIPlatformDevice</string>
 			<key>IOUserClientClass</key>
