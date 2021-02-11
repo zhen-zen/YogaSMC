@@ -48,7 +48,7 @@ bool ThinkVPC::updateConservation(const char * method, OSDictionary *bat, bool u
     IOReturn ret = vpc->evaluateInteger(method, &result, params, 1);
     params[0]->release();
 
-    if (ret != kIOReturnSuccess) {
+    if (ret != kIOReturnSuccess || result & BIT(31)) {
         AlwaysLog(updateFailure, method);
         return false;
     }
@@ -62,17 +62,17 @@ bool ThinkVPC::updateConservation(const char * method, OSDictionary *bat, bool u
     return true;
 }
 
-bool ThinkVPC::setConservation(const char * method, UInt8 value) {
+bool ThinkVPC::setConservation(const char * method, UInt32 value) {
     UInt32 result;
 
     OSObject* params[] = {
-        OSNumber::withNumber((batnum << 8) + value, 32)
+        OSNumber::withNumber(value, 32)
     };
 
     IOReturn ret = vpc->evaluateInteger(method, &result, params, 1);
     params[0]->release();
 
-    if (ret != kIOReturnSuccess) {
+    if (ret != kIOReturnSuccess || result & BIT(31)) {
         AlwaysLog(updateFailure, method);
         return false;
     }
@@ -318,24 +318,14 @@ void ThinkVPC::updateBattery(bool update) {
         updateConservation(getCMstop, bat) &&
         updateConservation(getCMInhibitCharge, bat) &&
         updateConservation(getCMForceDischarge, bat) &&
-        updateConservation(getCMPeakShiftState, bat))
+        updateConservation(getCMPeakShiftState, bat)) {
         DebugLog(updateSuccess, batteryPrompt, batnum);
-    else
+        setProperty(batteryName[batnum], bat);
+    } else {
         AlwaysLog(updateFailure, batteryPrompt);
-
-    switch (batnum) {
-        case BAT_ANY:
-            setProperty("BAT_ANY", bat);
-            break;
-
-        case BAT_PRIMARY:
-            setProperty("BAT_PRIMARY", bat);
-            break;
-
-        case BAT_SECONDARY:
-            setProperty("BAT_SECONDARY", bat);
-            break;
+        removeProperty(batteryName[batnum]);
     }
+
     bat->release();
 }
 
@@ -358,23 +348,23 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
             } else if (key->isEqualTo("setCMstart")) {
                 OSNumber *value;
                 getPropertyNumber("setCMstart");
-                setConservation(setCMstart, value->unsigned8BitValue());
+                setConservation(setCMstart, (batnum << 8) | value->unsigned8BitValue());
             } else if (key->isEqualTo("setCMstop")) {
                 OSNumber *value;
                 getPropertyNumber("setCMstop");
-                setConservation(setCMstop, value->unsigned8BitValue());
+                setConservation(setCMstop, (batnum << 8) | value->unsigned8BitValue());
             } else if (key->isEqualTo("setCMInhibitCharge")) {
                 OSNumber *value;
                 getPropertyNumber("setCMInhibitCharge");
-                setConservation(setCMInhibitCharge, value->unsigned8BitValue());
+                setConservation(setCMInhibitCharge, (batnum << 4) | (value->unsigned32BitValue() & 0xffff01));
             } else if (key->isEqualTo("setCMForceDischarge")) {
                 OSNumber *value;
                 getPropertyNumber("setCMForceDischarge");
-                setConservation(setCMForceDischarge, value->unsigned8BitValue());
+                setConservation(setCMForceDischarge, (batnum << 8) | value->unsigned8BitValue());
             } else if (key->isEqualTo("setCMPeakShiftState")) {
                 OSNumber *value;
                 getPropertyNumber("setCMPeakShiftState");
-                setConservation(setCMPeakShiftState, value->unsigned8BitValue());
+                setConservation(setCMPeakShiftState, value->unsigned32BitValue() & 0xffff01);
             } else if (key->isEqualTo("GHSL")) {
                 UInt32 result;
                 OSObject* params[1] = {
