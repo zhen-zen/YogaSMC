@@ -12,7 +12,7 @@ import os.log
 
 enum EventAction: String {
     // Userspace
-    case nothing, script, launchapp
+    case nothing, script, launchapp, launchbundle
     case airplane, wireless, bluetooth, bluetoothdiscoverable
     case prefpane, spotlight, search, siri, sleep, micmute
     case mission, launchpad, desktop, expose
@@ -132,7 +132,10 @@ let thinkEvents: [UInt32: [UInt32: EventDesc]] = [
     TP_HKEY_EV_SEARCH.rawValue: [0: EventDesc("Search", act: .siri, display: false)], // 0x101E
     TP_HKEY_EV_MISSION.rawValue: [0: EventDesc("Mission Control", act: .mission, display: false)], // 0x101F
     TP_HKEY_EV_APPS.rawValue: [0: EventDesc("Launchpad", act: .launchpad, display: false)], // 0x1020
-    TP_HKEY_EV_STAR.rawValue: [0: EventDesc("Custom Hotkey", .kStar, act: .script, opt: prefpaneAS)], // 0x1311
+    TP_HKEY_EV_STAR.rawValue: [
+        0: EventDesc("Custom Hotkey", .kStar, act: .script, opt: prefpaneAS),
+        optionFlag: EventDesc("System Prefereces", .kStar, act: .launchbundle, opt: "com.apple.systempreferences")
+    ], // 0x1311
     TP_HKEY_EV_BLUETOOTH.rawValue: [
         0: EventDesc("Bluetooth", act: .bluetooth),
         optionFlag: EventDesc("BT Discoverable", act: .bluetoothdiscoverable)
