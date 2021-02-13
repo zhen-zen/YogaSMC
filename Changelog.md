@@ -3,6 +3,9 @@ YogaSMC Changelog
 
 #### v1.5.0
 
+#### v1.4.3
+- YogaWMI: fix BMF parsing
+
 #### v1.4.2
 - YogaWMI: complete event handling
 - NC: use timer for distinguish input method switch, thx @vnln
