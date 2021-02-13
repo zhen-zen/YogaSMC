@@ -23,6 +23,8 @@ enum hp_wmi_radio {
     HPWMI_GPS    = 0x3,
 };
 
+// hpqBEvnt
+
 enum hp_wmi_event_ids {
     HPWMI_DOCK_EVENT        = 0x01,
     HPWMI_PARK_HDD            = 0x02,
@@ -41,12 +43,14 @@ enum hp_wmi_event_ids {
     HPWMI_BATTERY_CHARGE_PERIOD    = 0x10,
 };
 
-struct bios_args {
-    UInt32 signature;       // SNIN
-    UInt32 command;         // COMD
-    UInt32 commandtype;     // CMTP
-    UInt32 datasize;        // DASI
-    UInt8 data[128];
+// hpqBIntM
+
+struct bios_args {          // hpqBIOSInt 0 / 4 / 128 / 1024 / 4096
+    UInt32 signature;       // 0x1, SNIN, Sign, should be uint8 * 4, 0x55434553 (UCES)
+    UInt32 command;         // 0x2, COMD, Command, uint32
+    UInt32 commandtype;     // 0x3, CMTP, CommandType, uint32
+    UInt32 datasize;        // 0x4, DASI, Size, uint32
+    UInt8 data[128];        // 0x5, PVWB, hpqBData, uint8 * Size
 };
 
 enum hp_wmi_commandtype {
@@ -76,9 +80,10 @@ enum hp_wmi_hardware_mask {
     HPWMI_TABLET_MASK    = 0x04,
 };
 
-struct bios_return {
-    UInt32 sigpass;         // SNOU = 0x4C494146
-    UInt32 return_code;     // RTCD
+struct bios_return {        // hpqBDataOut 0 / 4 / 128 / 1024 / 4096
+    UInt32 sigpass;         // 0x1, SNOU, Sign, should be uint8 * 4, 0x4C494146 (LIAF) / 0x53534150 (SSAP)
+    UInt32 return_code;     // 0x2, RTCD, rwReturnCode, uint32
+    // UInt8 data[];        // 0x3, HVWA, Data, uint8 * 0 / 4 / 128 / 1024 / 4096
 };
 
 enum hp_return_value {

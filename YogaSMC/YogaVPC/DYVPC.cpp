@@ -137,7 +137,7 @@ bool DYVPC::WMIQuery(UInt32 query, void *buffer, enum hp_wmi_command command, UI
     else if (outsize > 128)
         mid = 4;
     else if (outsize > 4)
-        mid = 4;
+        mid = 3;
     else if (outsize > 0)
         mid = 2;
     else
@@ -148,7 +148,7 @@ bool DYVPC::WMIQuery(UInt32 query, void *buffer, enum hp_wmi_command command, UI
     OSObject *params[] = {
         OSNumber::withNumber(0ULL, 32),
         OSNumber::withNumber(mid, 32),
-        OSData::withBytes(&args, sizeof(struct bios_args)),
+        OSData::withBytesNoCopy(&args, sizeof(struct bios_args)),
     };
 
     OSObject *result;
@@ -156,6 +156,7 @@ bool DYVPC::WMIQuery(UInt32 query, void *buffer, enum hp_wmi_command command, UI
     bool ret = YWMI->executeMethod(BIOS_QUERY_WMI_METHOD, &result, params, 3);
     params[0]->release();
     params[1]->release();
+    params[2]->release();
 
     if (!ret) {
         AlwaysLog("BIOS query failed");
