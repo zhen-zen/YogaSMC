@@ -33,8 +33,20 @@ bool DYVPC::initVPC() {
 
     if (BIOSCap) {
         UInt32 value;
+        if (WMIQuery(HPWMI_HARDWARE_QUERY, &value))
+            setProperty("HARDWARE", value, 32);
+        if (WMIQuery(HPWMI_WIRELESS_QUERY, &value))
+            setProperty("WIRELESS", value, 32);
+        if (WMIQuery(HPWMI_WIRELESS2_QUERY, &value))
+            setProperty("WIRELESS2", value, 32);
+        if (WMIQuery(HPWMI_FEATURE2_QUERY, &value))
+            setProperty("FEATURE2", value, 32);
+        else if (WMIQuery(HPWMI_FEATURE_QUERY, &value))
+            setProperty("FEATURE", value, 32);
         if (WMIQuery(HPWMI_POSTCODEERROR_QUERY, &value))
             setProperty("POSTCODE", value, 32);
+        if (WMIQuery(HPWMI_THERMAL_POLICY_QUERY, &value))
+            setProperty("THERMAL_POLICY", value, 32);
     }
     return true;
 }
@@ -176,12 +188,16 @@ bool DYVPC::WMIQuery(UInt32 query, void *buffer, enum hp_wmi_command command, UI
         case 0:
             break;
             
+        case HPWMI_RET_UNKNOWN_COMMAND:
+            DebugLog("Unknown COMMAND");
+            break;
+            
         case HPWMI_RET_UNKNOWN_CMDTYPE:
             DebugLog("Unknown CMDTYPE");
-//            break;
+            break;
             
         default:
-            DebugLog("Return code error");
+            DebugLog("Return code error - %d", biosRet->return_code);
             output->release();
             return false;
     }
