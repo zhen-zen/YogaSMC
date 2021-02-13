@@ -55,7 +55,7 @@ class WMI
     IOACPIPlatformDevice* mDevice {nullptr};
     OSDictionary* mData = {nullptr};
     OSDictionary* mEvent = {nullptr};
-    OSDictionary* mBMFCandidate = {nullptr};
+    OSArray* mBMFCandidate = {nullptr};
     const char* name;
 
 public:
