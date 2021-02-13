@@ -87,6 +87,21 @@
 			<key>IOUserClientClass</key>
 			<string>YogaSMCUserClient</string>
 		</dict>
+		<key>YogaVPC</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>YogaVPC</string>
+			<key>IONameMatch</key>
+			<string>VPC0000</string>
+			<key>IOProbeScore</key>
+			<integer>200</integer>
+			<key>IOProviderClass</key>
+			<string>IOACPIPlatformDevice</string>
+			<key>IOUserClientClass</key>
+			<string>YogaSMCUserClient</string>
+		</dict>
 		<key>YogaWMI</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
