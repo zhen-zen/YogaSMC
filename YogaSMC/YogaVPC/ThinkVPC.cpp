@@ -925,7 +925,8 @@ void ThinkVPC::updateVPC() {
                     break;
 
                 case TP_HKEY_EV_THM_TRANSFM_CHANGED:
-                    AlwaysLog("Thermal Transformation changed (GMTS)");
+                    vpc->evaluateInteger(getThermalModeState, &data);
+                    AlwaysLog("Thermal Transformation changed (GMTS): 0x%x", data);
                     break;
 
                 case TP_HKEY_EV_ALARM_BAT_HOT:
