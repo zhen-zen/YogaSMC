@@ -12,7 +12,7 @@ OSDefineMetaClassAndStructors(DYVPC, YogaVPC);
 bool DYVPC::probeVPC(IOService *provider) {
     YWMI = new WMI(provider);
     if (!YWMI->initialize())
-        return false;;
+        return false;
 
     inputCap = YWMI->hasMethod(INPUT_WMI_EVENT, ACPI_WMI_EVENT);
     BIOSCap = YWMI->hasMethod(BIOS_QUERY_WMI_METHOD);
@@ -171,14 +171,14 @@ bool DYVPC::WMIQuery(UInt32 query, void *buffer, enum hp_wmi_command command, UI
     params[2]->release();
 
     if (!ret) {
-        AlwaysLog("BIOS query failed");
+        AlwaysLog("BIOS query 0x%x: evaluation failed", query);
         OSSafeReleaseNULL(result);
         return false;
     }
 
     OSData *output = OSDynamicCast(OSData, result);
     if (output == nullptr) {
-        DebugLog("Unknown output type");
+        AlwaysLog("BIOS query 0x%x: unexpected output type", query);
         OSSafeReleaseNULL(result);
         return false;
     }
@@ -189,25 +189,27 @@ bool DYVPC::WMIQuery(UInt32 query, void *buffer, enum hp_wmi_command command, UI
             break;
             
         case HPWMI_RET_UNKNOWN_COMMAND:
-            DebugLog("Unknown COMMAND");
+            DebugLog("BIOS query 0x%x: unknown COMMAND", query);
+            ret = false;
             break;
             
         case HPWMI_RET_UNKNOWN_CMDTYPE:
-            DebugLog("Unknown CMDTYPE");
+            DebugLog("BIOS query 0x%x: unknown CMDTYPE", query);
+            ret = false;
             break;
             
         default:
-            DebugLog("Return code error - %d", biosRet->return_code);
-            output->release();
-            return false;
+            AlwaysLog("BIOS query 0x%x: return code error - %d", query, biosRet->return_code);
+            ret = false;
+            break;
     }
 
-    if (outsize != 0) {
+    if (ret && outsize != 0) {
         memset(buffer, 0, outsize);
         outsize = min(outsize, output->getLength() - sizeof(*biosRet));
         memcpy(buffer, output->getBytesNoCopy(sizeof(*biosRet), outsize), outsize);
     }
 
     output->release();
-    return true;
+    return ret;
 }

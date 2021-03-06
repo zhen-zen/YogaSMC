@@ -26,21 +26,21 @@ enum hp_wmi_radio {
 // hpqBEvnt
 
 enum hp_wmi_event_ids {
-    HPWMI_DOCK_EVENT        = 0x01,
-    HPWMI_PARK_HDD            = 0x02,
-    HPWMI_SMART_ADAPTER        = 0x03,
-    HPWMI_BEZEL_BUTTON        = 0x04,
-    HPWMI_WIRELESS            = 0x05,           // _L62 / HWWB
+    HPWMI_DOCK_EVENT              = 0x01,
+    HPWMI_PARK_HDD                = 0x02,
+    HPWMI_SMART_ADAPTER           = 0x03,
+    HPWMI_BEZEL_BUTTON            = 0x04,
+    HPWMI_WIRELESS                = 0x05,           // _L62 / HWWB
     HPWMI_CPU_BATTERY_THROTTLE    = 0x06,
-    HPWMI_LOCK_SWITCH        = 0x07,
-    HPWMI_LID_SWITCH        = 0x08,
-    HPWMI_SCREEN_ROTATION        = 0x09,
-    HPWMI_COOLSENSE_SYSTEM_MOBILE    = 0x0A,
+    HPWMI_LOCK_SWITCH             = 0x07,
+    HPWMI_LID_SWITCH              = 0x08,
+    HPWMI_SCREEN_ROTATION         = 0x09,
+    HPWMI_COOLSENSE_SYSTEM_MOBILE = 0x0A,
     HPWMI_COOLSENSE_SYSTEM_HOT    = 0x0B,
     HPWMI_PROXIMITY_SENSOR        = 0x0C,
-    HPWMI_BACKLIT_KB_BRIGHTNESS    = 0x0D,
+    HPWMI_BACKLIT_KB_BRIGHTNESS   = 0x0D,
     HPWMI_PEAKSHIFT_PERIOD        = 0x0F,
-    HPWMI_BATTERY_CHARGE_PERIOD    = 0x10,
+    HPWMI_BATTERY_CHARGE_PERIOD   = 0x10,
     // 0x14             // _Q24 / _Q25 / _Q26
     // 0x18             // _L62
     // 0x00020001       // _Q07
@@ -60,33 +60,33 @@ enum hp_wmi_commandtype {
     HPWMI_DISPLAY_QUERY        = 0x01,
     HPWMI_HDDTEMP_QUERY        = 0x02,
     HPWMI_ALS_QUERY            = 0x03,
-    HPWMI_HARDWARE_QUERY        = 0x04,     // r:WGDS
-    HPWMI_WIRELESS_QUERY        = 0x05,
+    HPWMI_HARDWARE_QUERY       = 0x04,      // r:WGDS
+    HPWMI_WIRELESS_QUERY       = 0x05,
     // 0x06                                 // w:SBBC, Arg3
     HPWMI_BATTERY_QUERY        = 0x07,      // r:WGBI, ToInteger (DerefOf (Arg3 [Zero]))
-    HPWMI_BIOS_QUERY        = 0x09,         // w:SHKS, Arg3
+    HPWMI_BIOS_QUERY           = 0x09,      // w:SHKS, Arg3
     // 0x0a                                 // r:GHKF, Arg3
     HPWMI_FEATURE_QUERY        = 0x0b,
-    HPWMI_HOTKEY_QUERY        = 0x0c,
-    HPWMI_FEATURE2_QUERY        = 0x0d,
+    HPWMI_HOTKEY_QUERY         = 0x0c,
+    HPWMI_FEATURE2_QUERY       = 0x0d,
     // 0x0f                                 // r:GSAS
-    HPWMI_WIRELESS2_QUERY        = 0x1b,    // r:WGWS; w:GVWE
+    HPWMI_WIRELESS2_QUERY      = 0x1b,      // r:WGWS; w:GVWE
     // 0x25                                 // w:CPMC
     // 0x28                                 // r:WGBC; w:STMM, Arg3
     // 0x29                                 // w:HWWB
-    HPWMI_POSTCODEERROR_QUERY    = 0x2a,
+    HPWMI_POSTCODEERROR_QUERY  = 0x2a,
     // 0x2b                                 // w:WSBC, Arg1, Arg2, Arg3
     // 0x2b                                 // w:STCS, Arg3
     // 0x30                                 // r:GEID
     // HPWMI_PEAKSHIFT_QUERY  = 0x36        // w:GVWE
     // HPWMI_BATTERY_CHARGE_QUERY = 0x37    // w:GVWE
-    // HPWMI_PEAKSHIFT_QUERY  = 0x38       // w:GVWE
+    // HPWMI_PEAKSHIFT_QUERY  = 0x38        // w:GVWE
     // 0x3e                                 // r:GPPS, w:SPPA, Arg3
     // 0x3f                                 // w:STPB, Arg3
     // 0x42                                 // r:GAAT
     // 0x45                                 // r:GECP, Arg3; w:SECP, Arg3
     // 0x48                                 // r:EC01; w:EC02, Arg3
-    HPWMI_THERMAL_POLICY_QUERY    = 0x4c,
+    HPWMI_THERMAL_POLICY_QUERY = 0x4c,
 };
 
 enum hp_wmi_command {
