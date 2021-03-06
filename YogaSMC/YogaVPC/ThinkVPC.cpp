@@ -740,7 +740,15 @@ UInt32 ThinkVPC::getYogaMode() {
         return 0;
     }
 
+#ifdef DEBUG
+    UInt32 rawMode;
+    if (vpc->evaluateInteger("CMMD", &rawMode) != kIOReturnSuccess)
+        AlwaysLog("failed to evaluate raw tablet mode");
+    else
+        DebugLog("tablet mode: %x, raw: %x", mode, rawMode);
+#else
     DebugLog("tablet mode: %x", mode);
+#endif
     if (!validModes) {
         UInt16 type = mode >> 16;
         setProperty("MultiModeType", type, 16);
