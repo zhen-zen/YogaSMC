@@ -209,6 +209,13 @@ private:
      */
     UInt32 getYogaMode();
     
+    /**
+     *  Get thermal mode
+     *
+     *  @return mode
+     */
+    UInt32 getThermalMode();
+    
     void updateVPC() APPLE_KEXT_OVERRIDE;
     bool exitVPC() APPLE_KEXT_OVERRIDE;
     

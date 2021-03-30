@@ -733,9 +733,30 @@ IOReturn ThinkVPC::message(UInt32 type, IOService *provider, void *argument) {
     return kIOReturnSuccess;
 }
 
+UInt32 ThinkVPC::getThermalMode() {
+    UInt32 mode;
+
+    OSObject* params[] = {
+        OSNumber::withNumber(0ULL, 32)
+    };
+
+    IOReturn ret = vpc->evaluateInteger(getThermalModeState, &mode, params, 1);
+    params[0]->release();
+
+    return (ret == kIOReturnSuccess ? mode : 0);
+}
+
 UInt32 ThinkVPC::getYogaMode() {
     UInt32 mode;
-    if (vpc->evaluateInteger(getMultiModeState, &mode) != kIOReturnSuccess) {
+
+    OSObject* params[] = {
+        OSNumber::withNumber(0ULL, 32)
+    };
+
+    IOReturn ret = vpc->evaluateInteger(getMultiModeState, &mode, params, 1);
+    params[0]->release();
+
+    if (ret != kIOReturnSuccess) {
         AlwaysLog("failed to evaluate tablet mode");
         return 0;
     }
@@ -812,7 +833,10 @@ UInt32 ThinkVPC::getYogaMode() {
 //            else
 //                mode = TP_ACPI_MULTI_MODE_STAND;
             setTopCase(false);
-            setProperty("YogaMode", "Stand");
+            if ((mode >> 16) == 1)
+                setProperty("YogaMode", "Stand/Tent");
+            else
+                setProperty("YogaMode", "Stand");
             break;
         case 5:
 //            mode = TP_ACPI_MULTI_MODE_TENT;
@@ -822,6 +846,7 @@ UInt32 ThinkVPC::getYogaMode() {
         default:
 //            if (type == 5 && value == 0xffff)
 //                DebugLog("Multi mode status is undetected, assuming laptop");
+            setTopCase(true);
             AlwaysLog("unknown tablet mode: %x", mode);
             break;
     }
@@ -933,8 +958,11 @@ void ThinkVPC::updateVPC() {
                     break;
 
                 case TP_HKEY_EV_THM_TRANSFM_CHANGED:
-                    vpc->evaluateInteger(getThermalModeState, &data);
-                    AlwaysLog("Thermal Transformation changed (GMTS): 0x%x", data);
+                    data = getThermalMode();
+                    if (data & 0x00010000)
+                        DebugLog("Thermal Transformation changed: 0x%x", data);
+                    else
+                        AlwaysLog("Thermal Transformation changed: failed to evaluate GMTS");
                     break;
 
                 case TP_HKEY_EV_ALARM_BAT_HOT:
