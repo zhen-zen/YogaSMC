@@ -169,13 +169,16 @@ private:
 
     UInt32 thermalstate {0};
 
-    bool LEDsupport {false};
+    bool LEDSupport {false};
 
     UInt32 batnum {BAT_ANY};
 
     bool ConservationMode {false};
 
     OSDictionary *KBDProperty {nullptr};
+
+    bool yogaModeSupport {false};
+
     /**
      *  Set single notification mask
      *
@@ -207,15 +210,15 @@ private:
      *
      *  @return mode
      */
-    UInt32 getYogaMode();
+    UInt32 updateYogaMode();
     
     /**
      *  Get thermal mode
      *
      *  @return mode
      */
-    UInt32 getThermalMode();
-    
+    UInt32 updateThermalMode();
+
     void updateVPC() APPLE_KEXT_OVERRIDE;
     bool exitVPC() APPLE_KEXT_OVERRIDE;
     
