@@ -51,9 +51,11 @@ enum tpacpi_hkey_event_t : UInt32 {
     TP_HKEY_EV_UNDOCK_ACK       = 0x4003, /* undock complete */
 
     /* Misc bay events */
-    TP_HKEY_EV_OPTDRV_EJ        = 0x3006, /* opt. drive tray ejected */
-    TP_HKEY_EV_HOTPLUG_DOCK     = 0x4010, /* docked into hotplug dock or port replicator */
-    TP_HKEY_EV_HOTPLUG_UNDOCK   = 0x4011, /* undocked from hotplug dock or port replicator */
+    TP_HKEY_EV_OPTDRV_EJ        = 0x3006,   /* opt. drive tray ejected */
+    TP_HKEY_EV_HOTPLUG_DOCK     = 0x4010,   /* docked into hotplug dock or port replicator */
+    TP_HKEY_EV_HOTPLUG_DOCK     = 0x4010:0, /* docked into hotplug dock or port replicator */
+    TP_HKEY_EV_HOTPLUG_UNDOCK   = 0x4011,   /* undocked from hotplug dock or port replicator */
+    TP_HKEY_EV_HOTPLUG_UNDOCK   = 0x4011:0, /* undocked from hotplug dock or port replicator */
 
     /* User-interface events */
     TP_HKEY_EV_LID_CLOSE          = 0x5001, /* laptop lid closed */
