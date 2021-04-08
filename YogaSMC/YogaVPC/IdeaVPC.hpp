@@ -100,6 +100,8 @@ private:
     /**
      *  Related ACPI methods
      */
+    static constexpr const char *getECStatus          = "ECAV";
+    static constexpr const char *getECStatusLegacy    = "OKEC";
     static constexpr const char *getVPCConfig         = "_CFG";
     static constexpr const char *getBatteryID         = "GBID";
     static constexpr const char *getBatteryInfo       = "GSBI";
@@ -245,18 +247,18 @@ private:
     bool updateBatteryInfo(OSDictionary *bat0, OSDictionary *bat1);
 
     /**
-     *  Update battery stats
+     *  Update battery capability
      *
      *  @param batState battery state from GBMD
      */
-    void updateBatteryStats(UInt32 batState);
+    void updateBatteryCapability(UInt32 batState);
 
     /**
-     *  Update keyboard stats
+     *  Update keyboard capability
      *
      *  @param kbdState keyboard state from HALS
      */
-    void updateKeyboardStats(UInt32 kbdState);
+    void updateKeyboardCapability(UInt32 kbdState);
     /**
      *  Update battery conservation mode status
      *

@@ -36,7 +36,6 @@ void ThinkVPC::updateAll() {
     updateKBDLocale();
     updateVPC();
     updateYogaMode();
-    setMicMuteLEDStatus(0);
 }
 
 bool ThinkVPC::updateConservation(const char * method, OSDictionary *bat, bool update) {
@@ -247,6 +246,7 @@ bool ThinkVPC::initVPC() {
     if (vpc->validateObject(getMultiModeState) == kIOReturnSuccess)
         yogaModeSupport = true;
 
+    setMicMuteLEDStatus(0);
     return true;
 }
 
@@ -415,9 +415,9 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 else
                     AlwaysLog("%s evaluation failed 0x%x", "HFSP", ret);
 #ifdef DEBUG
-            } else if (key->isEqualTo(LocalePrompt)) {
+            } else if (key->isEqualTo(localePrompt)) {
                 OSNumber *value;
-                getPropertyNumber(LocalePrompt);
+                getPropertyNumber(localePrompt);
                 setKBDLocale(value->unsigned16BitValue());
             } else if (key->isEqualTo("CFNI")) {
                 OSNumber *value;
@@ -1207,7 +1207,7 @@ bool ThinkVPC::updateKBDLocale(bool update) {
     if (ret == kIOReturnNoDevice) {
         return true;
     } else if (ret != kIOReturnSuccess) {
-        AlwaysLog(updateFailure, LocalePrompt);
+        AlwaysLog(updateFailure, localePrompt);
         return false;
     }
 
@@ -1219,13 +1219,13 @@ bool ThinkVPC::updateKBDLocale(bool update) {
     ret = vpc->evaluateInteger(getKBDLang, &locale, params, 1);
     params[0]->release();
     if (ret != kIOReturnSuccess) {
-        AlwaysLog(updateFailure, LocalePrompt);
+        AlwaysLog(updateFailure, localePrompt);
         return false;
     }
 
     if (update)
-        DebugLog(updateSuccess, LocalePrompt, locale);
-    setProperty(LocalePrompt, locale, 32);
+        DebugLog(updateSuccess, localePrompt, locale);
+    setProperty(localePrompt, locale, 32);
 
     return true;
 
@@ -1241,12 +1241,12 @@ bool ThinkVPC::setKBDLocale(UInt32 value) {
     IOReturn ret = vpc->evaluateInteger(setKBDLang, &result, params, 1);
     params[0]->release();
     if (ret != kIOReturnSuccess) {
-        AlwaysLog(toggleFailure, LocalePrompt);
+        AlwaysLog(toggleFailure, localePrompt);
         return false;
     }
 
-    DebugLog(toggleSuccess, LocalePrompt, value, "-");
-    setProperty(LocalePrompt, value, 32);
+    DebugLog(toggleSuccess, localePrompt, value, "-");
+    setProperty(localePrompt, value, 32);
     return true;
 }
 
