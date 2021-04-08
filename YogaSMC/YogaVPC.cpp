@@ -41,10 +41,15 @@ IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
         while (auto entry = iterator->getNextObject()) {
             if (entry->compareName(pnp) &&
                 (dev = OSDynamicCast(IOACPIPlatformDevice, entry))) {
-                if (strncmp(dev->getName(), "WTBT", sizeof("WTBT")) == 0) {
-                    DebugLog("Skip Thunderbolt interface");
-                    continue;
+                OSObject *uid = nullptr;
+                if (dev->evaluateObject("_UID", &uid) == kIOReturnSuccess) {
+                    OSString *str = OSDynamicCast(OSString, uid);
+                    if (str && str->isEqualTo("TBFP")) {
+                        DebugLog("Skip Thunderbolt interface");
+                        continue;
+                    }
                 }
+                OSSafeReleaseNULL(uid);
                 if (auto wmi = initWMI(dev)) {
                     DebugLog("WMI available at %s", dev->getName());
                     WMICollection->setObject(wmi);

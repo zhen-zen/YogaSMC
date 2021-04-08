@@ -16,10 +16,16 @@ IOService *YogaWMI::probe(IOService *provider, SInt32 *score)
     if (!super::probe(provider, score))
         return nullptr;
 
-    if (strncmp(name, "WTBT", 4) == 0) {
-        DebugLog("Exit on Thunderbolt interface");
-        return nullptr;
+    OSObject *uid = nullptr;
+    IOACPIPlatformDevice *dev = OSDynamicCast(IOACPIPlatformDevice, provider);
+    if (dev && dev->evaluateObject("_UID", &uid) == kIOReturnSuccess) {
+        OSString *str = OSDynamicCast(OSString, uid);
+        if (str && str->isEqualTo("TBFP")) {
+            DebugLog("Skip Thunderbolt interface");
+            return nullptr;
+        }
     }
+    OSSafeReleaseNULL(uid);
 
     if (provider->getClient() != this) {
         DebugLog("Already loaded, exiting");
