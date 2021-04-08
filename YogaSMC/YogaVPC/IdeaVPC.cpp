@@ -17,6 +17,9 @@ void IdeaVPC::updateAll() {
 }
 
 bool IdeaVPC::initVPC() {
+    if (!initEC())
+        return false;
+
     super::initVPC();
 
     UInt32 config;
@@ -68,7 +71,15 @@ bool IdeaVPC::initVPC() {
     setProperty("Capability", capabilities);
     capabilities->release();
 
-    initEC();
+    if (vpc->evaluateInteger(getKeyboardMode, &config) == kIOReturnSuccess)
+        updateKeyboardCapability(config);
+    else
+        AlwaysLog(updateFailure, keyboardPrompt);
+
+    if (vpc->evaluateInteger(getBatteryMode, &config) == kIOReturnSuccess)
+        updateBatteryCapability(config);
+    else
+        AlwaysLog(updateFailure, batteryPrompt);
 
     if (checkKernelArgument("-ideabr")) {
         brightnessPoller = IOTimerEventSource::timerEventSource(this, OSMemberFunctionCast(IOTimerEventSource::Action, this, &IdeaVPC::brightnessAction));
@@ -298,28 +309,46 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
 }
 
 bool IdeaVPC::initEC() {
-    UInt32 kbdState, batState, attempts = 0;
+    UInt32 state, attempts = 0;
+
+    // _REG will write Arg1 to ECAV (or OKEC on old machines) to connect / disconnect the region
+    if (ec->validateObject(getECStatus) == kIOReturnSuccess) {
+        do {
+            if (ec->evaluateInteger(getECStatus, &state) == kIOReturnSuccess && state != 0) {
+                if (attempts != 0)
+                    setProperty("EC Access Retries", attempts, 8);
+                return true;
+            }
+            IOSleep(100);
+        } while (++attempts < 5);
+        AlwaysLog(updateFailure, getECStatus);
+    }
+
+    if (ec->validateObject(getECStatusLegacy) == kIOReturnSuccess) {
+        do {
+            if (ec->evaluateInteger(getECStatusLegacy, &state) == kIOReturnSuccess && state != 0) {
+                if (attempts != 0)
+                    setProperty("EC Access Retries", attempts, 8);
+                return true;
+            }
+            IOSleep(100);
+        } while (++attempts < 5);
+        AlwaysLog(updateFailure, getECStatusLegacy);
+    }
+
+    // fallback to battery mode since some laptop don't have available keyboard mode
     do {
-        if (vpc->evaluateInteger(getKeyboardMode, &kbdState) == kIOReturnSuccess &&
-            vpc->evaluateInteger(getBatteryMode, &batState) == kIOReturnSuccess)
-            break;
-        if (++attempts > 5) {
-            AlwaysLog(updateFailure, getKeyboardMode);
-            setProperty("EC Access", "Error");
-            return false;
+        if (vpc->evaluateInteger(getBatteryMode, &state) == kIOReturnSuccess) {
+            setProperty("EC Access Retries", attempts, 8);
+            return true;
         }
-        IOSleep(200);
-    } while (true);
-
-    if (attempts)
-        setProperty("EC Access", attempts + 1, 8);
-
-    updateKeyboardStats(kbdState);
-    updateBatteryStats(batState);
-    return true;
+        IOSleep(100);
+    } while (++attempts < 10);
+    AlwaysLog(initFailure, getBatteryMode);
+    return false;
 }
 
-void IdeaVPC::updateKeyboardStats(UInt32 kbdState) {
+void IdeaVPC::updateKeyboardCapability(UInt32 kbdState) {
     backlightCap = BIT(HA_BACKLIGHT_CAP_BIT) & kbdState;
     if (!backlightCap)
         setProperty(backlightPrompt, "unsupported");
@@ -340,7 +369,7 @@ void IdeaVPC::updateKeyboardStats(UInt32 kbdState) {
         setProperty(alwaysOnUSBPrompt, "unsupported");
 }
 
-void IdeaVPC::updateBatteryStats(UInt32 batState) {
+void IdeaVPC::updateBatteryCapability(UInt32 batState) {
     OSDictionary *bat0 = OSDictionary::withCapacity(5);
     OSDictionary *bat1 = OSDictionary::withCapacity(5);
     if (BIT(BM_BATTERY0BAD_BIT) & batState) {
@@ -522,7 +551,7 @@ bool IdeaVPC::updateKeyboard(bool update) {
     UInt32 state;
 
     if (vpc->evaluateInteger(getKeyboardMode, &state) != kIOReturnSuccess) {
-        AlwaysLog(updateFailure, KeyboardPrompt);
+        AlwaysLog(updateFailure, keyboardPrompt);
         return false;
     }
 
@@ -539,7 +568,7 @@ bool IdeaVPC::updateKeyboard(bool update) {
         alwaysOnUSBMode = BIT(HA_AOUSB_BIT) & state;
 
     if (update)
-        DebugLog(updateSuccess, KeyboardPrompt, state);
+        DebugLog(updateSuccess, keyboardPrompt, state);
 
     if (backlightCap)
         setProperty(backlightPrompt, backlightLevel, 32);
