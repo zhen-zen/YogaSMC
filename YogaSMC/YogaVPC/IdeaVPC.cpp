@@ -284,17 +284,23 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                 else
                     AlwaysLog("%s 0x%x 0x%x failed %d", writeECPrompt, command, data, retries);
             } else if (key->isEqualTo(batteryPrompt)) {
-                UInt32 state;
-                if (vpc->evaluateInteger(getBatteryMode, &state) == kIOReturnSuccess)
-                    updateBatteryStats(state);
-                else
-                    AlwaysLog(updateFailure, batteryPrompt);
+                OSBoolean *value;
+                getPropertyBoolean(batteryPrompt);
+                conservationModeLock = value->getValue();
             } else if (key->isEqualTo(updatePrompt)) {
                 updateAll();
                 super::updateAll();
             } else if (key->isEqualTo(resetPrompt)) {
-                conservationModeLock = false;
-                initEC();
+                UInt32 state;
+                if (vpc->evaluateInteger(getKeyboardMode, &state) == kIOReturnSuccess)
+                    updateKeyboardCapability(state);
+                else
+                    AlwaysLog(updateFailure, keyboardPrompt);
+
+                if (vpc->evaluateInteger(getBatteryMode, &state) == kIOReturnSuccess)
+                    updateBatteryCapability(state);
+                else
+                    AlwaysLog(updateFailure, batteryPrompt);
             } else {
                 OSDictionary *entry = OSDictionary::withCapacity(1);
                 entry->setObject(key, dict->getObject(key));
