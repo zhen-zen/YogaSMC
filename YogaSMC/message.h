@@ -42,7 +42,7 @@ static IOPMPowerState IOPMPowerStates[kIOPMNumberPowerStates] = {
 #define keyboardPrompt "KeyboardMode"
 #define HotKeyPrompt "HotKey"
 #define LEDPrompt "LED"
-#define LocalePrompt "KeyboardLocale"
+#define localePrompt "KeyboardLocale"
 #define mutePrompt "Mute"
 #define muteLEDPrompt "MuteLED"
 #define muteSupportPrompt "MuteSupport"
