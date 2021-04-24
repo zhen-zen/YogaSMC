@@ -54,10 +54,11 @@ protected:
      *  Iterate over IOACPIPlane for PNP device
      *
      *  @param id PNP name
-     *  @param dev target ACPI device
+     *  @param device target ACPI device
+     *
      *  @return true if VPC is available
      */
-    bool findPNP(const char *id, IOACPIPlatformDevice **dev);
+    bool findPNP(const char *id, IOACPIPlatformDevice **device);
 
     /**
      *  Current Keyboard status

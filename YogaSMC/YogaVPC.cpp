@@ -18,16 +18,20 @@ IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
  
     DebugLog("Probing");
 
-    if ((vpc = OSDynamicCast(IOACPIPlatformDevice, provider))) {
-        IORegistryEntry* parent = vpc->getParentEntry(gIOACPIPlane);
-        auto pnp = OSString::withCString(PnpDeviceIdEC);
-        if (parent->compareName(pnp))
-            ec = OSDynamicCast(IOACPIPlatformDevice, parent);
-        pnp->release();
-    }
-
-    if (!ec && !findPNP(PnpDeviceIdEC, &ec))
+    vpc = OSDynamicCast(IOACPIPlatformDevice, provider);
+    if (!vpc)
         return nullptr;
+
+    auto pnp = OSString::withCString(PnpDeviceIdEC);
+    ec = OSDynamicCast(IOACPIPlatformDevice, vpc->getParentEntry(gIOACPIPlane));
+    if (!(ec && ec->IORegistryEntry::compareName(pnp)))
+        findPNP(PnpDeviceIdEC, &ec);
+    pnp->release();
+
+    if (!ec) {
+        AlwaysLog("Failed to find EC");
+        return nullptr;
+    }
 
     auto iterator = IORegistryIterator::iterateOver(gIOACPIPlane, kIORegistryIterateRecursively);
     if (!iterator) {
