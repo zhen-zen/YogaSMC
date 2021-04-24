@@ -35,14 +35,12 @@ void IdeaWMI::ACPIEvent(UInt32 argument) {
     return;
 }
 
-IOReturn IdeaWMI::setPowerState(unsigned long powerState, IOService *whatDevice){
-    AlwaysLog("powerState %ld : %s", powerState, powerState ? "on" : "off");
-
-    if (whatDevice != this)
+IOReturn IdeaWMI::setPowerState(unsigned long powerStateOrdinal, IOService * whatDevice) {
+    if (super::setPowerState(powerStateOrdinal, whatDevice) != kIOPMAckImplied)
         return kIOReturnInvalid;
 
     if (isYMC) {
-        if (powerState == 0) {
+        if (powerStateOrdinal == 0) {
             if (YogaMode != kYogaMode_laptop) {
                 DebugLog("Re-enabling top case");
                 setTopCase(true);

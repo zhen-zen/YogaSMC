@@ -106,6 +106,9 @@ private:
     static constexpr const char *getKBDBacklightLevel  = "MLCG";
     static constexpr const char *setKBDBacklightLevel  = "MLCS";
 
+    static constexpr const char *getKBDLang            = "GSKL";
+    static constexpr const char *setKBDLang            = "SSKL";
+
     static constexpr const char *getAudioMutestatus    = "HAUM"; // EC
     static constexpr const char *setAudioMutestatus    = "SAUM";
     static constexpr const char *getAudioMuteLED       = "GSMS";
@@ -166,13 +169,16 @@ private:
 
     UInt32 thermalstate {0};
 
-    bool LEDsupport {false};
+    bool LEDSupport {false};
 
     UInt32 batnum {BAT_ANY};
 
     bool ConservationMode {false};
 
     OSDictionary *KBDProperty {nullptr};
+
+    bool yogaModeSupport {false};
+
     /**
      *  Set single notification mask
      *
@@ -204,8 +210,15 @@ private:
      *
      *  @return mode
      */
-    UInt32 getYogaMode();
+    UInt32 updateYogaMode();
     
+    /**
+     *  Get thermal mode
+     *
+     *  @return mode
+     */
+    UInt32 updateThermalMode();
+
     void updateVPC() APPLE_KEXT_OVERRIDE;
     bool exitVPC() APPLE_KEXT_OVERRIDE;
     
@@ -385,9 +398,27 @@ private:
      */
     bool setSSTStatus(UInt32 value);
 
+    /**
+     *  Update keyboard locale
+     *
+     *  @param update only update internal status when false
+     *
+     *  @return true if success
+     */
+    bool updateKBDLocale(bool update=true);
+
+    /**
+     *  Set keyboard locale
+     *
+     *  @param value locale
+     *
+     *  @return true if success
+     */
+    bool setKBDLocale(UInt32 value);
+
 public:
     IOReturn message(UInt32 type, IOService *provider, void *argument) APPLE_KEXT_OVERRIDE;
-    IOReturn setPowerState(unsigned long powerState, IOService * whatDevice) APPLE_KEXT_OVERRIDE;
+    IOReturn setPowerState(unsigned long powerStateOrdinal, IOService * whatDevice) APPLE_KEXT_OVERRIDE;
 };
 
 #endif /* ThinkVPC_hpp */

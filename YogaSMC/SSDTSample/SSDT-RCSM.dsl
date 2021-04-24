@@ -1,5 +1,5 @@
 /*
- * Sample DSDT to disable lid open
+ * Sample SSDT to disable lid open
  */
 DefinitionBlock ("", "SSDT", 2, "hack", "RCSM", 0x00000000)
 {

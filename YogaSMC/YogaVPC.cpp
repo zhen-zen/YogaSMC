@@ -21,16 +21,20 @@ IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
  
     DebugLog("Probing");
 
-    if ((vpc = OSDynamicCast(IOACPIPlatformDevice, provider))) {
-        IORegistryEntry* parent = vpc->getParentEntry(gIOACPIPlane);
-        auto pnp = OSString::withCString(PnpDeviceIdEC);
-        if (parent->compareName(pnp))
-            ec = OSDynamicCast(IOACPIPlatformDevice, parent);
-        pnp->release();
-    }
-
-    if (!ec && !findPNP(PnpDeviceIdEC, &ec))
+    vpc = OSDynamicCast(IOACPIPlatformDevice, provider);
+    if (!vpc)
         return nullptr;
+
+    auto pnp = OSString::withCString(PnpDeviceIdEC);
+    ec = OSDynamicCast(IOACPIPlatformDevice, vpc->getParentEntry(gIOACPIPlane));
+    if (!(ec && ec->IORegistryEntry::compareName(pnp)))
+        findPNP(PnpDeviceIdEC, &ec);
+    pnp->release();
+
+    if (!ec) {
+        AlwaysLog("Failed to find EC");
+        return nullptr;
+    }
 
     auto iterator = IORegistryIterator::iterateOver(gIOACPIPlane, kIORegistryIterateRecursively);
     if (!iterator) {
@@ -44,10 +48,15 @@ IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
         while (auto entry = iterator->getNextObject()) {
             if (entry->compareName(pnp) &&
                 (dev = OSDynamicCast(IOACPIPlatformDevice, entry))) {
-                if (strncmp(dev->getName(), "WTBT", sizeof("WTBT")) == 0) {
-                    DebugLog("Skip Thunderbolt interface");
-                    continue;
+                OSObject *uid = nullptr;
+                if (dev->evaluateObject("_UID", &uid) == kIOReturnSuccess) {
+                    OSString *str = OSDynamicCast(OSString, uid);
+                    if (str && str->isEqualTo("TBFP")) {
+                        DebugLog("Skip Thunderbolt interface");
+                        continue;
+                    }
                 }
+                OSSafeReleaseNULL(uid);
                 if (auto wmi = initWMI(dev)) {
                     DebugLog("WMI available at %s", dev->getName());
                     WMICollection->setObject(wmi);
@@ -347,15 +356,22 @@ bool YogaVPC::toggleClamshell() {
     return true;
 }
 
-IOReturn YogaVPC::setPowerState(unsigned long powerState, IOService *whatDevice){
-    DebugLog("powerState %ld : %s", powerState, powerState ? "on" : "off");
+bool YogaVPC::notifyBattery() {
+    if (ec->validateObject("NBAT") != kIOReturnSuccess ||
+        ec->evaluateObject("NBAT") != kIOReturnSuccess ) {
+        DebugLog(toggleFailure, "NBAT");
+        return false;
+    }
+    return true;
+}
 
-    if (whatDevice != this)
+IOReturn YogaVPC::setPowerState(unsigned long powerStateOrdinal, IOService * whatDevice) {
+    if (super::setPowerState(powerStateOrdinal, whatDevice) != kIOPMAckImplied)
         return kIOReturnInvalid;
 
     if (backlightCap && (automaticBacklightMode & BIT(0))) {
         updateBacklight();
-        if (powerState == 0) {
+        if (powerStateOrdinal == 0) {
             backlightLevelSaved = backlightLevel;
             if (backlightLevel)
                 setBacklight(0);

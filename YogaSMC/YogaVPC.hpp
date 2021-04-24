@@ -72,7 +72,6 @@ private:
      */
     bool dumpECOffset(UInt32 value);
 
-    
     /**
      *  Set DYTC mode
      *
@@ -206,6 +205,13 @@ protected:
      *  @return true if success
      */
     inline virtual bool setBacklight(UInt32 level) {return true;};
+
+    /**
+     *  Notify battery on conservation mode change
+     *
+     *  @return true if success
+     */
+    bool notifyBattery();
 
     /**
      *  DYTC capability, will be update on init

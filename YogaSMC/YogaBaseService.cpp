@@ -146,15 +146,14 @@ bool YogaBaseService::findPNP(const char *id, IOACPIPlatformDevice **dev) {
         AlwaysLog("findPNP failed");
         return false;
     }
-    auto pnp = OSString::withCString(id);
 
+    *dev = nullptr;
+    auto pnp = OSString::withCString(id);
     while (auto entry = iterator->getNextObject()) {
         if (entry->compareName(pnp)) {
-            *dev = OSDynamicCast(IOACPIPlatformDevice, entry);
-            if (*dev) {
-                DebugLog("%s available at %s", id, (*dev)->getName());
+            DebugLog("found %s at %s", id, entry->getName());
+            if ((*dev = OSDynamicCast(IOACPIPlatformDevice, entry)))
                 break;
-            }
         }
     }
     iterator->release();
@@ -196,7 +195,7 @@ bool YogaBaseService::updateTopCase() {
     return true;
 }
 
-IOReturn YogaBaseService::setPowerState(unsigned long powerStateOrdinal, IOService *whatDevice){
+IOReturn YogaBaseService::setPowerState(unsigned long powerStateOrdinal, IOService * whatDevice) {
     DebugLog("powerState %ld : %s", powerStateOrdinal, powerStateOrdinal ? "on" : "off");
     if (whatDevice != this)
         return kIOReturnInvalid;

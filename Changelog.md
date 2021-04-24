@@ -1,7 +1,28 @@
 YogaSMC Changelog
 ============================
 
+#### v1.5.0
+- IdeaVPC: wait for EC region init
+- IdeaVPC: set conservationModeLock via Battery flag; update keyboard and battery capability via reset
+- ThinkVPC: only turn off mic mute led during init
+- YogaWMI: skip TB interface by _UID
+- ThinkVPC: evaluate raw tablet mode
+
+#### v1.4.3
+- YogaWMI: fix BMF parsing
+
 #### v1.4.2
+- YogaWMI: complete event handling
+- NC: use timer for distinguish input method switch, thx @vnln
+- NC: simplify RFHelper handling
+- IdeaVPC: support toggle Always On USB
+- Project: cleanup
+- YogaWMI: seperate BMF validation
+- NC: update holiday list
+- ThinkVPC: debug:  support keyboard locale
+- IdeaVPC: notify battery on conservation mode change
+- NC: support launchbundle, thx @simprecicchiani
+- Pane: display threshold for all three battery types, thx @antoniomcr96
 
 #### v1.4.1
 - ThinkVPC: fix LEDSupport evaluation, thx @tylernguyen

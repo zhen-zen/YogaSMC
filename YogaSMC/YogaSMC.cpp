@@ -144,10 +144,10 @@ void YogaSMC::updateEC() {
     poller->setTimeoutMS(POLLING_INTERVAL);
 }
 
-IOReturn YogaSMC::setPowerState(unsigned long powerStateOrdinal, IOService *whatDevice){
-    DebugLog("powerState %ld : %s", powerStateOrdinal, powerStateOrdinal ? "on" : "off");
-    if (whatDevice != this)
+IOReturn YogaSMC::setPowerState(unsigned long powerStateOrdinal, IOService * whatDevice) {
+    if (super::setPowerState(powerStateOrdinal, whatDevice) != kIOPMAckImplied)
         return kIOReturnInvalid;
+
     if (powerStateOrdinal == 0) {
         if (awake) {
             poller->disable();
