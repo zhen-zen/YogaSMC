@@ -25,7 +25,31 @@ bool DYVPC::probeVPC(IOService *provider) {
     return true;
 }
 
+bool DYVPC::initEC() {
+    UInt32 state, attempts = 0;
+
+    // _REG will write Arg1 to ECRG to connect / disconnect the region
+    if (ec->validateObject("ECRG") == kIOReturnSuccess) {
+        do {
+            if (ec->evaluateInteger("ECRG", &state) == kIOReturnSuccess && state != 0) {
+                if (attempts != 0)
+                    setProperty("EC Access Retries", attempts, 8);
+                return true;
+            }
+            IOSleep(100);
+        } while (++attempts < 5);
+        AlwaysLog(updateFailure, "ECRG");
+    }
+
+    return true;
+}
+
 bool DYVPC::initVPC() {
+    if (!initEC())
+        return false;
+
+    super::initVPC();
+
     YWMI->extractBMF();
 
     if (inputCap)

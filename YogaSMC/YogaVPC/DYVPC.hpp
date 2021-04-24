@@ -163,6 +163,13 @@ private:
     bool exitVPC() APPLE_KEXT_OVERRIDE;
 
     /**
+     *  Initialize VPC EC status
+     *
+     *  @return true if success
+     */
+    bool initEC();
+
+    /**
      *  input capability
      */
     bool inputCap {false};
