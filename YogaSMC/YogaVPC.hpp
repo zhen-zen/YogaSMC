@@ -150,8 +150,10 @@ protected:
 
     /**
      *  Update VPC EC status
+     *
+     *  @param event Event ID
      */
-    inline virtual void updateVPC() {return;};
+    inline virtual void updateVPC(UInt32 event=0) {return;};
 
     /**
      *  Update all status

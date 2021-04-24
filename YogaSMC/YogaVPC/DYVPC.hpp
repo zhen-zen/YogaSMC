@@ -159,7 +159,7 @@ private:
     bool initVPC() APPLE_KEXT_OVERRIDE;
 //    void setPropertiesGated(OSObject* props) APPLE_KEXT_OVERRIDE;
 //    void updateAll() APPLE_KEXT_OVERRIDE;
-    void updateVPC() APPLE_KEXT_OVERRIDE;
+    void updateVPC(UInt32 event) APPLE_KEXT_OVERRIDE;
     bool exitVPC() APPLE_KEXT_OVERRIDE;
 
     /**

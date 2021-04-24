@@ -85,13 +85,15 @@ bool DYVPC::exitVPC() {
     return super::exitVPC();
 }
 
-void DYVPC::updateVPC() {
+void DYVPC::updateVPC(UInt32 event) {
     UInt32 id;
     UInt32 data;
 
     OSObject *result;
-    if (!YWMI->getEventData(kIOACPIMessageReserved, &result))
+    if (!YWMI->getEventData(event, &result)) {
+        AlwaysLog("message: Unknown ACPI notification 0x%04x", event);
         return;
+    }
 
     OSData *buf = OSDynamicCast(OSData, result);
     if (!buf) {
@@ -137,10 +139,8 @@ IOReturn DYVPC::message(UInt32 type, IOService *provider, void *argument) {
         case kIOACPIMessageDeviceNotification:
             if (!argument)
                 AlwaysLog("message: Unknown ACPI notification");
-            else if (*((UInt32 *) argument) == kIOACPIMessageReserved)
-                updateVPC();
             else
-                AlwaysLog("message: Unknown ACPI notification 0x%04x", *((UInt32 *) argument));
+                updateVPC(*((UInt32 *) argument));
             break;
 
         default:
