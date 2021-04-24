@@ -39,6 +39,7 @@ static IOPMPowerState IOPMPowerStates[kIOPMNumberPowerStates] = {
 #define ECLockPrompt "ECLock"
 #define FnKeyPrompt "FnlockMode"
 #define fanControlPrompt "FanControl"
+#define fanSpeedPrompt "FanSpeed"
 #define keyboardPrompt "KeyboardMode"
 #define HotKeyPrompt "HotKey"
 #define LEDPrompt "LED"
