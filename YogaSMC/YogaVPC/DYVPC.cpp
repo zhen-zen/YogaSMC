@@ -55,23 +55,23 @@ bool DYVPC::initVPC() {
     if (inputCap)
         YWMI->enableEvent(INPUT_WMI_EVENT, true);
 
-    if (BIOSCap) {
-        UInt32 value;
-        if (WMIQuery(HPWMI_HARDWARE_QUERY, &value))
-            setProperty("HARDWARE", value, 32);
-        if (WMIQuery(HPWMI_WIRELESS_QUERY, &value))
-            setProperty("WIRELESS", value, 32);
-        if (WMIQuery(HPWMI_WIRELESS2_QUERY, &value))
-            setProperty("WIRELESS2", value, 32);
-        if (WMIQuery(HPWMI_FEATURE2_QUERY, &value))
-            setProperty("FEATURE2", value, 32);
-        else if (WMIQuery(HPWMI_FEATURE_QUERY, &value))
-            setProperty("FEATURE", value, 32);
-        if (WMIQuery(HPWMI_POSTCODEERROR_QUERY, &value))
-            setProperty("POSTCODE", value, 32);
-        if (WMIQuery(HPWMI_THERMAL_POLICY_QUERY, &value))
-            setProperty("THERMAL_POLICY", value, 32);
-    }
+//    if (BIOSCap) {
+//        UInt32 value;
+//        if (WMIQuery(HPWMI_HARDWARE_QUERY, &value))
+//            setProperty("HARDWARE", value, 32);
+//        if (WMIQuery(HPWMI_WIRELESS_QUERY, &value))
+//            setProperty("WIRELESS", value, 32);
+//        if (WMIQuery(HPWMI_WIRELESS2_QUERY, &value))
+//            setProperty("WIRELESS2", value, 32);
+//        if (WMIQuery(HPWMI_FEATURE2_QUERY, &value))
+//            setProperty("FEATURE2", value, 32);
+//        else if (WMIQuery(HPWMI_FEATURE_QUERY, &value))
+//            setProperty("FEATURE", value, 32);
+//        if (WMIQuery(HPWMI_POSTCODEERROR_QUERY, &value))
+//            setProperty("POSTCODE", value, 32);
+//        if (WMIQuery(HPWMI_THERMAL_POLICY_QUERY, &value))
+//            setProperty("THERMAL_POLICY", value, 32);
+//    }
     return true;
 }
 
@@ -120,7 +120,7 @@ void DYVPC::updateVPC(UInt32 event) {
     }
     buf->release();
 
-    DebugLog("Unknown id: %d - 0x%x", id, data);
+    DebugLog("Unknown id: 0x%x - 0x%x", id, data);
 }
 
 IOReturn DYVPC::message(UInt32 type, IOService *provider, void *argument) {
@@ -236,4 +236,42 @@ bool DYVPC::WMIQuery(UInt32 query, void *buffer, enum hp_wmi_command command, UI
 
     output->release();
     return ret;
+}
+
+void DYVPC::setPropertiesGated(OSObject *props) {
+    OSDictionary *dict = OSDynamicCast(OSDictionary, props);
+    if (!dict)
+        return;
+
+//    AlwaysLog("%d objects in properties", dict->getCount());
+    OSCollectionIterator* i = OSCollectionIterator::withCollection(dict);
+
+    if (i) {
+        while (OSString* key = OSDynamicCast(OSString, i->getNextObject())) {
+            if (key->isEqualTo("BIOSQuery")) {
+                if (!BIOSCap) {
+                    AlwaysLog(notSupported, "BIOSQuery");
+                    continue;
+                }
+
+                OSNumber *value;
+                getPropertyNumber("BIOSQuery");
+
+                UInt32 result;
+
+                if (WMIQuery(value->unsigned32BitValue(), &result))
+                    AlwaysLog("%s 0x%x result: 0x%x", "BIOSQuery", value->unsigned32BitValue(), result);
+                else
+                    AlwaysLog("%s failed 0x%x", "BIOSQuery", value->unsigned32BitValue());
+            } else {
+                OSDictionary *entry = OSDictionary::withCapacity(1);
+                entry->setObject(key, dict->getObject(key));
+                super::setPropertiesGated(entry);
+                entry->release();
+            }
+        }
+        i->release();
+    }
+
+    return;
 }

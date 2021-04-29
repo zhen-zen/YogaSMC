@@ -28,7 +28,7 @@ enum hp_wmi_radio {
 enum hp_wmi_event_ids {
     HPWMI_DOCK_EVENT              = 0x01,
     HPWMI_PARK_HDD                = 0x02,
-    HPWMI_SMART_ADAPTER           = 0x03,
+    HPWMI_SMART_ADAPTER           = 0x03,           // _PSR
     HPWMI_BEZEL_BUTTON            = 0x04,
     HPWMI_WIRELESS                = 0x05,           // _L62 / HWWB
     HPWMI_CPU_BATTERY_THROTTLE    = 0x06,
@@ -39,11 +39,13 @@ enum hp_wmi_event_ids {
     HPWMI_COOLSENSE_SYSTEM_HOT    = 0x0B,
     HPWMI_PROXIMITY_SENSOR        = 0x0C,
     HPWMI_BACKLIT_KB_BRIGHTNESS   = 0x0D,
-    HPWMI_PEAKSHIFT_PERIOD        = 0x0F,
-    HPWMI_BATTERY_CHARGE_PERIOD   = 0x10,
+    HPWMI_PEAKSHIFT_PERIOD        = 0x0F,           // HVWP / _Q20
+    HPWMI_BATTERY_CHARGE_PERIOD   = 0x10,           // HVWP / _Q20
     // 0x14             // _Q24 / _Q25 / _Q26
     // 0x18             // _L62
+    // 0x19             // HWAK / SSLC / HVWP
     // 0x00020001       // _Q07
+    // 0x00020002       // _Q01 / _Q02 / _Q10 / _Q11 / _Q12 / _Q13 / _Q15 / _Q16
 };
 
 // hpqBIntM
@@ -157,7 +159,7 @@ class DYVPC : public YogaVPC
 private:
     bool probeVPC(IOService *provider) APPLE_KEXT_OVERRIDE;
     bool initVPC() APPLE_KEXT_OVERRIDE;
-//    void setPropertiesGated(OSObject* props) APPLE_KEXT_OVERRIDE;
+    void setPropertiesGated(OSObject* props) APPLE_KEXT_OVERRIDE;
 //    void updateAll() APPLE_KEXT_OVERRIDE;
     void updateVPC(UInt32 event) APPLE_KEXT_OVERRIDE;
     bool exitVPC() APPLE_KEXT_OVERRIDE;
