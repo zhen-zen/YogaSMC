@@ -53,6 +53,7 @@ static IOPMPowerState IOPMPowerStates[kIOPMNumberPowerStates] = {
 #define resetPrompt "reset"
 #define writeECPrompt "WriteEC"
 #define updatePrompt "Update"
+#define updateSensorPrompt "UpdateSensor"
 
 #define initFailure "%s evaluation failed, exiting"
 #define updateFailure "%s evaluation failed"

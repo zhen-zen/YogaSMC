@@ -10,6 +10,7 @@
 #define DYVPC_hpp
 
 #include "YogaVPC.hpp"
+#include "DYWMI.hpp"
 
 // from linux/drivers/platform/x86/hp-wmi.c
 
@@ -170,6 +171,8 @@ private:
      *  @return true if success
      */
     bool initEC();
+
+    inline virtual IOService* initWMI(IOACPIPlatformDevice *provider) APPLE_KEXT_OVERRIDE {return DYWMI::withDevice(provider);};
 
     /**
      *  input capability
