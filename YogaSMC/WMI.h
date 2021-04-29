@@ -74,6 +74,7 @@ public:
     inline IOACPIPlatformDevice* getACPIDevice() { return mDevice; }
     inline OSDictionary* getEvent() { return mEvent; }
     bool getEventData(UInt32 event, OSObject ** result);
+    UInt8 getInstanceCount(const char * guid);
 
 private:
     inline const char *getName() {return mDevice->getName();}
