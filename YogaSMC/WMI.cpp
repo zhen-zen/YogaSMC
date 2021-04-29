@@ -260,8 +260,10 @@ bool WMI::executeMethod(const char * guid, OSObject ** result, OSObject * params
         if (mDevice->validateObject(methodName) == kIOReturnNotFound)
             return true;
     } else {
-        DebugLog("Type 0x%x not implemented", flags->unsigned8BitValue());
-        return false;
+        DebugLog("Type 0x%x not implemented, trying buffer type", flags->unsigned8BitValue());
+        snprintf(methodName, 5, ACPIBufferName, objectId->getCStringNoCopy());
+        if (mDevice->validateObject(methodName) == kIOReturnNotFound)
+            return false;
     }
 
     DebugLog("Calling method %s", methodName);
@@ -310,6 +312,19 @@ bool WMI::getEventData(UInt32 event, OSObject **result)
     return (ret == kIOReturnSuccess);
 }
 
+UInt8 WMI::getInstanceCount(const char *guid)
+{
+    OSDictionary *method = getMethod(guid, 0);
+
+    if (!method)
+        return 0;
+
+    OSNumber *instanceCount = OSDynamicCast(OSNumber, method->getObject(kWMIInstanceCount));
+    if (instanceCount == nullptr)
+        return 0;
+
+    return instanceCount->unsigned8BitValue();
+}
 void WMI::extractBMF()
 {
     DebugLog("Extract %d possible BMF object", mBMFCandidate->getCount());
