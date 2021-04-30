@@ -37,9 +37,12 @@ void ThinkSMC::addVSMCKey() {
     VirtualSMCAPI::addKey(KeyCH0B, vsmcPlugin.data, VirtualSMCAPI::valueWithData(nullptr, 1, SmcKeyTypeHex, new CH0B, SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_WRITE));
 
     VirtualSMCAPI::addKey(KeyFNum, vsmcPlugin.data, VirtualSMCAPI::valueWithUint8(dualFan ? 2 : 1, nullptr, SMC_KEY_ATTRIBUTE_CONST | SMC_KEY_ATTRIBUTE_READ));
-    VirtualSMCAPI::addKey(KeyF0Ac(0), vsmcPlugin.data, VirtualSMCAPI::valueWithFp(0, SmcKeyTypeFpe2, new atomicFpKey(&fanSpeed[0])));
-    if (dualFan)
-        VirtualSMCAPI::addKey(KeyF0Ac(1), vsmcPlugin.data, VirtualSMCAPI::valueWithFp(0, SmcKeyTypeFpe2, new atomicFpKey(&fanSpeed[1])));
+    VirtualSMCAPI::addKey(KeyF0Ac(0), vsmcPlugin.data, VirtualSMCAPI::valueWithFp(0, SmcKeyTypeFpe2, new atomicFpKey(&currentSensor[0])));
+    ++sensorCount;
+    if (dualFan) {
+        VirtualSMCAPI::addKey(KeyF0Ac(1), vsmcPlugin.data, VirtualSMCAPI::valueWithFp(0, SmcKeyTypeFpe2, new atomicFpKey(&currentSensor[1])));
+        ++sensorCount;
+    }
     setProperty("Dual fan", dualFan);
     super::addVSMCKey();
 }
@@ -56,7 +59,7 @@ void ThinkSMC::updateEC() {
     if (method_re1b(0x84, &lo) == kIOReturnSuccess &&
         method_re1b(0x85, &hi) == kIOReturnSuccess) {
         UInt16 result = (hi << 8) | lo;
-        atomic_store_explicit(&fanSpeed[0], result, memory_order_release);
+        atomic_store_explicit(&currentSensor[0], result, memory_order_release);
     }
 
     if (!dualFan) {
@@ -74,7 +77,7 @@ void ThinkSMC::updateEC() {
             method_re1b(0x84, &lo) == kIOReturnSuccess &&
             method_re1b(0x85, &hi) == kIOReturnSuccess) {
             UInt16 result = (hi << 8) | lo;
-            atomic_store_explicit(&fanSpeed[1], result, memory_order_release);
+            atomic_store_explicit(&currentSensor[1], result, memory_order_release);
             if ((select & 0x1) != 0)
                 select &= 0xfe;
             else

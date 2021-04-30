@@ -27,7 +27,6 @@ private:
         });
     };
 
-    _Atomic(uint16_t) fanSpeed[2];
     bool dualFan {false};
 
 public:
