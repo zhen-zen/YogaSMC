@@ -192,7 +192,7 @@ void WMI::parseWDGEntry(struct WMI_DATA* block)
     dict->release();
 }
 
-OSDictionary* WMI::getMethod(const char * guid, UInt8 flg)
+OSDictionary* WMI::getMethod(const char * guid, UInt8 flg, bool mute)
 {
     if (mData && mData->getCount() > 0)
     {
@@ -200,7 +200,8 @@ OSDictionary* WMI::getMethod(const char * guid, UInt8 flg)
         if (!entry)
             return nullptr;
 
-        DebugLog("GUID %s matched, verifying flag %d", guid, flg);
+        if (!mute)
+            DebugLog("GUID %s matched, verifying flag %d", guid, flg);
 
         OSNumber *flags = OSDynamicCast(OSNumber, entry->getObject(kWMIFlags));
         if (!flg | (flags->unsigned32BitValue() & flg))
@@ -232,11 +233,11 @@ bool WMI::hasMethod(const char * guid, UInt8 flg)
     return false;
 }
 
-bool WMI::executeMethod(const char * guid, OSObject ** result, OSObject * params[], IOItemCount paramCount)
+bool WMI::executeMethod(const char * guid, OSObject ** result, OSObject * params[], IOItemCount paramCount, bool mute)
 {
     char methodName[5];
 
-    OSDictionary *method = getMethod(guid);
+    OSDictionary *method = getMethod(guid, 0, mute);
     if (!method) return false;
 
     OSNumber *flags = OSDynamicCast(OSNumber, method->getObject(kWMIFlags));
@@ -260,24 +261,26 @@ bool WMI::executeMethod(const char * guid, OSObject ** result, OSObject * params
         if (mDevice->validateObject(methodName) == kIOReturnNotFound)
             return true;
     } else {
-        DebugLog("Type 0x%x not implemented, trying buffer type", flags->unsigned8BitValue());
+        if (!mute)
+            DebugLog("Type 0x%x not implemented, trying buffer type", flags->unsigned8BitValue());
         snprintf(methodName, 5, ACPIBufferName, objectId->getCStringNoCopy());
         if (mDevice->validateObject(methodName) == kIOReturnNotFound)
             return false;
     }
 
-    DebugLog("Calling method %s", methodName);
+    if (!mute)
+        DebugLog("Calling method %s", methodName);
     if (mDevice->evaluateObject(methodName, result, params, paramCount) != kIOReturnSuccess)
         return false;
 
     return true;
 }
 
-bool WMI::executeInteger(const char * guid, UInt32 * result, OSObject * params[], IOItemCount paramCount)
+bool WMI::executeInteger(const char * guid, UInt32 * result, OSObject * params[], IOItemCount paramCount, bool mute)
 {
     bool ret = false;
     OSObject *obj = nullptr;
-    if (executeMethod(guid, &obj, params, paramCount)) {
+    if (executeMethod(guid, &obj, params, paramCount, mute)) {
         OSNumber *num = OSDynamicCast(OSNumber, obj);
         if (num != nullptr) {
             ret = true;

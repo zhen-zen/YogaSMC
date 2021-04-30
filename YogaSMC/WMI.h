@@ -69,8 +69,8 @@ public:
 
     bool hasMethod(const char * guid, UInt8 flg = ACPI_WMI_METHOD);
     bool enableEvent(const char * guid, bool enable);
-    bool executeMethod(const char * guid, OSObject ** result = 0, OSObject * params[] = 0, IOItemCount paramCount = 0);
-    bool executeInteger(const char * guid, UInt32 * result, OSObject * params[] = 0, IOItemCount paramCount = 0);
+    bool executeMethod(const char * guid, OSObject ** result = 0, OSObject * params[] = 0, IOItemCount paramCount = 0, bool mute = false);
+    bool executeInteger(const char * guid, UInt32 * result, OSObject * params[] = 0, IOItemCount paramCount = 0, bool mute = false);
     inline IOACPIPlatformDevice* getACPIDevice() { return mDevice; }
     inline OSDictionary* getEvent() { return mEvent; }
     bool getEventData(UInt32 event, OSObject ** result);
@@ -78,7 +78,7 @@ public:
 
 private:
     inline const char *getName() {return mDevice->getName();}
-    OSDictionary* getMethod(const char * guid, UInt8 flg = 0);
+    OSDictionary* getMethod(const char * guid, UInt8 flg = 0, bool mute = false);
 
     bool extractData();
     void parseWDGEntry(struct WMI_DATA * block);
