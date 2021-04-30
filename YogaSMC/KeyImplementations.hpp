@@ -20,9 +20,8 @@
             if (ec->validateObject(method->getCStringNoCopy()) == kIOReturnSuccess) { \
                 atomic_init(&currentSensor[sensorCount], 0); \
                 VirtualSMCAPI::addKey(key, vsmcPlugin.data, VirtualSMCAPI::valueWithSp(0, SmcKeyTypeSp78, new type(&currentSensor[sensorCount]))); \
-                sensorMethod[sensorCount] = method->getCStringNoCopy(); \
+                sensorMethod[sensorCount++] = method->getCStringNoCopy(); \
                 status->setObject(name, kOSBooleanTrue); \
-                sensorCount++; \
             } else { \
                 status->setObject(name, kOSBooleanFalse); \
             } \
@@ -43,7 +42,7 @@ static constexpr SMC_KEY KeyTW0P = SMC_MAKE_IDENTIFIER('T','W','0','P');
 static constexpr SMC_KEY KeyTaLC = SMC_MAKE_IDENTIFIER('T','a','L','C');
 static constexpr SMC_KEY KeyTaRC = SMC_MAKE_IDENTIFIER('T','a','R','C');
 static constexpr SMC_KEY KeyTh0H(size_t i) { return SMC_MAKE_IDENTIFIER('T','h',KeyIndexes[i],'H'); }
-static constexpr SMC_KEY KeyTs0p(size_t i) { return SMC_MAKE_IDENTIFIER('T','s',KeyIndexes[i],'p'); }
+static constexpr SMC_KEY KeyTs0P(size_t i) { return SMC_MAKE_IDENTIFIER('T','s',KeyIndexes[i],'P'); }
 
 // Fan related keys, from SMCDellSensors
 
@@ -95,11 +94,11 @@ public:
 };
 
 class atomicFpKey : public VirtualSMCValue {
-    _Atomic(uint16_t) *currentSensor;
+    _Atomic(uint32_t) *currentSensor;
 protected:
     SMC_RESULT readAccess() override;
 public:
-    atomicFpKey(_Atomic(uint16_t) *currentSensor) : currentSensor(currentSensor) {};
+    atomicFpKey(_Atomic(uint32_t) *currentSensor) : currentSensor(currentSensor) {};
 };
 
 class messageKey : public VirtualSMCValue {

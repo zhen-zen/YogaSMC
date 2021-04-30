@@ -43,8 +43,8 @@ void YogaSMC::addVSMCKey() {
     addECKeySp(KeyTaRC, "Airflow Right", atomicSpKey);
     addECKeySp(KeyTh0H(1), "Fin Stack Proximity Right", atomicSpKey);
     addECKeySp(KeyTh0H(2), "Fin Stack Proximity Left", atomicSpKey);
-    addECKeySp(KeyTs0p(0), "Palm Rest", atomicSpKey);
-    addECKeySp(KeyTs0p(1), "Trackpad Actuator", atomicSpKey);
+    addECKeySp(KeyTs0P(0), "Palm Rest", atomicSpKey);
+    addECKeySp(KeyTs0P(1), "Trackpad Actuator", atomicSpKey);
 
     setProperty("DirectECKey", status);
     status->release();
@@ -137,7 +137,7 @@ void YogaSMC::updateEC() {
         return;
 
     UInt32 result = 0;
-    for (int i = 0; i < sensorCount; i++) {
+    for (UInt8 i = 0; i < sensorCount; i++) {
         if (ec->evaluateInteger(sensorMethod[i], &result) == kIOReturnSuccess && result != 0)
             atomic_store_explicit(&currentSensor[i], result, memory_order_release);
     }
