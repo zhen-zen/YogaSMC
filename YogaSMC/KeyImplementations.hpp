@@ -104,6 +104,14 @@ public:
     atomicSpDeciKelvinKey(_Atomic(uint32_t) *currentSensor) : currentSensor(currentSensor) {};
 };
 
+class atomicFltKey : public VirtualSMCValue {
+    _Atomic(uint32_t) *currentSensor;
+protected:
+    SMC_RESULT readAccess() override;
+public:
+    atomicFltKey(_Atomic(uint32_t) *currentSensor) : currentSensor(currentSensor) {};
+};
+
 class atomicFpKey : public VirtualSMCValue {
     _Atomic(uint32_t) *currentSensor;
 protected:

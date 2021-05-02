@@ -61,7 +61,7 @@ DYSMC* DYSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) {
 bool DYSMC::addTachometerKey(OSString *name) {
     for (auto &pair : DYPresetTachometer) {
         if (name->isEqualTo(pair.name)) {
-            VirtualSMCAPI::addKey(pair.key, vsmcPlugin.data, VirtualSMCAPI::valueWithFp(0, SmcKeyTypeFpe2, new atomicFpKey(&currentSensor[sensorCount])));
+            VirtualSMCAPI::addKey(pair.key, vsmcPlugin.data, VirtualSMCAPI::valueWithFlt(0, new atomicFltKey(&currentSensor[sensorCount])));
             return true;
         }
     }
