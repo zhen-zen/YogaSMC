@@ -34,6 +34,35 @@
 			<string>IOACPIPlatformDevice</string>
 			<key>IOUserClientClass</key>
 			<string>YogaSMCUserClient</string>
+			<key>Sensors</key>
+			<dict>
+				<key>Airflow Left</key>
+				<false/>
+				<key>Airflow Right</key>
+				<false/>
+				<key>Battery</key>
+				<false/>
+				<key>Battery Sensor 1</key>
+				<false/>
+				<key>Battery Sensor 2</key>
+				<false/>
+				<key>CPU Core PECI</key>
+				<false/>
+				<key>CPU System Agent Core</key>
+				<false/>
+				<key>Memory Proximity</key>
+				<false/>
+				<key>Platform Controller Hub Die</key>
+				<false/>
+				<key>SO-DIMM 1 Proximity</key>
+				<false/>
+				<key>SO-DIMM 2 Proximity</key>
+				<false/>
+				<key>SO-DIMM 3 Proximity</key>
+				<false/>
+				<key>SO-DIMM 4 Proximity</key>
+				<false/>
+			</dict>
 		</dict>
 		<key>IdeaVPC</key>
 		<dict>

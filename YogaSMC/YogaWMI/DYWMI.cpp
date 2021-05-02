@@ -93,7 +93,7 @@ bool DYWMI::getSensorInfo(UInt8 index) {
         else
             AlwaysLog("%s empty result, please check the method return", sensorName);
     } else {
-        AlwaysLog("WQBI evaluation failed");
+        AlwaysLog("Sensor info evaluation failed");
     }
     OSSafeReleaseNULL(result);
     return ret;

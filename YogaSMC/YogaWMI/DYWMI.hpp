@@ -10,6 +10,9 @@
 #define DYWMI_hpp
 
 #include "YogaWMI.hpp"
+#ifndef ALTER
+#include "DYSMC.hpp"
+#endif
 
 #define SENSOR_DATA_WMI_METHOD  "8f1f6435-9f42-42c8-badc-0e9424f20c9a"
 
@@ -30,6 +33,10 @@ private:
     bool getSensorInfo (UInt8 index);
 
     virtual void setPropertiesGated(OSObject* props);
+
+#ifndef ALTER
+    friend void DYSMC::setWMI(IOService *instance);
+#endif
 
     void processWMI() APPLE_KEXT_OVERRIDE;
 //    void ACPIEvent(UInt32 argument) APPLE_KEXT_OVERRIDE;

@@ -275,3 +275,16 @@ void DYVPC::setPropertiesGated(OSObject *props) {
 
     return;
 }
+
+bool DYVPC::examineWMI(IOService *provider) {
+#ifndef ALTER
+    OSString *feature;
+    if ((feature = OSDynamicCast(OSString, provider->getProperty("Feature"))) &&
+        feature->isEqualTo("Sensor")) {
+        DYSMC *sensor = OSDynamicCast(DYSMC, smc);
+        if (sensor)
+            sensor->setWMI(provider);
+    }
+#endif
+    return true;
+}
