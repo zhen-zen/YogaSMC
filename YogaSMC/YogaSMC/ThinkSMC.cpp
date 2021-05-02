@@ -50,11 +50,14 @@ void ThinkSMC::addVSMCKey() {
 void ThinkSMC::updateEC() {
     if (!awake)
         return;
-    if (!(ECAccessCap & BIT(0))) {
-        super::updateEC();
-        return;
-    }
 
+    if (ECAccessCap & ECReadCap)
+        updateECFan();
+
+    super::updateEC();
+}
+
+void ThinkSMC::updateECFan() {
     UInt8 lo, hi;
     if (method_re1b(0x84, &lo) == kIOReturnSuccess &&
         method_re1b(0x85, &hi) == kIOReturnSuccess) {
@@ -62,10 +65,8 @@ void ThinkSMC::updateEC() {
         atomic_store_explicit(&currentSensor[0], result, memory_order_release);
     }
 
-    if (!dualFan) {
-        super::updateEC();
+    if (!(ECAccessCap & ECWriteCap) || !dualFan)
         return;
-    }
 
     UInt8 select;
     if (method_re1b(0x84, &select) == kIOReturnSuccess) {
@@ -90,5 +91,4 @@ void ThinkSMC::updateEC() {
     } else {
         dualFan = false;
     }
-    super::updateEC();
 }
