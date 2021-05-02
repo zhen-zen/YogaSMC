@@ -118,6 +118,15 @@ protected:
      */
     inline virtual IOService* initWMI(IOACPIPlatformDevice *provider) {return nullptr;};
 
+    /**
+     *  Examine WMI
+     *
+     *  @param provider service provider
+     *
+     *  @return true if success
+     */
+    inline virtual bool examineWMI(IOService *provider) {return true;};
+
 #ifndef ALTER
     /**
      *  SMC service
@@ -129,7 +138,6 @@ protected:
      */
     inline virtual void initSMC() {
         smc = YogaSMC::withDevice(this, ec);
-        smc->conf = OSDynamicCast(OSDictionary, getProperty("Sensors"));
     };
 #endif
     /**

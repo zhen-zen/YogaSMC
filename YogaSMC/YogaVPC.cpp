@@ -45,6 +45,10 @@ IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
         while (auto entry = iterator->getNextObject()) {
             if (entry->compareName(pnp) &&
                 (dev = OSDynamicCast(IOACPIPlatformDevice, entry))) {
+                if (dev == vpc) {
+                    DebugLog("Skip VPC interface");
+                    continue;
+                }
                 OSObject *uid = nullptr;
                 if (dev->evaluateObject("_UID", &uid) == kIOReturnSuccess) {
                     OSString *str = OSDynamicCast(OSString, uid);
@@ -95,7 +99,7 @@ bool YogaVPC::start(IOService *provider) {
         for (int i=WMICollection->getCount()-1; i >= 0; i--) {
             IOService *wmi = OSDynamicCast(IOService, WMICollection->getObject(i));
             IOService *prov = OSDynamicCast(IOService, WMIProvCollection->getObject(i));
-            if (!wmi->start(prov)) {
+            if (!wmi->start(prov) || !examineWMI(wmi)) {
                 AlwaysLog("Failed to start WMI instance on %s", prov->getName());
                 wmi->detach(prov);
                 WMICollection->removeObject(wmi);
@@ -150,7 +154,12 @@ bool YogaVPC::exitVPC() {
 void YogaVPC::stop(IOService *provider) {
     DebugLog("Stopping");
     exitVPC();
-
+#ifndef ALTER
+    if (smc) {
+        smc->stop(this);
+        smc->detach(this);
+    }
+#endif
     if (WMICollection) {
         for (int i= WMICollection->getCount()-1; i >= 0; i--) {
             IOService *wmi = OSDynamicCast(IOService, WMICollection->getObject(i));
@@ -162,12 +171,6 @@ void YogaVPC::stop(IOService *provider) {
         OSSafeReleaseNULL(WMIProvCollection);
     }
 
-#ifndef ALTER
-    if (smc) {
-        smc->stop(this);
-        smc->detach(this);
-    }
-#endif
     super::stop(provider);
 }
 
