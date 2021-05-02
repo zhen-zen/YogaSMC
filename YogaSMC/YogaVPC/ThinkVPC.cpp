@@ -497,6 +497,18 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 getPropertyNumber(fanControlPrompt);
 //                setFanControl(value->unsigned32BitValue());
                 updateFanControl(value->unsigned32BitValue());
+            } else if (key->isEqualTo(fanSpeedPrompt)) {
+                OSNumber *value;
+                getPropertyNumber(fanSpeedPrompt);
+                UInt8 speed = value->unsigned8BitValue();
+                if (speed > 7) {
+                    speed = speed < 0x80 ? 0x47 : 0x84;
+                }
+                ret = method_we1b(0x2f, speed);
+                if (ret == kIOReturnSuccess)
+                    DebugLog(updateSuccess, fanSpeedPrompt, speed);
+                else
+                    AlwaysLog("%s update failed 0x%x", fanSpeedPrompt, ret);
             } else if (key->isEqualTo(updatePrompt)) {
                 updateAll();
                 super::updateAll();
