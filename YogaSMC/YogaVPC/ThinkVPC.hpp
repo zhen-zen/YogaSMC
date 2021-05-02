@@ -219,7 +219,7 @@ private:
      */
     UInt32 updateThermalMode();
 
-    void updateVPC() APPLE_KEXT_OVERRIDE;
+    void updateVPC(UInt32 event=0) APPLE_KEXT_OVERRIDE;
     bool exitVPC() APPLE_KEXT_OVERRIDE;
     
 #ifndef ALTER

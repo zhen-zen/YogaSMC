@@ -713,7 +713,7 @@ bool IdeaVPC::toggleFnlock() {
     return true;
 }
 
-void IdeaVPC::updateVPC() {
+void IdeaVPC::updateVPC(UInt32 event) {
     UInt32 vpc1, vpc2, result;
     UInt32 retries = 0;
 

@@ -35,7 +35,7 @@ private:
     const OSSymbol* _deliverNotification {nullptr};
 
 protected:
-    const char* name;
+    const char* name {nullptr};
 
     IOWorkLoop *workLoop {nullptr};
     IOCommandGate *commandGate {nullptr};

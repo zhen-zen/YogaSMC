@@ -873,7 +873,7 @@ UInt32 ThinkVPC::updateYogaMode() {
     return data;
 }
 
-void ThinkVPC::updateVPC() {
+void ThinkVPC::updateVPC(UInt32 event) {
     UInt32 result;
     if (vpc->evaluateInteger(getHKEYevent, &result) != kIOReturnSuccess) {
         AlwaysLog(toggleFailure, HotKeyPrompt);

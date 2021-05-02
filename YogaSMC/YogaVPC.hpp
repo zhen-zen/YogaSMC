@@ -148,9 +148,20 @@ protected:
     virtual bool initVPC();
 
     /**
-     *  Update VPC EC status
+     *  Probe VPC
+     *
+     *  @param provider service provider
+     *
+     *  @return true if success
      */
-    inline virtual void updateVPC() {return;};
+    inline virtual bool probeVPC(IOService *provider) {return true;};
+
+    /**
+     *  Update VPC EC status
+     *
+     *  @param event Event ID
+     */
+    inline virtual void updateVPC(UInt32 event=0) {return;};
 
     /**
      *  Update all status
