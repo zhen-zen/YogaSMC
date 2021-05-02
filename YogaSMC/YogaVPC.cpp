@@ -229,7 +229,7 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
                     setProperty(autoBacklightPrompt, automaticBacklightMode, 8);
                 }
             } else if (key->isEqualTo("ReadECOffset")) {
-                if (!(ECAccessCap & BIT(0))) {
+                if (!(ECAccessCap & ECReadCap)) {
                     AlwaysLog(notSupported, "EC Read");
                     continue;
                 }
