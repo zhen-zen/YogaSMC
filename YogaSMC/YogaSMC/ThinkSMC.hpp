@@ -18,6 +18,7 @@ class ThinkSMC : public YogaSMC
     OSDeclareDefaultStructors(ThinkSMC)
 
 private:
+    void updateECFan();
     void addVSMCKey() APPLE_KEXT_OVERRIDE;
     void updateEC() APPLE_KEXT_OVERRIDE;
     virtual inline IOTimerEventSource *initPoller() APPLE_KEXT_OVERRIDE {
