@@ -56,12 +56,17 @@ protected:
     /**
      *  ACPI method for sensors
      */
-    const char *sensorMethod[MAX_SENSOR];
+    const char *sensorMethods[MAX_SENSOR];
 
     /**
      *  Enabled sensor count
      */
     UInt8 sensorCount {0};
+
+    /**
+     *  EC sensor base
+     */
+    UInt8 ECSensorBase {0};
 
     /**
      *  Current sensor reading obtained from ACPI

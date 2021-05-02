@@ -20,7 +20,7 @@
             if (ec->validateObject(method->getCStringNoCopy()) == kIOReturnSuccess) { \
                 atomic_init(&currentSensor[sensorCount], 0); \
                 VirtualSMCAPI::addKey(key, vsmcPlugin.data, VirtualSMCAPI::valueWithSp(0, SmcKeyTypeSp78, new type(&currentSensor[sensorCount]))); \
-                sensorMethod[sensorCount++] = method->getCStringNoCopy(); \
+                sensorMethods[sensorCount++] = method->getCStringNoCopy(); \
                 status->setObject(name, kOSBooleanTrue); \
             } else { \
                 status->setObject(name, kOSBooleanFalse); \

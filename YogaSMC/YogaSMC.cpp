@@ -44,6 +44,8 @@ void YogaSMC::addVSMCKey() {
     if (!conf || !ec)
         return;
 
+    ECSensorBase = sensorCount;
+
     OSDictionary *status = OSDictionary::withCapacity(1);
     OSString *method;
 
@@ -141,10 +143,9 @@ YogaSMC* YogaSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) 
 
 void YogaSMC::updateEC() {
     UInt32 result = 0;
-    for (UInt8 i = 0; i < sensorCount; i++) {
-        if (ec->evaluateInteger(sensorMethod[i], &result) == kIOReturnSuccess && result != 0)
-            atomic_store_explicit(&currentSensor[i], result, memory_order_release);
-    }
+    for (UInt8 i = ECSensorBase; i < sensorCount; i++)
+        if (ec->evaluateInteger(sensorMethods[i-1], &result) == kIOReturnSuccess && result != 0)
+            atomic_store_explicit(&currentSensor[i-1], result, memory_order_release);
     poller->setTimeoutMS(POLLING_INTERVAL);
 }
 

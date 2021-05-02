@@ -222,7 +222,7 @@ IOReturn YogaBaseService::readECName(const char* name, UInt32 *result) {
 }
 
 IOReturn YogaBaseService::method_re1b(UInt32 offset, UInt8 *result) {
-    if (!ec || !(ECAccessCap & BIT(0)))
+    if (!ec || !(ECAccessCap & ECReadCap))
         return kIOReturnUnsupported;
 
     UInt32 raw;
@@ -272,7 +272,7 @@ IOReturn YogaBaseService::method_recb(UInt32 offset, UInt32 size, OSData **data)
 }
 
 IOReturn YogaBaseService::method_we1b(UInt32 offset, UInt8 value) {
-    if (!ec || !(ECAccessCap & BIT(1)))
+    if (!ec || !(ECAccessCap & ECWriteCap))
         return kIOReturnUnsupported;
 
     OSObject* params[2] = {
@@ -299,12 +299,12 @@ void YogaBaseService::validateEC() {
         setProperty("EC Capability", "Basic");
         return;
     }
-    ECAccessCap |= BIT(0);
+    ECAccessCap |= ECReadCap;
     if (ec->validateObject(writeECOneByte) != kIOReturnSuccess) {
         setProperty("EC Capability", "RO");
         return;
     }
-    ECAccessCap |= BIT(1);
+    ECAccessCap |= ECWriteCap;
     setProperty("EC Capability", "RW");
 }
 
