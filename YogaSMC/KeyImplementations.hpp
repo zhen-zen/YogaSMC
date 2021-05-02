@@ -28,6 +28,11 @@
         } \
     } while (0)
 
+struct sensorPair {
+    const SMC_KEY key;
+    const char *name;
+};
+
 static constexpr const char *KeyIndexes = "0123456789ABCDEF";
 
 static constexpr SMC_KEY KeyBDVT = SMC_MAKE_IDENTIFIER('B','D','V','T');

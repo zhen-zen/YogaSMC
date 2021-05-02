@@ -13,38 +13,45 @@ OSDefineMetaClassAndStructors(YogaSMC, YogaBaseService);
 bool ADDPR(debugEnabled) = false;
 uint32_t ADDPR(debugPrintDelay) = 0;
 
+static const struct sensorPair presetTemperatureDeciKelvin[] = {
+    {KeyTB0T(0), "Battery"},
+    {KeyTB0T(1), "Battery Sensor 1"},
+    {KeyTB0T(2), "Battery Sensor 2"}
+};
+
+static const struct sensorPair presetTemperature[] = {
+    {KeyTCSA,    "CPU System Agent Core"},
+    {KeyTCXC,    "CPU Core PECI"},
+    // Laptops only have 1 key for both channel
+    {KeyTM0P,    "Memory Proximity"},
+    // Desktops
+    {KeyTG0P(0), "SO-DIMM 1 Proximity"},
+    {KeyTG0P(1), "SO-DIMM 2 Proximity"},
+    {KeyTG0P(2), "SO-DIMM 3 Proximity"},
+    {KeyTG0P(3), "SO-DIMM 4 Proximity"},
+    {KeyTPCD,    "Platform Controller Hub Die"},
+    {KeyTW0P,    "Airport Proximity"},
+    {KeyTaLC,    "Airflow Left"},
+    {KeyTaRC,    "Airflow Right"},
+    {KeyTh0H(1), "Fin Stack Proximity Right"},
+    {KeyTh0H(2), "Fin Stack Proximity Left"},
+    {KeyTs0P(0), "Palm Rest"},
+    {KeyTs0P(1), "Trackpad Actuator"}
+};
+
 void YogaSMC::addVSMCKey() {
     // ACPI-based
     if (!conf || !ec)
         return;
 
-    OSDictionary *status = OSDictionary::withCapacity(8);
+    OSDictionary *status = OSDictionary::withCapacity(1);
     OSString *method;
 
-    addECKeySp(KeyTB0T(0), "Battery", atomicSpDeciKelvinKey);
-    addECKeySp(KeyTB0T(1), "Battery Sensor 1", atomicSpDeciKelvinKey);
-    addECKeySp(KeyTB0T(2), "Battery Sensor 2", atomicSpDeciKelvinKey);
+    for (auto &pair : presetTemperatureDeciKelvin)
+        addECKeySp(pair.key, pair.name, atomicSpDeciKelvinKey);
 
-    addECKeySp(KeyTCSA, "CPU System Agent Core", atomicSpKey);
-    addECKeySp(KeyTCXC, "CPU Core PECI", atomicSpKey);
-
-    // Laptops only have 1 key for both channel
-    addECKeySp(KeyTM0P, "Memory Proximity", atomicSpKey);
-
-    // Desktops
-    addECKeySp(KeyTM0p(0), "SO-DIMM 1 Proximity", atomicSpKey);
-    addECKeySp(KeyTM0p(1), "SO-DIMM 2 Proximity", atomicSpKey);
-    addECKeySp(KeyTM0p(2), "SO-DIMM 3 Proximity", atomicSpKey);
-    addECKeySp(KeyTM0p(3), "SO-DIMM 4 Proximity", atomicSpKey);
-
-    addECKeySp(KeyTPCD, "Platform Controller Hub Die", atomicSpKey);
-    addECKeySp(KeyTW0P, "Airport Proximity", atomicSpKey);
-    addECKeySp(KeyTaLC, "Airflow Left", atomicSpKey);
-    addECKeySp(KeyTaRC, "Airflow Right", atomicSpKey);
-    addECKeySp(KeyTh0H(1), "Fin Stack Proximity Right", atomicSpKey);
-    addECKeySp(KeyTh0H(2), "Fin Stack Proximity Left", atomicSpKey);
-    addECKeySp(KeyTs0P(0), "Palm Rest", atomicSpKey);
-    addECKeySp(KeyTs0P(1), "Trackpad Actuator", atomicSpKey);
+    for (auto &pair : presetTemperature)
+        addECKeySp(pair.key, pair.name, atomicSpKey);
 
     setProperty("DirectECKey", status);
     status->release();
@@ -133,9 +140,6 @@ YogaSMC* YogaSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) 
 }
 
 void YogaSMC::updateEC() {
-    if (!awake)
-        return;
-
     UInt32 result = 0;
     for (UInt8 i = 0; i < sensorCount; i++) {
         if (ec->evaluateInteger(sensorMethod[i], &result) == kIOReturnSuccess && result != 0)
