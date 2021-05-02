@@ -25,10 +25,10 @@ static const struct sensorPair presetTemperature[] = {
     // Laptops only have 1 key for both channel
     {KeyTM0P,    "Memory Proximity"},
     // Desktops
-    {KeyTG0P(0), "SO-DIMM 1 Proximity"},
-    {KeyTG0P(1), "SO-DIMM 2 Proximity"},
-    {KeyTG0P(2), "SO-DIMM 3 Proximity"},
-    {KeyTG0P(3), "SO-DIMM 4 Proximity"},
+    {KeyTM0p(0), "SO-DIMM 1 Proximity"},
+    {KeyTM0p(1), "SO-DIMM 2 Proximity"},
+    {KeyTM0p(2), "SO-DIMM 3 Proximity"},
+    {KeyTM0p(3), "SO-DIMM 4 Proximity"},
     {KeyTPCD,    "Platform Controller Hub Die"},
     {KeyTW0P,    "Airport Proximity"},
     {KeyTaLC,    "Airflow Left"},
