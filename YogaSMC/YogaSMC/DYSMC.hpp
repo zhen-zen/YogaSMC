@@ -9,9 +9,8 @@
 #ifndef DYSMC_hpp
 #define DYSMC_hpp
 
+#include "DYWMI.hpp"
 #include "YogaSMC.hpp"
-
-#define SENSOR_DATA_WMI_METHOD  "8f1f6435-9f42-42c8-badc-0e9424f20c9a"
 
 #define SENSOR_TYPE_TEMPERATURE 2
 #define SENSOR_TYPE_AIR_FLOW    12
@@ -70,7 +69,7 @@ private:
     /**
      *  WMI device, in place of provider and direct ACPI evaluations
      */
-    WMI* YWMI {nullptr};
+    DYWMI *wmis {nullptr};
 
     /**
      *  Availble sensor range could be 0..InstanceCount or 0..InstanceCount-1
@@ -81,16 +80,6 @@ private:
      *  Corresponding sensor index
      */
     UInt8 sensorIndex[MAX_SENSOR];
-
-    /**
-     *  Parse Sensor Info
-     *
-     *  @param index sensor info to be executed
-     *  @param result sensor info
-     *
-     *  @return true if success
-     */
-    bool getSensorInfo (UInt8 index, OSObject **result);
 
     bool addTachometerKey(OSString *name);
     bool addTemperatureKey(OSString *name);

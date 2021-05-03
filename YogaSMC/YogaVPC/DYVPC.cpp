@@ -7,6 +7,10 @@
 //
 
 #include "DYVPC.hpp"
+#include "DYWMI.hpp"
+#ifndef ALTER
+#include "DYSMC.hpp"
+#endif
 OSDefineMetaClassAndStructors(DYVPC, YogaVPC);
 
 bool DYVPC::probeVPC(IOService *provider) {
@@ -288,3 +292,13 @@ bool DYVPC::examineWMI(IOService *provider) {
 #endif
     return true;
 }
+
+IOService* DYVPC::initWMI(IOACPIPlatformDevice *provider) {
+    return DYWMI::withDevice(provider);
+}
+
+#ifndef ALTER
+IOService* DYVPC::initSMC() {
+    return DYSMC::withDevice(this, ec);
+}
+#endif

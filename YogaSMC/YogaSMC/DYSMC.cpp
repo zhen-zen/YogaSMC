@@ -7,7 +7,8 @@
 //
 
 #include "DYSMC.hpp"
-#include "DYWMI.hpp"
+#include <Headers/kern_devinfo.hpp>
+
 OSDefineMetaClassAndStructors(DYSMC, YogaSMC);
 
 static const struct sensorPair DYPresetTachometer[] = {
@@ -79,18 +80,15 @@ bool DYSMC::addTemperatureKey(OSString *name) {
 }
 
 void DYSMC::addVSMCKey() {
-    sensorRange = YWMI->getInstanceCount(SENSOR_DATA_WMI_METHOD);
-    if (sensorRange > MAX_SENSOR)
-        sensorRange = MAX_SENSOR;
-
     OSObject *result = nullptr;
 
-    OSDictionary *enabled = OSDictionary::withCapacity(sensorRange);
-    OSDictionary *disabled = OSDictionary::withCapacity(sensorRange);
-    for (UInt8 index = 0; index <= sensorRange; ++index) {
+    OSDictionary *enabled = OSDictionary::withCapacity(wmis->sensorRange);
+    OSDictionary *disabled = OSDictionary::withCapacity(wmis->sensorRange);
+
+    for (UInt8 index = 0; index <= sensorRange && sensorCount < MAX_SENSOR; ++index) {
         OSSafeReleaseNULL(result);
 
-        if (!getSensorInfo(index, &result)) {
+        if (!wmis->getSensorInfo(index, &result)) {
             AlwaysLog("Failed to evaluate sensor %d", index);
             continue;
         }
@@ -144,14 +142,14 @@ void DYSMC::addVSMCKey() {
 
         switch (type->unsigned32BitValue()) {
             case SENSOR_TYPE_TEMPERATURE:
-                if (!addTemperatureKey(sensorName)) {
-                    disabled->setObject(sensorName, arr);
-                    AlwaysLog("Unknown temperature %s", sensorName->getCStringNoCopy());
-                    continue;
-                }
                 if (reading->unsigned32BitValue() == 0) {
                     disabled->setObject(sensorName, arr);
                     AlwaysLog("Temperature is 0 for %s", sensorName->getCStringNoCopy());
+                    continue;
+                }
+                if (!addTemperatureKey(sensorName)) {
+                    disabled->setObject(sensorName, arr);
+                    AlwaysLog("Unknown temperature %s", sensorName->getCStringNoCopy());
                     continue;
                 }
                 break;
@@ -190,9 +188,9 @@ void DYSMC::updateEC() {
 
     OSObject *result = nullptr;
 
-    for (int index = 0; index < sensorCount; ++index) {
+    for (UInt8 index = 0; index < sensorCount; ++index) {
         OSSafeReleaseNULL(result);
-        if (!getSensorInfo(sensorIndex[index], &result)) {
+        if (!wmis->getSensorInfo(sensorIndex[index], &result)) {
             AlwaysLog("Failed to evaluate sensor %d", sensorIndex[index]);
             continue;
         }
@@ -229,28 +227,14 @@ void DYSMC::updateEC() {
     super::updateEC();
 }
 
-bool DYSMC::getSensorInfo(UInt8 index, OSObject **result) {
-    bool ret;
-
-    OSObject* params[1] = {
-        OSNumber::withNumber(index, 32),
-    };
-
-    ret = YWMI->executeMethod(SENSOR_DATA_WMI_METHOD, result, params, 1, true);
-    params[0]->release();
-
-    if (!ret)
-        AlwaysLog("Sensor info evaluation failed");
-    return ret;
-}
-
 void DYSMC::setWMI(IOService *instance) {
-    if (YWMI)
+    if (wmis)
         return;
 
     DYWMI *provider = OSDynamicCast(DYWMI, instance);
     if (!provider)
         return;
 
-    YWMI = provider->YWMI;
+    wmis = provider;
+    sensorRange = provider->sensorRange;
 }
