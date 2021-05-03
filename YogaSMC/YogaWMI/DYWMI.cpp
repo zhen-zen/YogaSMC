@@ -39,18 +39,28 @@ void DYWMI::setPropertiesGated(OSObject* props) {
     if (i) {
         while (OSString* key = OSDynamicCast(OSString, i->getNextObject())) {
             if (key->isEqualTo(updateSensorPrompt)) {
-                if (!sensorRange) {
-                    AlwaysLog(notSupported, updateSensorPrompt);
-                    continue;
-                }
-
                 OSNumber *value;
                 getPropertyNumber(updateSensorPrompt);
 
-                if (getSensorInfo(value->unsigned8BitValue()))
-                    DebugLog(toggleSuccess, updateSensorPrompt, value->unsigned8BitValue(), "see ioreg");
-                else
+                if (value->unsigned8BitValue() > sensorRange) {
+                    AlwaysLog(valueMatched, updateSensorPrompt, sensorRange);
+                    continue;
+                }
+
+                OSObject *result;
+                if (getSensorInfo(value->unsigned8BitValue(), &result)) {
+                    char sensorName[10];
+                    snprintf(sensorName, 10, "Sensor %d", value->unsigned8BitValue());
+                    if (result) {
+                        setProperty(sensorName, result);
+                        DebugLog(toggleSuccess, updateSensorPrompt, value->unsigned8BitValue(), "see ioreg");
+                    } else {
+                        AlwaysLog("%s empty result, please check the method return", sensorName);
+                    }
+                } else {
                     AlwaysLog(toggleFailure, updateSensorPrompt);
+                }
+                OSSafeReleaseNULL(result);
             } else {
                 AlwaysLog("Unknown property %s", key->getCStringNoCopy());
             }
@@ -69,32 +79,17 @@ void DYWMI::processWMI() {
     }
 }
 
-bool DYWMI::getSensorInfo(UInt8 index) {
-    if (index > sensorRange) {
-        AlwaysLog("index %d exceed!", index);
-        return false;
-    }
-
-    OSObject *result;
+bool DYWMI::getSensorInfo(UInt8 index, OSObject **result) {
     bool ret;
 
     OSObject* params[1] = {
         OSNumber::withNumber(index, 32),
     };
 
-    ret = YWMI->executeMethod(SENSOR_DATA_WMI_METHOD, &result, params, 1);
+    ret = YWMI->executeMethod(SENSOR_DATA_WMI_METHOD, result, params, 1, true);
     params[0]->release();
 
-    if (ret) {
-        char sensorName[9];
-        snprintf(sensorName, 9, "Sensor %d", index);
-        if (result)
-            setProperty(sensorName, result);
-        else
-            AlwaysLog("%s empty result, please check the method return", sensorName);
-    } else {
-        AlwaysLog("WQBI evaluation failed");
-    }
-    OSSafeReleaseNULL(result);
+    if (!ret)
+        AlwaysLog("Sensor %d evaluation failed", index);
     return ret;
 }
