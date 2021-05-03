@@ -11,9 +11,6 @@
 #define ThinkVPC_hpp
 
 #include "YogaVPC.hpp"
-#ifndef ALTER
-#include "ThinkSMC.hpp"
-#endif
 
 // from linux/drivers/platform/x86/ideapad-laptop.c and ibm-acpi
 
@@ -228,7 +225,7 @@ private:
      *
      *  @return true if success
      */
-    inline void initSMC() APPLE_KEXT_OVERRIDE {smc = ThinkSMC::withDevice(this, ec);};
+    IOService* initSMC() APPLE_KEXT_OVERRIDE;
 #endif
 
     bool updateBacklight(bool update=false) APPLE_KEXT_OVERRIDE;

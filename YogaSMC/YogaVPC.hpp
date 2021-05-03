@@ -14,10 +14,6 @@
 #include "YogaBaseService.hpp"
 #include "YogaSMCUserClientPrivate.hpp"
 
-#ifndef ALTER
-#include "YogaSMC.hpp"
-#endif
-
 class YogaSMCUserClient;
 class YogaVPC : public YogaBaseService
 {
@@ -131,14 +127,12 @@ protected:
     /**
      *  SMC service
      */
-    YogaSMC *smc;
+    IOService *smc;
 
     /**
      *  Initialize SMC
      */
-    inline virtual void initSMC() {
-        smc = YogaSMC::withDevice(this, ec);
-    };
+    virtual IOService* initSMC();
 #endif
     /**
      *  Initialize VPC EC, get config and update status

@@ -9,6 +9,9 @@
 
 #include "ThinkEvents.h"
 #include "ThinkVPC.hpp"
+#ifndef ALTER
+#include "ThinkSMC.hpp"
+#endif
 
 OSDefineMetaClassAndStructors(ThinkVPC, YogaVPC);
 
@@ -1291,3 +1294,8 @@ IOReturn ThinkVPC::setPowerState(unsigned long powerStateOrdinal, IOService * wh
     return kIOPMAckImplied;
 }
 
+#ifndef ALTER
+IOService* ThinkVPC::initSMC() {
+    return ThinkSMC::withDevice(this, ec);
+};
+#endif

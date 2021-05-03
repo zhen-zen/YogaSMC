@@ -8,6 +8,10 @@
 //
 
 #include "IdeaVPC.hpp"
+#include "IdeaWMI.hpp"
+#ifndef ALTER
+#include "IdeaSMC.hpp"
+#endif
 OSDefineMetaClassAndStructors(IdeaVPC, YogaVPC);
 
 void IdeaVPC::updateAll() {
@@ -963,3 +967,18 @@ bool IdeaVPC::method_vpcw(UInt32 cmd, UInt32 data) {
 
     return (ret == kIOReturnSuccess);
 }
+
+IOService* IdeaVPC::initWMI(IOACPIPlatformDevice *provider) {
+    return IdeaWMI::withDevice(provider);
+};
+
+#ifndef ALTER
+/**
+ *  Initialize SMC
+ *
+ *  @return true if success
+ */
+IOService* IdeaVPC::initSMC() {
+    return IdeaSMC::withDevice(this, ec);
+};
+#endif

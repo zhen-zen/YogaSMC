@@ -8,6 +8,9 @@
 //
 
 #include "YogaVPC.hpp"
+#ifndef ALTER
+#include "YogaSMC.hpp"
+#endif
 
 OSDefineMetaClassAndStructors(YogaVPC, YogaBaseService);
 
@@ -81,7 +84,7 @@ IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
 
 #ifndef ALTER
     if (getProperty("Sensors") != nullptr)
-        initSMC();
+        smc = initSMC();
 #endif
     return this;
 }
@@ -606,3 +609,8 @@ bool YogaVPC::dumpECOffset(UInt32 value) {
     return ret;
 }
 
+#ifndef ALTER
+inline IOService* YogaVPC::initSMC() {
+    return YogaSMC::withDevice(this, ec);
+};
+#endif

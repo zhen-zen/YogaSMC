@@ -11,10 +11,6 @@
 #define IdeaVPC_hpp
 
 #include "YogaVPC.hpp"
-#include "IdeaWMI.hpp"
-#ifndef ALTER
-#include "IdeaSMC.hpp"
-#endif
 
 #define BR_POLLING_INTERVAL 2000
 
@@ -185,7 +181,7 @@ private:
      */
     bool initEC();
 
-    inline virtual IOService* initWMI(IOACPIPlatformDevice *provider) APPLE_KEXT_OVERRIDE {return IdeaWMI::withDevice(provider);};
+    IOService* initWMI(IOACPIPlatformDevice *provider) APPLE_KEXT_OVERRIDE;
 
 #ifndef ALTER
     /**
@@ -193,7 +189,7 @@ private:
      *
      *  @return true if success
      */
-    inline void initSMC() APPLE_KEXT_OVERRIDE {smc = IdeaSMC::withDevice(this, ec);};
+    IOService* initSMC() APPLE_KEXT_OVERRIDE;
 #endif
 
     /**
