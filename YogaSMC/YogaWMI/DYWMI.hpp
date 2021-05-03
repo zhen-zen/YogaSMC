@@ -23,14 +23,16 @@ class DYWMI : public YogaWMI
 
 private:
     UInt8 sensorRange {0};
+
     /**
      *  Parse Sensor Info
      *
      *  @param index sensor info to be executed
+     *  @param result sensor info
      *
      *  @return true if success
      */
-    bool getSensorInfo (UInt8 index);
+    bool getSensorInfo (UInt8 index, OSObject **result);
 
     virtual void setPropertiesGated(OSObject* props);
 
