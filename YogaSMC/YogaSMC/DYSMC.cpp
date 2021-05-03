@@ -160,6 +160,7 @@ void DYSMC::addVSMCKey() {
                     AlwaysLog("Unknown tachometer %s", sensorName->getCStringNoCopy());
                     continue;
                 }
+                fanCount++;
                 break;
 
             default:
@@ -172,6 +173,9 @@ void DYSMC::addVSMCKey() {
         enabled->setObject(sensorName, arr);
     }
     OSSafeReleaseNULL(result);
+
+    if (fanCount)
+        VirtualSMCAPI::addKey(KeyFNum, vsmcPlugin.data, VirtualSMCAPI::valueWithUint8(fanCount, nullptr, SMC_KEY_ATTRIBUTE_CONST | SMC_KEY_ATTRIBUTE_READ));
 
     setProperty("Sensors", enabled);
     setProperty("Sensor Count", sensorCount, 8);
