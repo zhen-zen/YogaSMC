@@ -7,7 +7,7 @@
 //
 
 #include "DYVPC.hpp"
-#include "DYWMI.hpp"
+#include "YogaWMI.hpp"
 #ifndef ALTER
 #include "DYSMC.hpp"
 #endif
@@ -294,7 +294,7 @@ bool DYVPC::examineWMI(IOService *provider) {
 }
 
 IOService* DYVPC::initWMI(IOACPIPlatformDevice *provider) {
-    return DYWMI::withDevice(provider);
+    return YogaWMI::withDY(provider);
 }
 
 #ifndef ALTER

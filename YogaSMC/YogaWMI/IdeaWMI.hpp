@@ -34,20 +34,9 @@ enum
     kYogaMode_tent   = 4    // 180-360 degree, ∧ , screen upside down, trigger rotation?
 } kYogaMode;
 
-class IdeaWMI : public YogaWMI
+class IdeaWMIYoga : public YogaWMI
 {
     typedef YogaWMI super;
-    OSDeclareDefaultStructors(IdeaWMI)
-
-    void checkEvent(const char *cname, UInt32 id) APPLE_KEXT_OVERRIDE;
-
-public:
-    static IdeaWMI *withDevice(IOService *provider);
-};
-
-class IdeaWMIYoga : public IdeaWMI
-{
-    typedef IdeaWMI super;
     OSDeclareDefaultStructors(IdeaWMIYoga)
 
     /**
@@ -70,18 +59,18 @@ public:
     IOReturn setPowerState(unsigned long powerStateOrdinal, IOService * whatDevice) APPLE_KEXT_OVERRIDE;
 };
 
-class IdeaWMIPaper : public IdeaWMI
+class IdeaWMIPaper : public YogaWMI
 {
-    typedef IdeaWMI super;
+    typedef YogaWMI super;
     OSDeclareDefaultStructors(IdeaWMIPaper)
 
     void processWMI() APPLE_KEXT_OVERRIDE;
     void ACPIEvent(UInt32 argument) APPLE_KEXT_OVERRIDE;
 };
 
-class IdeaWMIBattery : public IdeaWMI
+class IdeaWMIBattery : public YogaWMI
 {
-    typedef IdeaWMI super;
+    typedef YogaWMI super;
     OSDeclareDefaultStructors(IdeaWMIBattery)
 
     /**

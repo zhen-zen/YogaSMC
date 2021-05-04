@@ -9,16 +9,26 @@
 #include "DYWMI.hpp"
 OSDefineMetaClassAndStructors(DYWMI, YogaWMI);
 
-DYWMI* DYWMI::withDevice(IOService *provider) {
-    DYWMI* dev = OSTypeAlloc(DYWMI);
+YogaWMI* YogaWMI::withDY(IOService *provider) {
+    WMI *candidate = new WMI(provider);
+    candidate->initialize();
+
+    YogaWMI* dev = nullptr;
+
+    if (candidate->hasMethod(SENSOR_DATA_WMI_METHOD, 0))
+        dev = OSTypeAlloc(DYWMI);
+    else
+        dev = OSTypeAlloc(YogaWMI);
 
     OSDictionary *dictionary = OSDictionary::withCapacity(1);
 
     dev->name = provider->getName();
+    dev->YWMI = candidate;
 
     if (!dev->init(dictionary) ||
         !dev->attach(provider)) {
         OSSafeReleaseNULL(dev);
+        delete candidate;
     }
 
     dictionary->release();
@@ -72,11 +82,9 @@ void DYWMI::setPropertiesGated(OSObject* props) {
 }
 
 void DYWMI::processWMI() {
-    if (YWMI->hasMethod(SENSOR_DATA_WMI_METHOD, 0)) {
-        setProperty("Feature", "Sensor");
-        sensorRange = YWMI->getInstanceCount(SENSOR_DATA_WMI_METHOD);
-        registerService();
-    }
+    setProperty("Feature", "Sensor");
+    sensorRange = YWMI->getInstanceCount(SENSOR_DATA_WMI_METHOD);
+    registerService();
 }
 
 bool DYWMI::getSensorInfo(UInt8 index, OSObject **result) {
@@ -93,3 +101,28 @@ bool DYWMI::getSensorInfo(UInt8 index, OSObject **result) {
         AlwaysLog("Sensor %d evaluation failed", index);
     return ret;
 }
+
+void DYWMI::checkEvent(const char *cname, UInt32 id) {
+    switch (id) {
+        case kIOACPIMessageDYSensor:
+            AlwaysLog("found sensor event notify id 0x%x for %s", id, cname);
+            break;
+
+        default:
+            super::checkEvent(cname, id);
+            return;
+    }
+}
+
+void DYWMI::ACPIEvent(UInt32 argument) {
+    switch (argument) {
+        case kIOACPIMessageDYSensor:
+            DebugLog("message: ACPI notification D0");
+            break;
+
+        default:
+            super::ACPIEvent(argument);
+            return;
+    }
+}
+

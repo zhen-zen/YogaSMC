@@ -9,29 +9,11 @@
 
 #include "IdeaWMI.hpp"
 
-OSDefineMetaClassAndStructors(IdeaWMI, YogaWMI);
-
-void IdeaWMI::checkEvent(const char *cname, UInt32 id) {
-    switch (id) {
-        case kIOACPIMessageReserved:
-            AlwaysLog("found reserved notify id 0x%x for %s", id, cname);
-            break;
-            
-        case kIOACPIMessageYMC:
-            AlwaysLog("found YMC notify id 0x%x for %s", id, cname);
-            break;
-            
-        default:
-            AlwaysLog("found unknown notify id 0x%x for %s", id, cname);
-            break;
-    }
-}
-
-IdeaWMI* IdeaWMI::withDevice(IOService *provider) {
+YogaWMI* YogaWMI::withIdea(IOService *provider) {
     WMI *candidate = new WMI(provider);
     candidate->initialize();
 
-    IdeaWMI* dev = nullptr;
+    YogaWMI* dev = nullptr;
 
     if (candidate->hasMethod(GSENSOR_WMI_EVENT, ACPI_WMI_EVENT) && candidate->hasMethod(GSENSOR_DATA_WMI_METHOD))
         dev = OSTypeAlloc(IdeaWMIYoga);
@@ -39,9 +21,8 @@ IdeaWMI* IdeaWMI::withDevice(IOService *provider) {
         dev = OSTypeAlloc(IdeaWMIPaper);
     else if (candidate->hasMethod(BAT_INFO_WMI_STRING, ACPI_WMI_EXPENSIVE | ACPI_WMI_STRING))
         dev = OSTypeAlloc(IdeaWMIBattery);
-
-    if (!dev)
-        dev = OSTypeAlloc(IdeaWMI);
+    else
+        dev = OSTypeAlloc(YogaWMI);
 
     OSDictionary *dictionary = OSDictionary::withCapacity(1);
 
@@ -58,11 +39,13 @@ IdeaWMI* IdeaWMI::withDevice(IOService *provider) {
     return dev;
 }
 
-OSDefineMetaClassAndStructors(IdeaWMIYoga, IdeaWMI);
+OSDefineMetaClassAndStructors(IdeaWMIYoga, YogaWMI);
 
 void IdeaWMIYoga::ACPIEvent(UInt32 argument) {
-    if (argument != kIOACPIMessageYMC)
+    if (argument != kIOACPIMessageYMC) {
         super::ACPIEvent(argument);
+        return;
+    }
 
     DebugLog("message: ACPI notification D0");
     updateYogaMode();
@@ -153,11 +136,13 @@ IOReturn IdeaWMIYoga::setPowerState(unsigned long powerStateOrdinal, IOService *
     return kIOPMAckImplied;
 }
 
-OSDefineMetaClassAndStructors(IdeaWMIPaper, IdeaWMI);
+OSDefineMetaClassAndStructors(IdeaWMIPaper, YogaWMI);
 
 void IdeaWMIPaper::ACPIEvent(UInt32 argument) {
-    if (argument != kIOACPIMessageReserved)
+    if (argument != kIOACPIMessageReserved) {
         super::ACPIEvent(argument);
+        return;
+    }
 
     DebugLog("message: ACPI notification 80");
     // force enable keyboard and touchpad
@@ -169,7 +154,7 @@ void IdeaWMIPaper::processWMI() {
     setProperty("Feature", "Paper Display");
 }
 
-OSDefineMetaClassAndStructors(IdeaWMIBattery, IdeaWMI);
+OSDefineMetaClassAndStructors(IdeaWMIBattery, YogaWMI);
 
 void IdeaWMIBattery::processWMI() {
     setProperty("Feature", "Battery Information");

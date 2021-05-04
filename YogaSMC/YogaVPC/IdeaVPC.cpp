@@ -8,7 +8,7 @@
 //
 
 #include "IdeaVPC.hpp"
-#include "IdeaWMI.hpp"
+#include "YogaWMI.hpp"
 #ifndef ALTER
 #include "IdeaSMC.hpp"
 #endif
@@ -969,7 +969,7 @@ bool IdeaVPC::method_vpcw(UInt32 cmd, UInt32 data) {
 }
 
 IOService* IdeaVPC::initWMI(IOACPIPlatformDevice *provider) {
-    return IdeaWMI::withDevice(provider);
+    return YogaWMI::withIdea(provider);
 };
 
 #ifndef ALTER
