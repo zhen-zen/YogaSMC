@@ -23,20 +23,20 @@ static const struct sensorPair DYPresetTachometer[] = {
 };
 
 static const struct sensorPair DYPresetTemperature[] = {
-    {KeyTA0P(0), "System Ambient Temperature"},
-    {KeyTA0P(1), "System Ambient1 Temperature"},
     {KeyTB0T(1), "Battery Temperature"},
-    {KeyTCHP,    "Charger Temperature"},
-    {KeyTCSA,    "CPU Temperature"},
-    {KeyTG0P(0), "Discrete Graphics Temperature"},
+    {KeyTCGC,    "Discrete Graphics Temperature"},
+    {KeyTCXC,    "CPU Temperature"},
     {KeyTG0P(0), "GPU0 Temperature"},
     {KeyTG0P(1), "GPU1 Temperature"},
     {KeyTH0a,    "M.2 0 Temperature"},
     {KeyTH0b,    "M.2 1 Temperature"},
     {KeyTH0P(0), "HDD Temperature"},
     {KeyTPCD,    "Local Temperature"},
-    {KeyTs0P(0), "Remote Temperature"},
-    {KeyTs0P(0), "Chassis Temperature"},
+    {KeyTTRD,    "Charger Temperature"},
+    {KeyTW0P,    "Chassis Temperature"},
+    {KeyTh0H(1), "System Ambient Temperature"},
+    {KeyTh0H(2), "System Ambient1 Temperature"},
+    {KeyTs0P(0), "Remote Temperature"}
 };
 
 DYSMC* DYSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) {
