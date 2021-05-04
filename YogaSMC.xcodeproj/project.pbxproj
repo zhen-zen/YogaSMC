@@ -73,6 +73,8 @@
 		6F861252253BF805008FB857 /* YogaBaseService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F86124F253BF805008FB857 /* YogaBaseService.cpp */; };
 		6F861253253BF805008FB857 /* YogaBaseService.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F861250253BF805008FB857 /* YogaBaseService.hpp */; };
 		6F861254253BF805008FB857 /* YogaBaseService.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F861250253BF805008FB857 /* YogaBaseService.hpp */; };
+		6F86DD06263A3E670037A878 /* DYSMC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F86DD04263A3E670037A878 /* DYSMC.cpp */; };
+		6F86DD07263A3E670037A878 /* DYSMC.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F86DD05263A3E670037A878 /* DYSMC.hpp */; };
 		6F87BF8024D26A5D00D64375 /* YogaSMC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F87BF7E24D26A5D00D64375 /* YogaSMC.cpp */; };
 		6F87BF8124D26A5D00D64375 /* YogaSMC.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F87BF7F24D26A5D00D64375 /* YogaSMC.hpp */; };
 		6F88067924EB575F00ACD6C8 /* WMI.h in Headers */ = {isa = PBXBuildFile; fileRef = 6FCF7F572474B74800A82B13 /* WMI.h */; };
@@ -263,6 +265,8 @@
 		6F861242253BD7FB008FB857 /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
 		6F86124F253BF805008FB857 /* YogaBaseService.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = YogaBaseService.cpp; sourceTree = "<group>"; };
 		6F861250253BF805008FB857 /* YogaBaseService.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = YogaBaseService.hpp; sourceTree = "<group>"; };
+		6F86DD04263A3E670037A878 /* DYSMC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DYSMC.cpp; sourceTree = "<group>"; };
+		6F86DD05263A3E670037A878 /* DYSMC.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DYSMC.hpp; sourceTree = "<group>"; };
 		6F87BF7E24D26A5D00D64375 /* YogaSMC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = YogaSMC.cpp; sourceTree = "<group>"; };
 		6F87BF7F24D26A5D00D64375 /* YogaSMC.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = YogaSMC.hpp; sourceTree = "<group>"; };
 		6F88069624EB575F00ACD6C8 /* YogaSMCAlter.kext */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = YogaSMCAlter.kext; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -498,6 +502,8 @@
 		6F70426024D2CFB900FD5659 /* YogaSMC */ = {
 			isa = PBXGroup;
 			children = (
+				6F86DD05263A3E670037A878 /* DYSMC.hpp */,
+				6F86DD04263A3E670037A878 /* DYSMC.cpp */,
 				6F77A23724F4FE59007A127B /* IdeaSMC.hpp */,
 				6F77A23624F4FE59007A127B /* IdeaSMC.cpp */,
 				6F7B5CFE24FBC3CC00AA80FF /* ThinkSMC.hpp */,
@@ -607,6 +613,7 @@
 				6F87BF8124D26A5D00D64375 /* YogaSMC.hpp in Headers */,
 				6F81FC4425317B1200CFEDF5 /* YogaSMCUserClient.h in Headers */,
 				6F48676424A293A0003AD4CA /* IdeaWMI.hpp in Headers */,
+				6F86DD07263A3E670037A878 /* DYSMC.hpp in Headers */,
 				6F98BCFA25532AD300ACFD99 /* YogaHIDD.hpp in Headers */,
 				6F77A23924F4FE59007A127B /* IdeaSMC.hpp in Headers */,
 				6F7B5D0024FBC3CC00AA80FF /* ThinkSMC.hpp in Headers */,
@@ -902,6 +909,7 @@
 				6F48676324A293A0003AD4CA /* IdeaWMI.cpp in Sources */,
 				6F7B5CFF24FBC3CC00AA80FF /* ThinkSMC.cpp in Sources */,
 				6F861251253BF805008FB857 /* YogaBaseService.cpp in Sources */,
+				6F86DD06263A3E670037A878 /* DYSMC.cpp in Sources */,
 				6FD2BB49247721040018EA36 /* bmfdec.c in Sources */,
 				6FCF7F5A2474B74800A82B13 /* WMI.cpp in Sources */,
 				6F96A30C24B93D25006562EC /* YogaVPC.cpp in Sources */,

@@ -220,11 +220,6 @@ private:
     bool exitVPC() APPLE_KEXT_OVERRIDE;
     
 #ifndef ALTER
-    /**
-     *  Initialize SMC
-     *
-     *  @return true if success
-     */
     IOService* initSMC() APPLE_KEXT_OVERRIDE;
 #endif
 
