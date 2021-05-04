@@ -8,76 +8,71 @@
 //
 
 #include "IdeaWMI.hpp"
+
 OSDefineMetaClassAndStructors(IdeaWMI, YogaWMI);
 
-void IdeaWMI::ACPIEvent(UInt32 argument) {
-    switch (argument) {
+void IdeaWMI::checkEvent(const char *cname, UInt32 id) {
+    switch (id) {
         case kIOACPIMessageReserved:
-            DebugLog("message: ACPI notification 80");
-            // force enable keyboard and touchpad
-            setTopCase(true);
-            dispatchMessage(kSMC_FnlockEvent, NULL);
+            AlwaysLog("found reserved notify id 0x%x for %s", id, cname);
             break;
-
-        case kIOACPIMessageD0:
-            if (isYMC) {
-                DebugLog("message: ACPI notification D0");
-                updateYogaMode();
-            } else {
-                AlwaysLog("message: ACPI notification D0, unknown YMC");
-            }
+            
+        case kIOACPIMessageYMC:
+            AlwaysLog("found YMC notify id 0x%x for %s", id, cname);
             break;
-
+            
         default:
-            AlwaysLog("message: Unknown ACPI notification 0x%x", argument);
+            AlwaysLog("found unknown notify id 0x%x for %s", id, cname);
             break;
     }
-    return;
 }
 
-IOReturn IdeaWMI::setPowerState(unsigned long powerStateOrdinal, IOService * whatDevice) {
-    if (super::setPowerState(powerStateOrdinal, whatDevice) != kIOPMAckImplied)
-        return kIOReturnInvalid;
+IdeaWMI* IdeaWMI::withDevice(IOService *provider) {
+    WMI *candidate = new WMI(provider);
+    candidate->initialize();
 
-    if (isYMC) {
-        if (powerStateOrdinal == 0) {
-            if (YogaMode != kYogaMode_laptop) {
-                DebugLog("Re-enabling top case");
-                setTopCase(true);
-            }
-        } else {
-            updateYogaMode();
-        }
+    IdeaWMI* dev = nullptr;
+
+    if (candidate->hasMethod(GSENSOR_WMI_EVENT, ACPI_WMI_EVENT) && candidate->hasMethod(GSENSOR_DATA_WMI_METHOD))
+        dev = OSTypeAlloc(IdeaWMIYoga);
+    else if (candidate->hasMethod(PAPER_LOOKING_WMI_EVENT, ACPI_WMI_EVENT))
+        dev = OSTypeAlloc(IdeaWMIPaper);
+    else if (candidate->hasMethod(BAT_INFO_WMI_STRING, ACPI_WMI_EXPENSIVE | ACPI_WMI_STRING))
+        dev = OSTypeAlloc(IdeaWMIBattery);
+
+    if (!dev)
+        dev = OSTypeAlloc(IdeaWMI);
+
+    OSDictionary *dictionary = OSDictionary::withCapacity(1);
+
+    dev->name = provider->getName();
+    dev->YWMI = candidate;
+
+    if (!dev->init(dictionary) ||
+        !dev->attach(provider)) {
+        OSSafeReleaseNULL(dev);
+        delete candidate;
     }
-    return kIOPMAckImplied;
+
+    dictionary->release();
+    return dev;
 }
 
-void IdeaWMI::processWMI() {
-    if (YWMI->hasMethod(GSENSOR_WMI_EVENT, ACPI_WMI_EVENT)) {
-        if (YWMI->hasMethod(GSENSOR_DATA_WMI_METHOD)) {
-            setProperty("Feature", "Yoga Mode Control");
-            isYMC = true;
-        } else {
-            AlwaysLog("YMC method not found");
-        }
-    }
+OSDefineMetaClassAndStructors(IdeaWMIYoga, IdeaWMI);
 
-    if (YWMI->hasMethod(PAPER_LOOKING_WMI_EVENT, ACPI_WMI_EVENT))
-        setProperty("Feature", "Paper Display");
+void IdeaWMIYoga::ACPIEvent(UInt32 argument) {
+    if (argument != kIOACPIMessageYMC)
+        super::ACPIEvent(argument);
 
-    if (YWMI->hasMethod(BAT_INFO_WMI_STRING, ACPI_WMI_EXPENSIVE | ACPI_WMI_STRING)) {
-        setProperty("Feature", "WBAT");
-        // only execute once for WMI_EXPENSIVE
-        OSArray *BatteryInfo = OSArray::withCapacity(3);
-        getBatteryInfo(WBAT_BAT0_BatMaker, BatteryInfo);
-        getBatteryInfo(WBAT_BAT0_HwId, BatteryInfo);
-        getBatteryInfo(WBAT_BAT0_MfgDate, BatteryInfo);
-        setProperty("BatteryInfo", BatteryInfo);
-        BatteryInfo->release();
-    }
+    DebugLog("message: ACPI notification D0");
+    updateYogaMode();
 }
 
-void IdeaWMI::updateYogaMode() {
+void IdeaWMIYoga::processWMI() {
+    setProperty("Feature", "Yoga Mode Control");
+}
+
+void IdeaWMIYoga::updateYogaMode() {
     UInt32 value;
     OSObject* params[3] = {
         OSNumber::withNumber(0ULL, 32),
@@ -134,7 +129,7 @@ void IdeaWMI::updateYogaMode() {
     dispatchMessage(kSMC_YogaEvent, &YogaMode);
 }
 
-void IdeaWMI::stop(IOService *provider) {
+void IdeaWMIYoga::stop(IOService *provider) {
     if (YogaMode != kYogaMode_laptop) {
         DebugLog("Re-enabling top case");
         setTopCase(true);
@@ -142,7 +137,52 @@ void IdeaWMI::stop(IOService *provider) {
     super::stop(provider);
 }
 
-bool IdeaWMI::getBatteryInfo(UInt32 index, OSArray *bat) {
+IOReturn IdeaWMIYoga::setPowerState(unsigned long powerStateOrdinal, IOService * whatDevice) {
+    if (super::setPowerState(powerStateOrdinal, whatDevice) != kIOPMAckImplied)
+        return kIOReturnInvalid;
+
+    if (powerStateOrdinal == 0) {
+        if (YogaMode != kYogaMode_laptop) {
+            DebugLog("Re-enabling top case");
+            setTopCase(true);
+        }
+    } else {
+        updateYogaMode();
+    }
+
+    return kIOPMAckImplied;
+}
+
+OSDefineMetaClassAndStructors(IdeaWMIPaper, IdeaWMI);
+
+void IdeaWMIPaper::ACPIEvent(UInt32 argument) {
+    if (argument != kIOACPIMessageReserved)
+        super::ACPIEvent(argument);
+
+    DebugLog("message: ACPI notification 80");
+    // force enable keyboard and touchpad
+    setTopCase(true);
+    dispatchMessage(kSMC_FnlockEvent, NULL);
+}
+
+void IdeaWMIPaper::processWMI() {
+    setProperty("Feature", "Paper Display");
+}
+
+OSDefineMetaClassAndStructors(IdeaWMIBattery, IdeaWMI);
+
+void IdeaWMIBattery::processWMI() {
+    setProperty("Feature", "Battery Information");
+    // only execute once for WMI_EXPENSIVE
+    OSArray *BatteryInfo = OSArray::withCapacity(3);
+    getBatteryInfo(WBAT_BAT0_BatMaker, BatteryInfo);
+    getBatteryInfo(WBAT_BAT0_HwId, BatteryInfo);
+    getBatteryInfo(WBAT_BAT0_MfgDate, BatteryInfo);
+    setProperty("BatteryInfo", BatteryInfo);
+    BatteryInfo->release();
+}
+
+bool IdeaWMIBattery::getBatteryInfo(UInt32 index, OSArray *bat) {
     OSObject *result;
     bool ret;
 
@@ -167,36 +207,4 @@ bool IdeaWMI::getBatteryInfo(UInt32 index, OSArray *bat) {
     }
     OSSafeReleaseNULL(result);
     return ret;
-}
-
-void IdeaWMI::checkEvent(const char *cname, UInt32 id) {
-    switch (id) {
-        case kIOACPIMessageReserved:
-            AlwaysLog("found reserved notify id 0x%x for %s", id, cname);
-            break;
-            
-        case kIOACPIMessageD0:
-            AlwaysLog("found YMC notify id 0x%x for %s", id, cname);
-            break;
-            
-        default:
-            AlwaysLog("found unknown notify id 0x%x for %s", id, cname);
-            break;
-    }
-}
-
-IdeaWMI* IdeaWMI::withDevice(IOService *provider) {
-    IdeaWMI* dev = OSTypeAlloc(IdeaWMI);
-
-    OSDictionary *dictionary = OSDictionary::withCapacity(1);
-
-    dev->name = provider->getName();
-
-    if (!dev->init(dictionary) ||
-        !dev->attach(provider)) {
-        OSSafeReleaseNULL(dev);
-    }
-
-    dictionary->release();
-    return dev;
 }

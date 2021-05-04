@@ -16,6 +16,8 @@ IOService *YogaWMI::probe(IOService *provider, SInt32 *score)
     if (!super::probe(provider, score))
         return nullptr;
 
+    DebugLog("Probing");
+
     OSObject *uid = nullptr;
     IOACPIPlatformDevice *dev = OSDynamicCast(IOACPIPlatformDevice, provider);
     if (dev && dev->evaluateObject("_UID", &uid) == kIOReturnSuccess) {
@@ -31,8 +33,6 @@ IOService *YogaWMI::probe(IOService *provider, SInt32 *score)
         DebugLog("Already loaded, exiting");
         return nullptr;
     }
-
-    DebugLog("Probing");
 
     return this;
 }
@@ -81,8 +81,10 @@ bool YogaWMI::start(IOService *provider)
 
     DebugLog("Starting");
 
-    YWMI = new WMI(provider);
-    YWMI->initialize();
+    if (!YWMI) {
+        YWMI = new WMI(provider);
+        YWMI->initialize();
+    }
     YWMI->extractBMF();
     processWMI();
 

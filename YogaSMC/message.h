@@ -10,7 +10,6 @@
 #ifndef message_h
 #define message_h
 
-#define kIOACPIMessageD0 0xd0
 #define kIOACPIMessageReserved 0x80
 
 #define PnpDeviceIdEC       "PNP0C09"
