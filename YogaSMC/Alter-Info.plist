@@ -34,6 +34,8 @@
 			<string>IOACPIPlatformDevice</string>
 			<key>IOUserClientClass</key>
 			<string>YogaSMCUserClient</string>
+			<key>YogaWMISupported</key>
+			<true/>
 		</dict>
 		<key>IdeaVPC</key>
 		<dict>
@@ -49,6 +51,8 @@
 			<string>IOACPIPlatformDevice</string>
 			<key>IOUserClientClass</key>
 			<string>YogaSMCUserClient</string>
+			<key>YogaWMISupported</key>
+			<true/>
 		</dict>
 		<key>ThinkVPC</key>
 		<dict>

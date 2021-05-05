@@ -29,8 +29,19 @@ IOService *YogaWMI::probe(IOService *provider, SInt32 *score)
     }
     OSSafeReleaseNULL(uid);
 
-    if (provider->getClient() != this) {
-        DebugLog("Already loaded, exiting");
+    auto key = OSSymbol::withCString("YogaWMISupported");
+    auto dict = IOService::propertyMatching(key, kOSBooleanTrue);
+    key->release();
+    if (!dict) {
+        DebugLog("Failed to create matching dictionary");
+        return nullptr;
+    }
+
+    auto vpc = IOService::waitForMatchingService(dict, 1000000000);
+    dict->release();
+    if (vpc) {
+        vpc->release();
+        DebugLog("YogaWMI variant available, exiting");
         return nullptr;
     }
 
