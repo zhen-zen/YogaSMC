@@ -78,8 +78,7 @@ bool YogaSMC::start(IOService *provider) {
     // WARNING: watch out, key addition is sorted here!
     addVSMCKey();
     qsort(const_cast<VirtualSMCKeyValue *>(vsmcPlugin.data.data()), vsmcPlugin.data.size(), sizeof(VirtualSMCKeyValue), VirtualSMCKeyValue::compare);
-    setProperty("Status", vsmcPlugin.data.size(), 32);
-
+    setProperty("Key Submitted", vsmcPlugin.data.size(), 32);
     vsmcNotifier = VirtualSMCAPI::registerHandler(vsmcNotificationHandler, this);
 
     poller->setTimeoutMS(POLLING_INTERVAL);
@@ -132,10 +131,8 @@ YogaSMC* YogaSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) 
     drv->ec = device;
     drv->name = device->getName();
 
-    if (!drv->init(dictionary) ||
-        !drv->attach(provider)) {
+    if (!drv->init(dictionary))
         OSSafeReleaseNULL(drv);
-    }
 
     dictionary->release();
     return drv;

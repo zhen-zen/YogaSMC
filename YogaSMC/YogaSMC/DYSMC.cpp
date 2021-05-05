@@ -50,10 +50,8 @@ DYSMC* DYSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) {
     drv->ec = device;
     drv->name = device->getName();
 
-    if (!drv->init(dictionary) ||
-        !drv->attach(provider)) {
+    if (!drv->init(dictionary))
         OSSafeReleaseNULL(drv);
-    }
 
     dictionary->release();
     return drv;
@@ -178,7 +176,6 @@ void DYSMC::addVSMCKey() {
         VirtualSMCAPI::addKey(KeyFNum, vsmcPlugin.data, VirtualSMCAPI::valueWithUint8(fanCount, nullptr, SMC_KEY_ATTRIBUTE_CONST | SMC_KEY_ATTRIBUTE_READ));
 
     setProperty("Sensors", enabled);
-    setProperty("Sensor Count", sensorCount, 8);
     setProperty("Disabled Sensors", disabled);
     OSSafeReleaseNULL(enabled);
     OSSafeReleaseNULL(disabled);

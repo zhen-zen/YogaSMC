@@ -105,17 +105,20 @@ bool YogaVPC::start(IOService *provider) {
         for (int i=WMICollection->getCount()-1; i >= 0; i--) {
             IOService *wmi = OSDynamicCast(IOService, WMICollection->getObject(i));
             IOService *prov = OSDynamicCast(IOService, WMIProvCollection->getObject(i));
-            if (!wmi->start(prov) || !examineWMI(wmi)) {
+            if (!wmi->attach(prov) || !wmi->start(prov) || !examineWMI(wmi)) {
                 AlwaysLog("Failed to start WMI instance on %s", prov->getName());
-                wmi->detach(prov);
                 WMICollection->removeObject(wmi);
                 WMIProvCollection->removeObject(prov);
             }
         }
     }
 #ifndef ALTER
-    if (smc)
-        smc->start(this);
+    if (smc) {
+        if (!smc->attach(this) || !smc->start(this)) {
+            AlwaysLog("Failed to start SMC instance");
+            OSSafeReleaseNULL(smc);
+        }
+    }
 #endif
     setProperty(kDeliverNotifications, kOSBooleanTrue);
     registerService();
@@ -610,7 +613,7 @@ bool YogaVPC::dumpECOffset(UInt32 value) {
 }
 
 #ifndef ALTER
-inline IOService* YogaVPC::initSMC() {
+IOService* YogaVPC::initSMC() {
     return YogaSMC::withDevice(this, ec);
 };
 #endif

@@ -973,11 +973,6 @@ IOService* IdeaVPC::initWMI(IOACPIPlatformDevice *provider) {
 };
 
 #ifndef ALTER
-/**
- *  Initialize SMC
- *
- *  @return true if success
- */
 IOService* IdeaVPC::initSMC() {
     return IdeaSMC::withDevice(this, ec);
 };

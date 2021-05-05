@@ -25,8 +25,7 @@ YogaWMI* YogaWMI::withDY(IOService *provider) {
     dev->name = provider->getName();
     dev->YWMI = candidate;
 
-    if (!dev->init(dictionary) ||
-        !dev->attach(provider)) {
+    if (!dev->init(dictionary)) {
         OSSafeReleaseNULL(dev);
         delete candidate;
     }
