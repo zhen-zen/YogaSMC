@@ -2,7 +2,7 @@
 
 This driver consists of YogaSMC, YogaWMI and YogaVPC.
 
-Each component can be derived for different targets. Currently ThinkPad and IdeaPad series (all other consumer brands) are supported. Support for generic Intel HID event & 5 button array is experimental.
+Each component can be derived for different targets. Currently ThinkPad and IdeaPad series (all other consumer brands) are supported. Support for generic Intel HID event & 5 button array, and HP system (both laptop and desktop, requires vanilla EC) is experimental.
 
 Command to driver can be sent with [ioio](https://github.com/RehabMan/OS-X-ioio), e.g. `ioio -s IdeaVPC ConservationMode true`.
 
@@ -32,7 +32,7 @@ Support for parsing WMI devices and properties. On some devices, it could act as
 Based on [the-darkvoid/macOS-IOElectrify](https://github.com/the-darkvoid/macOS-IOElectrify/) ([Dolnor/IOWMIFamily](https://github.com/Dolnor/IOWMIFamily/)) and [bmfparser](https://github.com/zhen-zen/bmfparser) ([pali/bmfdec](https://github.com/pali/bmfdec))
 
 ### DYWMI
-- `WMIS` Sensor reading
+- `WMIS` Sensor reading, check `SSDT-WMIS.dsl` in `SSDTSample` if the system is affected
 - `WMIV` Event driver, see DYVPC
 
 ### IdeaWMI
