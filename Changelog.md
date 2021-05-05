@@ -7,6 +7,15 @@ YogaSMC Changelog
 - ThinkVPC: only turn off mic mute led during init
 - YogaWMI: skip TB interface by _UID
 - ThinkVPC: evaluate raw tablet mode
+- ThinkVPC: support basic fan speed control through setProperties, thx @wrobeljakub
+- YogaBaseService: rework findPNP
+- YogaWMI: various improvements
+- YogaSMC: store preset with struct
+- DYVPC: initial event support
+- DYWMI: initial event support
+- DYSMC: support sensor reading, thx @jqqqqqqqqqq
+- YogaWMI: remove intermediate class
+- YogaWMI: fix duplicated loading
 
 #### v1.4.3
 - YogaWMI: fix BMF parsing

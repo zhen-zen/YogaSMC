@@ -8,9 +8,9 @@
  *     \_TZ.WQBI (Arg0)
  * }
  *
- * So we have to patch it for currect reporting. 
- * Replace Method (WQBI, 1, N) to Method (XQBI, 1, N)
- * (ThermalZone one usually have Serialized type)
+ * So we have to patch it for correct reporting.
+ * Rename Method (WQBI, 1, N) to XQBI
+ * (ThermalZone one usually has Serialized type)
  *
  * Find: 57514249 01 // WQBI
  * Repl: 58514249 01 // XQBI 
