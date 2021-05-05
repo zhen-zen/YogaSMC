@@ -85,7 +85,8 @@ bool IdeaVPC::initVPC() {
     else
         AlwaysLog(updateFailure, batteryPrompt);
 
-    if (checkKernelArgument("-ideabr")) {
+    int val[16];
+    if (PE_parse_boot_argn("-ideabr", val, sizeof(val))) {
         brightnessPoller = IOTimerEventSource::timerEventSource(this, OSMemberFunctionCast(IOTimerEventSource::Action, this, &IdeaVPC::brightnessAction));
         if (!brightnessPoller ||
             workLoop->addEventSource(brightnessPoller) != kIOReturnSuccess) {

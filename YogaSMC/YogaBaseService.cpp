@@ -40,8 +40,9 @@ bool YogaBaseService::start(IOService *provider)
     if (!super::start(provider))
         return false;
 
+#ifndef ALTER
     setProperty("VersionInfo", kextVersion);
-#ifdef ALTER
+#else
     setProperty("Variant", "Alter");
 #endif
     workLoop = IOWorkLoop::workLoop();

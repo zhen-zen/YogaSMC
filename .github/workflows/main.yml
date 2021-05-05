@@ -98,14 +98,14 @@ jobs:
       with:
         project: YogaSMC.xcodeproj
         configuration: Debug
-        build-settings: -target BuildAll
+        build-settings: -target BuildAll ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES=NO MACOSX_DEPLOYMENT_TARGET=10.14.4
         action: analyze
     - name: Xcodebuild Release Analyze
       uses: sersoft-gmbh/xcodebuild-action@v1
       with:
         project: YogaSMC.xcodeproj
         configuration: Release
-        build-settings: -target BuildAll
+        build-settings: -target BuildAll ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES=NO MACOSX_DEPLOYMENT_TARGET=10.14.4
         action: analyze
     - name: Prepare release image
       run: mkdir build/Release-App; mv build/Release/YogaSMCNC.app build/Release-App/; mv build/Release/YogaSMCPane.prefPane build/Release-App/; cp LICENSE build/Release-App/; ln -s /Applications build/Release-App/; cp -r YogaSMC/SSDTSample build/Release/
