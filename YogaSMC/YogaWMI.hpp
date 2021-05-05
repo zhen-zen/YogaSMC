@@ -7,6 +7,9 @@
 //  Copyright © 2020 Zhen. All rights reserved.
 //
 
+#ifndef YogaWMI_hpp
+#define YogaWMI_hpp
+
 #include "YogaBaseService.hpp"
 
 class YogaWMI : public YogaBaseService
@@ -51,4 +54,8 @@ public:
     virtual void stop(IOService *provider) APPLE_KEXT_OVERRIDE;
 
     virtual IOReturn message(UInt32 type, IOService *provider, void *argument) APPLE_KEXT_OVERRIDE;
+    static YogaWMI *withIdea(IOService *provider);
+    static YogaWMI *withDY(IOService *provider);
 };
+
+#endif /* YogaWMI_hpp */

@@ -20,30 +20,42 @@
             if (ec->validateObject(method->getCStringNoCopy()) == kIOReturnSuccess) { \
                 atomic_init(&currentSensor[sensorCount], 0); \
                 VirtualSMCAPI::addKey(key, vsmcPlugin.data, VirtualSMCAPI::valueWithSp(0, SmcKeyTypeSp78, new type(&currentSensor[sensorCount]))); \
-                sensorMethod[sensorCount] = method->getCStringNoCopy(); \
+                sensorMethods[sensorCount++] = method->getCStringNoCopy(); \
                 status->setObject(name, kOSBooleanTrue); \
-                sensorCount++; \
             } else { \
                 status->setObject(name, kOSBooleanFalse); \
             } \
         } \
     } while (0)
 
+struct sensorPair {
+    const SMC_KEY key;
+    const char *name;
+};
+
 static constexpr const char *KeyIndexes = "0123456789ABCDEF";
 
 static constexpr SMC_KEY KeyBDVT = SMC_MAKE_IDENTIFIER('B','D','V','T');
 static constexpr SMC_KEY KeyCH0B = SMC_MAKE_IDENTIFIER('C','H','0','B');
+static constexpr SMC_KEY KeyTA0P(size_t i) { return SMC_MAKE_IDENTIFIER('T','A',KeyIndexes[i],'P');};
 static constexpr SMC_KEY KeyTB0T(size_t i) { return SMC_MAKE_IDENTIFIER('T','B',KeyIndexes[i],'T'); }
+static constexpr SMC_KEY KeyTCGC = SMC_MAKE_IDENTIFIER('T','C','G','C');
+static constexpr SMC_KEY KeyTCHP = SMC_MAKE_IDENTIFIER('T','C','H','P');
 static constexpr SMC_KEY KeyTCSA = SMC_MAKE_IDENTIFIER('T','C','S','A');
 static constexpr SMC_KEY KeyTCXC = SMC_MAKE_IDENTIFIER('T','C','X','C');
+static constexpr SMC_KEY KeyTG0P(size_t i) { return SMC_MAKE_IDENTIFIER('T','G',KeyIndexes[i],'P');};
+static constexpr SMC_KEY KeyTH0P(size_t i) { return SMC_MAKE_IDENTIFIER('T','H',KeyIndexes[i],'P');};
+static constexpr SMC_KEY KeyTH0a = SMC_MAKE_IDENTIFIER('T','H','0','a');
+static constexpr SMC_KEY KeyTH0b = SMC_MAKE_IDENTIFIER('T','H','0','b');
 static constexpr SMC_KEY KeyTM0P = SMC_MAKE_IDENTIFIER('T','M','0','P');
 static constexpr SMC_KEY KeyTM0p(size_t i) { return SMC_MAKE_IDENTIFIER('T','M',KeyIndexes[i],'p'); }
 static constexpr SMC_KEY KeyTPCD = SMC_MAKE_IDENTIFIER('T','P','C','D');
+static constexpr SMC_KEY KeyTTRD = SMC_MAKE_IDENTIFIER('T','T','R','D');
 static constexpr SMC_KEY KeyTW0P = SMC_MAKE_IDENTIFIER('T','W','0','P');
 static constexpr SMC_KEY KeyTaLC = SMC_MAKE_IDENTIFIER('T','a','L','C');
 static constexpr SMC_KEY KeyTaRC = SMC_MAKE_IDENTIFIER('T','a','R','C');
 static constexpr SMC_KEY KeyTh0H(size_t i) { return SMC_MAKE_IDENTIFIER('T','h',KeyIndexes[i],'H'); }
-static constexpr SMC_KEY KeyTs0p(size_t i) { return SMC_MAKE_IDENTIFIER('T','s',KeyIndexes[i],'p'); }
+static constexpr SMC_KEY KeyTs0P(size_t i) { return SMC_MAKE_IDENTIFIER('T','s',KeyIndexes[i],'P'); }
 
 // Fan related keys, from SMCDellSensors
 
@@ -94,12 +106,20 @@ public:
     atomicSpDeciKelvinKey(_Atomic(uint32_t) *currentSensor) : currentSensor(currentSensor) {};
 };
 
-class atomicFpKey : public VirtualSMCValue {
-    _Atomic(uint16_t) *currentSensor;
+class atomicFltKey : public VirtualSMCValue {
+    _Atomic(uint32_t) *currentSensor;
 protected:
     SMC_RESULT readAccess() override;
 public:
-    atomicFpKey(_Atomic(uint16_t) *currentSensor) : currentSensor(currentSensor) {};
+    atomicFltKey(_Atomic(uint32_t) *currentSensor) : currentSensor(currentSensor) {};
+};
+
+class atomicFpKey : public VirtualSMCValue {
+    _Atomic(uint32_t) *currentSensor;
+protected:
+    SMC_RESULT readAccess() override;
+public:
+    atomicFpKey(_Atomic(uint32_t) *currentSensor) : currentSensor(currentSensor) {};
 };
 
 class messageKey : public VirtualSMCValue {

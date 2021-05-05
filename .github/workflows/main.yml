@@ -10,12 +10,14 @@ on:
   pull_request:
     branches: [ master ]
 
+  workflow_dispatch:
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
   build:
     # The type of runner that the job will run on
-    runs-on: macos-11.0
+    runs-on: macos-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -45,9 +47,21 @@ jobs:
         build-settings: -target BuildAll
         action: build
     - name: Prepare release image
-      run: mkdir build/Release-App; mv build/Release/YogaSMCNC.app build/Release-App/; mv build/Release/YogaSMCPane.prefPane build/Release-App/; cp LICENSE build/Release-App/; ln -s /Applications build/Release-App/; cp -r YogaSMC/SSDTSample build/Release/
+      run: |
+        mkdir build/Release-App
+        mv build/Release/YogaSMCNC.app build/Release-App/
+        mv build/Release/YogaSMCPane.prefPane build/Release-App/
+        cp LICENSE build/Release-App/
+        ln -s /Applications build/Release-App/
+        cp -r YogaSMC/SSDTSample build/Release/
     - name: Prepare debug image
-      run: mkdir build/Debug-App; mv build/Debug/YogaSMCNC.app build/Debug-App/; mv build/Debug/YogaSMCPane.prefPane build/Debug-App/; cp LICENSE build/Debug-App/;  ln -s /Applications build/Debug-App/; cp -r YogaSMC/SSDTSample build/Debug/
+      run: |
+        mkdir build/Debug-App
+        mv build/Debug/YogaSMCNC.app build/Debug-App/
+        mv build/Debug/YogaSMCPane.prefPane build/Debug-App/
+        cp LICENSE build/Debug-App/
+        ln -s /Applications build/Debug-App/
+        cp -r YogaSMC/SSDTSample build/Debug/
     - name: Upload debug kext
       uses: actions/upload-artifact@v2
       with:
@@ -65,7 +79,10 @@ jobs:
           build/Release/LICENSE
           build/Release/SSDTSample
     - name: Create DMG image
-      run: brew install create-dmg && create-dmg --no-internet-enable --sandbox-safe --window-size 450 450 build/YogaSMC-App-Debug.dmg build/Debug-App/ && create-dmg --no-internet-enable --sandbox-safe --window-size 450 450 build/YogaSMC-App-Release.dmg build/Release-App/
+      run: |
+        brew install create-dmg
+        create-dmg --no-internet-enable --sandbox-safe --window-size 450 450 build/YogaSMC-App-Debug.dmg build/Debug-App/
+        create-dmg --no-internet-enable --sandbox-safe --window-size 450 450 build/YogaSMC-App-Release.dmg build/Release-App/
     - name: Upload debug app
       uses: actions/upload-artifact@v2
       with:
@@ -98,12 +115,66 @@ jobs:
       with:
         project: YogaSMC.xcodeproj
         configuration: Debug
-        build-settings: -target BuildAll
+        build-settings: -target BuildAll ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES=NO MACOSX_DEPLOYMENT_TARGET=10.14.4
         action: analyze
     - name: Xcodebuild Release Analyze
       uses: sersoft-gmbh/xcodebuild-action@v1
       with:
         project: YogaSMC.xcodeproj
         configuration: Release
-        build-settings: -target BuildAll
+        build-settings: -target BuildAll ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES=NO MACOSX_DEPLOYMENT_TARGET=10.14.4
         action: analyze
+    - name: Prepare release image
+      run: |
+        mkdir build/Release-App
+        mv build/Release/YogaSMCNC.app build/Release-App/
+        mv build/Release/YogaSMCPane.prefPane build/Release-App/
+        cp LICENSE build/Release-App/
+        ln -s /Applications build/Release-App/
+        cp -r YogaSMC/SSDTSample build/Release/
+    - name: Prepare debug image
+      run: |
+        mkdir build/Debug-App
+        mv build/Debug/YogaSMCNC.app build/Debug-App/
+        mv build/Debug/YogaSMCPane.prefPane build/Debug-App/
+        cp LICENSE build/Debug-App/
+        ln -s /Applications build/Debug-App/
+        cp -r YogaSMC/SSDTSample build/Debug/
+    - name: Upload debug kext
+      uses: actions/upload-artifact@v2
+      with:
+        name: YogaSMC-Debug-11
+        path: |
+          build/Debug/*.kext
+          build/Debug/LICENSE
+          build/Debug/SSDTSample
+    - name: Upload release kext
+      uses: actions/upload-artifact@v2
+      with:
+        name: YogaSMC-Release-11
+        path: |
+          build/Release/*.kext
+          build/Release/LICENSE
+          build/Release/SSDTSample
+    - name: Create DMG image
+      run: |
+        brew install create-dmg
+        create-dmg --no-internet-enable --sandbox-safe --window-size 450 450 build/YogaSMC-App-Debug.dmg build/Debug-App/
+        create-dmg --no-internet-enable --sandbox-safe --window-size 450 450 build/YogaSMC-App-Release.dmg build/Release-App/
+    - name: Upload debug app
+      uses: actions/upload-artifact@v2
+      with:
+        name: YogaSMC-App-Debug-11
+        path: build/YogaSMC-App-Debug-11.dmg
+    - name: Upload release app
+      uses: actions/upload-artifact@v2
+      with:
+        name: YogaSMC-App-Release-11
+        path: build/YogaSMC-App-Release-11.dmg
+    - name: Upload release dSYM
+      uses: actions/upload-artifact@v2
+      with:
+        name: YogaSMC-Release-dSYM-11
+        path: |
+          build/Release/*.dSYM
+          build/Release/LICENSE

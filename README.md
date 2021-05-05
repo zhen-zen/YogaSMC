@@ -2,7 +2,7 @@
 
 This driver consists of YogaSMC, YogaWMI and YogaVPC.
 
-Each component can be derived for different targets. Currently ThinkPad and IdeaPad series (all other consumer brands) are supported. Support for generic Intel HID event & 5 button array is experimental.
+Each component can be derived for different targets. Currently ThinkPad and IdeaPad series (all other consumer brands) are supported. Support for generic Intel HID event & 5 button array, and HP system (both laptop and desktop, requires vanilla EC) is experimental.
 
 Command to driver can be sent with [ioio](https://github.com/RehabMan/OS-X-ioio), e.g. `ioio -s IdeaVPC ConservationMode true`.
 
@@ -18,7 +18,11 @@ Based on [acidanthera/VirtualSMC](https://github.com/acidanthera/VirtualSMC/)
 ### Customized sensor reading
 The EC field name for corresponding SMC key is read from Info.plist. If there's no `FieldUnit` object at desired offset, you can add an `OperationRegion` like `SSDT-THINK.dsl` in `SSDTSample`.
 
-### Fan control (WIP)
+| Variant | IdeaVPC | DYSMC |
+| ---- | ---- | ---- |
+| Fan reading | Need testing | ✅ |
+| Fan control | ☑️ | TBD |
+| Sensor reading | Generic | ✅ |
 
 ## YogaWMI
 Support for parsing WMI devices and properties. On some devices, it could act as YogaVPC with access to extensive device control method.
@@ -27,8 +31,11 @@ Support for parsing WMI devices and properties. On some devices, it could act as
 
 Based on [the-darkvoid/macOS-IOElectrify](https://github.com/the-darkvoid/macOS-IOElectrify/) ([Dolnor/IOWMIFamily](https://github.com/Dolnor/IOWMIFamily/)) and [bmfparser](https://github.com/zhen-zen/bmfparser) ([pali/bmfdec](https://github.com/pali/bmfdec))
 
+### DYWMI
+- `WMIS` Sensor reading, check `SSDT-WMIS.dsl` in `SSDTSample` if the system is affected
+- `WMIV` Event driver, see DYVPC
+
 ### IdeaWMI
-Currently available functions:
 - `WMIY` Yoga Mode detection and disabling keyboard/touchpad when flipped
 - `WBAT` Extra battery information (requires patching related methods like battery ones)
 - `WMI2` Fn+esc (obsolete paper looking function), currently assigned to Fn mode toggle.
@@ -45,20 +52,20 @@ Currently available functions:
 - Automatic backlight and LED control
 - Clamshell mode (need additional patch on `_LID` like  `SSDT-RCSM.dsl` in `SSDTSample`)
 
-| Variant | IdeaVPC  | ThinkVPC | YogaHIDD |
-| ---- | ---- | ---- | ---- |
-| `_HID` | `VPC2004` | `LEN0268`<br>`LEN0068` | `INT33D5`<br>`INTC1051` |
-| Reference | [ideapad-laptop](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/ideapad-laptop.c) | [thinkpad_acpi](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/thinkpad_acpi.c) | [intel-hid](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/intel-hid.c) |
-| Hotkey polling | ✅ | ✅ | ✅ |
-| Conservation mode | ✅ | ✅ | N/A |
-| Battery threshold | Not supported | ✅ | N/A |
-| Charging control | Need testing | Need testing | N/A |
-| DYTC | ✅ | ✅ | N/A |
-| Fan reading | Need testing | ✅ | N/A |
-| Fan control | Need testing | ✅ | N/A |
-| Fn lock mode | ✅ | Native | N/A |
-| LED control | Not supported | ✅ | N/A |
-| Keyboard backlight | ✅ | ✅ | N/A |
+| Variant | IdeaVPC | ThinkVPC | YogaHIDD | DYSMC |
+| ---- | ---- | ---- | ---- | ---- |
+| `_HID` | `VPC2004` | `LEN0268`<br>`LEN0068` | `INT33D5`<br>`INTC1051` | (`WMIV`) |
+| Reference | [ideapad-laptop](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/ideapad-laptop.c) | [thinkpad_acpi](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/thinkpad_acpi.c) | [intel-hid](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/intel-hid.c) | [hp-wmi](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/hp-wmi.c) |
+| Hotkey polling | ✅ | ✅ | ✅ | ☑️ |
+| Conservation mode | ✅ | ✅ | N/A | TBD |
+| Battery threshold | Not supported | ✅ | N/A | TBD |
+| Charging control | Need testing | Need testing | N/A | TBD |
+| DYTC | ✅ | ✅ | N/A | N/A |
+| Fan reading | Need testing | ✅ | N/A | SMC |
+| Fan control | Need testing | ✅ | N/A | TBD |
+| Fn lock mode | ✅ | Native | N/A | TBD |
+| LED control | Not supported | ✅ | N/A | TBD |
+| Keyboard backlight | ✅ | ✅ | N/A | TBD |
 
 ### EC reading:
 When [Rehabman's](https://www.tonymacx86.com/threads/guide-how-to-patch-dsdt-for-working-battery-status.116102/) battery patching method `RE1B` `RECB` present (or  `SSDT-ECRW.dsl` in `SSDTSample`), desired EC fields can be read using following commands:
@@ -87,7 +94,7 @@ If you want to add new actions, the easiest approach is to use the `script` acti
 ## Installation
 The kext should work out-of-the-box. If you have modified `_QXX` methods before, please remove the patches.
 
-Some features may rely on methods accessing EC. Although it won't affect the core functionality, please consider patching related EC fields larger than 8-bit.
+Some features may rely on methods accessing EC, please consider [ECEnabler](https://github.com/1Revenger1/ECEnabler) for EC fields larger than 8-bits.
 
 The `YogaSMCAlter.kext` is a variant without SMC keys support and the dependencies of `Lilu` and `VirtualSMC`. It's designed for quick loading / unloading without reboot when debugging. 
 

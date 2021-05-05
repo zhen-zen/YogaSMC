@@ -25,6 +25,9 @@
 
 #define BIT(nr) (1U << (nr))
 
+#define ECReadCap    BIT(0)
+#define ECWriteCap   BIT(1)
+
 #define getPropertyBoolean(prompt)     \
     do { \
         value = OSDynamicCast(OSBoolean, dict->getObject(prompt));   \

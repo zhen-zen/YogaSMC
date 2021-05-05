@@ -99,7 +99,7 @@ bool WMI::initialize()
     name = mDevice->getName();
     mData = OSDictionary::withCapacity(1);
     mEvent = OSDictionary::withCapacity(1);
-    mBMFCandidate = OSDictionary::withCapacity(1);
+    mBMFCandidate = OSArray::withCapacity(1);
 
     if (!extractData()) {
         AlwaysLog("WMI method %s not found", kWMIMethod);
@@ -176,7 +176,7 @@ void WMI::parseWDGEntry(struct WMI_DATA* block)
 
             DebugLog("Validating buffer %s", bmfName);
             if (mDevice->validateObject(bmfName) == kIOReturnSuccess)
-                mBMFCandidate->setObject(guid_string, dict);
+                mBMFCandidate->setObject(dict);
         }
     }
 
@@ -192,7 +192,7 @@ void WMI::parseWDGEntry(struct WMI_DATA* block)
     dict->release();
 }
 
-OSDictionary* WMI::getMethod(const char * guid, UInt8 flg)
+OSDictionary* WMI::getMethod(const char * guid, UInt8 flg, bool mute)
 {
     if (mData && mData->getCount() > 0)
     {
@@ -200,7 +200,8 @@ OSDictionary* WMI::getMethod(const char * guid, UInt8 flg)
         if (!entry)
             return nullptr;
 
-        DebugLog("GUID %s matched, verifying flag %d", guid, flg);
+        if (!mute)
+            DebugLog("GUID %s matched, verifying flag %d", guid, flg);
 
         OSNumber *flags = OSDynamicCast(OSNumber, entry->getObject(kWMIFlags));
         if (!flg | (flags->unsigned32BitValue() & flg))
@@ -232,11 +233,11 @@ bool WMI::hasMethod(const char * guid, UInt8 flg)
     return false;
 }
 
-bool WMI::executeMethod(const char * guid, OSObject ** result, OSObject * params[], IOItemCount paramCount)
+bool WMI::executeMethod(const char * guid, OSObject ** result, OSObject * params[], IOItemCount paramCount, bool mute)
 {
     char methodName[5];
 
-    OSDictionary *method = getMethod(guid);
+    OSDictionary *method = getMethod(guid, 0, mute);
     if (!method) return false;
 
     OSNumber *flags = OSDynamicCast(OSNumber, method->getObject(kWMIFlags));
@@ -260,22 +261,26 @@ bool WMI::executeMethod(const char * guid, OSObject ** result, OSObject * params
         if (mDevice->validateObject(methodName) == kIOReturnNotFound)
             return true;
     } else {
-        DebugLog("Type 0x%x not implemented", flags->unsigned8BitValue());
-        return false;
+        if (!mute)
+            DebugLog("Type 0x%x not implemented, trying buffer type", flags->unsigned8BitValue());
+        snprintf(methodName, 5, ACPIBufferName, objectId->getCStringNoCopy());
+        if (mDevice->validateObject(methodName) == kIOReturnNotFound)
+            return false;
     }
 
-    DebugLog("Calling method %s", methodName);
+    if (!mute)
+        DebugLog("Calling method %s", methodName);
     if (mDevice->evaluateObject(methodName, result, params, paramCount) != kIOReturnSuccess)
         return false;
 
     return true;
 }
 
-bool WMI::executeInteger(const char * guid, UInt32 * result, OSObject * params[], IOItemCount paramCount)
+bool WMI::executeInteger(const char * guid, UInt32 * result, OSObject * params[], IOItemCount paramCount, bool mute)
 {
     bool ret = false;
     OSObject *obj = nullptr;
-    if (executeMethod(guid, &obj, params, paramCount)) {
+    if (executeMethod(guid, &obj, params, paramCount, mute)) {
         OSNumber *num = OSDynamicCast(OSNumber, obj);
         if (num != nullptr) {
             ret = true;
@@ -310,21 +315,35 @@ bool WMI::getEventData(UInt32 event, OSObject **result)
     return (ret == kIOReturnSuccess);
 }
 
+UInt8 WMI::getInstanceCount(const char *guid)
+{
+    OSDictionary *method = getMethod(guid, 0);
+
+    if (!method)
+        return 0;
+
+    OSNumber *instanceCount = OSDynamicCast(OSNumber, method->getObject(kWMIInstanceCount));
+    if (instanceCount == nullptr)
+        return 0;
+
+    return instanceCount->unsigned8BitValue();
+}
 void WMI::extractBMF()
 {
-    OSCollectionIterator *it = OSCollectionIterator::withCollection(mBMFCandidate);
-    if (it) {
-        while (OSDictionary* dict = OSDynamicCast(OSDictionary, it->getNextObject())) {
-            if (foundBMF) break;
-            parseBMF(dict);
-        }
-        it->release();
+    DebugLog("Extract %d possible BMF object", mBMFCandidate->getCount());
+    for (unsigned int i = 0; i < mBMFCandidate->getCount(); i++) {
+        DebugLog("%d / %d possible BMF object", i, mBMFCandidate->getCount());
+        if (foundBMF) break;
+        parseBMF(OSDynamicCast(OSDictionary, mBMFCandidate->getObject(i)));
     }
     mDevice->setProperty("WDG", mData);
 }
 
 bool WMI::parseBMF(OSDictionary* dict)
 {
+    if (!dict)
+        return false;
+
     OSObject *bmf;
     OSData *data;
 

@@ -39,6 +39,10 @@
 		6F48676324A293A0003AD4CA /* IdeaWMI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F48676124A293A0003AD4CA /* IdeaWMI.cpp */; };
 		6F48676424A293A0003AD4CA /* IdeaWMI.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F48676224A293A0003AD4CA /* IdeaWMI.hpp */; };
 		6F53F8382564C51F00CC4140 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 6F53F83A2564C51F00CC4140 /* Localizable.strings */; };
+		6F64A28325A7FA7D00070265 /* DYVPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F64A28125A7FA7D00070265 /* DYVPC.cpp */; };
+		6F64A28425A7FA7D00070265 /* DYVPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F64A28125A7FA7D00070265 /* DYVPC.cpp */; };
+		6F64A28525A7FA7D00070265 /* DYVPC.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F64A28225A7FA7D00070265 /* DYVPC.hpp */; };
+		6F64A28625A7FA7D00070265 /* DYVPC.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F64A28225A7FA7D00070265 /* DYVPC.hpp */; };
 		6F6CEDA424BC14C2004D553F /* ThinkVPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F6CEDA224BC14C2004D553F /* ThinkVPC.cpp */; };
 		6F6CEDA524BC14C2004D553F /* ThinkVPC.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F6CEDA324BC14C2004D553F /* ThinkVPC.hpp */; };
 		6F77A23824F4FE59007A127B /* IdeaSMC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F77A23624F4FE59007A127B /* IdeaSMC.cpp */; };
@@ -69,6 +73,8 @@
 		6F861252253BF805008FB857 /* YogaBaseService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F86124F253BF805008FB857 /* YogaBaseService.cpp */; };
 		6F861253253BF805008FB857 /* YogaBaseService.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F861250253BF805008FB857 /* YogaBaseService.hpp */; };
 		6F861254253BF805008FB857 /* YogaBaseService.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F861250253BF805008FB857 /* YogaBaseService.hpp */; };
+		6F86DD06263A3E670037A878 /* DYSMC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F86DD04263A3E670037A878 /* DYSMC.cpp */; };
+		6F86DD07263A3E670037A878 /* DYSMC.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F86DD05263A3E670037A878 /* DYSMC.hpp */; };
 		6F87BF8024D26A5D00D64375 /* YogaSMC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F87BF7E24D26A5D00D64375 /* YogaSMC.cpp */; };
 		6F87BF8124D26A5D00D64375 /* YogaSMC.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F87BF7F24D26A5D00D64375 /* YogaSMC.hpp */; };
 		6F88067924EB575F00ACD6C8 /* WMI.h in Headers */ = {isa = PBXBuildFile; fileRef = 6FCF7F572474B74800A82B13 /* WMI.h */; };
@@ -106,6 +112,10 @@
 		6F8B2337253CEA94005BEC5D /* Camera.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 6F8B2336253CEA93005BEC5D /* Camera.pdf */; };
 		6F8B2343253CEF97005BEC5D /* Sleep.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 6F8B2342253CEF97005BEC5D /* Sleep.pdf */; };
 		6F8B234A253CF029005BEC5D /* SecondDisplay.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 6F8B2349253CF029005BEC5D /* SecondDisplay.pdf */; };
+		6F9150762634C29300DF4F9D /* DYWMI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F9150742634C29200DF4F9D /* DYWMI.cpp */; };
+		6F9150772634C29300DF4F9D /* DYWMI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F9150742634C29200DF4F9D /* DYWMI.cpp */; };
+		6F9150782634C29300DF4F9D /* DYWMI.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F9150752634C29200DF4F9D /* DYWMI.hpp */; };
+		6F9150792634C29300DF4F9D /* DYWMI.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F9150752634C29200DF4F9D /* DYWMI.hpp */; };
 		6F9553BA24BA515B00215EBB /* IdeaVPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F9553B824BA515B00215EBB /* IdeaVPC.cpp */; };
 		6F9553BB24BA515B00215EBB /* IdeaVPC.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F9553B924BA515B00215EBB /* IdeaVPC.hpp */; };
 		6F96A30C24B93D25006562EC /* YogaVPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F96A30A24B93D25006562EC /* YogaVPC.cpp */; };
@@ -224,6 +234,8 @@
 		6F48676124A293A0003AD4CA /* IdeaWMI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IdeaWMI.cpp; sourceTree = "<group>"; };
 		6F48676224A293A0003AD4CA /* IdeaWMI.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IdeaWMI.hpp; sourceTree = "<group>"; };
 		6F53F8392564C51F00CC4140 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		6F64A28125A7FA7D00070265 /* DYVPC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DYVPC.cpp; sourceTree = "<group>"; };
+		6F64A28225A7FA7D00070265 /* DYVPC.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DYVPC.hpp; sourceTree = "<group>"; };
 		6F6CEDA224BC14C2004D553F /* ThinkVPC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ThinkVPC.cpp; sourceTree = "<group>"; };
 		6F6CEDA324BC14C2004D553F /* ThinkVPC.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ThinkVPC.hpp; sourceTree = "<group>"; };
 		6F70426124D2CFE900FD5659 /* SSDTSample */ = {isa = PBXFileReference; lastKnownFileType = folder; name = SSDTSample; path = YogaSMC/SSDTSample; sourceTree = "<group>"; };
@@ -253,6 +265,8 @@
 		6F861242253BD7FB008FB857 /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
 		6F86124F253BF805008FB857 /* YogaBaseService.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = YogaBaseService.cpp; sourceTree = "<group>"; };
 		6F861250253BF805008FB857 /* YogaBaseService.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = YogaBaseService.hpp; sourceTree = "<group>"; };
+		6F86DD04263A3E670037A878 /* DYSMC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DYSMC.cpp; sourceTree = "<group>"; };
+		6F86DD05263A3E670037A878 /* DYSMC.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DYSMC.hpp; sourceTree = "<group>"; };
 		6F87BF7E24D26A5D00D64375 /* YogaSMC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = YogaSMC.cpp; sourceTree = "<group>"; };
 		6F87BF7F24D26A5D00D64375 /* YogaSMC.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = YogaSMC.hpp; sourceTree = "<group>"; };
 		6F88069624EB575F00ACD6C8 /* YogaSMCAlter.kext */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = YogaSMCAlter.kext; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -274,6 +288,8 @@
 		6F8B2336253CEA93005BEC5D /* Camera.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = Camera.pdf; sourceTree = "<group>"; };
 		6F8B2342253CEF97005BEC5D /* Sleep.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = Sleep.pdf; sourceTree = "<group>"; };
 		6F8B2349253CF029005BEC5D /* SecondDisplay.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = SecondDisplay.pdf; sourceTree = "<group>"; };
+		6F9150742634C29200DF4F9D /* DYWMI.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DYWMI.cpp; sourceTree = "<group>"; };
+		6F9150752634C29200DF4F9D /* DYWMI.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = DYWMI.hpp; sourceTree = "<group>"; };
 		6F93458F255140B900625343 /* Changelog.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Changelog.md; sourceTree = "<group>"; };
 		6F9553B824BA515B00215EBB /* IdeaVPC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IdeaVPC.cpp; sourceTree = "<group>"; };
 		6F9553B924BA515B00215EBB /* IdeaVPC.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IdeaVPC.hpp; sourceTree = "<group>"; };
@@ -464,6 +480,8 @@
 		6F48676024A2937E003AD4CA /* YogaWMI */ = {
 			isa = PBXGroup;
 			children = (
+				6F9150752634C29200DF4F9D /* DYWMI.hpp */,
+				6F9150742634C29200DF4F9D /* DYWMI.cpp */,
 				6F48676224A293A0003AD4CA /* IdeaWMI.hpp */,
 				6F48676124A293A0003AD4CA /* IdeaWMI.cpp */,
 			);
@@ -484,6 +502,8 @@
 		6F70426024D2CFB900FD5659 /* YogaSMC */ = {
 			isa = PBXGroup;
 			children = (
+				6F86DD05263A3E670037A878 /* DYSMC.hpp */,
+				6F86DD04263A3E670037A878 /* DYSMC.cpp */,
 				6F77A23724F4FE59007A127B /* IdeaSMC.hpp */,
 				6F77A23624F4FE59007A127B /* IdeaSMC.cpp */,
 				6F7B5CFE24FBC3CC00AA80FF /* ThinkSMC.hpp */,
@@ -560,6 +580,8 @@
 			isa = PBXGroup;
 			children = (
 				6FE3698824F76A5D008B29E4 /* DYTC.h */,
+				6F64A28225A7FA7D00070265 /* DYVPC.hpp */,
+				6F64A28125A7FA7D00070265 /* DYVPC.cpp */,
 				6F9553B924BA515B00215EBB /* IdeaVPC.hpp */,
 				6F9553B824BA515B00215EBB /* IdeaVPC.cpp */,
 				6F8B1F902538309F003DD8A8 /* ThinkEvents.h */,
@@ -581,6 +603,8 @@
 				6F05D7E3252E35A000471F57 /* YogaSMCUserClientPrivate.hpp in Headers */,
 				6FCF7F592474B74800A82B13 /* WMI.h in Headers */,
 				6F96A30D24B93D25006562EC /* YogaVPC.hpp in Headers */,
+				6F9150782634C29300DF4F9D /* DYWMI.hpp in Headers */,
+				6F64A28525A7FA7D00070265 /* DYVPC.hpp in Headers */,
 				6F861253253BF805008FB857 /* YogaBaseService.hpp in Headers */,
 				6FD2BB8E247B37A20018EA36 /* bmfparser.hpp in Headers */,
 				6FCF7F5C2474B89000A82B13 /* common.h in Headers */,
@@ -589,6 +613,7 @@
 				6F87BF8124D26A5D00D64375 /* YogaSMC.hpp in Headers */,
 				6F81FC4425317B1200CFEDF5 /* YogaSMCUserClient.h in Headers */,
 				6F48676424A293A0003AD4CA /* IdeaWMI.hpp in Headers */,
+				6F86DD07263A3E670037A878 /* DYSMC.hpp in Headers */,
 				6F98BCFA25532AD300ACFD99 /* YogaHIDD.hpp in Headers */,
 				6F77A23924F4FE59007A127B /* IdeaSMC.hpp in Headers */,
 				6F7B5D0024FBC3CC00AA80FF /* ThinkSMC.hpp in Headers */,
@@ -606,8 +631,10 @@
 				6F88067924EB575F00ACD6C8 /* WMI.h in Headers */,
 				6F861254253BF805008FB857 /* YogaBaseService.hpp in Headers */,
 				6F98BCFB25532AD300ACFD99 /* YogaHIDD.hpp in Headers */,
+				6F9150792634C29300DF4F9D /* DYWMI.hpp in Headers */,
 				6F88067A24EB575F00ACD6C8 /* YogaVPC.hpp in Headers */,
 				6F88067B24EB575F00ACD6C8 /* bmfparser.hpp in Headers */,
+				6F64A28625A7FA7D00070265 /* DYVPC.hpp in Headers */,
 				6F88067C24EB575F00ACD6C8 /* common.h in Headers */,
 				6F88067E24EB575F00ACD6C8 /* YogaWMI.hpp in Headers */,
 				6F88067F24EB575F00ACD6C8 /* ThinkVPC.hpp in Headers */,
@@ -736,7 +763,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1200;
-				LastUpgradeCheck = 1240;
+				LastUpgradeCheck = 1250;
 				ORGANIZATIONNAME = zhen;
 				TargetAttributes = {
 					6F08ACE324746B8B00681A63 = {
@@ -870,16 +897,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6F64A28325A7FA7D00070265 /* DYVPC.cpp in Sources */,
 				6F9553BA24BA515B00215EBB /* IdeaVPC.cpp in Sources */,
 				6F6CEDA424BC14C2004D553F /* ThinkVPC.cpp in Sources */,
 				6F77A23824F4FE59007A127B /* IdeaSMC.cpp in Sources */,
 				6F08ACEA24746B8B00681A63 /* YogaWMI.cpp in Sources */,
 				6F98BCF825532AD300ACFD99 /* YogaHIDD.cpp in Sources */,
+				6F9150762634C29300DF4F9D /* DYWMI.cpp in Sources */,
 				6F83587324D0C2B50031512F /* KeyImplementations.cpp in Sources */,
 				6F05D7E2252E35A000471F57 /* YogaSMCUserClient.cpp in Sources */,
 				6F48676324A293A0003AD4CA /* IdeaWMI.cpp in Sources */,
 				6F7B5CFF24FBC3CC00AA80FF /* ThinkSMC.cpp in Sources */,
 				6F861251253BF805008FB857 /* YogaBaseService.cpp in Sources */,
+				6F86DD06263A3E670037A878 /* DYSMC.cpp in Sources */,
 				6FD2BB49247721040018EA36 /* bmfdec.c in Sources */,
 				6FCF7F5A2474B74800A82B13 /* WMI.cpp in Sources */,
 				6F96A30C24B93D25006562EC /* YogaVPC.cpp in Sources */,
@@ -933,10 +963,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6F64A28425A7FA7D00070265 /* DYVPC.cpp in Sources */,
 				6F861252253BF805008FB857 /* YogaBaseService.cpp in Sources */,
 				6F88068524EB575F00ACD6C8 /* IdeaVPC.cpp in Sources */,
 				6F05D7EB252E362A00471F57 /* YogaSMCUserClient.cpp in Sources */,
 				6F88068624EB575F00ACD6C8 /* ThinkVPC.cpp in Sources */,
+				6F9150772634C29300DF4F9D /* DYWMI.cpp in Sources */,
 				6F88068724EB575F00ACD6C8 /* YogaWMI.cpp in Sources */,
 				6F88068924EB575F00ACD6C8 /* IdeaWMI.cpp in Sources */,
 				6F88068A24EB575F00ACD6C8 /* bmfdec.c in Sources */,
@@ -1040,9 +1072,11 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1.5.0;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -1059,11 +1093,12 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -1102,9 +1137,11 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1.5.0;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -1115,11 +1152,12 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -1130,8 +1168,6 @@
 				CLANG_ANALYZER_DIVIDE_BY_ZERO = NO;
 				CLANG_ANALYZER_NULL_DEREFERENCE = NO;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
-				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = "";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MODULE_VERSION=$(MODULE_VERSION)",
 					"PRODUCT_NAME=$(PRODUCT_NAME)",
@@ -1149,11 +1185,13 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/MacKernelSDK/Library/x86_64",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				MODULE_NAME = org.zhen.YogaSMC;
+				MODULE_START = "$(PRODUCT_NAME)_kern_start";
+				MODULE_STOP = "$(PRODUCT_NAME)_kern_stop";
 				MODULE_VERSION = "$(CURRENT_PROJECT_VERSION)";
 				PRODUCT_BUNDLE_IDENTIFIER = org.zhen.YogaSMC;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				WRAPPER_EXTENSION = kext;
 			};
@@ -1163,8 +1201,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
-				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = "";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MODULE_VERSION=$(MODULE_VERSION)",
 					"PRODUCT_NAME=$(PRODUCT_NAME)",
@@ -1182,11 +1218,13 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/MacKernelSDK/Library/x86_64",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				MODULE_NAME = org.zhen.YogaSMC;
+				MODULE_START = "$(PRODUCT_NAME)_kern_start";
+				MODULE_STOP = "$(PRODUCT_NAME)_kern_stop";
 				MODULE_VERSION = "$(CURRENT_PROJECT_VERSION)";
 				PRODUCT_BUNDLE_IDENTIFIER = org.zhen.YogaSMC;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				WRAPPER_EXTENSION = kext;
 			};
 			name = Release;
@@ -1198,10 +1236,6 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CODE_SIGN_ENTITLEMENTS = YogaSMCNC/YogaSMCNC.entitlements;
-				CODE_SIGN_STYLE = Manual;
-				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = "";
-				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Frameworks",
@@ -1212,13 +1246,10 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = org.zhen.YogaSMCNC;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OBJC_BRIDGING_HEADER = "YogaSMCUtils/YogaSMC-Bridging-Header.h";
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 5.0;
 				SYSTEM_FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks",
@@ -1233,10 +1264,6 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CODE_SIGN_ENTITLEMENTS = YogaSMCNC/YogaSMCNC.entitlements;
-				CODE_SIGN_STYLE = Manual;
-				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = "";
-				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Frameworks",
@@ -1247,12 +1274,10 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = org.zhen.YogaSMCNC;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "YogaSMCUtils/YogaSMC-Bridging-Header.h";
-				SWIFT_OPTIMIZATION_LEVEL = "-O";
-				SWIFT_VERSION = 5.0;
 				SYSTEM_FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks",
@@ -1265,8 +1290,6 @@
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Frameworks",
@@ -1279,12 +1302,10 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
-				OTHER_SWIFT_FLAGS = "-D DEBUG";
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = org.zhen.YogaSMCPane;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "YogaSMCUtils/YogaSMC-Bridging-Header.h";
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 5.0;
 				SYSTEM_FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks",
@@ -1298,8 +1319,6 @@
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Frameworks",
@@ -1312,11 +1331,10 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
-				OTHER_SWIFT_FLAGS = "";
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = org.zhen.YogaSMCPane;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "YogaSMCUtils/YogaSMC-Bridging-Header.h";
-				SWIFT_VERSION = 5.0;
 				SYSTEM_FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks",
@@ -1328,41 +1346,30 @@
 		6F7D484E25344C25004074C7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = YogaSMCNCHelper/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = org.zhen.YogaSMCNCHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
 		6F7D484F25344C25004074C7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = YogaSMCNCHelper/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = org.zhen.YogaSMCNCHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OPTIMIZATION_LEVEL = "-O";
-				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -1373,17 +1380,11 @@
 				CLANG_ANALYZER_DIVIDE_BY_ZERO = NO;
 				CLANG_ANALYZER_NULL_DEREFERENCE = NO;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
-				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = "";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MODULE_VERSION=$(MODULE_VERSION)",
 					"PRODUCT_NAME=$(PRODUCT_NAME)",
 					"$(inherited)",
 					"ALTER=1",
-				);
-				HEADER_SEARCH_PATHS = (
-					"${PROJECT_DIR}/Lilu.kext/Contents/Resources",
-					"${PROJECT_DIR}",
 				);
 				INFOPLIST_FILE = "YogaSMC/Alter-Info.plist";
 				KERNEL_EXTENSION_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/MacKernelSDK/Headers";
@@ -1392,11 +1393,11 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/MacKernelSDK/Library/x86_64",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				MODULE_NAME = org.zhen.YogaSMC;
 				MODULE_VERSION = "$(CURRENT_PROJECT_VERSION)";
 				PRODUCT_BUNDLE_IDENTIFIER = org.zhen.YogaSMC;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				WRAPPER_EXTENSION = kext;
 			};
@@ -1406,17 +1407,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
-				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = "";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MODULE_VERSION=$(MODULE_VERSION)",
 					"PRODUCT_NAME=$(PRODUCT_NAME)",
 					"$(inherited)",
 					"ALTER=1",
-				);
-				HEADER_SEARCH_PATHS = (
-					"${PROJECT_DIR}/Lilu.kext/Contents/Resources",
-					"${PROJECT_DIR}",
 				);
 				INFOPLIST_FILE = "YogaSMC/Alter-Info.plist";
 				KERNEL_EXTENSION_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/MacKernelSDK/Headers";
@@ -1425,11 +1420,11 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/MacKernelSDK/Library/x86_64",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				MODULE_NAME = org.zhen.YogaSMC;
 				MODULE_VERSION = "$(CURRENT_PROJECT_VERSION)";
 				PRODUCT_BUNDLE_IDENTIFIER = org.zhen.YogaSMC;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				WRAPPER_EXTENSION = kext;
 			};
 			name = Release;

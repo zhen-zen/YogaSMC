@@ -21,10 +21,8 @@ IdeaSMC* IdeaSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) 
     drv->ec = device;
     drv->name = device->getName();
 
-    if (!drv->init(dictionary) ||
-        !drv->attach(provider)) {
+    if (!drv->init(dictionary))
         OSSafeReleaseNULL(drv);
-    }
 
     dictionary->release();
     return drv;

@@ -11,9 +11,6 @@
 #define ThinkVPC_hpp
 
 #include "YogaVPC.hpp"
-#ifndef ALTER
-#include "ThinkSMC.hpp"
-#endif
 
 // from linux/drivers/platform/x86/ideapad-laptop.c and ibm-acpi
 
@@ -176,13 +173,16 @@ private:
 
     UInt32 thermalstate {0};
 
-    bool LEDsupport {false};
+    bool LEDSupport {false};
 
     UInt8 batnum {BAT_ANY};
 
     bool ConservationMode {false};
 
     OSDictionary *KBDProperty {nullptr};
+
+    bool yogaModeSupport {false};
+
     /**
      *  Set single notification mask
      *
@@ -214,18 +214,20 @@ private:
      *
      *  @return mode
      */
-    UInt32 getYogaMode();
+    UInt32 updateYogaMode();
     
-    void updateVPC() APPLE_KEXT_OVERRIDE;
+    /**
+     *  Get thermal mode
+     *
+     *  @return mode
+     */
+    UInt32 updateThermalMode();
+
+    void updateVPC(UInt32 event=0) APPLE_KEXT_OVERRIDE;
     bool exitVPC() APPLE_KEXT_OVERRIDE;
     
 #ifndef ALTER
-    /**
-     *  Initialize SMC
-     *
-     *  @return true if success
-     */
-    inline void initSMC() APPLE_KEXT_OVERRIDE {smc = ThinkSMC::withDevice(this, ec);};
+    IOService* initSMC() APPLE_KEXT_OVERRIDE;
 #endif
 
     bool updateBacklight(bool update=false) APPLE_KEXT_OVERRIDE;

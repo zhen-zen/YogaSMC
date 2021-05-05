@@ -9,7 +9,9 @@
 #ifndef YogaBaseService_hpp
 #define YogaBaseService_hpp
 
+#ifndef ALTER
 #include <Headers/kern_version.hpp>
+#endif
 #include <IOKit/IOCommandGate.h>
 #include <IOKit/IOService.h>
 #include <IOKit/IOTimerEventSource.h>
@@ -17,7 +19,6 @@
 #include "common.h"
 #include "message.h"
 #include "WMI.h"
-//#include "YogaSMCUserClientPrivate.hpp"
 
 class YogaBaseService : public IOService {
     typedef IOService super;
@@ -35,7 +36,7 @@ private:
     const OSSymbol* _deliverNotification {nullptr};
 
 protected:
-    const char* name;
+    const char* name {nullptr};
 
     IOWorkLoop *workLoop {nullptr};
     IOCommandGate *commandGate {nullptr};
@@ -54,10 +55,11 @@ protected:
      *  Iterate over IOACPIPlane for PNP device
      *
      *  @param id PNP name
-     *  @param dev target ACPI device
+     *  @param device target ACPI device
+     *
      *  @return true if VPC is available
      */
-    bool findPNP(const char *id, IOACPIPlatformDevice **dev);
+    bool findPNP(const char *id, IOACPIPlatformDevice **device);
 
     /**
      *  Current Keyboard status

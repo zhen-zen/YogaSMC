@@ -11,10 +11,6 @@
 #define IdeaVPC_hpp
 
 #include "YogaVPC.hpp"
-#include "IdeaWMI.hpp"
-#ifndef ALTER
-#include "IdeaSMC.hpp"
-#endif
 
 #define BR_POLLING_INTERVAL 2000
 
@@ -100,6 +96,8 @@ private:
     /**
      *  Related ACPI methods
      */
+    static constexpr const char *getECStatus          = "ECAV";
+    static constexpr const char *getECStatusLegacy    = "OKEC";
     static constexpr const char *getVPCConfig         = "_CFG";
     static constexpr const char *getBatteryID         = "GBID";
     static constexpr const char *getBatteryInfo       = "GSBI";
@@ -113,7 +111,7 @@ private:
     bool initVPC() APPLE_KEXT_OVERRIDE;
     void setPropertiesGated(OSObject* props) APPLE_KEXT_OVERRIDE;
     void updateAll() APPLE_KEXT_OVERRIDE;
-    void updateVPC() APPLE_KEXT_OVERRIDE;
+    void updateVPC(UInt32 event=0) APPLE_KEXT_OVERRIDE;
     bool exitVPC() APPLE_KEXT_OVERRIDE;
 
     /**
@@ -183,15 +181,10 @@ private:
      */
     bool initEC();
 
-    inline virtual IOService* initWMI(IOACPIPlatformDevice *provider) APPLE_KEXT_OVERRIDE {return IdeaWMI::withDevice(provider);};
+    IOService* initWMI(IOACPIPlatformDevice *provider) APPLE_KEXT_OVERRIDE;
 
 #ifndef ALTER
-    /**
-     *  Initialize SMC
-     *
-     *  @return true if success
-     */
-    inline void initSMC() APPLE_KEXT_OVERRIDE {smc = IdeaSMC::withDevice(this, ec);};
+    IOService* initSMC() APPLE_KEXT_OVERRIDE;
 #endif
 
     /**
@@ -245,18 +238,18 @@ private:
     bool updateBatteryInfo(OSDictionary *bat0, OSDictionary *bat1);
 
     /**
-     *  Update battery stats
+     *  Update battery capability
      *
      *  @param batState battery state from GBMD
      */
-    void updateBatteryStats(UInt32 batState);
+    void updateBatteryCapability(UInt32 batState);
 
     /**
-     *  Update keyboard stats
+     *  Update keyboard capability
      *
      *  @param kbdState keyboard state from HALS
      */
-    void updateKeyboardStats(UInt32 kbdState);
+    void updateKeyboardCapability(UInt32 kbdState);
     /**
      *  Update battery conservation mode status
      *
