@@ -11,6 +11,9 @@
 OSDefineMetaClassAndStructors(IdeaSMC, YogaSMC);
 
 IdeaSMC* IdeaSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) {
+    if (!device)
+        return nullptr;
+
     IdeaSMC* drv = OSTypeAlloc(IdeaSMC);
 
     drv->conf = OSDictionary::withDictionary(OSDynamicCast(OSDictionary, provider->getProperty("Sensors")));

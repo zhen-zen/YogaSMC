@@ -40,6 +40,9 @@ static const struct sensorPair DYPresetTemperature[] = {
 };
 
 DYSMC* DYSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) {
+    if (!device)
+        return nullptr;
+
     DYSMC* drv = OSTypeAlloc(DYSMC);
 
     drv->conf = OSDictionary::withDictionary(OSDynamicCast(OSDictionary, provider->getProperty("Sensors")));

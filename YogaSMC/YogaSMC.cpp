@@ -121,6 +121,9 @@ bool YogaSMC::vsmcNotificationHandler(void *sensors, void *refCon, IOService *vs
 }
 
 YogaSMC* YogaSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) {
+    if (!device)
+        return nullptr;
+
     YogaSMC* drv = OSTypeAlloc(YogaSMC);
 
     drv->conf = OSDictionary::withDictionary(OSDynamicCast(OSDictionary, provider->getProperty("Sensors")));
