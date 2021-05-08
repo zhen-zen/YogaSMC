@@ -21,6 +21,8 @@ YogaWMI* YogaWMI::withIdea(IOService *provider) {
         dev = OSTypeAlloc(IdeaWMIPaper);
     else if (candidate->hasMethod(BAT_INFO_WMI_STRING, ACPI_WMI_EXPENSIVE | ACPI_WMI_STRING))
         dev = OSTypeAlloc(IdeaWMIBattery);
+    else if (candidate->hasMethod(GAME_ZONE_DATA_WMI_METHOD))
+        dev = OSTypeAlloc(IdeaWMIGameZone);
     else
         dev = OSTypeAlloc(YogaWMI);
 
@@ -192,3 +194,48 @@ bool IdeaWMIBattery::getBatteryInfo(UInt32 index, OSArray *bat) {
     OSSafeReleaseNULL(result);
     return ret;
 }
+
+OSDefineMetaClassAndStructors(IdeaWMIGameZone, YogaWMI);
+
+bool IdeaWMIGameZone::getGamzeZoneData(UInt32 query, UInt32 *result) {
+    bool ret;
+
+    OSObject* params[3] = {
+        OSNumber::withNumber(0ULL, 32),
+        OSNumber::withNumber(query, 32),
+        OSNumber::withNumber(0ULL, 32)
+    };
+    
+    ret = YWMI->executeInteger(GAME_ZONE_DATA_WMI_METHOD, result, params, 3);
+    params[0]->release();
+    params[1]->release();
+    params[2]->release();
+    return ret;
+}
+
+void IdeaWMIGameZone::processWMI() {
+    setProperty("Feature", "Game Zone");
+
+    UInt32 result;
+
+    if (getGamzeZoneData(GAME_ZONE_DATA_WMI_VERSION, &result))
+        setProperty("Game Zone Version", result, 32);
+    else
+        AlwaysLog("Failed to get version");
+
+    if (getGamzeZoneData(GAME_ZONE_DATA_WMI_FAN_NUM, &result))
+        setProperty("Fan number", result, 32);
+    else
+        AlwaysLog("Failed to get fan number");
+}
+
+void IdeaWMIGameZone::ACPIEvent(UInt32 argument) {
+    OSObject *result;
+    OSNumber *id;
+    if (YWMI->getEventData(argument, &result) && (id = (OSDynamicCast(OSNumber, result))))
+        DebugLog("message: ACPI notification 0x%04x - 0x%04x", argument, id->unsigned32BitValue());
+    else
+        AlwaysLog("message: Unknown ACPI notification 0x%04x", argument);
+    OSSafeReleaseNULL(result);
+}
+
