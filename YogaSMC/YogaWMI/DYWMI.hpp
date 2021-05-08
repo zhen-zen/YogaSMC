@@ -16,12 +16,49 @@
 
 #define kIOACPIMessageDYSensor  0xd0
 
+#define EVENT_SEVERITY_UNKNOWN  0
+#define EVENT_SEVERITY_OK       5
+#define EVENT_SEVERITY_WARNING  10
+
+/**
+ * BIOS Event (index start from 1)
+ *
+ * 0x1: Name
+ * 0x2: Description
+ * 0x3: Category
+ *   0: Unknown
+ *   1: Configuration Change
+ *   2: Button Pressed
+ *   3: Sensor
+ *   4: BIOS Settings
+ * 0x4: Severity
+ *   0: Unknown
+ *   5: OK
+ *  10: Degraded/Warning
+ *  15: Minor Failure
+ *  20: Major Failure
+ *  25: Critical Failure
+ *  30: Non-recoverable Error
+ * 0x5: Status
+ *   0: Unknown
+ *   1: Other
+ *   2: OK
+ *   4: Stressed
+ *   5: Predictive Failure
+ *  10: Stopped
+ *  12: Aborted
+ */
+
 class DYWMI : public YogaWMI
 {
     typedef YogaWMI super;
     OSDeclareDefaultStructors(DYWMI)
 
 private:
+    bool hasSensorEvent {false};
+
+    void processBIOSEvent(OSObject *result);
+    
     UInt8 sensorRange {0};
 
     /**

@@ -7,6 +7,19 @@
 //
 
 #include "DYWMI.hpp"
+
+extern "C"
+{
+    #include <UserNotification/KUNCUserNotifications.h>
+}
+
+enum {
+    kUNCUserNotificationStopAlertLevel = 0,
+    kUNCUserNotificationNoteAlertLevel = 1,
+    kUNCUserNotificationCautionAlertLevel = 2,
+    kUNCUserNotificationPlainAlertLevel = 3
+};
+
 OSDefineMetaClassAndStructors(DYWMI, YogaWMI);
 
 YogaWMI* YogaWMI::withDY(IOService *provider) {
@@ -81,7 +94,12 @@ void DYWMI::setPropertiesGated(OSObject* props) {
 }
 
 void DYWMI::processWMI() {
-    setProperty("Feature", "Sensor");
+    if (YWMI->hasMethod(SENSOR_EVENT_WMI_METHOD, ACPI_WMI_EVENT)) {
+//        hasSensorEvent = true;
+        setProperty("Feature", "Sensor Event");
+    } else {
+        setProperty("Feature", "Sensor");
+    }
     sensorRange = YWMI->getInstanceCount(SENSOR_DATA_WMI_METHOD);
     registerService();
 }
@@ -113,10 +131,87 @@ void DYWMI::checkEvent(const char *cname, UInt32 id) {
     }
 }
 
+void DYWMI::processBIOSEvent(OSObject *result) {
+    if (!hasSensorEvent)
+        return;
+
+    OSArray *arr = OSDynamicCast(OSArray, result);
+    if (!arr) {
+        DebugLog("Unknown event");
+        return;
+    }
+
+    OSString *name = OSDynamicCast(OSString, arr->getObject(0));
+    if (!name) {
+        DebugLog("Unknown event name");
+        return;
+    }
+
+    OSString *desc = OSDynamicCast(OSString, arr->getObject(1));
+    if (!desc) {
+        DebugLog("Unknown event description");
+        return;
+    }
+
+    OSNumber *severity = OSDynamicCast(OSNumber, arr->getObject(3));
+    if (severity == nullptr) {
+        DebugLog("Unknown event severity");
+        return;
+    }
+
+    unsigned int flags = 0;
+    switch (severity->unsigned8BitValue()) {
+        case EVENT_SEVERITY_UNKNOWN:
+            flags = kUNCUserNotificationCautionAlertLevel;
+            break;
+            
+        case EVENT_SEVERITY_OK:
+            flags = kUNCUserNotificationPlainAlertLevel;
+            break;
+            
+        case EVENT_SEVERITY_WARNING:
+            flags = kUNCUserNotificationNoteAlertLevel;
+            break;
+            
+        default:
+            flags = kUNCUserNotificationStopAlertLevel;
+            break;
+    }
+#ifndef DEBUG
+    if (flags < kUNCUserNotificationPlainAlertLevel) {
+#endif
+        AlwaysLog("BIOS Event: %s - %s - %d", name->getCStringNoCopy(), desc->getCStringNoCopy(), severity->unsigned8BitValue());
+        char header[20];
+        strncpy(header, name->getCStringNoCopy(), name->getLength() < 20 ? name->getLength() : 20);
+        char message[40];
+        strncpy(message, desc->getCStringNoCopy(), desc->getLength() < 40 ? desc->getLength() : 40);
+        kern_return_t notificationError;
+        notificationError = KUNCUserNotificationDisplayNotice(flags == kUNCUserNotificationPlainAlertLevel ? 2 : 0,
+                                                              flags,
+                                                              (char *) "",
+                                                              (char *) "",
+                                                              (char *) "",
+                                                              header,
+                                                              message,
+                                                              (char *) "OK");
+        if (notificationError != kIOReturnSuccess)
+            AlwaysLog("Failed to send BIOS Event");
+
+#ifndef DEBUG
+    }
+#endif
+}
+
 void DYWMI::ACPIEvent(UInt32 argument) {
     switch (argument) {
         case kIOACPIMessageDYSensor:
             DebugLog("message: ACPI notification D0");
+            OSObject *result;
+            if (!YWMI->getEventData(argument, &result))
+                AlwaysLog("message: Unknown ACPI notification 0x%04x", argument);
+            else
+                processBIOSEvent(result);
+            OSSafeReleaseNULL(result);
             break;
 
         default:
@@ -124,4 +219,3 @@ void DYWMI::ACPIEvent(UInt32 argument) {
             return;
     }
 }
-
