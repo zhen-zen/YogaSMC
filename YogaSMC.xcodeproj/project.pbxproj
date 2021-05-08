@@ -57,6 +57,10 @@
 		6F7D487B253465DB004074C7 /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F7D487A253465DB004074C7 /* ServiceManagement.framework */; };
 		6F7D488325346671004074C7 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F1C70A3251473E7007D1DFC /* AppKit.framework */; };
 		6F7D488425346677004074C7 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F1C70A3251473E7007D1DFC /* AppKit.framework */; };
+		6F800762264611B200E0590D /* MIHIDD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F800760264611B200E0590D /* MIHIDD.cpp */; };
+		6F800763264611B200E0590D /* MIHIDD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F800760264611B200E0590D /* MIHIDD.cpp */; };
+		6F800764264611B200E0590D /* MIHIDD.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F800761264611B200E0590D /* MIHIDD.hpp */; };
+		6F800765264611B200E0590D /* MIHIDD.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F800761264611B200E0590D /* MIHIDD.hpp */; };
 		6F81FC4425317B1200CFEDF5 /* YogaSMCUserClient.h in Headers */ = {isa = PBXBuildFile; fileRef = 6F81FC4025317AE100CFEDF5 /* YogaSMCUserClient.h */; };
 		6F81FC4825317B1300CFEDF5 /* YogaSMCUserClient.h in Headers */ = {isa = PBXBuildFile; fileRef = 6F81FC4025317AE100CFEDF5 /* YogaSMCUserClient.h */; };
 		6F83587324D0C2B50031512F /* KeyImplementations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F83587124D0C2B50031512F /* KeyImplementations.cpp */; };
@@ -247,6 +251,8 @@
 		6F7D484225344C25004074C7 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		6F7D484B25344C25004074C7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		6F7D487A253465DB004074C7 /* ServiceManagement.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ServiceManagement.framework; path = System/Library/Frameworks/ServiceManagement.framework; sourceTree = SDKROOT; };
+		6F800760264611B200E0590D /* MIHIDD.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MIHIDD.cpp; sourceTree = "<group>"; };
+		6F800761264611B200E0590D /* MIHIDD.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = MIHIDD.hpp; sourceTree = "<group>"; };
 		6F81FC4025317AE100CFEDF5 /* YogaSMCUserClient.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = YogaSMCUserClient.h; sourceTree = "<group>"; };
 		6F83586424D0BFFD0031512F /* Headers */ = {isa = PBXFileReference; lastKnownFileType = text; name = Headers; path = Lilu.kext/Contents/Resources/Headers; sourceTree = SOURCE_ROOT; };
 		6F83586F24D0C0C90031512F /* VirtualSMCSDK */ = {isa = PBXFileReference; lastKnownFileType = text; name = VirtualSMCSDK; path = VirtualSMC.kext/Contents/Resources/VirtualSMCSDK; sourceTree = SOURCE_ROOT; };
@@ -584,6 +590,8 @@
 				6F64A28125A7FA7D00070265 /* DYVPC.cpp */,
 				6F9553B924BA515B00215EBB /* IdeaVPC.hpp */,
 				6F9553B824BA515B00215EBB /* IdeaVPC.cpp */,
+				6F800761264611B200E0590D /* MIHIDD.hpp */,
+				6F800760264611B200E0590D /* MIHIDD.cpp */,
 				6F8B1F902538309F003DD8A8 /* ThinkEvents.h */,
 				6F6CEDA324BC14C2004D553F /* ThinkVPC.hpp */,
 				6F6CEDA224BC14C2004D553F /* ThinkVPC.cpp */,
@@ -619,6 +627,7 @@
 				6F7B5D0024FBC3CC00AA80FF /* ThinkSMC.hpp in Headers */,
 				6F83587424D0C2B50031512F /* KeyImplementations.hpp in Headers */,
 				6F9553BB24BA515B00215EBB /* IdeaVPC.hpp in Headers */,
+				6F800764264611B200E0590D /* MIHIDD.hpp in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -635,6 +644,7 @@
 				6F88067A24EB575F00ACD6C8 /* YogaVPC.hpp in Headers */,
 				6F88067B24EB575F00ACD6C8 /* bmfparser.hpp in Headers */,
 				6F64A28625A7FA7D00070265 /* DYVPC.hpp in Headers */,
+				6F800765264611B200E0590D /* MIHIDD.hpp in Headers */,
 				6F88067C24EB575F00ACD6C8 /* common.h in Headers */,
 				6F88067E24EB575F00ACD6C8 /* YogaWMI.hpp in Headers */,
 				6F88067F24EB575F00ACD6C8 /* ThinkVPC.hpp in Headers */,
@@ -900,6 +910,7 @@
 				6F64A28325A7FA7D00070265 /* DYVPC.cpp in Sources */,
 				6F9553BA24BA515B00215EBB /* IdeaVPC.cpp in Sources */,
 				6F6CEDA424BC14C2004D553F /* ThinkVPC.cpp in Sources */,
+				6F800762264611B200E0590D /* MIHIDD.cpp in Sources */,
 				6F77A23824F4FE59007A127B /* IdeaSMC.cpp in Sources */,
 				6F08ACEA24746B8B00681A63 /* YogaWMI.cpp in Sources */,
 				6F98BCF825532AD300ACFD99 /* YogaHIDD.cpp in Sources */,
@@ -975,6 +986,7 @@
 				6F88068B24EB575F00ACD6C8 /* WMI.cpp in Sources */,
 				6F98BCF925532AD300ACFD99 /* YogaHIDD.cpp in Sources */,
 				6F88068C24EB575F00ACD6C8 /* YogaVPC.cpp in Sources */,
+				6F800763264611B200E0590D /* MIHIDD.cpp in Sources */,
 				6F88068E24EB575F00ACD6C8 /* bmfparser.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
