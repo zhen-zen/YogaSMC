@@ -96,7 +96,7 @@ bool WMI::initialize()
     if (!mDevice)
         return false;
 
-    name = mDevice->getName();
+    iname = mDevice->getName();
     mData = OSDictionary::withCapacity(1);
     mEvent = OSDictionary::withCapacity(1);
     mBMFCandidate = OSArray::withCapacity(1);
@@ -389,7 +389,7 @@ bool WMI::parseBMF(OSDictionary* dict)
 #ifdef DEBUG
     mDevice->setProperty("MOF size", size, sizeof(uint32_t)*8);
 #endif
-    MOF mof(pout, size, mData, name);
+    MOF mof(pout, size, mData, iname);
     mDevice->removeProperty("MOF");
 
     OSObject *result = mof.parse_bmf(guidString->getCStringNoCopy());

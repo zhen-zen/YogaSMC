@@ -223,7 +223,7 @@ IOReturn YogaSMCUserClient::sendNotification(UInt32 event, UInt32 data) {
 bool YogaSMCUserClient::start(IOService *provider) {
     if (!(fProvider = OSDynamicCast(YogaVPC, provider)))
         return false;
-    name = fProvider->getName();
+    iname = fProvider->getName();
     DebugLog("%s", __FUNCTION__);
     return super::start(provider);
 }

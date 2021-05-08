@@ -21,7 +21,7 @@ class YogaSMCUserClient : public IOUserClient {
 
 protected:
     YogaVPC* fProvider;
-    const char* name;
+    const char* iname;
     task_t fTask;
     mach_port_t m_notificationPort;
     SMCNotificationMessage notification;

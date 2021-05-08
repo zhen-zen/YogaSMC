@@ -26,7 +26,7 @@ YogaWMI* YogaWMI::withIdea(IOService *provider) {
 
     OSDictionary *dictionary = OSDictionary::withCapacity(1);
 
-    dev->name = provider->getName();
+    dev->iname = provider->getName();
     dev->YWMI = candidate;
 
     if (!dev->init(dictionary)) {

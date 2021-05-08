@@ -31,7 +31,7 @@ IOService *YogaBaseService::probe(IOService *provider, SInt32 *score)
     if (!super::probe(provider, score))
         return nullptr;
 
-    name = provider->getName();
+    iname = provider->getName();
     return this;
 }
 

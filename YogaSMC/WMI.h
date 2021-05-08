@@ -56,7 +56,7 @@ class WMI
     OSDictionary* mData = {nullptr};
     OSDictionary* mEvent = {nullptr};
     OSArray* mBMFCandidate = {nullptr};
-    const char* name;
+    const char* iname;
 
 public:
     // Constructor

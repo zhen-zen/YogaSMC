@@ -19,7 +19,7 @@ IdeaSMC* IdeaSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) 
     dictionary->setObject("Sensors", drv->conf);
 
     drv->ec = device;
-    drv->name = device->getName();
+    drv->iname = device->getName();
 
     if (!drv->init(dictionary))
         OSSafeReleaseNULL(drv);
