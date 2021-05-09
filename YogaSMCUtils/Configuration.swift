@@ -141,8 +141,8 @@ let thinkEvents: [UInt32: [UInt32: EventDesc]] = [
         optionFlag: EventDesc("BT Discoverable", act: .bluetoothdiscoverable)
     ], // 0x1314
     TP_HKEY_EV_KEYBOARD.rawValue: [0: EventDesc("Keyboard Toggle", act: .keyboard)], // 0x1315
-    TP_HKEY_EV_HOTPLUG_DOCK.rawValue: [0: EventDesc("Docked into Docking Station", display: true)], // 0x4010
-    TP_HKEY_EV_HOTPLUG_UNDOCK.rawValue: [0: EventDesc("Undocked from Docking Station", display: true)], // 0x4011
+    TP_HKEY_EV_HOTPLUG_DOCK.rawValue: [0: EventDesc("Dock Attached", .kDock, display: true)], // 0x4010
+    TP_HKEY_EV_HOTPLUG_UNDOCK.rawValue: [0: EventDesc("Dock Detached", .kUndock, display: true)], // 0x4011
     TP_HKEY_EV_LID_CLOSE.rawValue: [0: EventDesc("LID Close", display: false)], // 0x5001
     TP_HKEY_EV_LID_OPEN.rawValue: [0: EventDesc("LID Open", display: false)], // 0x5002
     TP_HKEY_EV_THM_TABLE_CHANGED.rawValue: [0: EventDesc("Thermal Table Change", display: false)], // 0x6030
