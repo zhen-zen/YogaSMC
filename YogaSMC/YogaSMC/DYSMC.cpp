@@ -192,7 +192,7 @@ void DYSMC::updateEC() {
 
     OSObject *result = nullptr;
 
-    for (UInt8 index = 0; index < sensorCount; ++index) {
+    for (UInt8 index = 0; index < ECSensorBase; ++index) {
         OSSafeReleaseNULL(result);
         if (!wmis->getSensorInfo(sensorIndex[index], &result)) {
             AlwaysLog("Failed to evaluate sensor %d", sensorIndex[index]);
