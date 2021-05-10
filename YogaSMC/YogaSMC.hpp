@@ -24,12 +24,6 @@ class YogaSMC : public YogaBaseService
 private:
     inline virtual bool PMSupport() APPLE_KEXT_OVERRIDE {return true;};
 
-    /**
-     *  Current sensor reading obtained from ACPI
-     */
-    _Atomic(uint32_t) currentSensor[MAX_SENSOR];
-     
-
 protected:
     bool awake {false};
 
@@ -50,6 +44,11 @@ protected:
     };
 
     /**
+     *  Sensors configuration
+     */
+    OSDictionary* conf {nullptr};
+
+    /**
      *  Add available SMC keys
      */
     virtual void addVSMCKey();
@@ -57,12 +56,22 @@ protected:
     /**
      *  ACPI method for sensors
      */
-    const char *sensorMethod[MAX_SENSOR];
+    const char *sensorMethods[MAX_SENSOR];
 
     /**
      *  Enabled sensor count
      */
-    UInt sensorCount {0};
+    UInt8 sensorCount {0};
+
+    /**
+     *  EC sensor base
+     */
+    UInt8 ECSensorBase {0};
+
+    /**
+     *  Current sensor reading obtained from ACPI
+     */
+    _Atomic(uint32_t) currentSensor[MAX_SENSOR];
 
     /**
      *  Poll EC field for sensor data
@@ -79,11 +88,14 @@ protected:
         });
     };
 
+    virtual void setPropertiesGated(OSObject* props);
+
 public:
     virtual bool start(IOService *provider) APPLE_KEXT_OVERRIDE;
     virtual void stop(IOService *provider) APPLE_KEXT_OVERRIDE;
 
     virtual IOReturn setPowerState(unsigned long powerStateOrdinal, IOService * whatDevice) APPLE_KEXT_OVERRIDE;
+    virtual IOReturn setProperties(OSObject* props) APPLE_KEXT_OVERRIDE;
 
     static YogaSMC *withDevice(IOService *provider, IOACPIPlatformDevice *device);
 
@@ -96,11 +108,6 @@ public:
      *  @param notifier  created notifier
      */
     static bool vsmcNotificationHandler(void *sensors, void *refCon, IOService *vsmc, IONotifier *notifier);
-
-    /**
-     *  Sensors configuration
-     */
-    OSDictionary* conf {nullptr};
 };
 
 #endif /* YogaSMC_hpp */

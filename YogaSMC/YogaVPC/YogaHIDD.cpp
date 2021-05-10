@@ -45,6 +45,8 @@ bool YogaHIDD::initDSM() {
 }
 
 bool YogaHIDD::initVPC() {
+    super::initVPC();
+
     if (!initDSM())
         AlwaysLog("Failed to obtain valid fn mask, evaluating methods directly");
 

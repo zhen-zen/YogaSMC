@@ -14,10 +14,6 @@
 #include "YogaBaseService.hpp"
 #include "YogaSMCUserClientPrivate.hpp"
 
-#ifndef ALTER
-#include "YogaSMC.hpp"
-#endif
-
 class YogaSMCUserClient;
 class YogaVPC : public YogaBaseService
 {
@@ -72,7 +68,6 @@ private:
      */
     bool dumpECOffset(UInt32 value);
 
-    
     /**
      *  Set DYTC mode
      *
@@ -119,19 +114,25 @@ protected:
      */
     inline virtual IOService* initWMI(IOACPIPlatformDevice *provider) {return nullptr;};
 
+    /**
+     *  Examine WMI
+     *
+     *  @param provider service provider
+     *
+     *  @return true if success
+     */
+    inline virtual bool examineWMI(IOService *provider) {return true;};
+
 #ifndef ALTER
     /**
      *  SMC service
      */
-    YogaSMC *smc;
+    IOService *smc;
 
     /**
      *  Initialize SMC
      */
-    inline virtual void initSMC() {
-        smc = YogaSMC::withDevice(this, ec);
-        smc->conf = OSDynamicCast(OSDictionary, getProperty("Sensors"));
-    };
+    virtual IOService* initSMC();
 #endif
     /**
      *  Initialize VPC EC, get config and update status
@@ -141,9 +142,20 @@ protected:
     virtual bool initVPC();
 
     /**
-     *  Update VPC EC status
+     *  Probe VPC
+     *
+     *  @param provider service provider
+     *
+     *  @return true if success
      */
-    inline virtual void updateVPC() {return;};
+    inline virtual bool probeVPC(IOService *provider) {return true;};
+
+    /**
+     *  Update VPC EC status
+     *
+     *  @param event Event ID
+     */
+    inline virtual void updateVPC(UInt32 event=0) {return;};
 
     /**
      *  Update all status
@@ -197,6 +209,13 @@ protected:
      *  @return true if success
      */
     inline virtual bool setBacklight(UInt32 level) {return true;};
+
+    /**
+     *  Notify battery on conservation mode change
+     *
+     *  @return true if success
+     */
+    bool notifyBattery();
 
     /**
      *  DYTC capability, will be update on init

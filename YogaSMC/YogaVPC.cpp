@@ -8,6 +8,9 @@
 //
 
 #include "YogaVPC.hpp"
+#ifndef ALTER
+#include "YogaSMC.hpp"
+#endif
 
 OSDefineMetaClassAndStructors(YogaVPC, YogaBaseService);
 
@@ -16,18 +19,25 @@ IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
     if (!super::probe(provider, score))
         return nullptr;
  
+    if (!probeVPC(provider))
+        return nullptr;
+ 
     DebugLog("Probing");
 
-    if ((vpc = OSDynamicCast(IOACPIPlatformDevice, provider))) {
-        IORegistryEntry* parent = vpc->getParentEntry(gIOACPIPlane);
-        auto pnp = OSString::withCString(PnpDeviceIdEC);
-        if (parent->compareName(pnp))
-            ec = OSDynamicCast(IOACPIPlatformDevice, parent);
-        pnp->release();
-    }
-
-    if (!ec && !findPNP(PnpDeviceIdEC, &ec))
+    vpc = OSDynamicCast(IOACPIPlatformDevice, provider);
+    if (!vpc)
         return nullptr;
+
+    auto pnp = OSString::withCString(PnpDeviceIdEC);
+    ec = OSDynamicCast(IOACPIPlatformDevice, vpc->getParentEntry(gIOACPIPlane));
+    if (!(ec && ec->IORegistryEntry::compareName(pnp)))
+        findPNP(PnpDeviceIdEC, &ec);
+    pnp->release();
+
+    if (!ec) {
+        AlwaysLog("Failed to find EC");
+        return nullptr;
+    }
 
     auto iterator = IORegistryIterator::iterateOver(gIOACPIPlane, kIORegistryIterateRecursively);
     if (!iterator) {
@@ -41,10 +51,19 @@ IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
         while (auto entry = iterator->getNextObject()) {
             if (entry->compareName(pnp) &&
                 (dev = OSDynamicCast(IOACPIPlatformDevice, entry))) {
-                if (strncmp(dev->getName(), "WTBT", sizeof("WTBT")) == 0) {
-                    DebugLog("Skip Thunderbolt interface");
+                if (dev == vpc) {
+                    DebugLog("Skip VPC interface");
                     continue;
                 }
+                OSObject *uid = nullptr;
+                if (dev->evaluateObject("_UID", &uid) == kIOReturnSuccess) {
+                    OSString *str = OSDynamicCast(OSString, uid);
+                    if (str && str->isEqualTo("TBFP")) {
+                        DebugLog("Skip Thunderbolt interface");
+                        continue;
+                    }
+                }
+                OSSafeReleaseNULL(uid);
                 if (auto wmi = initWMI(dev)) {
                     DebugLog("WMI available at %s", dev->getName());
                     WMICollection->setObject(wmi);
@@ -65,7 +84,7 @@ IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
 
 #ifndef ALTER
     if (getProperty("Sensors") != nullptr)
-        initSMC();
+        smc = initSMC();
 #endif
     return this;
 }
@@ -86,17 +105,20 @@ bool YogaVPC::start(IOService *provider) {
         for (int i=WMICollection->getCount()-1; i >= 0; i--) {
             IOService *wmi = OSDynamicCast(IOService, WMICollection->getObject(i));
             IOService *prov = OSDynamicCast(IOService, WMIProvCollection->getObject(i));
-            if (!wmi->start(prov)) {
+            if (!wmi->attach(prov) || !wmi->start(prov) || !examineWMI(wmi)) {
                 AlwaysLog("Failed to start WMI instance on %s", prov->getName());
-                wmi->detach(prov);
                 WMICollection->removeObject(wmi);
                 WMIProvCollection->removeObject(prov);
             }
         }
     }
 #ifndef ALTER
-    if (smc)
-        smc->start(this);
+    if (smc) {
+        if (!smc->attach(this) || !smc->start(this)) {
+            AlwaysLog("Failed to start SMC instance");
+            OSSafeReleaseNULL(smc);
+        }
+    }
 #endif
     setProperty(kDeliverNotifications, kOSBooleanTrue);
     registerService();
@@ -141,7 +163,12 @@ bool YogaVPC::exitVPC() {
 void YogaVPC::stop(IOService *provider) {
     DebugLog("Stopping");
     exitVPC();
-
+#ifndef ALTER
+    if (smc) {
+        smc->stop(this);
+        smc->detach(this);
+    }
+#endif
     if (WMICollection) {
         for (int i= WMICollection->getCount()-1; i >= 0; i--) {
             IOService *wmi = OSDynamicCast(IOService, WMICollection->getObject(i));
@@ -153,12 +180,6 @@ void YogaVPC::stop(IOService *provider) {
         OSSafeReleaseNULL(WMIProvCollection);
     }
 
-#ifndef ALTER
-    if (smc) {
-        smc->stop(this);
-        smc->detach(this);
-    }
-#endif
     super::stop(provider);
 }
 
@@ -187,11 +208,10 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
                 OSBoolean *value;
                 getPropertyBoolean(clamshellPrompt);
                 updateClamshell(false);
-                if (value->getValue() == clamshellMode) {
+                if (value->getValue() == clamshellMode)
                     DebugLog(valueMatched, clamshellPrompt, clamshellMode);
-                } else {
+                else
                     toggleClamshell();
-                }
             } else if (key->isEqualTo(backlightPrompt)) {
                 OSNumber *value;
                 getPropertyNumber(backlightPrompt);
@@ -215,7 +235,7 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
                     setProperty(autoBacklightPrompt, automaticBacklightMode, 8);
                 }
             } else if (key->isEqualTo("ReadECOffset")) {
-                if (!(ECAccessCap & BIT(0))) {
+                if (!(ECAccessCap & ECReadCap)) {
                     AlwaysLog(notSupported, "EC Read");
                     continue;
                 }
@@ -348,7 +368,10 @@ bool YogaVPC::toggleClamshell() {
         OSNumber::withNumber(!clamshellMode, 32)
     };
 
-    if (vpc->evaluateInteger(setClamshellMode, &result, params, 1) != kIOReturnSuccess || result != 0) {
+    IOReturn ret = vpc->evaluateInteger(setClamshellMode, &result, params, 1);
+    params[0]->release();
+
+    if (ret != kIOReturnSuccess || result != 0) {
         AlwaysLog(toggleFailure, clamshellPrompt);
         return false;
     }
@@ -360,15 +383,22 @@ bool YogaVPC::toggleClamshell() {
     return true;
 }
 
-IOReturn YogaVPC::setPowerState(unsigned long powerState, IOService *whatDevice){
-    DebugLog("powerState %ld : %s", powerState, powerState ? "on" : "off");
+bool YogaVPC::notifyBattery() {
+    if (ec->validateObject("NBAT") != kIOReturnSuccess ||
+        ec->evaluateObject("NBAT") != kIOReturnSuccess ) {
+        DebugLog(toggleFailure, "NBAT");
+        return false;
+    }
+    return true;
+}
 
-    if (whatDevice != this)
+IOReturn YogaVPC::setPowerState(unsigned long powerStateOrdinal, IOService * whatDevice) {
+    if (super::setPowerState(powerStateOrdinal, whatDevice) != kIOPMAckImplied)
         return kIOReturnInvalid;
 
     if (backlightCap && (automaticBacklightMode & BIT(0))) {
         updateBacklight();
-        if (powerState == 0) {
+        if (powerStateOrdinal == 0) {
             backlightLevelSaved = backlightLevel;
             if (backlightLevel)
                 setBacklight(0);
@@ -392,7 +422,10 @@ bool YogaVPC::DYTCCommand(DYTC_CMD command, DYTC_RESULT* result, UInt8 ICFunc, U
         OSNumber::withNumber(command.raw, 32)
     };
 
-    if (vpc->evaluateInteger(setThermalControl, &(result->raw), params, 1) != kIOReturnSuccess) {
+    IOReturn ret = vpc->evaluateInteger(setThermalControl, &(result->raw), params, 1);
+    params[0]->release();
+
+    if (ret != kIOReturnSuccess) {
         AlwaysLog(toggleFailure, DYTCPrompt);
         DYTCCap = false;
         setProperty("DYTC", false);
@@ -697,3 +730,8 @@ bool YogaVPC::dumpECOffset(UInt32 value) {
     return ret;
 }
 
+#ifndef ALTER
+IOService* YogaVPC::initSMC() {
+    return YogaSMC::withDevice(this, ec);
+};
+#endif

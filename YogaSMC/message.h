@@ -10,7 +10,6 @@
 #ifndef message_h
 #define message_h
 
-#define kIOACPIMessageD0 0xd0
 #define kIOACPIMessageReserved 0x80
 
 #define PnpDeviceIdEC       "PNP0C09"
@@ -25,6 +24,7 @@ static IOPMPowerState IOPMPowerStates[kIOPMNumberPowerStates] = {
 
 #define kDeliverNotifications   "RM,deliverNotifications"
 
+#define alwaysOnUSBPrompt "AlwaysOnUSBMode"
 #define autoBacklightPrompt "AutoBacklight"
 #define batteryPrompt "Battery"
 #define backlightPrompt "BacklightLevel"
@@ -38,9 +38,11 @@ static IOPMPowerState IOPMPowerStates[kIOPMNumberPowerStates] = {
 #define ECLockPrompt "ECLock"
 #define FnKeyPrompt "FnlockMode"
 #define fanControlPrompt "FanControl"
-#define KeyboardPrompt "KeyboardMode"
+#define fanSpeedPrompt "FanSpeed"
+#define keyboardPrompt "KeyboardMode"
 #define HotKeyPrompt "HotKey"
 #define LEDPrompt "LED"
+#define localePrompt "KeyboardLocale"
 #define mutePrompt "Mute"
 #define muteLEDPrompt "MuteLED"
 #define muteSupportPrompt "MuteSupport"
@@ -51,6 +53,7 @@ static IOPMPowerState IOPMPowerStates[kIOPMNumberPowerStates] = {
 #define resetPrompt "reset"
 #define writeECPrompt "WriteEC"
 #define updatePrompt "Update"
+#define updateSensorPrompt "UpdateSensor"
 
 #define initFailure "%s evaluation failed, exiting"
 #define updateFailure "%s evaluation failed"

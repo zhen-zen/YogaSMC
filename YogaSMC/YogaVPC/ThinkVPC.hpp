@@ -11,9 +11,6 @@
 #define ThinkVPC_hpp
 
 #include "YogaVPC.hpp"
-#ifndef ALTER
-#include "ThinkSMC.hpp"
-#endif
 
 // from linux/drivers/platform/x86/ideapad-laptop.c and ibm-acpi
 
@@ -106,6 +103,9 @@ private:
     static constexpr const char *getKBDBacklightLevel  = "MLCG";
     static constexpr const char *setKBDBacklightLevel  = "MLCS";
 
+    static constexpr const char *getKBDLang            = "GSKL";
+    static constexpr const char *setKBDLang            = "SSKL";
+
     static constexpr const char *getAudioMutestatus    = "HAUM"; // EC
     static constexpr const char *setAudioMutestatus    = "SAUM";
     static constexpr const char *getAudioMuteLED       = "GSMS";
@@ -166,13 +166,16 @@ private:
 
     UInt32 thermalstate {0};
 
-    bool LEDsupport {false};
+    bool LEDSupport {false};
 
     UInt32 batnum {BAT_ANY};
 
     bool ConservationMode {false};
 
     OSDictionary *KBDProperty {nullptr};
+
+    bool yogaModeSupport {false};
+
     /**
      *  Set single notification mask
      *
@@ -204,18 +207,20 @@ private:
      *
      *  @return mode
      */
-    UInt32 getYogaMode();
+    UInt32 updateYogaMode();
     
-    void updateVPC() APPLE_KEXT_OVERRIDE;
+    /**
+     *  Get thermal mode
+     *
+     *  @return mode
+     */
+    UInt32 updateThermalMode();
+
+    void updateVPC(UInt32 event=0) APPLE_KEXT_OVERRIDE;
     bool exitVPC() APPLE_KEXT_OVERRIDE;
     
 #ifndef ALTER
-    /**
-     *  Initialize SMC
-     *
-     *  @return true if success
-     */
-    inline void initSMC() APPLE_KEXT_OVERRIDE {smc = ThinkSMC::withDevice(this, ec);};
+    IOService* initSMC() APPLE_KEXT_OVERRIDE;
 #endif
 
     bool updateBacklight(bool update=false) APPLE_KEXT_OVERRIDE;
@@ -385,9 +390,27 @@ private:
      */
     bool setSSTStatus(UInt32 value);
 
+    /**
+     *  Update keyboard locale
+     *
+     *  @param update only update internal status when false
+     *
+     *  @return true if success
+     */
+    bool updateKBDLocale(bool update=true);
+
+    /**
+     *  Set keyboard locale
+     *
+     *  @param value locale
+     *
+     *  @return true if success
+     */
+    bool setKBDLocale(UInt32 value);
+
 public:
     IOReturn message(UInt32 type, IOService *provider, void *argument) APPLE_KEXT_OVERRIDE;
-    IOReturn setPowerState(unsigned long powerState, IOService * whatDevice) APPLE_KEXT_OVERRIDE;
+    IOReturn setPowerState(unsigned long powerStateOrdinal, IOService * whatDevice) APPLE_KEXT_OVERRIDE;
 };
 
 #endif /* ThinkVPC_hpp */

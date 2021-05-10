@@ -9,6 +9,9 @@
 
 #include "ThinkEvents.h"
 #include "ThinkVPC.hpp"
+#ifndef ALTER
+#include "ThinkSMC.hpp"
+#endif
 
 OSDefineMetaClassAndStructors(ThinkVPC, YogaVPC);
 
@@ -33,8 +36,9 @@ void ThinkVPC::updateAll() {
     updateMutestatus();
     updateMuteLEDStatus();
     updateMicMuteLEDStatus();
+    updateKBDLocale();
     updateVPC();
-    setMicMuteLEDStatus(0);
+    updateYogaMode();
 }
 
 bool ThinkVPC::updateConservation(const char * method, OSDictionary *bat, bool update) {
@@ -46,6 +50,7 @@ bool ThinkVPC::updateConservation(const char * method, OSDictionary *bat, bool u
 
     IOReturn ret = vpc->evaluateInteger(method, &result, params, 1);
     params[0]->release();
+
     if (ret != kIOReturnSuccess) {
         AlwaysLog(updateFailure, method);
         return false;
@@ -69,6 +74,7 @@ bool ThinkVPC::setConservation(const char * method, UInt8 value) {
 
     IOReturn ret = vpc->evaluateInteger(method, &result, params, 1);
     params[0]->release();
+
     if (ret != kIOReturnSuccess) {
         AlwaysLog(updateFailure, method);
         return false;
@@ -108,6 +114,7 @@ bool ThinkVPC::setMutestatus(UInt32 value) {
 
     IOReturn ret = vpc->evaluateInteger(setAudioMutestatus, &result, params, 1);
     params[0]->release();
+
     if (ret != kIOReturnSuccess) {
         AlwaysLog(toggleFailure, __func__);
         return false;
@@ -127,6 +134,7 @@ void ThinkVPC::getNotificationMask(UInt32 index, OSDictionary *KBDPresent) {
 
     IOReturn ret = vpc->evaluateInteger(getHKEYmask, &result, params, 1);
     params[0]->release();
+
     if (ret != kIOReturnSuccess) {
         AlwaysLog(toggleFailure, __func__);
         return;
@@ -156,9 +164,11 @@ bool ThinkVPC::setNotificationMask(UInt32 i, UInt32 all_mask, UInt32 offset, boo
         OSNumber::withNumber(i + offset + 1, 32),
         OSNumber::withNumber(enable, 32),
     };
+
     IOReturn ret = vpc->evaluateObject(setHKEYmask, nullptr, params, 2);
     params[0]->release();
     params[1]->release();
+
     if (ret != kIOReturnSuccess) {
         AlwaysLog("set HKEY mask BIT %x failed", i);
         return false;
@@ -221,6 +231,7 @@ bool ThinkVPC::initVPC() {
 
     IOReturn ret = vpc->evaluateInteger(getKBDBacklightLevel, &state, params, 1);
     params[0]->release();
+
     if (ret == kIOReturnSuccess)
         backlightCap = BIT(KBD_BACKLIGHT_CAP_BIT) & state;
 
@@ -229,11 +240,16 @@ bool ThinkVPC::initVPC() {
 
     setProperty(autoBacklightPrompt, automaticBacklightMode, 8);
     if (ec->validateObject(setLED) == kIOReturnSuccess) {
-        LEDsupport = true;
+        LEDSupport = true;
         setProperty("LEDSupport", true);
     } else {
         setProperty("LEDSupport", false);
     }
+
+    if (vpc->validateObject(getMultiModeState) == kIOReturnSuccess)
+        yogaModeSupport = true;
+
+    setMicMuteLEDStatus(0);
     return true;
 }
 
@@ -257,6 +273,7 @@ bool ThinkVPC::updateAdaptiveKBD(int arg) {
 
         IOReturn ret = vpc->evaluateInteger(getHKEYAdaptive, &result, params, 1);
         params[0]->release();
+
         if (ret != kIOReturnSuccess) {
             AlwaysLog(updateFailure, __func__);
             return false;
@@ -366,24 +383,15 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 OSNumber *value;
                 getPropertyNumber("setCMPeakShiftState");
                 setConservation(setCMPeakShiftState, value->unsigned8BitValue());
-            } else if (key->isEqualTo("GSKL")) {
-                OSNumber *value;
-                getPropertyNumber("GSKL");
-                UInt32 result;
-                OSObject* params[1] = {
-                    value
-                };
-                ret = vpc->evaluateInteger("GSKL", &result, params, 1);
-                if (ret == kIOReturnSuccess)
-                    DebugLog(updateSuccess, "GSKL", result);
-                else
-                    AlwaysLog("%s evaluation failed 0x%x", "GSKL", ret);
             } else if (key->isEqualTo("GHSL")) {
                 UInt32 result;
                 OSObject* params[1] = {
                     OSNumber::withNumber(0ULL, 32)
                 };
+
                 ret = vpc->evaluateInteger("GHKL", &result, params, 1);
+                params[0]->release();
+
                 if (ret == kIOReturnSuccess)
                     DebugLog(updateSuccess, "GHSL", result);
                 else
@@ -396,6 +404,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                     OSObject* params[1] = {
                         value
                     };
+
                     ret = vpc->evaluateObject("CFSP", nullptr, params, 1);
                     if (ret == kIOReturnSuccess)
                         DebugLog(updateSuccess, "CFSP", value->unsigned8BitValue());
@@ -409,6 +418,10 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 else
                     AlwaysLog("%s evaluation failed 0x%x", "HFSP", ret);
 #ifdef DEBUG
+            } else if (key->isEqualTo(localePrompt)) {
+                OSNumber *value;
+                getPropertyNumber(localePrompt);
+                setKBDLocale(value->unsigned16BitValue());
             } else if (key->isEqualTo("CFNI")) {
                 OSNumber *value;
                 getPropertyNumber("CFNI");
@@ -416,6 +429,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                     OSObject* params[1] = {
                         value
                     };
+
                     ret = vpc->evaluateObject("CFNI", nullptr, params, 1);
                     if (ret == kIOReturnSuccess)
                         DebugLog(updateSuccess, "CFNI", value->unsigned8BitValue());
@@ -434,6 +448,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 OSObject* params[1] = {
                     value
                 };
+
                 ret = vpc->evaluateObject("CRST", nullptr, params, 1);
                 if (ret == kIOReturnSuccess)
                     DebugLog(updateSuccess, "CRST", value->unsigned8BitValue());
@@ -470,23 +485,33 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 getPropertyNumber(SSTPrompt);
                 setSSTStatus(value->unsigned32BitValue());
             } else if (key->isEqualTo(LEDPrompt)) {
-                if (!LEDsupport) {
+                if (!LEDSupport) {
                     AlwaysLog(notSupported, LEDPrompt);
                     continue;
                 }
                 OSNumber *value;
                 getPropertyNumber(LEDPrompt);
-                if (value->unsigned32BitValue() > 0xff) {
+                if (value->unsigned32BitValue() > 0xff)
                     AlwaysLog(valueInvalid, LEDPrompt);
-                    continue;
-                } else {
+                else
                     setLEDStatus(value->unsigned8BitValue());
-                }
             } else if (key->isEqualTo(fanControlPrompt)) {
                 OSNumber *value;
                 getPropertyNumber(fanControlPrompt);
 //                setFanControl(value->unsigned32BitValue());
                 updateFanControl(value->unsigned32BitValue());
+            } else if (key->isEqualTo(fanSpeedPrompt)) {
+                OSNumber *value;
+                getPropertyNumber(fanSpeedPrompt);
+                UInt8 speed = value->unsigned8BitValue();
+                if (speed > 7) {
+                    speed = speed < 0x80 ? 0x47 : 0x84;
+                }
+                ret = method_we1b(0x2f, speed);
+                if (ret == kIOReturnSuccess)
+                    DebugLog(updateSuccess, fanSpeedPrompt, speed);
+                else
+                    AlwaysLog("%s update failed 0x%x", fanSpeedPrompt, ret);
             } else if (key->isEqualTo(updatePrompt)) {
                 updateAll();
                 super::updateAll();
@@ -728,14 +753,46 @@ IOReturn ThinkVPC::message(UInt32 type, IOService *provider, void *argument) {
     return kIOReturnSuccess;
 }
 
-UInt32 ThinkVPC::getYogaMode() {
+UInt32 ThinkVPC::updateThermalMode() {
     UInt32 mode;
-    if (vpc->evaluateInteger(getMultiModeState, &mode) != kIOReturnSuccess) {
+
+    OSObject* params[] = {
+        OSNumber::withNumber(0ULL, 32)
+    };
+
+    IOReturn ret = vpc->evaluateInteger(getThermalModeState, &mode, params, 1);
+    params[0]->release();
+
+    return (ret == kIOReturnSuccess ? mode : 0);
+}
+
+UInt32 ThinkVPC::updateYogaMode() {
+    if (!yogaModeSupport)
+        return 0;
+
+    UInt32 mode;
+
+    OSObject* params[] = {
+        OSNumber::withNumber(0ULL, 32)
+    };
+
+    IOReturn ret = vpc->evaluateInteger(getMultiModeState, &mode, params, 1);
+    params[0]->release();
+
+    if (ret != kIOReturnSuccess) {
         AlwaysLog("failed to evaluate tablet mode");
         return 0;
     }
 
+#ifdef DEBUG
+    UInt32 rawMode;
+    if (ec->evaluateInteger("CMMD", &rawMode) != kIOReturnSuccess)
+        AlwaysLog("failed to evaluate raw tablet mode");
+    else
+        DebugLog("tablet mode: %x, raw: %x", mode, rawMode);
+#else
     DebugLog("tablet mode: %x", mode);
+#endif
     if (!validModes) {
         UInt16 type = mode >> 16;
         setProperty("MultiModeType", type, 16);
@@ -799,7 +856,10 @@ UInt32 ThinkVPC::getYogaMode() {
 //            else
 //                mode = TP_ACPI_MULTI_MODE_STAND;
             setTopCase(false);
-            setProperty("YogaMode", "Stand");
+            if ((mode >> 16) == 1)
+                setProperty("YogaMode", "Stand/Tent");
+            else
+                setProperty("YogaMode", "Stand");
             break;
         case 5:
 //            mode = TP_ACPI_MULTI_MODE_TENT;
@@ -809,13 +869,14 @@ UInt32 ThinkVPC::getYogaMode() {
         default:
 //            if (type == 5 && value == 0xffff)
 //                DebugLog("Multi mode status is undetected, assuming laptop");
+            setTopCase(true);
             AlwaysLog("unknown tablet mode: %x", mode);
             break;
     }
     return data;
 }
 
-void ThinkVPC::updateVPC() {
+void ThinkVPC::updateVPC(UInt32 event) {
     UInt32 result;
     if (vpc->evaluateInteger(getHKEYevent, &result) != kIOReturnSuccess) {
         AlwaysLog(toggleFailure, HotKeyPrompt);
@@ -920,7 +981,11 @@ void ThinkVPC::updateVPC() {
                     break;
 
                 case TP_HKEY_EV_THM_TRANSFM_CHANGED:
-                    AlwaysLog("Thermal Transformation changed (GMTS)");
+                    data = updateThermalMode();
+                    if (data & 0x00010000)
+                        DebugLog("Thermal Transformation changed: 0x%x", data);
+                    else
+                        AlwaysLog("Thermal Transformation changed: failed to evaluate GMTS");
                     break;
 
                 case TP_HKEY_EV_ALARM_BAT_HOT:
@@ -963,7 +1028,7 @@ void ThinkVPC::updateVPC() {
                     break;
 
                 case TP_HKEY_EV_TABLET_CHANGED:
-                    data = getYogaMode();
+                    data = updateYogaMode();
                     break;
 
                 case TP_HKEY_EV_PALM_DETECTED:
@@ -1097,7 +1162,7 @@ bool ThinkVPC::setSSTStatus(UInt32 value) {
         DebugLog(toggleSuccess, "SST Proxy", value, property[value]);
         return true;
     }
-    if (!LEDsupport)
+    if (!LEDSupport)
         return true;
     // Replicate of _SI._SST
     // 0x0: power
@@ -1150,11 +1215,61 @@ bool ThinkVPC::setSSTStatus(UInt32 value) {
     return status;
 }
 
-IOReturn ThinkVPC::setPowerState(unsigned long powerState, IOService *whatDevice){
-    if (super::setPowerState(powerState, whatDevice) != kIOPMAckImplied)
+bool ThinkVPC::updateKBDLocale(bool update) {
+    IOReturn ret;
+
+    ret = vpc->validateObject("GSKL");
+    if (ret == kIOReturnNoDevice) {
+        return true;
+    } else if (ret != kIOReturnSuccess) {
+        AlwaysLog(updateFailure, localePrompt);
+        return false;
+    }
+
+    UInt32 locale;
+    OSObject* params[] = {
+        OSNumber::withNumber(0x02000000, 32)
+    };
+
+    ret = vpc->evaluateInteger(getKBDLang, &locale, params, 1);
+    params[0]->release();
+    if (ret != kIOReturnSuccess) {
+        AlwaysLog(updateFailure, localePrompt);
+        return false;
+    }
+
+    if (update)
+        DebugLog(updateSuccess, localePrompt, locale);
+    setProperty(localePrompt, locale, 32);
+
+    return true;
+
+}
+
+bool ThinkVPC::setKBDLocale(UInt32 value) {
+    UInt32 result;
+
+    OSObject* params[] = {
+        OSNumber::withNumber(value | 1 << 24, 32)
+    };
+
+    IOReturn ret = vpc->evaluateInteger(setKBDLang, &result, params, 1);
+    params[0]->release();
+    if (ret != kIOReturnSuccess) {
+        AlwaysLog(toggleFailure, localePrompt);
+        return false;
+    }
+
+    DebugLog(toggleSuccess, localePrompt, value, "-");
+    setProperty(localePrompt, value, 32);
+    return true;
+}
+
+IOReturn ThinkVPC::setPowerState(unsigned long powerStateOrdinal, IOService * whatDevice) {
+    if (super::setPowerState(powerStateOrdinal, whatDevice) != kIOPMAckImplied)
         return kIOReturnInvalid;
 
-    if (powerState == 0) {
+    if (powerStateOrdinal == 0) {
         if (automaticBacklightMode & BIT(2))
             setSSTStatus(3);
         if ((automaticBacklightMode & BIT(3))) {
@@ -1179,3 +1294,8 @@ IOReturn ThinkVPC::setPowerState(unsigned long powerState, IOService *whatDevice
     return kIOPMAckImplied;
 }
 
+#ifndef ALTER
+IOService* ThinkVPC::initSMC() {
+    return ThinkSMC::withDevice(this, ec);
+};
+#endif

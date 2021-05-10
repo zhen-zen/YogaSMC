@@ -17,13 +17,16 @@
 #endif
 
 #ifdef DEBUG
-#define DebugLog(str, ...) do { IOLog("YSMC - Debug: %s::%s " str "\n", getName(), name ? name : "(null)", ## __VA_ARGS__); } while (0)
+#define DebugLog(str, ...) do { IOLog("YSMC - Debug: %s::%s " str "\n", getName(), iname ? iname : "(null)", ## __VA_ARGS__); } while (0)
 #else
 #define DebugLog(str, ...) do { } while (0)
 #endif
-#define AlwaysLog(str, ...) do { IOLog("YSMC - Info: %s::%s " str "\n", getName(), name ? name : "(null)", ## __VA_ARGS__); } while (0)
+#define AlwaysLog(str, ...) do { IOLog("YSMC - Info: %s::%s " str "\n", getName(), iname ? iname : "(null)", ## __VA_ARGS__); } while (0)
 
 #define BIT(nr) (1U << (nr))
+
+#define ECReadCap    BIT(0)
+#define ECWriteCap   BIT(1)
 
 #define getPropertyBoolean(prompt)     \
     do { \

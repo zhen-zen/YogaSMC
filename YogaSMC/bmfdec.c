@@ -22,7 +22,6 @@
 //#include <errno.h>
 //#include <unistd.h>
 
-#include "bmfdec.h"
 #include <IOKit/IOLib.h>
 
 #define INLINE static inline

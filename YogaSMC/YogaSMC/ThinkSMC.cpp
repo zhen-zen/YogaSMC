@@ -12,6 +12,9 @@
 OSDefineMetaClassAndStructors(ThinkSMC, YogaSMC);
 
 ThinkSMC* ThinkSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) {
+    if (!device)
+        return nullptr;
+
     ThinkSMC* drv = OSTypeAlloc(ThinkSMC);
 
     drv->conf = OSDictionary::withDictionary(OSDynamicCast(OSDictionary, provider->getProperty("Sensors")));
@@ -20,12 +23,10 @@ ThinkSMC* ThinkSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device
     dictionary->setObject("Sensors", drv->conf);
 
     drv->ec = device;
-    drv->name = device->getName();
+    drv->iname = device->getName();
 
-    if (!drv->init(dictionary) ||
-        !drv->attach(provider)) {
+    if (!drv->init(dictionary))
         OSSafeReleaseNULL(drv);
-    }
 
     dictionary->release();
     return drv;
@@ -37,9 +38,12 @@ void ThinkSMC::addVSMCKey() {
     VirtualSMCAPI::addKey(KeyCH0B, vsmcPlugin.data, VirtualSMCAPI::valueWithData(nullptr, 1, SmcKeyTypeHex, new CH0B, SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_WRITE));
 
     VirtualSMCAPI::addKey(KeyFNum, vsmcPlugin.data, VirtualSMCAPI::valueWithUint8(dualFan ? 2 : 1, nullptr, SMC_KEY_ATTRIBUTE_CONST | SMC_KEY_ATTRIBUTE_READ));
-    VirtualSMCAPI::addKey(KeyF0Ac(0), vsmcPlugin.data, VirtualSMCAPI::valueWithFp(0, SmcKeyTypeFpe2, new atomicFpKey(&fanSpeed[0])));
-    if (dualFan)
-        VirtualSMCAPI::addKey(KeyF0Ac(1), vsmcPlugin.data, VirtualSMCAPI::valueWithFp(0, SmcKeyTypeFpe2, new atomicFpKey(&fanSpeed[1])));
+    VirtualSMCAPI::addKey(KeyF0Ac(0), vsmcPlugin.data, VirtualSMCAPI::valueWithFp(0, SmcKeyTypeFpe2, new atomicFpKey(&currentSensor[0])));
+    ++sensorCount;
+    if (dualFan) {
+        VirtualSMCAPI::addKey(KeyF0Ac(1), vsmcPlugin.data, VirtualSMCAPI::valueWithFp(0, SmcKeyTypeFpe2, new atomicFpKey(&currentSensor[1])));
+        ++sensorCount;
+    }
     setProperty("Dual fan", dualFan);
     super::addVSMCKey();
 }
@@ -47,22 +51,23 @@ void ThinkSMC::addVSMCKey() {
 void ThinkSMC::updateEC() {
     if (!awake)
         return;
-    if (!(ECAccessCap & BIT(0))) {
-        super::updateEC();
-        return;
-    }
 
+    if (ECAccessCap & ECReadCap)
+        updateECFan();
+
+    super::updateEC();
+}
+
+void ThinkSMC::updateECFan() {
     UInt8 lo, hi;
     if (method_re1b(0x84, &lo) == kIOReturnSuccess &&
         method_re1b(0x85, &hi) == kIOReturnSuccess) {
         UInt16 result = (hi << 8) | lo;
-        atomic_store_explicit(&fanSpeed[0], result, memory_order_release);
+        atomic_store_explicit(&currentSensor[0], result, memory_order_release);
     }
 
-    if (!dualFan) {
-        super::updateEC();
+    if (!(ECAccessCap & ECWriteCap) || !dualFan)
         return;
-    }
 
     UInt8 select;
     if (method_re1b(0x84, &select) == kIOReturnSuccess) {
@@ -74,7 +79,7 @@ void ThinkSMC::updateEC() {
             method_re1b(0x84, &lo) == kIOReturnSuccess &&
             method_re1b(0x85, &hi) == kIOReturnSuccess) {
             UInt16 result = (hi << 8) | lo;
-            atomic_store_explicit(&fanSpeed[1], result, memory_order_release);
+            atomic_store_explicit(&currentSensor[1], result, memory_order_release);
             if ((select & 0x1) != 0)
                 select &= 0xfe;
             else
@@ -87,5 +92,4 @@ void ThinkSMC::updateEC() {
     } else {
         dualFan = false;
     }
-    super::updateEC();
 }

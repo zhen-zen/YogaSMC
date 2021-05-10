@@ -16,17 +16,34 @@ IOService *YogaWMI::probe(IOService *provider, SInt32 *score)
     if (!super::probe(provider, score))
         return nullptr;
 
-    if (strncmp(name, "WTBT", 4) == 0) {
-        DebugLog("Exit on Thunderbolt interface");
-        return nullptr;
-    }
-
-    if (provider->getClient() != this) {
-        DebugLog("Already loaded, exiting");
-        return nullptr;
-    }
-
     DebugLog("Probing");
+
+    OSObject *uid = nullptr;
+    IOACPIPlatformDevice *dev = OSDynamicCast(IOACPIPlatformDevice, provider);
+    if (dev && dev->evaluateObject("_UID", &uid) == kIOReturnSuccess) {
+        OSString *str = OSDynamicCast(OSString, uid);
+        if (str && str->isEqualTo("TBFP")) {
+            DebugLog("Skip Thunderbolt interface");
+            return nullptr;
+        }
+    }
+    OSSafeReleaseNULL(uid);
+
+    auto key = OSSymbol::withCString("YogaWMISupported");
+    auto dict = IOService::propertyMatching(key, kOSBooleanTrue);
+    key->release();
+    if (!dict) {
+        DebugLog("Failed to create matching dictionary");
+        return nullptr;
+    }
+
+    auto vpc = IOService::waitForMatchingService(dict, 1000000000);
+    dict->release();
+    if (vpc) {
+        vpc->release();
+        DebugLog("YogaWMI variant available, exiting");
+        return nullptr;
+    }
 
     return this;
 }
@@ -75,9 +92,11 @@ bool YogaWMI::start(IOService *provider)
 
     DebugLog("Starting");
 
-    YWMI = new WMI(provider);
-    YWMI->initialize();
-
+    if (!YWMI) {
+        YWMI = new WMI(provider);
+        YWMI->initialize();
+    }
+    YWMI->extractBMF();
     processWMI();
 
     Event = YWMI->getEvent();

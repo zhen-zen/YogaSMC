@@ -31,7 +31,7 @@ IOService *YogaBaseService::probe(IOService *provider, SInt32 *score)
     if (!super::probe(provider, score))
         return nullptr;
 
-    name = provider->getName();
+    iname = provider->getName();
     return this;
 }
 
@@ -40,8 +40,9 @@ bool YogaBaseService::start(IOService *provider)
     if (!super::start(provider))
         return false;
 
+#ifndef ALTER
     setProperty("VersionInfo", kextVersion);
-#ifdef ALTER
+#else
     setProperty("Variant", "Alter");
 #endif
     workLoop = IOWorkLoop::workLoop();
@@ -146,15 +147,14 @@ bool YogaBaseService::findPNP(const char *id, IOACPIPlatformDevice **dev) {
         AlwaysLog("findPNP failed");
         return false;
     }
-    auto pnp = OSString::withCString(id);
 
+    *dev = nullptr;
+    auto pnp = OSString::withCString(id);
     while (auto entry = iterator->getNextObject()) {
         if (entry->compareName(pnp)) {
-            *dev = OSDynamicCast(IOACPIPlatformDevice, entry);
-            if (*dev) {
-                DebugLog("%s available at %s", id, (*dev)->getName());
+            DebugLog("found %s at %s", id, entry->getName());
+            if ((*dev = OSDynamicCast(IOACPIPlatformDevice, entry)))
                 break;
-            }
         }
     }
     iterator->release();
@@ -196,7 +196,7 @@ bool YogaBaseService::updateTopCase() {
     return true;
 }
 
-IOReturn YogaBaseService::setPowerState(unsigned long powerStateOrdinal, IOService *whatDevice){
+IOReturn YogaBaseService::setPowerState(unsigned long powerStateOrdinal, IOService * whatDevice) {
     DebugLog("powerState %ld : %s", powerStateOrdinal, powerStateOrdinal ? "on" : "off");
     if (whatDevice != this)
         return kIOReturnInvalid;
@@ -223,7 +223,7 @@ IOReturn YogaBaseService::readECName(const char* name, UInt32 *result) {
 }
 
 IOReturn YogaBaseService::method_re1b(UInt32 offset, UInt8 *result) {
-    if (!ec || !(ECAccessCap & BIT(0)))
+    if (!ec || !(ECAccessCap & ECReadCap))
         return kIOReturnUnsupported;
 
     UInt32 raw;
@@ -232,6 +232,8 @@ IOReturn YogaBaseService::method_re1b(UInt32 offset, UInt8 *result) {
     };
 
     IOReturn ret = ec->evaluateInteger(readECOneByte, &raw, params, 1);
+    params[0]->release();
+
     if (ret != kIOReturnSuccess)
         AlwaysLog("read 0x%02x failed", offset);
 
@@ -252,6 +254,9 @@ IOReturn YogaBaseService::method_recb(UInt32 offset, UInt32 size, OSData **data)
     OSObject* result;
 
     IOReturn ret = ec->evaluateObject(readECBytes, &result, params, 2);
+    params[0]->release();
+    params[1]->release();
+
     if (ret != kIOReturnSuccess || !(*data = OSDynamicCast(OSData, result))) {
         AlwaysLog("read %d bytes @ 0x%02x failed", size, offset);
         OSSafeReleaseNULL(result);
@@ -268,7 +273,7 @@ IOReturn YogaBaseService::method_recb(UInt32 offset, UInt32 size, OSData **data)
 }
 
 IOReturn YogaBaseService::method_we1b(UInt32 offset, UInt8 value) {
-    if (!ec || !(ECAccessCap & BIT(1)))
+    if (!ec || !(ECAccessCap & ECWriteCap))
         return kIOReturnUnsupported;
 
     OSObject* params[2] = {
@@ -277,6 +282,9 @@ IOReturn YogaBaseService::method_we1b(UInt32 offset, UInt8 value) {
     };
 
     IOReturn ret = ec->evaluateObject(writeECOneByte, nullptr, params, 2);
+    params[0]->release();
+    params[1]->release();
+
     if (ret != kIOReturnSuccess)
         AlwaysLog("write 0x%02x @ 0x%02x failed", value, offset);
     else
@@ -289,15 +297,15 @@ void YogaBaseService::validateEC() {
         return;
     if (ec->validateObject(readECOneByte) != kIOReturnSuccess ||
         ec->validateObject(readECBytes) != kIOReturnSuccess) {
-        setProperty("EC Capability", "False");
+        setProperty("EC Capability", "Basic");
         return;
     }
-    ECAccessCap |= BIT(0);
+    ECAccessCap |= ECReadCap;
     if (ec->validateObject(writeECOneByte) != kIOReturnSuccess) {
         setProperty("EC Capability", "RO");
         return;
     }
-    ECAccessCap |= BIT(1);
+    ECAccessCap |= ECWriteCap;
     setProperty("EC Capability", "RW");
 }
 
