@@ -83,8 +83,6 @@ private:
 
     UInt8 fanCount {0};
 
-    bool mobile {false};
-
     bool addTachometerKey(OSString *name);
     bool addTemperatureKey(OSString *name);
 
