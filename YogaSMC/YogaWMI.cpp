@@ -81,7 +81,11 @@ void YogaWMI::getNotifyID(const char *key) {
         AlwaysLog("found notify id 0x%x with no __CLASS", id);
         return;
     }
-    checkEvent(cname->getCStringNoCopy(), id);
+    const char *rname = nullptr;
+    OSString *guid = OSDynamicCast(OSString, item->getObject("guid"));
+    if (guid)
+        rname = registerEvent(guid, id);
+    AlwaysLog("found %s notify id 0x%x for %s", rname ? rname : "unknown", id, cname->getCStringNoCopy());
     // TODO: Event Enable and Disable WExx; Data Collection Enable and Disable WCxx
 }
 
