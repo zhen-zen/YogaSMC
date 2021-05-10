@@ -16,7 +16,7 @@
 #define SENSOR_TYPE_AIR_FLOW    12
 
 /**
- * Sensor Package Definition
+ * BIOS Numeric Sensor (index start from 1)
  *
  * 0x1: Name
  * 0x2: Description

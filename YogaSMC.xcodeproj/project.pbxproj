@@ -61,6 +61,8 @@
 		6F7E23E12646907300155D18 /* MateVPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F7E23DE2646907300155D18 /* MateVPC.cpp */; };
 		6F7E23E22646907300155D18 /* MateVPC.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F7E23DF2646907300155D18 /* MateVPC.hpp */; };
 		6F7E23E32646907300155D18 /* MateVPC.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F7E23DF2646907300155D18 /* MateVPC.hpp */; };
+		6F7E23E626478D2900155D18 /* Undock.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 6F7E23E426478D2900155D18 /* Undock.pdf */; };
+		6F7E23E726478D2900155D18 /* Dock.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 6F7E23E526478D2900155D18 /* Dock.pdf */; };
 		6F81FC4425317B1200CFEDF5 /* YogaSMCUserClient.h in Headers */ = {isa = PBXBuildFile; fileRef = 6F81FC4025317AE100CFEDF5 /* YogaSMCUserClient.h */; };
 		6F81FC4825317B1300CFEDF5 /* YogaSMCUserClient.h in Headers */ = {isa = PBXBuildFile; fileRef = 6F81FC4025317AE100CFEDF5 /* YogaSMCUserClient.h */; };
 		6F83587324D0C2B50031512F /* KeyImplementations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F83587124D0C2B50031512F /* KeyImplementations.cpp */; };
@@ -253,6 +255,8 @@
 		6F7D487A253465DB004074C7 /* ServiceManagement.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ServiceManagement.framework; path = System/Library/Frameworks/ServiceManagement.framework; sourceTree = SDKROOT; };
 		6F7E23DE2646907300155D18 /* MateVPC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MateVPC.cpp; sourceTree = "<group>"; };
 		6F7E23DF2646907300155D18 /* MateVPC.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = MateVPC.hpp; sourceTree = "<group>"; };
+		6F7E23E426478D2900155D18 /* Undock.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = Undock.pdf; sourceTree = "<group>"; };
+		6F7E23E526478D2900155D18 /* Dock.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = Dock.pdf; sourceTree = "<group>"; };
 		6F81FC4025317AE100CFEDF5 /* YogaSMCUserClient.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = YogaSMCUserClient.h; sourceTree = "<group>"; };
 		6F83586424D0BFFD0031512F /* Headers */ = {isa = PBXFileReference; lastKnownFileType = text; name = Headers; path = Lilu.kext/Contents/Resources/Headers; sourceTree = SOURCE_ROOT; };
 		6F83586F24D0C0C90031512F /* VirtualSMCSDK */ = {isa = PBXFileReference; lastKnownFileType = text; name = VirtualSMCSDK; path = VirtualSMC.kext/Contents/Resources/VirtualSMCSDK; sourceTree = SOURCE_ROOT; };
@@ -549,6 +553,7 @@
 				6F8B2336253CEA93005BEC5D /* Camera.pdf */,
 				6F3DA5CD2586C14A00A498C9 /* CapslockOff.pdf */,
 				6F3DA5CE2586C14A00A498C9 /* CapslockOn.pdf */,
+				6F7E23E526478D2900155D18 /* Dock.pdf */,
 				6FA75307253D68C600EBE9D7 /* FunctionKey.pdf */,
 				6F3DA56D2584968A00A498C9 /* FunctionKeyOff.pdf */,
 				6F3DA56E2584968A00A498C9 /* FunctionKeyOn.pdf */,
@@ -559,6 +564,7 @@
 				6F8B2349253CF029005BEC5D /* SecondDisplay.pdf */,
 				6F8B2342253CEF97005BEC5D /* Sleep.pdf */,
 				6F861236253BD518008FB857 /* Star.pdf */,
+				6F7E23E426478D2900155D18 /* Undock.pdf */,
 				6F8B2318253CE1F3005BEC5D /* Wifi.pdf */,
 				6F8B2319253CE1F3005BEC5D /* WifiOff.pdf */,
 			);
@@ -835,8 +841,10 @@
 				6FA75308253D68C600EBE9D7 /* FunctionKey.pdf in Resources */,
 				6F861237253BD518008FB857 /* Star.pdf in Resources */,
 				6F8B2343253CEF97005BEC5D /* Sleep.pdf in Resources */,
+				6F7E23E726478D2900155D18 /* Dock.pdf in Resources */,
 				6F8B2304253C4241005BEC5D /* MicOff.pdf in Resources */,
 				6F861217253AF7E4008FB857 /* BacklightHigh.pdf in Resources */,
+				6F7E23E626478D2900155D18 /* Undock.pdf in Resources */,
 				6F0A987E25343359002F9F65 /* Assets.xcassets in Resources */,
 				6F8B2312253CE075005BEC5D /* KeyboardOff.pdf in Resources */,
 				6F8B231B253CE1F3005BEC5D /* WifiOff.pdf in Resources */,
