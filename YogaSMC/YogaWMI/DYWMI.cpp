@@ -116,6 +116,34 @@ const char* DYWMI::registerEvent(OSString *guid, UInt32 id) {
     return nullptr;
 }
 
+bool DisplayUserNotification(OSString *name, OSString *desc, unsigned int flags) {
+    kern_return_t notificationError;
+    char header[20];
+    strncpy(header, name->getCStringNoCopy(), name->getLength() < 20 ? name->getLength() : 20);
+    char message[50];
+    strncpy(message, desc->getCStringNoCopy(), desc->getLength() < 50 ? desc->getLength() : 50);
+    if ((flags & kKUNCPlainAlertLevel) < kKUNCPlainAlertLevel) {
+        notificationError = KUNCUserNotificationDisplayNotice(0,
+                                                              flags,
+                                                              (char *) "",
+                                                              (char *) "",
+                                                              (char *) "",
+                                                              header,
+                                                              message,
+                                                              (char *) "OK");
+    } else {
+        notificationError = KUNCUserNotificationDisplayNotice(2,
+                                                              flags,
+                                                              (char *) "",
+                                                              (char *) "",
+                                                              (char *) "",
+                                                              header,
+                                                              message,
+                                                              (char *) "");
+    }
+    return (notificationError == kIOReturnSuccess);
+}
+
 void DYWMI::processBIOSEvent(OSObject *result) {
     OSArray *arr = OSDynamicCast(OSArray, result);
     if (!arr) {
@@ -162,21 +190,8 @@ void DYWMI::processBIOSEvent(OSObject *result) {
 #ifndef DEBUG
     if (flags < kKUNCPlainAlertLevel) {
 #endif
-        DebugLog("BIOS Event: %s - %s - %d", name->getCStringNoCopy(), desc->getCStringNoCopy(), severity->unsigned8BitValue());
-        char header[20];
-        strncpy(header, name->getCStringNoCopy(), name->getLength() < 20 ? name->getLength() : 20);
-        char message[50];
-        strncpy(message, desc->getCStringNoCopy(), desc->getLength() < 50 ? desc->getLength() : 50);
-        kern_return_t notificationError;
-        notificationError = KUNCUserNotificationDisplayNotice(flags < kKUNCPlainAlertLevel ? 0 : 2,
-                                                              flags,
-                                                              (char *) "",
-                                                              (char *) "",
-                                                              (char *) "",
-                                                              header,
-                                                              message,
-                                                              (char *) "OK");
-        if (notificationError != kIOReturnSuccess)
+        AlwaysLog("BIOS Event: %s - %s - %d", name->getCStringNoCopy(), desc->getCStringNoCopy(), severity->unsigned8BitValue());
+        if (!DisplayUserNotification(name, desc, flags))
             AlwaysLog("Failed to send BIOS Event");
 #ifndef DEBUG
     }
