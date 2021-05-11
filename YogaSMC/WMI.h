@@ -55,7 +55,6 @@ class WMI
     IOACPIPlatformDevice* mDevice {nullptr};
     OSDictionary* mData = {nullptr};
     OSDictionary* mEvent = {nullptr};
-    OSArray* mBMFCandidate = {nullptr};
     const char* iname;
 
 public:
@@ -65,7 +64,7 @@ public:
     ~WMI();
 
     bool initialize();
-    void extractBMF();
+    void start();
 
     bool hasMethod(const char * guid, UInt8 flg = ACPI_WMI_METHOD);
     bool enableEvent(const char * guid, bool enable);
@@ -83,8 +82,7 @@ private:
     bool extractData();
     void parseWDGEntry(struct WMI_DATA * block);
 
-    bool parseBMF(OSDictionary* dict);
-    bool foundBMF {false};
+    bool parseBMF();
 };
 
 

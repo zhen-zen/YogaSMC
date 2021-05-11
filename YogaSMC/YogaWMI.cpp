@@ -29,22 +29,6 @@ IOService *YogaWMI::probe(IOService *provider, SInt32 *score)
     }
     OSSafeReleaseNULL(uid);
 
-    auto key = OSSymbol::withCString("YogaWMISupported");
-    auto dict = IOService::propertyMatching(key, kOSBooleanTrue);
-    key->release();
-    if (!dict) {
-        DebugLog("Failed to create matching dictionary");
-        return nullptr;
-    }
-
-    auto vpc = IOService::waitForMatchingService(dict, 1000000000);
-    dict->release();
-    if (vpc) {
-        vpc->release();
-        DebugLog("YogaWMI variant available, exiting");
-        return nullptr;
-    }
-
     return this;
 }
 
@@ -81,12 +65,34 @@ void YogaWMI::getNotifyID(const char *key) {
         AlwaysLog("found notify id 0x%x with no __CLASS", id);
         return;
     }
-    checkEvent(cname->getCStringNoCopy(), id);
+    const char *rname = nullptr;
+    OSString *guid = OSDynamicCast(OSString, item->getObject("guid"));
+    if (guid)
+        rname = registerEvent(guid, id);
+    AlwaysLog("found %s notify id 0x%x for %s", rname ? rname : "unknown", id, cname->getCStringNoCopy());
     // TODO: Event Enable and Disable WExx; Data Collection Enable and Disable WCxx
 }
 
 bool YogaWMI::start(IOService *provider)
 {
+    if (!YWMI) {
+        auto key = OSSymbol::withCString("YogaWMISupported");
+        auto dict = IOService::propertyMatching(key, kOSBooleanTrue);
+        key->release();
+        if (!dict) {
+            DebugLog("Failed to create matching dictionary");
+            return false;
+        }
+
+        auto vpc = IOService::waitForMatchingService(dict, 1000000000);
+        dict->release();
+        if (vpc) {
+            vpc->release();
+            DebugLog("YogaWMI variant available, exiting");
+            return false;
+        }
+    }
+
     if (!super::start(provider))
         return false;
 
@@ -96,7 +102,7 @@ bool YogaWMI::start(IOService *provider)
         YWMI = new WMI(provider);
         YWMI->initialize();
     }
-    YWMI->extractBMF();
+    YWMI->start();
     processWMI();
 
     Event = YWMI->getEvent();

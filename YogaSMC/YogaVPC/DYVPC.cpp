@@ -54,7 +54,7 @@ bool DYVPC::initVPC() {
 
     super::initVPC();
 
-    YWMI->extractBMF();
+    YWMI->start();
 
     if (inputCap)
         YWMI->enableEvent(INPUT_WMI_EVENT, true);

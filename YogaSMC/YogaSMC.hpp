@@ -88,11 +88,14 @@ protected:
         });
     };
 
+    virtual void setPropertiesGated(OSObject* props);
+
 public:
     virtual bool start(IOService *provider) APPLE_KEXT_OVERRIDE;
     virtual void stop(IOService *provider) APPLE_KEXT_OVERRIDE;
 
     virtual IOReturn setPowerState(unsigned long powerStateOrdinal, IOService * whatDevice) APPLE_KEXT_OVERRIDE;
+    virtual IOReturn setProperties(OSObject* props) APPLE_KEXT_OVERRIDE;
 
     static YogaSMC *withDevice(IOService *provider, IOACPIPlatformDevice *device);
 
