@@ -55,10 +55,11 @@ class DYWMI : public YogaWMI
     OSDeclareDefaultStructors(DYWMI)
 
 private:
-    bool hasSensorEvent {false};
+    static constexpr const char *feature = "Sensor";
+    UInt32 sensorEvent {0xa0};
 
     void processBIOSEvent(OSObject *result);
-    
+
     UInt8 sensorRange {0};
 
     /**
@@ -79,7 +80,7 @@ private:
 
     void processWMI() APPLE_KEXT_OVERRIDE;
     void ACPIEvent(UInt32 argument) APPLE_KEXT_OVERRIDE;
-    void checkEvent(const char *cname, UInt32 id) APPLE_KEXT_OVERRIDE;
+    const char* registerEvent(OSString *guid, UInt32 id) APPLE_KEXT_OVERRIDE;
 
 public:
     virtual IOReturn setProperties(OSObject* props) APPLE_KEXT_OVERRIDE;

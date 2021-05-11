@@ -94,12 +94,7 @@ void DYWMI::setPropertiesGated(OSObject* props) {
 }
 
 void DYWMI::processWMI() {
-    if (YWMI->hasMethod(SENSOR_EVENT_WMI_METHOD, ACPI_WMI_EVENT)) {
-//        hasSensorEvent = true;
-        setProperty("Feature", "Sensor Event");
-    } else {
-        setProperty("Feature", "Sensor");
-    }
+    setProperty("Feature", feature);
     sensorRange = YWMI->getInstanceCount(SENSOR_DATA_WMI_METHOD);
     registerService();
 }
@@ -119,22 +114,16 @@ bool DYWMI::getSensorInfo(UInt8 index, OSObject **result) {
     return ret;
 }
 
-void DYWMI::checkEvent(const char *cname, UInt32 id) {
-    switch (id) {
-        case kIOACPIMessageDYSensor:
-            AlwaysLog("found sensor event notify id 0x%x for %s", id, cname);
-            break;
-
-        default:
-            super::checkEvent(cname, id);
-            return;
+const char* DYWMI::registerEvent(OSString *guid, UInt32 id) {
+    if (guid->isEqualTo(SENSOR_EVENT_WMI_METHOD)) {
+        sensorEvent = id;
+        setProperty("Feature", "Sensor Event");
+        return feature;
     }
+    return nullptr;
 }
 
 void DYWMI::processBIOSEvent(OSObject *result) {
-    if (!hasSensorEvent)
-        return;
-
     OSArray *arr = OSDynamicCast(OSArray, result);
     if (!arr) {
         DebugLog("Unknown event");
@@ -203,19 +192,15 @@ void DYWMI::processBIOSEvent(OSObject *result) {
 }
 
 void DYWMI::ACPIEvent(UInt32 argument) {
-    switch (argument) {
-        case kIOACPIMessageDYSensor:
-            DebugLog("message: ACPI notification D0");
-            OSObject *result;
-            if (!YWMI->getEventData(argument, &result))
-                AlwaysLog("message: Unknown ACPI notification 0x%04x", argument);
-            else
-                processBIOSEvent(result);
-            OSSafeReleaseNULL(result);
-            break;
-
-        default:
-            super::ACPIEvent(argument);
-            return;
+    if (argument != sensorEvent) {
+        super::ACPIEvent(argument);
+        return;
     }
+
+    OSObject *result;
+    if (!YWMI->getEventData(argument, &result))
+        AlwaysLog("message: Unknown ACPI notification 0x%04X", argument);
+    else
+        processBIOSEvent(result);
+    OSSafeReleaseNULL(result);
 }
