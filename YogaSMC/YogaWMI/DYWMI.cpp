@@ -13,13 +13,6 @@ extern "C"
     #include <UserNotification/KUNCUserNotifications.h>
 }
 
-enum {
-    kUNCUserNotificationStopAlertLevel = 0,
-    kUNCUserNotificationNoteAlertLevel = 1,
-    kUNCUserNotificationCautionAlertLevel = 2,
-    kUNCUserNotificationPlainAlertLevel = 3
-};
-
 OSDefineMetaClassAndStructors(DYWMI, YogaWMI);
 
 YogaWMI* YogaWMI::withDY(IOService *provider) {
@@ -151,31 +144,31 @@ void DYWMI::processBIOSEvent(OSObject *result) {
     unsigned int flags = 0;
     switch (severity->unsigned8BitValue()) {
         case EVENT_SEVERITY_UNKNOWN:
-            flags = kUNCUserNotificationCautionAlertLevel;
+            flags = kKUNCCautionAlertLevel;
             break;
-            
+
         case EVENT_SEVERITY_OK:
-            flags = kUNCUserNotificationPlainAlertLevel;
+            flags = kKUNCPlainAlertLevel | kKUNCNoDefaultButtonFlag;
             break;
-            
+
         case EVENT_SEVERITY_WARNING:
-            flags = kUNCUserNotificationNoteAlertLevel;
+            flags = kKUNCNoteAlertLevel;
             break;
-            
+
         default:
-            flags = kUNCUserNotificationStopAlertLevel;
+            flags = kKUNCStopAlertLevel;
             break;
     }
 #ifndef DEBUG
-    if (flags < kUNCUserNotificationPlainAlertLevel) {
+    if (flags < kKUNCPlainAlertLevel) {
 #endif
-        AlwaysLog("BIOS Event: %s - %s - %d", name->getCStringNoCopy(), desc->getCStringNoCopy(), severity->unsigned8BitValue());
+        DebugLog("BIOS Event: %s - %s - %d", name->getCStringNoCopy(), desc->getCStringNoCopy(), severity->unsigned8BitValue());
         char header[20];
         strncpy(header, name->getCStringNoCopy(), name->getLength() < 20 ? name->getLength() : 20);
-        char message[40];
-        strncpy(message, desc->getCStringNoCopy(), desc->getLength() < 40 ? desc->getLength() : 40);
+        char message[50];
+        strncpy(message, desc->getCStringNoCopy(), desc->getLength() < 50 ? desc->getLength() : 50);
         kern_return_t notificationError;
-        notificationError = KUNCUserNotificationDisplayNotice(flags == kUNCUserNotificationPlainAlertLevel ? 2 : 0,
+        notificationError = KUNCUserNotificationDisplayNotice(flags < kKUNCPlainAlertLevel ? 0 : 2,
                                                               flags,
                                                               (char *) "",
                                                               (char *) "",
@@ -185,7 +178,6 @@ void DYWMI::processBIOSEvent(OSObject *result) {
                                                               (char *) "OK");
         if (notificationError != kIOReturnSuccess)
             AlwaysLog("Failed to send BIOS Event");
-
 #ifndef DEBUG
     }
 #endif
