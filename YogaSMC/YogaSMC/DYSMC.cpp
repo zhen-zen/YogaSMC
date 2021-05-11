@@ -86,6 +86,11 @@ bool DYSMC::addTemperatureKey(OSString *name) {
 }
 
 void DYSMC::addVSMCKey() {
+    if (!wmis) {
+        super::addVSMCKey();
+        return;
+    }
+
     OSObject *result = nullptr;
 
     OSDictionary *enabled = OSDictionary::withCapacity(wmis->sensorRange);
