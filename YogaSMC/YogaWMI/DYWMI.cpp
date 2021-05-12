@@ -119,9 +119,9 @@ const char* DYWMI::registerEvent(OSString *guid, UInt32 id) {
 bool DisplayUserNotification(OSString *name, OSString *desc, unsigned int flags) {
     kern_return_t notificationError;
     char header[20];
-    strncpy(header, name->getCStringNoCopy(), name->getLength() < 20 ? name->getLength() : 20);
+    strlcpy(header, name->getCStringNoCopy(), name->getLength() < 20 ? name->getLength() : 20);
     char message[50];
-    strncpy(message, desc->getCStringNoCopy(), desc->getLength() < 50 ? desc->getLength() : 50);
+    strlcpy(message, desc->getCStringNoCopy(), desc->getLength() < 50 ? desc->getLength() : 50);
     if ((flags & kKUNCPlainAlertLevel) < kKUNCPlainAlertLevel) {
         notificationError = KUNCUserNotificationDisplayNotice(0,
                                                               flags,
