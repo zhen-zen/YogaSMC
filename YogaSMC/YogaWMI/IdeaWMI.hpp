@@ -24,6 +24,11 @@
 #define GSENSOR_WMI_EVENT           "06129d99-6083-4164-81ad-f092f9d773a6"
 #define PAPER_LOOKING_WMI_EVENT     "56322276-8493-4ce8-a783-98c991274f5e"
 #define GAME_ZONE_DATA_WMI_METHOD   "887b54e3-dddc-4b2c-8b88-68a26a8835d0"
+#define GAME_ZONE_TEMP_WMI_EVENT    "bfd42481-aee3-4501-a107-afb68425c5f8"
+#define GAME_ZONE_OC_WMI_EVENT      "d062906b-12d4-4510-999d-4831ee80e985"
+#define GAME_ZONE_GPU_WMI_EVENT     "bfd42481-aee3-4502-a107-afb68425c5f8"
+#define GAME_ZONE_FAN_WMI_EVENT     "bc72a435-e8c1-4275-b3e2-d8b8074aba59"
+#define GAME_ZONE_KEY_WMI_EVENT     "10afc6d9-ea8b-4590-a2e7-1cd3c84bb4b1"
 
 enum {
     GAME_ZONE_WMI_GET_TMP_IR   = 0x01,
@@ -131,6 +136,11 @@ class IdeaWMIGameZone : public YogaWMI
     OSDeclareDefaultStructors(IdeaWMIGameZone)
 
     static constexpr const char *feature = "Game Zone";
+    UInt32 tempEvent {0xd0};
+    UInt32 OCEvent   {0xd1};
+    UInt32 GPUEvent  {0xe0};
+    UInt32 fanEvent  {0xe1};
+    UInt32 keyEvent  {0xe2};
 
     bool getGamzeZoneData(UInt32 query, UInt32 *result);
 

@@ -226,6 +226,9 @@ bool IdeaWMIGameZone::getGamzeZoneData(UInt32 query, UInt32 *result) {
     params[0]->release();
     params[1]->release();
     params[2]->release();
+
+    if (!ret)
+        AlwaysLog("Query %d evaluation failed", query);
     return ret;
 }
 
@@ -256,5 +259,17 @@ void IdeaWMIGameZone::ACPIEvent(UInt32 argument) {
 }
 
 const char* IdeaWMIGameZone::registerEvent(OSString *guid, UInt32 id) {
+    if (guid->isEqualTo(GAME_ZONE_TEMP_WMI_EVENT))
+        tempEvent = id;
+    else if (guid->isEqualTo(GAME_ZONE_OC_WMI_EVENT))
+        OCEvent = id;
+    else if (guid->isEqualTo(GAME_ZONE_GPU_WMI_EVENT))
+        GPUEvent = id;
+    else if (guid->isEqualTo(GAME_ZONE_FAN_WMI_EVENT))
+        fanEvent = id;
+    else if (guid->isEqualTo(GAME_ZONE_KEY_WMI_EVENT))
+        keyEvent = id;
+    else
+        return nullptr;
     return feature;
 }
