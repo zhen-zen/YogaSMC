@@ -230,16 +230,16 @@ bool IdeaWMIGameZone::getGamzeZoneData(UInt32 query, UInt32 *result) {
 }
 
 void IdeaWMIGameZone::processWMI() {
-    setProperty("Feature", "Game Zone");
+    setProperty("Feature", feature);
 
     UInt32 result;
 
-    if (getGamzeZoneData(GAME_ZONE_DATA_WMI_VERSION, &result))
+    if (getGamzeZoneData(GAME_ZONE_WMI_GET_VERSION, &result))
         setProperty("Game Zone Version", result, 32);
     else
         AlwaysLog("Failed to get version");
 
-    if (getGamzeZoneData(GAME_ZONE_DATA_WMI_FAN_NUM, &result))
+    if (getGamzeZoneData(GAME_ZONE_WMI_GET_FAN_NUM, &result))
         setProperty("Fan number", result, 32);
     else
         AlwaysLog("Failed to get fan number");
@@ -255,3 +255,6 @@ void IdeaWMIGameZone::ACPIEvent(UInt32 argument) {
     OSSafeReleaseNULL(result);
 }
 
+const char* IdeaWMIGameZone::registerEvent(OSString *guid, UInt32 id) {
+    return feature;
+}

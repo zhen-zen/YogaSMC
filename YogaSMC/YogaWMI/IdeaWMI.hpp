@@ -25,15 +25,38 @@
 #define PAPER_LOOKING_WMI_EVENT     "56322276-8493-4ce8-a783-98c991274f5e"
 #define GAME_ZONE_DATA_WMI_METHOD   "887b54e3-dddc-4b2c-8b88-68a26a8835d0"
 
-#define GAME_ZONE_DATA_WMI_GOC_CAP   0x04
-#define GAME_ZONE_DATA_WMI_FAN_NUM   0x07
-#define GAME_ZONE_DATA_WMI_FAN_MAX   0x0a
-#define GAME_ZONE_DATA_WMI_VERSION   0x0b
-#define GAME_ZONE_DATA_WMI_FAN_CAP   0x0c
-#define GAME_ZONE_DATA_WMI_COC_CAP   0x0e
-
-#define kIOACPIMessageYMC       0xd0
-#define kIOACPIMessageGZTemp    0xd0
+enum {
+    GAME_ZONE_WMI_GET_TMP_IR   = 0x01,
+    GAME_ZONE_WMI_GET_TTBL_ID  = 0x02,
+    GAME_ZONE_WMI_SET_TTBL_ID  = 0x03,
+    GAME_ZONE_WMI_CAP_GPU_OC   = 0x04,
+    GAME_ZONE_WMI_GET_GPU_GPS  = 0x05,
+    GAME_ZONE_WMI_SET_GPU_GPS  = 0x06,
+    GAME_ZONE_WMI_GET_FAN_NUM  = 0x07,
+    GAME_ZONE_WMI_GET_FAN_ONE  = 0x08,
+    GAME_ZONE_WMI_GET_FAN_TWO  = 0x09,
+    GAME_ZONE_WMI_GET_FAN_MAX  = 0x0A,
+    GAME_ZONE_WMI_GET_VERSION  = 0x0B,
+    GAME_ZONE_WMI_CAP_FAN_SET  = 0x0C,
+    GAME_ZONE_WMI_SET_FAN_STA  = 0x0D,
+    GAME_ZONE_WMI_CAP_CPU_OC   = 0x0E,
+    GAME_ZONE_WMI_CAP_BIOS_OC  = 0x0F,
+    GAME_ZONE_WMI_SET_BIOS_OC  = 0x10,
+    GAME_ZONE_WMI_GET_TRIGGER  = 0x11,
+    GAME_ZONE_WMI_GET_TMP_CPU  = 0x12,
+    GAME_ZONE_WMI_GET_TMP_GPU  = 0x13,
+    GAME_ZONE_WMI_GET_FAN_STA  = 0x14,
+    GAME_ZONE_WMI_CAP_WIN_KEY  = 0x15,
+    GAME_ZONE_WMI_SET_WIN_KEY  = 0x16,
+    GAME_ZONE_WMI_GET_WIN_KEY  = 0x17,
+    GAME_ZONE_WMI_CAP_TOUCHPAD = 0x18,
+    GAME_ZONE_WMI_SET_TOUCHPAD = 0x19,
+    GAME_ZONE_WMI_GET_TOUCHPAD = 0x1A,
+    GAME_ZONE_WMI_GET_GPU_MAX  = 0x1B,
+    GAME_ZONE_WMI_GET_GPU_OCM  = 0x1C,
+    GAME_ZONE_WMI_GET_GPU_TYPE = 0x1D,
+    GAME_ZONE_WMI_CAP_KEYBOARD = 0x1E
+};
 
 enum
 {
@@ -107,10 +130,13 @@ class IdeaWMIGameZone : public YogaWMI
     typedef YogaWMI super;
     OSDeclareDefaultStructors(IdeaWMIGameZone)
 
+    static constexpr const char *feature = "Game Zone";
+
     bool getGamzeZoneData(UInt32 query, UInt32 *result);
 
     void processWMI() APPLE_KEXT_OVERRIDE;
     void ACPIEvent(UInt32 argument) APPLE_KEXT_OVERRIDE;
+    const char* registerEvent(OSString *guid, UInt32 id) APPLE_KEXT_OVERRIDE;
 };
 
 #endif /* IdeaWMI_hpp */
