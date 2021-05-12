@@ -119,28 +119,17 @@ const char* DYWMI::registerEvent(OSString *guid, UInt32 id) {
 bool DisplayUserNotification(OSString *name, OSString *desc, unsigned int flags) {
     kern_return_t notificationError;
     char header[20];
-    strlcpy(header, name->getCStringNoCopy(), name->getLength() < 20 ? name->getLength() : 20);
+    strlcpy(header, name->getCStringNoCopy(), sizeof(header));
     char message[50];
-    strlcpy(message, desc->getCStringNoCopy(), desc->getLength() < 50 ? desc->getLength() : 50);
-    if ((flags & kKUNCPlainAlertLevel) < kKUNCPlainAlertLevel) {
-        notificationError = KUNCUserNotificationDisplayNotice(0,
-                                                              flags,
-                                                              (char *) "",
-                                                              (char *) "",
-                                                              (char *) "",
-                                                              header,
-                                                              message,
-                                                              (char *) "OK");
-    } else {
-        notificationError = KUNCUserNotificationDisplayNotice(2,
-                                                              flags,
-                                                              (char *) "",
-                                                              (char *) "",
-                                                              (char *) "",
-                                                              header,
-                                                              message,
-                                                              (char *) "");
-    }
+    strlcpy(message, desc->getCStringNoCopy(), sizeof(message));
+    notificationError = KUNCUserNotificationDisplayNotice(flags < kKUNCPlainAlertLevel ? 0 : 2 ,
+                                                          flags,
+                                                          (char *) "",
+                                                          (char *) "",
+                                                          (char *) "",
+                                                          header,
+                                                          message,
+                                                          (char *) "OK");
     return (notificationError == kIOReturnSuccess);
 }
 
@@ -176,7 +165,7 @@ void DYWMI::processBIOSEvent(OSObject *result) {
             break;
 
         case EVENT_SEVERITY_OK:
-            flags = kKUNCPlainAlertLevel | kKUNCNoDefaultButtonFlag;
+            flags = kKUNCPlainAlertLevel;
             break;
 
         case EVENT_SEVERITY_WARNING:
