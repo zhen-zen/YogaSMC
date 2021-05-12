@@ -81,8 +81,6 @@ private:
      */
     UInt8 sensorIndex[MAX_SENSOR];
 
-    UInt8 fanCount {0};
-
     bool addTachometerKey(OSString *name);
     bool addTemperatureKey(OSString *name);
 

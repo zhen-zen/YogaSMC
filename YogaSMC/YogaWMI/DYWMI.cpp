@@ -110,7 +110,7 @@ bool DYWMI::getSensorInfo(UInt8 index, OSObject **result) {
 const char* DYWMI::registerEvent(OSString *guid, UInt32 id) {
     if (guid->isEqualTo(SENSOR_EVENT_WMI_METHOD)) {
         sensorEvent = id;
-        setProperty("Feature", "Sensor Event");
+        setProperty("Sensor Event", true);
         return feature;
     }
     return nullptr;

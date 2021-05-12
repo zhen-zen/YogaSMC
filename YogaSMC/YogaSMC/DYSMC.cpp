@@ -96,6 +96,8 @@ void DYSMC::addVSMCKey() {
     OSDictionary *enabled = OSDictionary::withCapacity(wmis->sensorRange);
     OSDictionary *disabled = OSDictionary::withCapacity(wmis->sensorRange);
 
+    UInt8 fanCount = 0;
+
     for (UInt8 index = 0; index <= sensorRange && sensorCount < MAX_SENSOR; ++index) {
         OSSafeReleaseNULL(result);
 
