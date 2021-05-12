@@ -40,18 +40,26 @@ YogaWMI* YogaWMI::withIdea(IOService *provider) {
 
 OSDefineMetaClassAndStructors(IdeaWMIYoga, YogaWMI);
 
+const char* IdeaWMIYoga::registerEvent(OSString *guid, UInt32 id) {
+    if (guid->isEqualTo(GSENSOR_WMI_EVENT)) {
+        YogaEvent = id;
+        return feature;
+    }
+    return nullptr;
+}
+
 void IdeaWMIYoga::ACPIEvent(UInt32 argument) {
-    if (argument != kIOACPIMessageYMC) {
+    if (argument != YogaEvent) {
         super::ACPIEvent(argument);
         return;
     }
 
-    DebugLog("message: ACPI notification D0");
+    DebugLog("message: ACPI notification 0x%02X", argument);
     updateYogaMode();
 }
 
 void IdeaWMIYoga::processWMI() {
-    setProperty("Feature", "Yoga Mode Control");
+    setProperty("Feature", feature);
 }
 
 void IdeaWMIYoga::updateYogaMode() {
@@ -137,20 +145,28 @@ IOReturn IdeaWMIYoga::setPowerState(unsigned long powerStateOrdinal, IOService *
 
 OSDefineMetaClassAndStructors(IdeaWMIPaper, YogaWMI);
 
+const char* IdeaWMIPaper::registerEvent(OSString *guid, UInt32 id) {
+    if (guid->isEqualTo(PAPER_LOOKING_WMI_EVENT)) {
+        paperEvent = id;
+        return feature;
+    }
+    return nullptr;
+}
+
 void IdeaWMIPaper::ACPIEvent(UInt32 argument) {
-    if (argument != kIOACPIMessageReserved) {
+    if (argument != paperEvent) {
         super::ACPIEvent(argument);
         return;
     }
 
-    DebugLog("message: ACPI notification 80");
+    DebugLog("message: ACPI notification 0x%02X", argument);
     // force enable keyboard and touchpad
     setTopCase(true);
     dispatchMessage(kSMC_FnlockEvent, NULL);
 }
 
 void IdeaWMIPaper::processWMI() {
-    setProperty("Feature", "Paper Display");
+    setProperty("Feature", feature);
 }
 
 OSDefineMetaClassAndStructors(IdeaWMIBattery, YogaWMI);
@@ -171,7 +187,7 @@ bool IdeaWMIBattery::getBatteryInfo(UInt32 index, OSArray *bat) {
     bool ret;
 
     OSObject* params[1] = {
-        OSNumber::withNumber(index, 32),
+        OSNumber::withNumber(index, 32)
     };
 
     ret = YWMI->executeMethod(BAT_INFO_WMI_STRING, &result, params, 1);

@@ -33,12 +33,14 @@ protected:
     OSDictionary *Event {nullptr};
 
     /**
-     *  Check WMI event id
+     *  Register WMI event id
      *
-     *  @param cname WMI event name
+     *  @param guid WMI GUID
      *  @param id  WMI event id
+     *
+     *  @return event name if available
      */
-    virtual void checkEvent(const char *cname, UInt32 id);
+    inline virtual const char* registerEvent(OSString *guid, UInt32 id) {return nullptr;};
     
     /**
      *  Corresponding event to trigger after receiving a message
