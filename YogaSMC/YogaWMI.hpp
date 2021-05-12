@@ -33,14 +33,6 @@ protected:
     OSDictionary *Event {nullptr};
 
     /**
-     *  Check WMI event id
-     *
-     *  @param cname WMI event name
-     *  @param id  WMI event id
-     */
-    virtual void checkEvent(const char *cname, UInt32 id);
-    
-    /**
      *  Register WMI event id
      *
      *  @param guid WMI GUID

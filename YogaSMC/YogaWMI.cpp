@@ -32,43 +32,41 @@ IOService *YogaWMI::probe(IOService *provider, SInt32 *score)
     return this;
 }
 
-void YogaWMI::checkEvent(const char *cname, UInt32 id) {
-    if (id == kIOACPIMessageReserved)
-        AlwaysLog("found reserved notify id 0x%x for %s", id, cname);
-    else
-        AlwaysLog("found unknown notify id 0x%x for %s", id, cname);
-}
-
 void YogaWMI::getNotifyID(const char *key) {
     OSDictionary *item = OSDynamicCast(OSDictionary, Event->getObject(key));
     if (!item) {
         AlwaysLog("found unparsed notify id %s", key);
         return;
     }
+
     OSNumber *num = OSDynamicCast(OSNumber, item->getObject(kWMINotifyId));
     if (num == nullptr) {
         AlwaysLog("found invalid notify id %s", key);
         return;
     }
+
     UInt32 id;
     sscanf(key, "%2x", &id);
     if (id != num->unsigned8BitValue())
         AlwaysLog("notify id %s mismatch %x", key, num->unsigned8BitValue());
 
-    OSDictionary *mof = OSDynamicCast(OSDictionary, item->getObject("MOF"));
-    if (!mof) {
-        AlwaysLog("found notify id 0x%x with no description", id);
-        return;
-    }
-    OSString *cname = OSDynamicCast(OSString, mof->getObject("__CLASS"));
-    if (!cname) {
-        AlwaysLog("found notify id 0x%x with no __CLASS", id);
-        return;
-    }
     const char *rname = nullptr;
     OSString *guid = OSDynamicCast(OSString, item->getObject("guid"));
     if (guid)
         rname = registerEvent(guid, id);
+
+    OSDictionary *mof = OSDynamicCast(OSDictionary, item->getObject("MOF"));
+    if (!mof) {
+        AlwaysLog("found %s notify id 0x%x with no description", rname ? rname : "unknown", id);
+        return;
+    }
+
+    OSString *cname = OSDynamicCast(OSString, mof->getObject("__CLASS"));
+    if (!cname) {
+        AlwaysLog("found %s notify id 0x%x with no __CLASS", rname ? rname : "unknown", id);
+        return;
+    }
+
     AlwaysLog("found %s notify id 0x%x for %s", rname ? rname : "unknown", id, cname->getCStringNoCopy());
     // TODO: Event Enable and Disable WExx; Data Collection Enable and Disable WCxx
 }
@@ -131,7 +129,7 @@ void YogaWMI::stop(IOService *provider)
 }
 
 void YogaWMI::ACPIEvent(UInt32 argument) {
-    AlwaysLog("message: Unknown ACPI Notification 0x%x", argument);
+    AlwaysLog("message: Unknown ACPI Notification 0x%02X", argument);
 }
 
 IOReturn YogaWMI::message(UInt32 type, IOService *provider, void *argument) {

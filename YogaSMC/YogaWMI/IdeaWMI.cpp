@@ -54,7 +54,7 @@ void IdeaWMIYoga::ACPIEvent(UInt32 argument) {
         return;
     }
 
-    DebugLog("message: ACPI notification D0");
+    DebugLog("message: ACPI notification 0x%02X", argument);
     updateYogaMode();
 }
 
@@ -159,7 +159,7 @@ void IdeaWMIPaper::ACPIEvent(UInt32 argument) {
         return;
     }
 
-    DebugLog("message: ACPI notification 80");
+    DebugLog("message: ACPI notification 0x%02X", argument);
     // force enable keyboard and touchpad
     setTopCase(true);
     dispatchMessage(kSMC_FnlockEvent, NULL);
