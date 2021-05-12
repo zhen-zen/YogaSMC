@@ -172,6 +172,41 @@ IOReturn YogaSMC::setPowerState(unsigned long powerStateOrdinal, IOService * wha
     return kIOPMAckImplied;
 }
 
+void YogaSMC::setPropertiesGated(OSObject* props) {
+    OSDictionary* dict = OSDynamicCast(OSDictionary, props);
+    if (!dict)
+        return;
+
+    OSCollectionIterator* i = OSCollectionIterator::withCollection(dict);
+
+    if (i) {
+        while (OSString* key = OSDynamicCast(OSString, i->getNextObject())) {
+            if (key->isEqualTo(readECPrompt)) {
+                if (!ec)
+                    continue;
+                OSNumber *value;
+                getPropertyNumber(readECPrompt);
+                if (value->unsigned8BitValue() >= sensorCount) {
+                    AlwaysLog(valueInvalid, readECPrompt);
+                    continue;
+                }
+                uint32_t raw = atomic_load_explicit(&currentSensor[value->unsigned8BitValue()], memory_order_acquire);
+                AlwaysLog(updateSuccess, readECPrompt, raw);
+            } else {
+                AlwaysLog("Unknown property %s", key->getCStringNoCopy());
+            }
+        }
+        i->release();
+    }
+
+    return;
+}
+
+IOReturn YogaSMC::setProperties(OSObject *props) {
+    commandGate->runAction(OSMemberFunctionCast(IOCommandGate::Action, this, &YogaSMC::setPropertiesGated), props);
+    return kIOReturnSuccess;
+}
+
 EXPORT extern "C" kern_return_t ADDPR(kern_start)(kmod_info_t *, void *) {
     // Report success but actually do not start and let I/O Kit unload us.
     // This works better and increases boot speed in some cases.

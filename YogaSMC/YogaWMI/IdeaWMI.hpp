@@ -48,6 +48,8 @@ class IdeaWMIYoga : public YogaWMI
     typedef YogaWMI super;
     OSDeclareDefaultStructors(IdeaWMIYoga)
 
+    static constexpr const char *feature = "Yoga Mode Control";
+    UInt32 YogaEvent {0xd0};
     /**
      *  Current Yoga Mode, see kYogaMode
      */
@@ -60,6 +62,7 @@ class IdeaWMIYoga : public YogaWMI
 
     void processWMI() APPLE_KEXT_OVERRIDE;
     void ACPIEvent(UInt32 argument) APPLE_KEXT_OVERRIDE;
+    const char* registerEvent(OSString *guid, UInt32 id) APPLE_KEXT_OVERRIDE;
     inline virtual bool PMSupport() APPLE_KEXT_OVERRIDE {return true;};
 
 public:
@@ -73,8 +76,12 @@ class IdeaWMIPaper : public YogaWMI
     typedef YogaWMI super;
     OSDeclareDefaultStructors(IdeaWMIPaper)
 
+    static constexpr const char *feature = "Paper Display";
+    UInt32 paperEvent {0x80};
+
     void processWMI() APPLE_KEXT_OVERRIDE;
     void ACPIEvent(UInt32 argument) APPLE_KEXT_OVERRIDE;
+    const char* registerEvent(OSString *guid, UInt32 id) APPLE_KEXT_OVERRIDE;
 };
 
 class IdeaWMIBattery : public YogaWMI
