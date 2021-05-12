@@ -144,6 +144,10 @@ class IdeaWMIGameZone : public YogaWMI
 
     bool getGamzeZoneData(UInt32 query, UInt32 *result);
 
+#ifndef ALTER
+    friend class IdeaSMC;
+#endif
+
     void processWMI() APPLE_KEXT_OVERRIDE;
     void ACPIEvent(UInt32 argument) APPLE_KEXT_OVERRIDE;
     const char* registerEvent(OSString *guid, UInt32 id) APPLE_KEXT_OVERRIDE;

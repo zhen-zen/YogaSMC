@@ -969,6 +969,19 @@ bool IdeaVPC::method_vpcw(UInt32 cmd, UInt32 data) {
     return (ret == kIOReturnSuccess);
 }
 
+bool IdeaVPC::examineWMI(IOService *provider) {
+#ifndef ALTER
+    OSString *feature;
+    if ((feature = OSDynamicCast(OSString, provider->getProperty("Feature"))) &&
+        feature->isEqualTo("Game Zone")) {
+        IdeaSMC *sensor = OSDynamicCast(IdeaSMC, smc);
+        if (sensor)
+            sensor->setWMI(provider);
+    }
+#endif
+    return true;
+}
+
 IOService* IdeaVPC::initWMI(IOACPIPlatformDevice *provider) {
     return YogaWMI::withIdea(provider);
 };
