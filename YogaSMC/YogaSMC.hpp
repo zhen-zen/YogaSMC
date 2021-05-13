@@ -21,9 +21,6 @@ class YogaSMC : public YogaBaseService
     typedef YogaBaseService super;
     OSDeclareDefaultStructors(YogaSMC)
 
-private:
-    inline virtual bool PMSupport() APPLE_KEXT_OVERRIDE {return true;};
-
 protected:
     bool awake {false};
 

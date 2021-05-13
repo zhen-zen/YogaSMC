@@ -96,9 +96,9 @@ protected:
     bool updateTopCase();
 
     /**
-     *  Enable power management support
+     *  Power management support
      */
-    inline virtual bool PMSupport() {return false;};
+    bool isPMsupported {false};
 
     /**
      *  Related ACPI methods

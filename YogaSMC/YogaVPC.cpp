@@ -39,6 +39,8 @@ IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
         return nullptr;
     }
 
+    isPMsupported = true;
+
     auto iterator = IORegistryIterator::iterateOver(gIOACPIPlane, kIORegistryIterateRecursively);
     if (!iterator) {
         AlwaysLog("findWMI failed");

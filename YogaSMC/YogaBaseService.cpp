@@ -74,7 +74,7 @@ bool YogaBaseService::start(IOService *provider)
       propertyMatch->release();
     }
 
-    if (PMSupport()) {
+    if (isPMsupported) {
         PMinit();
         provider->joinPMtree(this);
         registerPowerDriver(this, IOPMPowerStates, kIOPMNumberPowerStates);
@@ -95,7 +95,7 @@ void YogaBaseService::stop(IOService *provider)
     OSSafeReleaseNULL(commandGate);
     OSSafeReleaseNULL(workLoop);
 
-    if (PMSupport())
+    if (isPMsupported)
         PMstop();
 
     super::stop(provider);

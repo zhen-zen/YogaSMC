@@ -21,8 +21,6 @@ class YogaVPC : public YogaBaseService
   OSDeclareDefaultStructors(YogaVPC);
 
 private:
-    inline virtual bool PMSupport() APPLE_KEXT_OVERRIDE {return true;};
-
     /**
      *  Related ACPI methods
      *  See SSDTexamples

@@ -60,6 +60,8 @@ void YogaSMC::addVSMCKey() {
 }
 
 bool YogaSMC::start(IOService *provider) {
+    isPMsupported = true;
+
     if (!super::start(provider))
         return false;
 

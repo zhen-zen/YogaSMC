@@ -54,7 +54,6 @@ class IdeaWMIYoga : public YogaWMI
     void processWMI() APPLE_KEXT_OVERRIDE;
     void ACPIEvent(UInt32 argument) APPLE_KEXT_OVERRIDE;
     const char* registerEvent(OSString *guid, UInt32 id) APPLE_KEXT_OVERRIDE;
-    inline virtual bool PMSupport() APPLE_KEXT_OVERRIDE {return true;};
 
 public:
     void stop(IOService *provider) APPLE_KEXT_OVERRIDE;
