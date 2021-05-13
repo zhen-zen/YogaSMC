@@ -272,8 +272,8 @@ bool DYVPC::examineWMI(IOService *provider) {
     return true;
 }
 
-IOService* DYVPC::initWMI(IOACPIPlatformDevice *provider) {
-    return YogaWMI::withDY(provider);
+IOService* DYVPC::initWMI(WMI *instance) {
+    return YogaWMI::withDYWMI(instance);
 }
 
 #ifndef ALTER

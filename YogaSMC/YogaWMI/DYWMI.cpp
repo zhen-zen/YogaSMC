@@ -15,13 +15,10 @@ extern "C"
 
 OSDefineMetaClassAndStructors(DYWMI, YogaWMI);
 
-YogaWMI* YogaWMI::withDY(IOService *provider) {
-    WMI *candidate = new WMI(provider);
-    candidate->initialize();
-
+YogaWMI* YogaWMI::withDYWMI(WMI *provider) {
     YogaWMI* dev = nullptr;
 
-    if (candidate->hasMethod(SENSOR_DATA_WMI_METHOD, 0))
+    if (provider->hasMethod(SENSOR_DATA_WMI_METHOD, 0))
         dev = OSTypeAlloc(DYWMI);
     else
         dev = OSTypeAlloc(YogaWMI);
@@ -29,12 +26,10 @@ YogaWMI* YogaWMI::withDY(IOService *provider) {
     OSDictionary *dictionary = OSDictionary::withCapacity(1);
 
     dev->iname = provider->getName();
-    dev->YWMI = candidate;
+    dev->YWMI = provider;
 
-    if (!dev->init(dictionary)) {
+    if (!dev->init(dictionary))
         OSSafeReleaseNULL(dev);
-        delete candidate;
-    }
 
     dictionary->release();
     return dev;

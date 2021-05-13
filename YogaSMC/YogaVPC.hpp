@@ -106,11 +106,11 @@ protected:
     /**
      *  Initialize WMI
      *
-     *  @param provider WMI provider
+     *  @param instance WMI instance
      *
      *  @return Initialized YogaWMI instance
      */
-    inline virtual IOService* initWMI(IOACPIPlatformDevice *provider) {return nullptr;};
+    inline virtual IOService* initWMI(WMI *instance) {return nullptr;};
 
     /**
      *  Examine WMI

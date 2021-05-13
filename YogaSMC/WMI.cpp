@@ -325,7 +325,7 @@ void WMI::start()
 
 bool WMI::parseBMF()
 {
-    OSObject *bmf;
+    OSObject *bmf = nullptr;
     if (!executeMethod(BMF_DATA_BUFFER, &bmf)) {
         AlwaysLog("Failed to evaluate BMF data");
         return false;

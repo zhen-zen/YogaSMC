@@ -9,32 +9,29 @@
 
 #include "IdeaWMI.hpp"
 
-YogaWMI* YogaWMI::withIdea(IOService *provider) {
-    WMI *candidate = new WMI(provider);
-    candidate->initialize();
-
+YogaWMI* YogaWMI::withIdeaWMI(WMI *provider) {
     YogaWMI* dev = nullptr;
 
-    if (candidate->hasMethod(GSENSOR_WMI_EVENT, ACPI_WMI_EVENT) && candidate->hasMethod(GSENSOR_DATA_WMI_METHOD))
+    if (provider->hasMethod(GSENSOR_WMI_EVENT, ACPI_WMI_EVENT) && provider->hasMethod(GSENSOR_DATA_WMI_METHOD)) {
         dev = OSTypeAlloc(IdeaWMIYoga);
-    else if (candidate->hasMethod(PAPER_LOOKING_WMI_EVENT, ACPI_WMI_EVENT))
+        dev->isPMsupported = true;
+    } else if (provider->hasMethod(PAPER_LOOKING_WMI_EVENT, ACPI_WMI_EVENT)) {
         dev = OSTypeAlloc(IdeaWMIPaper);
-    else if (candidate->hasMethod(BAT_INFO_WMI_STRING, ACPI_WMI_EXPENSIVE | ACPI_WMI_STRING))
+    } else if (provider->hasMethod(BAT_INFO_WMI_STRING, ACPI_WMI_EXPENSIVE | ACPI_WMI_STRING)) {
         dev = OSTypeAlloc(IdeaWMIBattery);
-    else if (candidate->hasMethod(GAME_ZONE_DATA_WMI_METHOD))
+    } else if (provider->hasMethod(GAME_ZONE_DATA_WMI_METHOD)) {
         dev = OSTypeAlloc(IdeaWMIGameZone);
-    else
+    } else {
         dev = OSTypeAlloc(YogaWMI);
+    }
 
     OSDictionary *dictionary = OSDictionary::withCapacity(1);
 
     dev->iname = provider->getName();
-    dev->YWMI = candidate;
+    dev->YWMI = provider;
 
-    if (!dev->init(dictionary)) {
+    if (!dev->init(dictionary))
         OSSafeReleaseNULL(dev);
-        delete candidate;
-    }
 
     dictionary->release();
     return dev;

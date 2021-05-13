@@ -1224,7 +1224,6 @@ bool ThinkVPC::updateKBDLocale(bool update) {
     setProperty(localePrompt, locale, 32);
 
     return true;
-
 }
 
 bool ThinkVPC::setKBDLocale(UInt32 value) {

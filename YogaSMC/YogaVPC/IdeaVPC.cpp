@@ -966,8 +966,8 @@ bool IdeaVPC::examineWMI(IOService *provider) {
     return true;
 }
 
-IOService* IdeaVPC::initWMI(IOACPIPlatformDevice *provider) {
-    return YogaWMI::withIdea(provider);
+IOService* IdeaVPC::initWMI(WMI *instance) {
+    return YogaWMI::withIdeaWMI(instance);
 };
 
 #ifndef ALTER

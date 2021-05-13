@@ -57,22 +57,23 @@ IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
                     DebugLog("Skip VPC interface");
                     continue;
                 }
-                OSObject *uid = nullptr;
-                if (dev->evaluateObject("_UID", &uid) == kIOReturnSuccess) {
-                    OSString *str = OSDynamicCast(OSString, uid);
-                    if (str && str->isEqualTo("TBFP")) {
-                        DebugLog("Skip Thunderbolt interface");
-                        continue;
-                    }
+
+                WMI *candidate = new WMI(dev);
+                candidate->initialize();
+                if (candidate->hasMethod(TBT_WMI_GUID)) {
+                    DebugLog("Skip Thunderbolt interface");
+                    delete candidate;
+                    continue;
                 }
-                OSSafeReleaseNULL(uid);
-                if (auto wmi = initWMI(dev)) {
+
+                if (auto wmi = initWMI(candidate)) {
                     DebugLog("WMI available at %s", dev->getName());
                     WMICollection->setObject(wmi);
                     WMIProvCollection->setObject(dev);
                     wmi->release();
                 } else {
                     DebugLog("WMI init failed at %s", dev->getName());
+                    delete candidate;
                 }
             }
         }
@@ -116,7 +117,11 @@ bool YogaVPC::start(IOService *provider) {
     }
 #ifndef ALTER
     if (smc) {
-        if (!smc->attach(this) || !smc->start(this)) {
+        if (!smc->attach(this)) {
+            OSSafeReleaseNULL(smc);
+            AlwaysLog("Failed to attach SMC instance");
+        } else if (!smc->start(this)) {
+            smc->detach(this);
             AlwaysLog("Failed to start SMC instance");
             OSSafeReleaseNULL(smc);
         }

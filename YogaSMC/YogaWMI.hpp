@@ -56,8 +56,8 @@ public:
     virtual void stop(IOService *provider) APPLE_KEXT_OVERRIDE;
 
     virtual IOReturn message(UInt32 type, IOService *provider, void *argument) APPLE_KEXT_OVERRIDE;
-    static YogaWMI *withIdea(IOService *provider);
-    static YogaWMI *withDY(IOService *provider);
+    static YogaWMI *withIdeaWMI(WMI *provider);
+    static YogaWMI *withDYWMI(WMI *provider);
 };
 
 #endif /* YogaWMI_hpp */

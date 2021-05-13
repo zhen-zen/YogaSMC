@@ -181,7 +181,7 @@ private:
      */
     bool initEC();
 
-    IOService* initWMI(IOACPIPlatformDevice *provider) APPLE_KEXT_OVERRIDE;
+    IOService* initWMI(WMI *instance) APPLE_KEXT_OVERRIDE;
     bool examineWMI(IOService *provider) APPLE_KEXT_OVERRIDE;
 
 #ifndef ALTER
