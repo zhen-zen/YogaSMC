@@ -246,6 +246,11 @@ void IdeaWMIGameZone::processWMI() {
         setProperty("Fan number", result, 32);
     else
         AlwaysLog("Failed to get fan number");
+
+    if (getGamzeZoneData(GAME_ZONE_WMI_CAP_KEYBOARD, &result))
+        setProperty("Keyboard Feature", result, 32);
+    else
+        AlwaysLog("Failed to get keyboard feature");
 }
 
 void IdeaWMIGameZone::ACPIEvent(UInt32 argument) {
