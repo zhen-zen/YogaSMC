@@ -181,6 +181,11 @@ private:
      */
     bool initEC();
 
+    inline bool probeVPC(IOService *provider) APPLE_KEXT_OVERRIDE {
+        vendorWMISupport = true;
+        return true;
+    };
+
     IOService* initWMI(WMI *instance) APPLE_KEXT_OVERRIDE;
     bool examineWMI(IOService *provider) APPLE_KEXT_OVERRIDE;
 

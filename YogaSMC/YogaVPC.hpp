@@ -93,6 +93,11 @@ private:
      */
     OSDictionary *DYTCVersion {nullptr};
 
+    /**
+     *  Probe compatible WMI devices
+     */
+    void probeWMI();
+
 protected:
 
     /**
@@ -102,6 +107,11 @@ protected:
     
     OSOrderedSet *WMICollection {nullptr};
     OSOrderedSet *WMIProvCollection {nullptr};
+
+    /**
+     *  Vendor specific WMI support
+     */
+    bool vendorWMISupport {false};
 
     /**
      *  Initialize WMI

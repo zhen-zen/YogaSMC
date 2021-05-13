@@ -41,55 +41,64 @@ IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
 
     isPMsupported = true;
 
-    auto iterator = IORegistryIterator::iterateOver(gIOACPIPlane, kIORegistryIterateRecursively);
-    if (!iterator) {
-        AlwaysLog("findWMI failed");
-    } else {
-        auto pnp = OSString::withCString(PnpDeviceIdWMI);
-        IOACPIPlatformDevice *dev;
-        WMICollection = OSOrderedSet::withCapacity(1);
-        WMIProvCollection = OSOrderedSet::withCapacity(1);
-
-        while (auto entry = iterator->getNextObject()) {
-            if (entry->compareName(pnp) &&
-                (dev = OSDynamicCast(IOACPIPlatformDevice, entry))) {
-                if (dev == vpc) {
-                    DebugLog("Skip VPC interface");
-                    continue;
-                }
-
-                WMI *candidate = new WMI(dev);
-                candidate->initialize();
-                if (candidate->hasMethod(TBT_WMI_GUID)) {
-                    DebugLog("Skip Thunderbolt interface");
-                    delete candidate;
-                    continue;
-                }
-
-                if (auto wmi = initWMI(candidate)) {
-                    DebugLog("WMI available at %s", dev->getName());
-                    WMICollection->setObject(wmi);
-                    WMIProvCollection->setObject(dev);
-                    wmi->release();
-                } else {
-                    DebugLog("WMI init failed at %s", dev->getName());
-                    delete candidate;
-                }
-            }
-        }
-        if (WMICollection->getCount() == 0) {
-            OSSafeReleaseNULL(WMICollection);
-            OSSafeReleaseNULL(WMIProvCollection);
-        }
-        iterator->release();
-        pnp->release();
-    }
+    if (vendorWMISupport)
+        probeWMI();
 
 #ifndef ALTER
     if (getProperty("Sensors") != nullptr)
         smc = initSMC();
 #endif
     return this;
+}
+
+void YogaVPC::probeWMI() {
+    auto iterator = IORegistryIterator::iterateOver(gIOACPIPlane, kIORegistryIterateRecursively);
+    if (!iterator) {
+        AlwaysLog("findWMI failed");
+        return;
+    }
+
+    auto pnp = OSString::withCString(PnpDeviceIdWMI);
+    IOACPIPlatformDevice *dev;
+    WMICollection = OSOrderedSet::withCapacity(1);
+    WMIProvCollection = OSOrderedSet::withCapacity(1);
+    
+    while (auto entry = iterator->getNextObject()) {
+        if (entry->compareName(pnp) && (dev = OSDynamicCast(IOACPIPlatformDevice, entry))) {
+            if (dev == vpc) {
+                DebugLog("Skip VPC interface");
+                continue;
+            }
+            
+            WMI *candidate = new WMI(dev);
+            candidate->initialize();
+            if (candidate->hasMethod(TBT_WMI_GUID)) {
+                DebugLog("Skip Thunderbolt interface");
+                delete candidate;
+                continue;
+            }
+            
+            if (auto wmi = initWMI(candidate)) {
+                DebugLog("WMI available at %s", dev->getName());
+                WMICollection->setObject(wmi);
+                WMIProvCollection->setObject(dev);
+                wmi->release();
+            } else {
+                DebugLog("WMI init failed at %s", dev->getName());
+                delete candidate;
+            }
+        }
+    }
+
+    if (WMICollection->getCount() == 0) {
+        OSSafeReleaseNULL(WMICollection);
+        OSSafeReleaseNULL(WMIProvCollection);
+    } else {
+        setProperty("YogaWMISupported", true);
+    }
+
+    iterator->release();
+    pnp->release();
 }
 
 bool YogaVPC::start(IOService *provider) {
@@ -108,10 +117,17 @@ bool YogaVPC::start(IOService *provider) {
         for (int i=WMICollection->getCount()-1; i >= 0; i--) {
             IOService *wmi = OSDynamicCast(IOService, WMICollection->getObject(i));
             IOService *prov = OSDynamicCast(IOService, WMIProvCollection->getObject(i));
-            if (!wmi->attach(prov) || !wmi->start(prov) || !examineWMI(wmi)) {
+            if (!wmi->attach(prov)) {
+                AlwaysLog("Failed to attach WMI instance on %s", prov->getName());
+                WMICollection->removeObject(wmi);
+                WMIProvCollection->removeObject(prov);
+            } else if (!wmi->start(prov)) {
+                wmi->detach(prov);
                 AlwaysLog("Failed to start WMI instance on %s", prov->getName());
                 WMICollection->removeObject(wmi);
                 WMIProvCollection->removeObject(prov);
+            } else {
+                examineWMI(wmi);
             }
         }
     }

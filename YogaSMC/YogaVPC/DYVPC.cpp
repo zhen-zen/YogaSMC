@@ -26,6 +26,7 @@ bool DYVPC::probeVPC(IOService *provider) {
         return false;
     }
 
+    vendorWMISupport = true;
     return true;
 }
 
