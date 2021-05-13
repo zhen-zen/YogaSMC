@@ -128,31 +128,10 @@ void DYVPC::updateVPC(UInt32 event) {
 }
 
 IOReturn DYVPC::message(UInt32 type, IOService *provider, void *argument) {
-    switch (type)
-    {
-        case kSMC_setDisableTouchpad:
-        case kSMC_getDisableTouchpad:
-        case kPS2M_notifyKeyPressed:
-        case kPS2M_notifyKeyTime:
-        case kPS2M_resetTouchpad:
-        case kSMC_setKeyboardStatus:
-        case kSMC_getKeyboardStatus:
-        case kSMC_notifyKeystroke:
-            break;
+    if (type != kIOACPIMessageDeviceNotification || !argument)
+        return super::message(type, provider, argument);
 
-        case kIOACPIMessageDeviceNotification:
-            if (!argument)
-                AlwaysLog("message: Unknown ACPI notification");
-            else
-                updateVPC(*((UInt32 *) argument));
-            break;
-
-        default:
-            if (argument)
-                AlwaysLog("message: type=%x, provider=%s, argument=0x%04x", type, provider->getName(), *((UInt32 *) argument));
-            else
-                AlwaysLog("message: type=%x, provider=%s", type, provider->getName());
-    }
+    updateVPC(*((UInt32 *) argument));
 
     return kIOReturnSuccess;
 }
