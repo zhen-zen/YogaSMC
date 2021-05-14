@@ -222,7 +222,7 @@ bool IdeaWMIGameZone::getGamzeZoneData(UInt32 query, UInt32 *result) {
         OSNumber::withNumber(0ULL, 32)
     };
     
-    ret = YWMI->executeInteger(GAME_ZONE_DATA_WMI_METHOD, result, params, 3);
+    ret = YWMI->executeInteger(GAME_ZONE_DATA_WMI_METHOD, result, params, 3, true);
     params[0]->release();
     params[1]->release();
     params[2]->release();
