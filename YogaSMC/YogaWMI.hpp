@@ -33,12 +33,14 @@ protected:
     OSDictionary *Event {nullptr};
 
     /**
-     *  Check WMI event id
+     *  Register WMI event id
      *
-     *  @param cname WMI event name
+     *  @param guid WMI GUID
      *  @param id  WMI event id
+     *
+     *  @return event name if available
      */
-    virtual void checkEvent(const char *cname, UInt32 id);
+    inline virtual const char* registerEvent(OSString *guid, UInt32 id) {return nullptr;};
     
     /**
      *  Corresponding event to trigger after receiving a message
@@ -54,8 +56,8 @@ public:
     virtual void stop(IOService *provider) APPLE_KEXT_OVERRIDE;
 
     virtual IOReturn message(UInt32 type, IOService *provider, void *argument) APPLE_KEXT_OVERRIDE;
-    static YogaWMI *withIdea(IOService *provider);
-    static YogaWMI *withDY(IOService *provider);
+    static YogaWMI *withIdeaWMI(WMI *provider);
+    static YogaWMI *withDYWMI(WMI *provider);
 };
 
 #endif /* YogaWMI_hpp */

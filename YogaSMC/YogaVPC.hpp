@@ -21,8 +21,6 @@ class YogaVPC : public YogaBaseService
   OSDeclareDefaultStructors(YogaVPC);
 
 private:
-    inline virtual bool PMSupport() APPLE_KEXT_OVERRIDE {return true;};
-
     /**
      *  Related ACPI methods
      *  See SSDTexamples
@@ -95,6 +93,11 @@ private:
      */
     OSDictionary *DYTCVersion {nullptr};
 
+    /**
+     *  Probe compatible WMI devices
+     */
+    void probeWMI();
+
 protected:
 
     /**
@@ -106,13 +109,18 @@ protected:
     OSOrderedSet *WMIProvCollection {nullptr};
 
     /**
+     *  Vendor specific WMI support
+     */
+    bool vendorWMISupport {false};
+
+    /**
      *  Initialize WMI
      *
-     *  @param provider WMI provider
+     *  @param instance WMI instance
      *
      *  @return Initialized YogaWMI instance
      */
-    inline virtual IOService* initWMI(IOACPIPlatformDevice *provider) {return nullptr;};
+    inline virtual IOService* initWMI(WMI *instance) {return nullptr;};
 
     /**
      *  Examine WMI
@@ -255,6 +263,7 @@ public:
     virtual void stop(IOService *provider) APPLE_KEXT_OVERRIDE;
 
     virtual IOReturn setProperties(OSObject* props) APPLE_KEXT_OVERRIDE;
+    virtual IOReturn message(UInt32 type, IOService *provider, void *argument) APPLE_KEXT_OVERRIDE;
     virtual IOReturn setPowerState(unsigned long powerState, IOService * whatDevice) APPLE_KEXT_OVERRIDE;
 
     /**

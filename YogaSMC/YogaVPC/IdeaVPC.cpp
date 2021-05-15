@@ -121,16 +121,6 @@ bool IdeaVPC::exitVPC() {
 IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
     switch (type)
     {
-        case kSMC_setDisableTouchpad:
-        case kSMC_getDisableTouchpad:
-        case kPS2M_notifyKeyPressed:
-        case kPS2M_notifyKeyTime:
-        case kPS2M_resetTouchpad:
-        case kSMC_setKeyboardStatus:
-        case kSMC_getKeyboardStatus:
-        case kSMC_notifyKeystroke:
-            break;
-
         case kSMC_YogaEvent:
             {
                 UInt32 mode = *((UInt32 *) argument);
@@ -171,19 +161,13 @@ IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
             break;
 
         case kIOACPIMessageDeviceNotification:
-            if (!argument)
-                AlwaysLog("message: Unknown ACPI notification");
-            else if (*((UInt32 *) argument) == kIOACPIMessageReserved)
+            if (argument && *((UInt32 *) argument) == kIOACPIMessageReserved) {
                 updateVPC();
-            else
-                AlwaysLog("message: Unknown ACPI notification 0x%04x", *((UInt32 *) argument));
-            break;
+                break;
+            }
 
         default:
-            if (argument)
-                AlwaysLog("message: type=%x, provider=%s, argument=0x%04x", type, provider->getName(), *((UInt32 *) argument));
-            else
-                AlwaysLog("message: type=%x, provider=%s", type, provider->getName());
+            return super::message(type, provider, argument);
     }
 
     return kIOReturnSuccess;
@@ -969,8 +953,21 @@ bool IdeaVPC::method_vpcw(UInt32 cmd, UInt32 data) {
     return (ret == kIOReturnSuccess);
 }
 
-IOService* IdeaVPC::initWMI(IOACPIPlatformDevice *provider) {
-    return YogaWMI::withIdea(provider);
+bool IdeaVPC::examineWMI(IOService *provider) {
+#ifndef ALTER
+    OSString *feature;
+    if ((feature = OSDynamicCast(OSString, provider->getProperty("Feature"))) &&
+        feature->isEqualTo("Game Zone")) {
+        IdeaSMC *sensor = OSDynamicCast(IdeaSMC, smc);
+        if (sensor)
+            sensor->setWMI(provider);
+    }
+#endif
+    return true;
+}
+
+IOService* IdeaVPC::initWMI(WMI *instance) {
+    return YogaWMI::withIdeaWMI(instance);
 };
 
 #ifndef ALTER

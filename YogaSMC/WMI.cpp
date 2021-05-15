@@ -26,6 +26,7 @@
 #include <uuid/uuid.h>
 
 #define kWMIMethod "_WDG"
+#define BMF_DATA_BUFFER "05901221-d566-11d1-b2f0-00a0c9062910"
 
 struct __attribute__((packed)) WMI_DATA
 {
@@ -96,10 +97,9 @@ bool WMI::initialize()
     if (!mDevice)
         return false;
 
-    name = mDevice->getName();
+    iname = mDevice->getName();
     mData = OSDictionary::withCapacity(1);
     mEvent = OSDictionary::withCapacity(1);
-    mBMFCandidate = OSArray::withCapacity(1);
 
     if (!extractData()) {
         AlwaysLog("WMI method %s not found", kWMIMethod);
@@ -113,7 +113,6 @@ WMI::~WMI()
 {
     OSSafeReleaseNULL(mData);
     OSSafeReleaseNULL(mEvent);
-    OSSafeReleaseNULL(mBMFCandidate);
 }
 
 // Parse the _WDG method output for WMI data blocks
@@ -167,25 +166,14 @@ void WMI::parseWDGEntry(struct WMI_DATA* block)
     } else {
         snprintf(object_id_string, 3, "%c%c", block->object_id[0], block->object_id[1]);
         setPropertyString(dict, kWMIObjectId, object_id_string);
-
-        // validate BMF
-        if (block->flags == 0 && block->instance_count == 1) {
-            DebugLog("Possible BMF object %s %s", guid_string, object_id_string);
-            char bmfName[5];
-            snprintf(bmfName, 5, ACPIBufferName, object_id_string);
-
-            DebugLog("Validating buffer %s", bmfName);
-            if (mDevice->validateObject(bmfName) == kIOReturnSuccess)
-                mBMFCandidate->setObject(dict);
-        }
     }
 
     setPropertyNumber(dict, kWMIInstanceCount, block->instance_count, 8);
-    setPropertyNumber(dict, kWMIFlags, block->flags, 8);
-#ifdef DEBUG
     value = parseWMIFlags(block->flags);
     dict->setObject(kWMIFlagsText, value);
     value->release();
+#ifdef DEBUG
+    setPropertyNumber(dict, kWMIFlags, block->flags, 8);
     setPropertyBytes(dict, "raw", block, WMI_DATA_SIZE);
 #endif
     mData->setObject(guid_string, dict);
@@ -328,71 +316,56 @@ UInt8 WMI::getInstanceCount(const char *guid)
 
     return instanceCount->unsigned8BitValue();
 }
-void WMI::extractBMF()
+
+void WMI::start()
 {
-    DebugLog("Extract %d possible BMF object", mBMFCandidate->getCount());
-    for (unsigned int i = 0; i < mBMFCandidate->getCount(); i++) {
-        DebugLog("%d / %d possible BMF object", i, mBMFCandidate->getCount());
-        if (foundBMF) break;
-        parseBMF(OSDynamicCast(OSDictionary, mBMFCandidate->getObject(i)));
-    }
+    parseBMF();
     mDevice->setProperty("WDG", mData);
 }
 
-bool WMI::parseBMF(OSDictionary* dict)
+bool WMI::parseBMF()
 {
-    if (!dict)
-        return false;
-
-    OSObject *bmf;
-    OSData *data;
-
-    char methodName[5];
-
-    OSString *objectId = OSDynamicCast(OSString, dict->getObject(kWMIObjectId));
-    OSString *guidString = OSDynamicCast(OSString, dict->getObject(kWMIGuid));
-
-    snprintf(methodName, 5, ACPIBufferName, objectId->getCStringNoCopy());
-    if (mDevice->evaluateObject(methodName, &bmf) != kIOReturnSuccess) {
-        AlwaysLog("Failed to evaluate ACPI object %s for BMF data", methodName);
+    OSObject *bmf = nullptr;
+    if (!executeMethod(BMF_DATA_BUFFER, &bmf)) {
+        AlwaysLog("Failed to evaluate BMF data");
         return false;
     }
 
+    OSData *data;
     if (!(data = OSDynamicCast(OSData, bmf))) {
-        AlwaysLog("%s did not return a data blob", methodName);
+        AlwaysLog("BMF not a data blob");
         return false;
     }
 
     uint32_t len = data->getLength();
     if (len <= 16) {
-        AlwaysLog("%s too short", methodName);
+        AlwaysLog("BMF too short");
         return false;
     }
 
     uint32_t *pin = (uint32_t *)(data->getBytesNoCopy());
     if (pin[0] != 0x424D4F46 || pin[1] != 0x01 || pin[2] != len-16) {
-        AlwaysLog("%s format invalid", methodName);
+        AlwaysLog("BMF format invalid");
         return false;
     }
 
-    foundBMF = true;
 #ifdef DEBUG
     mDevice->setProperty("BMF size", data->getLength(), sizeof(unsigned int)*8);
 #endif
     uint32_t size = pin[3];
     char *pout = new char[size];
     if (ds_dec((char *)pin+16, len-16, pout, size, 0) != size) {
-        AlwaysLog("%s Decompress failed", methodName);
+        AlwaysLog("BMF Decompress failed");
         return false;
     }
     pin = nullptr;
 #ifdef DEBUG
     mDevice->setProperty("MOF size", size, sizeof(uint32_t)*8);
 #endif
-    MOF mof(pout, size, mData, name);
+    MOF mof(pout, size, mData, iname);
     mDevice->removeProperty("MOF");
 
-    OSObject *result = mof.parse_bmf(guidString->getCStringNoCopy());
+    OSObject *result = mof.parse_bmf(BMF_DATA_BUFFER);
     mDevice->setProperty("MOF", result);
     if (!mof.parsed)
         mDevice->setProperty("BMF data", data);

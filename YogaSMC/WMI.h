@@ -30,6 +30,7 @@
 #define kWMIFlagsText "flags-text"
 
 #define DESC_WMI_GUID "05901221-D566-11D1-B2F0-00A0C9062910"
+#define TBT_WMI_GUID  "86ccfd48-205e-4a77-9c48-2021cbede341"
 
 #define ACPIBufferName  "WQ%s" // MOF
 #define ACPIDataSetName "WS%s" // Arg0 = index, Arg1 = buffer
@@ -55,8 +56,7 @@ class WMI
     IOACPIPlatformDevice* mDevice {nullptr};
     OSDictionary* mData = {nullptr};
     OSDictionary* mEvent = {nullptr};
-    OSArray* mBMFCandidate = {nullptr};
-    const char* name;
+    const char* iname;
 
 public:
     // Constructor
@@ -65,7 +65,8 @@ public:
     ~WMI();
 
     bool initialize();
-    void extractBMF();
+    void start();
+    inline const char *getName() {return mDevice->getName();}
 
     bool hasMethod(const char * guid, UInt8 flg = ACPI_WMI_METHOD);
     bool enableEvent(const char * guid, bool enable);
@@ -77,14 +78,12 @@ public:
     UInt8 getInstanceCount(const char * guid);
 
 private:
-    inline const char *getName() {return mDevice->getName();}
     OSDictionary* getMethod(const char * guid, UInt8 flg = 0, bool mute = false);
 
     bool extractData();
     void parseWDGEntry(struct WMI_DATA * block);
 
-    bool parseBMF(OSDictionary* dict);
-    bool foundBMF {false};
+    bool parseBMF();
 };
 
 

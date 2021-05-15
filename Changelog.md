@@ -6,7 +6,7 @@ YogaSMC Changelog
 - IdeaVPC: set conservationModeLock via Battery flag; update keyboard and battery capability via reset
 - ThinkVPC: only turn off mic mute led during init
 - YogaWMI: skip TB interface by _UID
-- ThinkVPC: evaluate raw tablet mode
+- ThinkVPC: evaluate raw tablet mode, thx @antoniomcr96
 - ThinkVPC: support basic fan speed control through setProperties, thx @wrobeljakub
 - YogaBaseService: rework findPNP
 - YogaWMI: various improvements
@@ -16,6 +16,25 @@ YogaSMC Changelog
 - DYSMC: support sensor reading, thx @jqqqqqqqqqq
 - YogaWMI: remove intermediate class
 - YogaWMI: fix duplicated loading
+- Project: adjust deployment target
+- YogaBaseService: fix logging internal name
+- YogaSMC: validate EC availability
+- YogaSMC: support read internal status
+- DYSMC: fix conflict with DirectECKey, thx @jqqqqqqqqqq
+- NC: Add Docking Station Notification Events, thx @Sniki
+- NC: add icons for dock / undock
+- DYSMC: add more sensor names
+- YogaWMI: replace checkEvent wth registerEvent
+- YogaWMI: locate BMF blob with GUID
+- YogaWMI: fix probe timeout on WMI-based VPC
+- DYSMC: validate wmis presence
+- DYWMI: BIOS event support
+- BaseService: simplify PM support check
+- IdeaWMI: Game Zone sensor support
+- YogaSMC: simplify message handling
+- BaseService: adjust log prefix
+- YogaVPC: skip tb interface with GUID
+- YogaVPC: optimize WMI handling
 
 #### v1.4.3
 - YogaWMI: fix BMF parsing

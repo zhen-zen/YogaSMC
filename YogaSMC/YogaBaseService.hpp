@@ -36,7 +36,7 @@ private:
     const OSSymbol* _deliverNotification {nullptr};
 
 protected:
-    const char* name {nullptr};
+    const char* iname {nullptr};
 
     IOWorkLoop *workLoop {nullptr};
     IOCommandGate *commandGate {nullptr};
@@ -96,9 +96,9 @@ protected:
     bool updateTopCase();
 
     /**
-     *  Enable power management support
+     *  Power management support
      */
-    inline virtual bool PMSupport() {return false;};
+    bool isPMsupported {false};
 
     /**
      *  Related ACPI methods

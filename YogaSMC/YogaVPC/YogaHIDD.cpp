@@ -84,128 +84,129 @@ bool YogaHIDD::exitVPC() {
 }
 
 IOReturn YogaHIDD::message(UInt32 type, IOService *provider, void *argument) {
-    if (type == kIOACPIMessageDeviceNotification && argument) {
-        UInt32 event = *(reinterpret_cast<uint32_t *>(argument));
-        DebugLog("message: type=%x, provider=%s, argument=0x%04x", type, provider->getName(), event);
-        switch (event) {
-            case 0xc0: // HID events
-                UInt64 index;
-                if (kIOReturnSuccess != evaluateHIDD(INTEL_HID_DSM_HDEM_FN, &index)) {
-                    AlwaysLog("Failed to get event index");
-                    return kIOReturnSuccess;
-                }
-                switch (index) {
-                    case 3: // KEY_NUMLOCK
-                        dispatchKeyEvent(ADB_NUM_LOCK, true);
-                        dispatchKeyEvent(ADB_NUM_LOCK, false);
-                        break;
+    if (type != kIOACPIMessageDeviceNotification || !argument)
+        return super::message(type, provider, argument);
 
-                    case 4: // KEY_HOME
-                        dispatchKeyEvent(ADB_HOME, true);
-                        dispatchKeyEvent(ADB_HOME, false);
-                        break;
+    UInt32 event = *(reinterpret_cast<uint32_t *>(argument));
+    DebugLog("message: type=%x, provider=%s, argument=0x%04x", type, provider->getName(), event);
+    switch (event) {
+        case 0xc0: // HID events
+            UInt64 index;
+            if (kIOReturnSuccess != evaluateHIDD(INTEL_HID_DSM_HDEM_FN, &index)) {
+                AlwaysLog("Failed to get event index");
+                return kIOReturnSuccess;
+            }
+            switch (index) {
+                case 3: // KEY_NUMLOCK
+                    dispatchKeyEvent(ADB_NUM_LOCK, true);
+                    dispatchKeyEvent(ADB_NUM_LOCK, false);
+                    break;
 
-                    case 5: // KEY_END
-                        dispatchKeyEvent(ADB_END, true);
-                        dispatchKeyEvent(ADB_END, false);
-                        break;
+                case 4: // KEY_HOME
+                    dispatchKeyEvent(ADB_HOME, true);
+                    dispatchKeyEvent(ADB_HOME, false);
+                    break;
 
-                    case 6: // KEY_PAGEUP
-                        dispatchKeyEvent(ADB_PAGE_UP, true);
-                        dispatchKeyEvent(ADB_PAGE_UP, false);
-                        break;
+                case 5: // KEY_END
+                    dispatchKeyEvent(ADB_END, true);
+                    dispatchKeyEvent(ADB_END, false);
+                    break;
 
-                    case 7: // KEY_PAGEDOWN
-                        dispatchKeyEvent(ADB_PAGE_DOWN, true);
-                        dispatchKeyEvent(ADB_PAGE_DOWN, false);
-                        break;
+                case 6: // KEY_PAGEUP
+                    dispatchKeyEvent(ADB_PAGE_UP, true);
+                    dispatchKeyEvent(ADB_PAGE_UP, false);
+                    break;
 
-                    case 9: // KEY_POWER
-                        dispatchKeyEvent(ADB_POWER, true);
-                        dispatchKeyEvent(ADB_POWER, false);
-                        break;
+                case 7: // KEY_PAGEDOWN
+                    dispatchKeyEvent(ADB_PAGE_DOWN, true);
+                    dispatchKeyEvent(ADB_PAGE_DOWN, false);
+                    break;
 
-                    case 15: // KEY_PLAYPAUSE
-                        dispatchKeyEvent(ADB_PLAY_PAUSE, true);
-                        dispatchKeyEvent(ADB_PLAY_PAUSE, false);
-                        break;
+                case 9: // KEY_POWER
+                    dispatchKeyEvent(ADB_POWER, true);
+                    dispatchKeyEvent(ADB_POWER, false);
+                    break;
 
-                    case 16: // KEY_MUTE
-                        dispatchKeyEvent(ADB_MUTE, true);
-                        dispatchKeyEvent(ADB_MUTE, false);
-                        break;
+                case 15: // KEY_PLAYPAUSE
+                    dispatchKeyEvent(ADB_PLAY_PAUSE, true);
+                    dispatchKeyEvent(ADB_PLAY_PAUSE, false);
+                    break;
 
-                    case 17: // KEY_VOLUMEUP
-                        dispatchKeyEvent(ADB_VOLUME_UP, true);
-                        dispatchKeyEvent(ADB_VOLUME_UP, false);
-                        break;
+                case 16: // KEY_MUTE
+                    dispatchKeyEvent(ADB_MUTE, true);
+                    dispatchKeyEvent(ADB_MUTE, false);
+                    break;
 
-                    case 18: // KEY_VOLUMEDOWN
-                        dispatchKeyEvent(ADB_VOLUME_DOWN, true);
-                        dispatchKeyEvent(ADB_VOLUME_DOWN, false);
-                        break;
+                case 17: // KEY_VOLUMEUP
+                    dispatchKeyEvent(ADB_VOLUME_UP, true);
+                    dispatchKeyEvent(ADB_VOLUME_UP, false);
+                    break;
 
-                    case 19: // KEY_BRIGHTNESSUP
-                        dispatchKeyEvent(ADB_BRIGHTNESS_UP, true);
-                        dispatchKeyEvent(ADB_BRIGHTNESS_UP, false);
-                        break;
+                case 18: // KEY_VOLUMEDOWN
+                    dispatchKeyEvent(ADB_VOLUME_DOWN, true);
+                    dispatchKeyEvent(ADB_VOLUME_DOWN, false);
+                    break;
 
-                    case 20: // KEY_BRIGHTNESSDOWN
-                        dispatchKeyEvent(ADB_BRIGHTNESS_DOWN, true);
-                        dispatchKeyEvent(ADB_BRIGHTNESS_DOWN, false);
-                        break;
+                case 19: // KEY_BRIGHTNESSUP
+                    dispatchKeyEvent(ADB_BRIGHTNESS_UP, true);
+                    dispatchKeyEvent(ADB_BRIGHTNESS_UP, false);
+                    break;
 
-                    case 11: // KEY_SLEEP, notify SLPB?
-                    case 8: // KEY_RFKILL
-                    case 14: // KEY_STOPCD
-                    default:
-                        if (client)
-                            client->sendNotification(event);
-                        break;
-                }
-                break;
-            // Notify PWRB?
-            case 0xce: // KEY_POWER DOWN
-                dispatchKeyEvent(ADB_POWER, true);
-                break;
+                case 20: // KEY_BRIGHTNESSDOWN
+                    dispatchKeyEvent(ADB_BRIGHTNESS_DOWN, true);
+                    dispatchKeyEvent(ADB_BRIGHTNESS_DOWN, false);
+                    break;
 
-            case 0xcf: // KEY_POWER UP
-                dispatchKeyEvent(ADB_POWER, false);
-                break;
+                case 11: // KEY_SLEEP, notify SLPB?
+                case 8: // KEY_RFKILL
+                case 14: // KEY_STOPCD
+                default:
+                    if (client)
+                        client->sendNotification(event);
+                    break;
+            }
+            break;
+        // Notify PWRB?
+        case 0xce: // KEY_POWER DOWN
+            dispatchKeyEvent(ADB_POWER, true);
+            break;
 
-            case 0xc2: // KEY_LEFTMETA DOWN
-                dispatchKeyEvent(ADB_LEFT_META, true);
-                break;
+        case 0xcf: // KEY_POWER UP
+            dispatchKeyEvent(ADB_POWER, false);
+            break;
 
-            case 0xc3: // KEY_LEFTMETA UP
-                dispatchKeyEvent(ADB_LEFT_META, false);
-                break;
+        case 0xc2: // KEY_LEFTMETA DOWN
+            dispatchKeyEvent(ADB_LEFT_META, true);
+            break;
 
-            case 0xc4: // KEY_VOLUMEUP DOWN
-                dispatchKeyEvent(ADB_VOLUME_UP, true);
-                break;
+        case 0xc3: // KEY_LEFTMETA UP
+            dispatchKeyEvent(ADB_LEFT_META, false);
+            break;
 
-            case 0xc5: // KEY_VOLUMEUP UP
-                dispatchKeyEvent(ADB_VOLUME_UP, false);
-                break;
+        case 0xc4: // KEY_VOLUMEUP DOWN
+            dispatchKeyEvent(ADB_VOLUME_UP, true);
+            break;
 
-            case 0xc6: // KEY_VOLUMEDOWN DOWN
-                dispatchKeyEvent(ADB_VOLUME_DOWN, true);
-                break;
+        case 0xc5: // KEY_VOLUMEUP UP
+            dispatchKeyEvent(ADB_VOLUME_UP, false);
+            break;
 
-            case 0xc7: // KEY_VOLUMEDOWN UP
-                dispatchKeyEvent(ADB_VOLUME_DOWN, false);
-                break;
+        case 0xc6: // KEY_VOLUMEDOWN DOWN
+            dispatchKeyEvent(ADB_VOLUME_DOWN, true);
+            break;
 
-            case 0xc8: // KEY_ROTATE_LOCK_TOGGLE DOWN
-            case 0xc9: // KEY_ROTATE_LOCK_TOGGLE UP
-            case 0xcc: // KEY_CONVERTIBLE_TOGGLE DOWN
-            case 0xcd: // KEY_CONVERTIBLE_TOGGLE UP
-            default:
-                if (client)
-                    client->sendNotification(event);
-                break;
-        }
+        case 0xc7: // KEY_VOLUMEDOWN UP
+            dispatchKeyEvent(ADB_VOLUME_DOWN, false);
+            break;
+
+        case 0xc8: // KEY_ROTATE_LOCK_TOGGLE DOWN
+        case 0xc9: // KEY_ROTATE_LOCK_TOGGLE UP
+        case 0xcc: // KEY_CONVERTIBLE_TOGGLE DOWN
+        case 0xcd: // KEY_CONVERTIBLE_TOGGLE UP
+        default:
+            if (client)
+                client->sendNotification(event);
+            break;
     }
     return kIOReturnSuccess;
 }

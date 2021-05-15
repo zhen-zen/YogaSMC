@@ -12,6 +12,9 @@
 OSDefineMetaClassAndStructors(ThinkSMC, YogaSMC);
 
 ThinkSMC* ThinkSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) {
+    if (!device)
+        return nullptr;
+
     ThinkSMC* drv = OSTypeAlloc(ThinkSMC);
 
     drv->conf = OSDictionary::withDictionary(OSDynamicCast(OSDictionary, provider->getProperty("Sensors")));
@@ -20,7 +23,7 @@ ThinkSMC* ThinkSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device
     dictionary->setObject("Sensors", drv->conf);
 
     drv->ec = device;
-    drv->name = device->getName();
+    drv->iname = device->getName();
 
     if (!drv->init(dictionary))
         OSSafeReleaseNULL(drv);

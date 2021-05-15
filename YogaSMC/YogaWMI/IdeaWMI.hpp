@@ -19,12 +19,73 @@
 #define WBAT_BAT1_HwId     4
 #define WBAT_BAT1_MfgDate  5
 
-#define BAT_INFO_WMI_STRING     "c3a03776-51ac-49aa-ad0f-f2f7d62c3f3c"
-#define GSENSOR_DATA_WMI_METHOD "09b0ee6e-c3fd-4243-8da1-7911ff80bb8c"
-#define GSENSOR_WMI_EVENT       "06129d99-6083-4164-81ad-f092f9d773a6"
-#define PAPER_LOOKING_WMI_EVENT "56322276-8493-4ce8-a783-98c991274f5e"
+#define BAT_INFO_WMI_STRING         "c3a03776-51ac-49aa-ad0f-f2f7d62c3f3c"
+#define GSENSOR_DATA_WMI_METHOD     "09b0ee6e-c3fd-4243-8da1-7911ff80bb8c"
+#define GSENSOR_WMI_EVENT           "06129d99-6083-4164-81ad-f092f9d773a6"
+#define PAPER_LOOKING_WMI_EVENT     "56322276-8493-4ce8-a783-98c991274f5e"
+#define GAME_ZONE_DATA_WMI_METHOD   "887b54e3-dddc-4b2c-8b88-68a26a8835d0"
+#define GAME_ZONE_TEMP_WMI_EVENT    "bfd42481-aee3-4501-a107-afb68425c5f8"
+#define GAME_ZONE_OC_WMI_EVENT      "d062906b-12d4-4510-999d-4831ee80e985"
+#define GAME_ZONE_GPU_WMI_EVENT     "bfd42481-aee3-4502-a107-afb68425c5f8"
+#define GAME_ZONE_FAN_WMI_EVENT     "bc72a435-e8c1-4275-b3e2-d8b8074aba59"
+#define GAME_ZONE_KEY_WMI_EVENT     "10afc6d9-ea8b-4590-a2e7-1cd3c84bb4b1"
 
-#define kIOACPIMessageYMC       0xd0
+enum {
+    GAME_ZONE_WMI_GET_TMP_IR        = 0x01,
+    GAME_ZONE_WMI_GET_THERMAL_TABLE = 0x02,
+    GAME_ZONE_WMI_SET_THERMAL_TABLE = 0x03,
+    GAME_ZONE_WMI_CAP_GPU_OC        = 0x04,
+    GAME_ZONE_WMI_GET_GPU_GPS       = 0x05,
+    GAME_ZONE_WMI_SET_GPU_GPS       = 0x06,
+    GAME_ZONE_WMI_GET_FAN_NUM       = 0x07,
+    GAME_ZONE_WMI_GET_FAN_ONE       = 0x08,
+    GAME_ZONE_WMI_GET_FAN_TWO       = 0x09,
+    GAME_ZONE_WMI_GET_FAN_MAX       = 0x0A,
+    GAME_ZONE_WMI_GET_VERSION       = 0x0B,
+    GAME_ZONE_WMI_CAP_FAN_COOLING   = 0x0C,
+    GAME_ZONE_WMI_SET_FAN_COOLING   = 0x0D,
+    GAME_ZONE_WMI_CAP_CPU_OC        = 0x0E,
+    GAME_ZONE_WMI_CAP_BIOS_OC       = 0x0F,
+    GAME_ZONE_WMI_SET_BIOS_OC       = 0x10,
+    GAME_ZONE_WMI_GET_TMP_TRIGGER   = 0x11,
+    GAME_ZONE_WMI_GET_TMP_CPU       = 0x12,
+    GAME_ZONE_WMI_GET_TMP_GPU       = 0x13,
+    GAME_ZONE_WMI_GET_FAN_STA       = 0x14,
+    GAME_ZONE_WMI_CAP_WIN_KEY       = 0x15,
+    GAME_ZONE_WMI_SET_WIN_KEY       = 0x16,
+    GAME_ZONE_WMI_GET_WIN_KEY       = 0x17,
+    GAME_ZONE_WMI_CAP_TOUCHPAD      = 0x18,
+    GAME_ZONE_WMI_SET_TOUCHPAD      = 0x19,
+    GAME_ZONE_WMI_GET_TOUCHPAD      = 0x1A,
+    GAME_ZONE_WMI_GET_GPU_NORM_MAX  = 0x1B,
+    GAME_ZONE_WMI_GET_GPU_OC_MAX    = 0x1C,
+    GAME_ZONE_WMI_GET_GPU_OC_TYPE   = 0x1D,
+    GAME_ZONE_WMI_CAP_KEYBOARD      = 0x1E,
+    GAME_ZONE_WMI_CAP_MEM_OC_INFO   = 0x1F,
+    GAME_ZONE_WMI_CAP_WATER_COOLING = 0x20,
+    GAME_ZONE_WMI_SET_WATER_COOLING = 0x21,
+    GAME_ZONE_WMI_GET_WATER_COOLING = 0x22,
+    GAME_ZONE_WMI_CAP_LIGHTING      = 0x23,
+    GAME_ZONE_WMI_SET_LIGHTING      = 0x24,
+    GAME_ZONE_WMI_GET_LIGHTING      = 0x25,
+    GAME_ZONE_WMI_GET_MARCOKEY_CODE = 0x26,
+    GAME_ZONE_WMI_GET_MARCOKEY_CNT  = 0x27,
+    GAME_ZONE_WMI_CAP_GSYNC         = 0x28,
+    GAME_ZONE_WMI_GET_GSYNC         = 0x29,
+    GAME_ZONE_WMI_SET_GSYNC         = 0x2A,
+    GAME_ZONE_WMI_CAP_SMARTFAN      = 0x2B,
+    GAME_ZONE_WMI_SET_SMARTFAN_MODE = 0x2C,
+    GAME_ZONE_WMI_GET_SMARTFAN_MODE = 0x2D,
+    GAME_ZONE_WMI_GET_SMARTFAN_STA  = 0x2F,
+    GAME_ZONE_WMI_GET_CHARGE_MODE   = 0x30,
+    GAME_ZONE_WMI_CAP_OVER_DRIVE    = 0x31,
+    GAME_ZONE_WMI_GET_OVER_DRIVE    = 0x32,
+    GAME_ZONE_WMI_SET_OVER_DRIVE    = 0x33,
+    GAME_ZONE_WMI_SET_LIGHT_CTL     = 0x34,
+    GAME_ZONE_WMI_SET_DDS_CTL       = 0x35,
+    GAME_ZONE_WMI_RET_OC_VAL        = 0x36,
+    GAME_ZONE_WMI_GET_THERMAL_MODE  = 0x37
+};
 
 enum
 {
@@ -39,6 +100,8 @@ class IdeaWMIYoga : public YogaWMI
     typedef YogaWMI super;
     OSDeclareDefaultStructors(IdeaWMIYoga)
 
+    static constexpr const char *feature = "Yoga Mode Control";
+    UInt32 YogaEvent {0xd0};
     /**
      *  Current Yoga Mode, see kYogaMode
      */
@@ -51,7 +114,7 @@ class IdeaWMIYoga : public YogaWMI
 
     void processWMI() APPLE_KEXT_OVERRIDE;
     void ACPIEvent(UInt32 argument) APPLE_KEXT_OVERRIDE;
-    inline virtual bool PMSupport() APPLE_KEXT_OVERRIDE {return true;};
+    const char* registerEvent(OSString *guid, UInt32 id) APPLE_KEXT_OVERRIDE;
 
 public:
     void stop(IOService *provider) APPLE_KEXT_OVERRIDE;
@@ -64,8 +127,12 @@ class IdeaWMIPaper : public YogaWMI
     typedef YogaWMI super;
     OSDeclareDefaultStructors(IdeaWMIPaper)
 
+    static constexpr const char *feature = "Paper Display";
+    UInt32 paperEvent {0x80};
+
     void processWMI() APPLE_KEXT_OVERRIDE;
     void ACPIEvent(UInt32 argument) APPLE_KEXT_OVERRIDE;
+    const char* registerEvent(OSString *guid, UInt32 id) APPLE_KEXT_OVERRIDE;
 };
 
 class IdeaWMIBattery : public YogaWMI
@@ -84,6 +151,29 @@ class IdeaWMIBattery : public YogaWMI
     bool getBatteryInfo (UInt32 index, OSArray *bat);
 
     void processWMI() APPLE_KEXT_OVERRIDE;
+};
+
+class IdeaWMIGameZone : public YogaWMI
+{
+    typedef YogaWMI super;
+    OSDeclareDefaultStructors(IdeaWMIGameZone)
+
+    static constexpr const char *feature = "Game Zone";
+    UInt32 tempEvent {0xd0};
+    UInt32 OCEvent   {0xd1};
+    UInt32 GPUEvent  {0xe0};
+    UInt32 fanEvent  {0xe1};
+    UInt32 keyEvent  {0xe2};
+
+    bool getGamzeZoneData(UInt32 query, UInt32 *result);
+
+#ifndef ALTER
+    friend class IdeaSMC;
+#endif
+
+    void processWMI() APPLE_KEXT_OVERRIDE;
+    void ACPIEvent(UInt32 argument) APPLE_KEXT_OVERRIDE;
+    const char* registerEvent(OSString *guid, UInt32 id) APPLE_KEXT_OVERRIDE;
 };
 
 #endif /* IdeaWMI_hpp */

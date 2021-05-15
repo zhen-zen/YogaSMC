@@ -706,38 +706,19 @@ bool ThinkVPC::setMicMuteLEDStatus(UInt32 status) {
 IOReturn ThinkVPC::message(UInt32 type, IOService *provider, void *argument) {
     switch (type)
     {
-        case kSMC_setDisableTouchpad:
-        case kSMC_getDisableTouchpad:
-        case kPS2M_notifyKeyPressed:
-        case kPS2M_notifyKeyTime:
-        case kPS2M_resetTouchpad:
-        case kSMC_setKeyboardStatus:
-        case kSMC_getKeyboardStatus:
-        case kSMC_notifyKeystroke:
-            break;
-
-        case kSMC_FnlockEvent:
-            break;
-
         // TODO: determine default value for charge level
         case kSMC_getConservation:
         case kSMC_setConservation:
             break;
 
         case kIOACPIMessageDeviceNotification:
-            if (!argument)
-                AlwaysLog("message: Unknown ACPI notification");
-            else if (*((UInt32 *) argument) == kIOACPIMessageReserved)
+            if (argument && *((UInt32 *) argument) == kIOACPIMessageReserved) {
                 updateVPC();
-            else
-                AlwaysLog("message: Unknown ACPI notification 0x%04x", *((UInt32 *) argument));
-            break;
+                break;
+            }
 
         default:
-            if (argument)
-                AlwaysLog("message: type=%x, provider=%s, argument=0x%04x", type, provider->getName(), *((UInt32 *) argument));
-            else
-                AlwaysLog("message: type=%x, provider=%s", type, provider->getName());
+            return super::message(type, provider, argument);
     }
 
     return kIOReturnSuccess;
@@ -1233,7 +1214,6 @@ bool ThinkVPC::updateKBDLocale(bool update) {
     setProperty(localePrompt, locale, 32);
 
     return true;
-
 }
 
 bool ThinkVPC::setKBDLocale(UInt32 value) {

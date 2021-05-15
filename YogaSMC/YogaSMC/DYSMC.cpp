@@ -25,21 +25,29 @@ static const struct sensorPair DYPresetTachometer[] = {
 static const struct sensorPair DYPresetTemperature[] = {
     {KeyTB0T(1), "Battery Temperature"},
     {KeyTCGC,    "Discrete Graphics Temperature"},
+    {KeyTCGC,    "GPU Temperature"},
+    {KeyTCSA,    "Private temp1 (CPU VR Temp)"},
     {KeyTCXC,    "CPU Temperature"},
     {KeyTG0P(0), "GPU0 Temperature"},
     {KeyTG0P(1), "GPU1 Temperature"},
+    {KeyTH0a,    "M.2 Temperature"},
     {KeyTH0a,    "M.2 0 Temperature"},
     {KeyTH0b,    "M.2 1 Temperature"},
-    {KeyTH0P(0), "HDD Temperature"},
+    {KeyTH0b,    "HDD Temperature"},
+    {KeyTM0P,    "Private temp2 (Memory Temp)"},
     {KeyTPCD,    "Local Temperature"},
     {KeyTTRD,    "Charger Temperature"},
     {KeyTW0P,    "Chassis Temperature"},
+    {KeyTW0P,    "U518"},
     {KeyTh0H(1), "System Ambient Temperature"},
     {KeyTh0H(2), "System Ambient1 Temperature"},
     {KeyTs0P(0), "Remote Temperature"}
 };
 
 DYSMC* DYSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) {
+    if (!device)
+        return nullptr;
+
     DYSMC* drv = OSTypeAlloc(DYSMC);
 
     drv->conf = OSDictionary::withDictionary(OSDynamicCast(OSDictionary, provider->getProperty("Sensors")));
@@ -48,7 +56,7 @@ DYSMC* DYSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) {
     dictionary->setObject("Sensors", drv->conf);
 
     drv->ec = device;
-    drv->name = device->getName();
+    drv->iname = device->getName();
 
     if (!drv->init(dictionary))
         OSSafeReleaseNULL(drv);
@@ -78,10 +86,17 @@ bool DYSMC::addTemperatureKey(OSString *name) {
 }
 
 void DYSMC::addVSMCKey() {
+    if (!wmis) {
+        super::addVSMCKey();
+        return;
+    }
+
     OSObject *result = nullptr;
 
     OSDictionary *enabled = OSDictionary::withCapacity(wmis->sensorRange);
     OSDictionary *disabled = OSDictionary::withCapacity(wmis->sensorRange);
+
+    UInt8 fanCount = 0;
 
     for (UInt8 index = 0; index <= sensorRange && sensorCount < MAX_SENSOR; ++index) {
         OSSafeReleaseNULL(result);
@@ -189,7 +204,7 @@ void DYSMC::updateEC() {
 
     OSObject *result = nullptr;
 
-    for (UInt8 index = 0; index < sensorCount; ++index) {
+    for (UInt8 index = 0; index < ECSensorBase; ++index) {
         OSSafeReleaseNULL(result);
         if (!wmis->getSensorInfo(sensorIndex[index], &result)) {
             AlwaysLog("Failed to evaluate sensor %d", sensorIndex[index]);

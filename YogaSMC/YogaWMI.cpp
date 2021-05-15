@@ -29,30 +29,7 @@ IOService *YogaWMI::probe(IOService *provider, SInt32 *score)
     }
     OSSafeReleaseNULL(uid);
 
-    auto key = OSSymbol::withCString("YogaWMISupported");
-    auto dict = IOService::propertyMatching(key, kOSBooleanTrue);
-    key->release();
-    if (!dict) {
-        DebugLog("Failed to create matching dictionary");
-        return nullptr;
-    }
-
-    auto vpc = IOService::waitForMatchingService(dict, 1000000000);
-    dict->release();
-    if (vpc) {
-        vpc->release();
-        DebugLog("YogaWMI variant available, exiting");
-        return nullptr;
-    }
-
     return this;
-}
-
-void YogaWMI::checkEvent(const char *cname, UInt32 id) {
-    if (id == kIOACPIMessageReserved)
-        AlwaysLog("found reserved notify id 0x%x for %s", id, cname);
-    else
-        AlwaysLog("found unknown notify id 0x%x for %s", id, cname);
 }
 
 void YogaWMI::getNotifyID(const char *key) {
@@ -61,32 +38,59 @@ void YogaWMI::getNotifyID(const char *key) {
         AlwaysLog("found unparsed notify id %s", key);
         return;
     }
+
     OSNumber *num = OSDynamicCast(OSNumber, item->getObject(kWMINotifyId));
     if (num == nullptr) {
         AlwaysLog("found invalid notify id %s", key);
         return;
     }
+
     UInt32 id;
     sscanf(key, "%2x", &id);
     if (id != num->unsigned8BitValue())
         AlwaysLog("notify id %s mismatch %x", key, num->unsigned8BitValue());
 
+    const char *rname = nullptr;
+    OSString *guid = OSDynamicCast(OSString, item->getObject("guid"));
+    if (guid)
+        rname = registerEvent(guid, id);
+
     OSDictionary *mof = OSDynamicCast(OSDictionary, item->getObject("MOF"));
     if (!mof) {
-        AlwaysLog("found notify id 0x%x with no description", id);
+        AlwaysLog("found %s notify id 0x%x with no description", rname ? rname : "unknown", id);
         return;
     }
+
     OSString *cname = OSDynamicCast(OSString, mof->getObject("__CLASS"));
     if (!cname) {
-        AlwaysLog("found notify id 0x%x with no __CLASS", id);
+        AlwaysLog("found %s notify id 0x%x with no __CLASS", rname ? rname : "unknown", id);
         return;
     }
-    checkEvent(cname->getCStringNoCopy(), id);
+
+    AlwaysLog("found %s notify id 0x%x for %s", rname ? rname : "unknown", id, cname->getCStringNoCopy());
     // TODO: Event Enable and Disable WExx; Data Collection Enable and Disable WCxx
 }
 
 bool YogaWMI::start(IOService *provider)
 {
+    if (!YWMI) {
+        auto key = OSSymbol::withCString("YogaWMISupported");
+        auto dict = IOService::propertyMatching(key, kOSBooleanTrue);
+        key->release();
+        if (!dict) {
+            DebugLog("Failed to create matching dictionary");
+            return false;
+        }
+
+        auto vpc = IOService::waitForMatchingService(dict, 1000000000);
+        dict->release();
+        if (vpc) {
+            vpc->release();
+            DebugLog("YogaWMI variant available, exiting");
+            return false;
+        }
+    }
+
     if (!super::start(provider))
         return false;
 
@@ -96,7 +100,7 @@ bool YogaWMI::start(IOService *provider)
         YWMI = new WMI(provider);
         YWMI->initialize();
     }
-    YWMI->extractBMF();
+    YWMI->start();
     processWMI();
 
     Event = YWMI->getEvent();
@@ -125,7 +129,7 @@ void YogaWMI::stop(IOService *provider)
 }
 
 void YogaWMI::ACPIEvent(UInt32 argument) {
-    AlwaysLog("message: Unknown ACPI Notification 0x%x", argument);
+    AlwaysLog("message: Unknown ACPI Notification 0x%02X", argument);
 }
 
 IOReturn YogaWMI::message(UInt32 type, IOService *provider, void *argument) {

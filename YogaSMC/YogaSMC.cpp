@@ -60,6 +60,8 @@ void YogaSMC::addVSMCKey() {
 }
 
 bool YogaSMC::start(IOService *provider) {
+    isPMsupported = true;
+
     if (!super::start(provider))
         return false;
 
@@ -121,6 +123,9 @@ bool YogaSMC::vsmcNotificationHandler(void *sensors, void *refCon, IOService *vs
 }
 
 YogaSMC* YogaSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) {
+    if (!device)
+        return nullptr;
+
     YogaSMC* drv = OSTypeAlloc(YogaSMC);
 
     drv->conf = OSDictionary::withDictionary(OSDynamicCast(OSDictionary, provider->getProperty("Sensors")));
@@ -129,7 +134,7 @@ YogaSMC* YogaSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) 
     dictionary->setObject("Sensors", drv->conf);
 
     drv->ec = device;
-    drv->name = device->getName();
+    drv->iname = device->getName();
 
     if (!drv->init(dictionary))
         OSSafeReleaseNULL(drv);
@@ -167,6 +172,41 @@ IOReturn YogaSMC::setPowerState(unsigned long powerStateOrdinal, IOService * wha
         }
     }
     return kIOPMAckImplied;
+}
+
+void YogaSMC::setPropertiesGated(OSObject* props) {
+    OSDictionary* dict = OSDynamicCast(OSDictionary, props);
+    if (!dict)
+        return;
+
+    OSCollectionIterator* i = OSCollectionIterator::withCollection(dict);
+
+    if (i) {
+        while (OSString* key = OSDynamicCast(OSString, i->getNextObject())) {
+            if (key->isEqualTo(readECPrompt)) {
+                if (!ec)
+                    continue;
+                OSNumber *value;
+                getPropertyNumber(readECPrompt);
+                if (value->unsigned8BitValue() >= sensorCount) {
+                    AlwaysLog(valueInvalid, readECPrompt);
+                    continue;
+                }
+                uint32_t raw = atomic_load_explicit(&currentSensor[value->unsigned8BitValue()], memory_order_acquire);
+                AlwaysLog(updateSuccess, readECPrompt, raw);
+            } else {
+                AlwaysLog("Unknown property %s", key->getCStringNoCopy());
+            }
+        }
+        i->release();
+    }
+
+    return;
+}
+
+IOReturn YogaSMC::setProperties(OSObject *props) {
+    commandGate->runAction(OSMemberFunctionCast(IOCommandGate::Action, this, &YogaSMC::setPropertiesGated), props);
+    return kIOReturnSuccess;
 }
 
 EXPORT extern "C" kern_return_t ADDPR(kern_start)(kmod_info_t *, void *) {

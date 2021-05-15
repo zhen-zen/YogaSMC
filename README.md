@@ -18,11 +18,11 @@ Based on [acidanthera/VirtualSMC](https://github.com/acidanthera/VirtualSMC/)
 ### Customized sensor reading
 The EC field name for corresponding SMC key is read from Info.plist. If there's no `FieldUnit` object at desired offset, you can add an `OperationRegion` like `SSDT-THINK.dsl` in `SSDTSample`.
 
-| Variant | IdeaVPC | DYSMC |
-| ---- | ---- | ---- |
-| Fan reading | Need testing | ✅ |
-| Fan control | ☑️ | TBD |
-| Sensor reading | Generic | ✅ |
+| Variant | IdeaSMC | IdeaSMC (Game Zone) | DYSMC |
+| ---- | ---- | ---- | ---- |
+| Fan reading | Need testing | ✅ | ✅ |
+| Fan control | ☑️ | TBD | TBD |
+| Sensor reading | Generic | ✅ | ✅ |
 
 ## YogaWMI
 Support for parsing WMI devices and properties. On some devices, it could act as YogaVPC with access to extensive device control method.
@@ -36,9 +36,10 @@ Based on [the-darkvoid/macOS-IOElectrify](https://github.com/the-darkvoid/macOS-
 - `WMIV` Event driver, see DYVPC
 
 ### IdeaWMI
-- `WMIY` Yoga Mode detection and disabling keyboard/touchpad when flipped
+- `GZFD` Game Zone control center, see header for available functions
 - `WBAT` Extra battery information (requires patching related methods like battery ones)
-- `WMI2` Fn+esc (obsolete paper looking function), currently assigned to Fn mode toggle.
+- `WMI2` Fn+esc (obsolete paper looking function), currently assigned to Fn mode toggle
+- `WMIY` Yoga Mode detection and disabling keyboard/touchpad when flipped
 
 ### ThinkWMI (WIP)
 ~~Based on [lenovo/thinklmi](https://github.com/lenovo/thinklmi) ([iksaif/thinkpad-wmi](https://github.com/iksaif/thinkpad-wmi))~~

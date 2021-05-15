@@ -63,8 +63,6 @@
 				<key>SO-DIMM 4 Proximity</key>
 				<false/>
 			</dict>
-			<key>YogaWMISupported</key>
-			<true/>
 		</dict>
 		<key>IdeaVPC</key>
 		<dict>
@@ -109,8 +107,6 @@
 				<key>SO-DIMM 4 Proximity</key>
 				<false/>
 			</dict>
-			<key>YogaWMISupported</key>
-			<true/>
 		</dict>
 		<key>ThinkVPC</key>
 		<dict>
