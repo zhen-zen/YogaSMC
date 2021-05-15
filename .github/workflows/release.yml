@@ -41,7 +41,7 @@ jobs:
     - name: Prepare release kext
       run: cd build/Release; zip -X -r YogaSMC-Release.zip *.kext LICENSE SSDTSample
     - name: Install create-dmg
-      run: brew install create-dmg
+      run: brew install --build-from-source create-dmg
     - name: Create debug DMG image
       uses: nick-invision/retry@v2.2.0
       with:
