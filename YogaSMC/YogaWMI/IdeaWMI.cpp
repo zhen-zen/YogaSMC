@@ -21,6 +21,8 @@ YogaWMI* YogaWMI::withIdea(IOService *provider) {
         dev = OSTypeAlloc(IdeaWMIPaper);
     else if (candidate->hasMethod(BAT_INFO_WMI_STRING, ACPI_WMI_EXPENSIVE | ACPI_WMI_STRING))
         dev = OSTypeAlloc(IdeaWMIBattery);
+    else if (candidate->hasMethod(GAME_ZONE_DATA_WMI_METHOD))
+        dev = OSTypeAlloc(IdeaWMIGameZone);
     else
         dev = OSTypeAlloc(YogaWMI);
 
@@ -207,4 +209,72 @@ bool IdeaWMIBattery::getBatteryInfo(UInt32 index, OSArray *bat) {
     }
     OSSafeReleaseNULL(result);
     return ret;
+}
+
+OSDefineMetaClassAndStructors(IdeaWMIGameZone, YogaWMI);
+
+bool IdeaWMIGameZone::getGamzeZoneData(UInt32 query, UInt32 *result) {
+    bool ret;
+
+    OSObject* params[3] = {
+        OSNumber::withNumber(0ULL, 32),
+        OSNumber::withNumber(query, 32),
+        OSNumber::withNumber(0ULL, 32)
+    };
+    
+    ret = YWMI->executeInteger(GAME_ZONE_DATA_WMI_METHOD, result, params, 3, true);
+    params[0]->release();
+    params[1]->release();
+    params[2]->release();
+
+    if (!ret)
+        AlwaysLog("Query %d evaluation failed", query);
+    return ret;
+}
+
+void IdeaWMIGameZone::processWMI() {
+    setProperty("Feature", feature);
+
+    UInt32 result;
+
+    if (getGamzeZoneData(GAME_ZONE_WMI_GET_VERSION, &result))
+        setProperty("Game Zone Version", result, 32);
+    else
+        AlwaysLog("Failed to get version");
+
+    if (getGamzeZoneData(GAME_ZONE_WMI_GET_FAN_NUM, &result))
+        setProperty("Fan number", result, 32);
+    else
+        AlwaysLog("Failed to get fan number");
+
+    if (getGamzeZoneData(GAME_ZONE_WMI_CAP_KEYBOARD, &result))
+        setProperty("Keyboard Feature", result, 32);
+    else
+        AlwaysLog("Failed to get keyboard feature");
+}
+
+void IdeaWMIGameZone::ACPIEvent(UInt32 argument) {
+    OSObject *result;
+    OSNumber *id;
+    if (YWMI->getEventData(argument, &result) && (id = (OSDynamicCast(OSNumber, result))))
+        DebugLog("message: ACPI notification 0x%04x - 0x%04x", argument, id->unsigned32BitValue());
+    else
+        AlwaysLog("message: Unknown ACPI notification 0x%04x", argument);
+    OSSafeReleaseNULL(result);
+}
+
+const char* IdeaWMIGameZone::registerEvent(OSString *guid, UInt32 id) {
+    if (guid->isEqualTo(GAME_ZONE_TEMP_WMI_EVENT))
+        tempEvent = id;
+    else if (guid->isEqualTo(GAME_ZONE_OC_WMI_EVENT))
+        OCEvent = id;
+    else if (guid->isEqualTo(GAME_ZONE_GPU_WMI_EVENT))
+        GPUEvent = id;
+    else if (guid->isEqualTo(GAME_ZONE_FAN_WMI_EVENT))
+        fanEvent = id;
+    else if (guid->isEqualTo(GAME_ZONE_KEY_WMI_EVENT))
+        keyEvent = id;
+    else
+        return nullptr;
+    return feature;
 }
