@@ -65,7 +65,7 @@ protected:
      *  Current Keyboard status
      */
     bool Keyboardenabled {true};
-    
+
     /**
      *  Current TouchPad status
      */
@@ -75,7 +75,7 @@ protected:
      *  Switch  touchpad status
      */
     void toggleTouchpad();
-    
+
     /**
      *  Switch keyboard status
      */
@@ -117,7 +117,7 @@ protected:
      *  Test EC capability
      */
     void validateEC();
-    
+
     /**
      *  EC access capability, will be update on init
      *  BIT 0 Read

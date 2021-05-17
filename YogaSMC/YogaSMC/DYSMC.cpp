@@ -98,7 +98,7 @@ void DYSMC::addVSMCKey() {
 
     UInt8 fanCount = 0;
 
-    for (UInt8 index = 0; index <= sensorRange && sensorCount < MAX_SENSOR; ++index) {
+    for (UInt8 index = 0; index < wmis->sensorRange && sensorCount < MAX_SENSOR; ++index) {
         OSSafeReleaseNULL(result);
 
         if (!wmis->getSensorInfo(index, &result)) {
@@ -252,5 +252,4 @@ void DYSMC::setWMI(IOService *instance) {
         return;
 
     wmis = provider;
-    sensorRange = provider->sensorRange;
 }

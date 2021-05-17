@@ -72,11 +72,6 @@ private:
     DYWMI *wmis {nullptr};
 
     /**
-     *  Availble sensor range could be 0..InstanceCount or 0..InstanceCount-1
-     */
-    UInt8 sensorRange {0};
-
-    /**
      *  Corresponding sensor index
      */
     UInt8 sensorIndex[MAX_SENSOR];

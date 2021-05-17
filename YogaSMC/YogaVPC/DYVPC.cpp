@@ -125,7 +125,10 @@ void DYVPC::updateVPC(UInt32 event) {
     }
     buf->release();
 
-    DebugLog("Unknown id: 0x%x - 0x%x", id, data);
+    if (id == HPWMI_BEZEL_BUTTON)
+        DebugLog("Bezel id: 0x%x - 0x%x", id, data);
+    else
+        DebugLog("Unknown id: 0x%x - 0x%x", id, data);
 }
 
 IOReturn DYVPC::message(UInt32 type, IOService *provider, void *argument) {

@@ -89,7 +89,7 @@ class YogaHIDD : public YogaVPC
      *  Initialize 5 button array or v2 power button
      */
     void initButtonArray();
-    
+
 public:
     IOReturn message(UInt32 type, IOService *provider, void *argument) APPLE_KEXT_OVERRIDE;
     IOReturn setPowerState(unsigned long powerStateOrdinal, IOService * whatDevice) APPLE_KEXT_OVERRIDE;

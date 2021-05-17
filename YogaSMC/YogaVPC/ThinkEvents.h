@@ -71,7 +71,7 @@ enum tpacpi_hkey_event_t : UInt32 {
     TP_HKEY_EV_KEY_NUMLOCK        = 0x6000, /* NumLock key pressed */
     TP_HKEY_EV_KEY_FN             = 0x6005, /* Fn key pressed? E420 */
     TP_HKEY_EV_KEY_FN_ESC         = 0x6060, /* Fn+Esc key pressed X240 */
-    
+
 
     /* Thermal events */
     TP_HKEY_EV_ALARM_BAT_HOT        = 0x6011, /* battery too hot */

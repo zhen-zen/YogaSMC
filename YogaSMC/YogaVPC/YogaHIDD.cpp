@@ -304,16 +304,16 @@ void YogaHIDD::initButtonArray() {
         AlwaysLog("Failed to get button capability");
         return;
     }
-    
+
     setProperty("Array Button", arrayCap, 32);
     if (arrayCap == 0)
         DebugLog("No available button capability");
-    
+
     if (kIOReturnSuccess != evaluateHIDD(INTEL_HID_DSM_BTNE_FN, nullptr, arrayCap))
         AlwaysLog("Failed to set button capability");
     else
         DebugLog("Set button capability success");
-    
+
     if (kIOReturnSuccess != evaluateHIDD(INTEL_HID_DSM_BTNL_FN, nullptr, 0))
         AlwaysLog("Failed to enable HID power button");
 }
