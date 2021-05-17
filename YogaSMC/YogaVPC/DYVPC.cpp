@@ -164,21 +164,14 @@ bool DYVPC::WMIQuery(UInt32 query, void *buffer, enum hp_wmi_command command, UI
         mid = 1;
 
     memcpy(&args.data[0], buffer, insize);
-
-    OSObject *params[] = {
-        OSNumber::withNumber(0ULL, 32),
-        OSNumber::withNumber(mid, 32),
-        OSData::withBytesNoCopy(&args, sizeof(struct bios_args)),
-    };
+    OSData *in = OSData::withBytesNoCopy(&args, sizeof(struct bios_args));
 
     OSObject *result;
 
-    bool ret = YWMI->executeMethod(BIOS_QUERY_WMI_METHOD, &result, params, 3);
-    params[0]->release();
-    params[1]->release();
-    params[2]->release();
+    IOReturn ret = YWMI->evaluateMethod(BIOS_QUERY_WMI_METHOD, 0, mid, &result, in);
+    OSSafeReleaseNULL(in);
 
-    if (!ret) {
+    if (ret != kIOReturnSuccess) {
         AlwaysLog("BIOS query 0x%x: evaluation failed", query);
         OSSafeReleaseNULL(result);
         return false;

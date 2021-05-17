@@ -375,3 +375,79 @@ bool WMI::parseBMF()
     delete[] pout;
     return true;
 }
+
+IOReturn WMI::evaluateMethod(const char *guid, UInt8 instance, UInt32 methodId, OSObject ** result, OSObject * input, bool mute) {
+    IOReturn ret;
+
+    OSDictionary *method = getMethod(guid, ACPI_WMI_METHOD, mute);
+    if (!method) return kIOReturnNotFound;
+
+    OSString *objectId = OSDynamicCast(OSString, method->getObject(kWMIObjectId));
+    if (!objectId) return kIOReturnNotFound;
+
+    OSNumber *instanceCount = OSDynamicCast(OSNumber, method->getObject(kWMIInstanceCount));
+    if (instanceCount->unsigned8BitValue() <= instance)
+        return kIOReturnBadArgument;
+
+    char methodName[5];
+    snprintf(methodName, 5, ACPIMethodName, objectId->getCStringNoCopy());
+
+    OSObject* params[3] = {
+        OSNumber::withNumber(instance, 8),
+        OSNumber::withNumber(methodId, 32),
+        input
+    };
+
+    ret = mDevice->evaluateObject(methodName, result, params, input ? 3 : 2);
+    params[0]->release();
+    params[1]->release();
+
+    return ret;
+}
+
+IOReturn WMI::evaluateInteger(const char * guid, UInt8 instance, UInt32 methodId, UInt32 * result, OSObject * input, bool mute) {
+    IOReturn ret;
+    OSObject *obj = nullptr;
+
+    ret = evaluateMethod(guid, instance, methodId, &obj, input, mute);
+    if (ret == kIOReturnSuccess) {
+        OSNumber *num = OSDynamicCast(OSNumber, obj);
+        if (num != nullptr)
+            *result = num->unsigned32BitValue();
+        else
+            ret = kIOReturnBadArgument;
+    }
+
+    if (obj) obj->release();
+    return ret;
+}
+
+IOReturn WMI::queryBlock(const char *guid, UInt8 instance, OSObject ** result, bool mute) {
+    IOReturn ret;
+
+    OSDictionary *method = getMethod(guid, 0, mute);
+    if (!method) return kIOReturnNotFound;
+
+    OSString *objectId = OSDynamicCast(OSString, method->getObject(kWMIObjectId));
+    if (!objectId) return kIOReturnNotFound;
+
+    OSNumber *instanceCount = OSDynamicCast(OSNumber, method->getObject(kWMIInstanceCount));
+    if (instanceCount->unsigned8BitValue() <= instance)
+        return kIOReturnBadArgument;
+
+    OSNumber *flags = OSDynamicCast(OSNumber, method->getObject(kWMIFlags));
+    if (flags->unsigned8BitValue() & (ACPI_WMI_EVENT | ACPI_WMI_METHOD))
+        return kIOReturnError;
+
+    char methodName[5];
+    snprintf(methodName, 5, ACPIBufferName, objectId->getCStringNoCopy());
+
+    OSObject* params[1] = {
+        OSNumber::withNumber(instance, 8),
+    };
+
+    ret = mDevice->evaluateObject(methodName, result, params, 1);
+    params[0]->release();
+
+    return ret;
+}

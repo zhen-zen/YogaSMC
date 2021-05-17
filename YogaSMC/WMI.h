@@ -77,6 +77,10 @@ public:
     bool getEventData(UInt32 event, OSObject ** result);
     UInt8 getInstanceCount(const char * guid);
 
+    IOReturn evaluateMethod(const char * guid, UInt8 instance, UInt32 methodId, OSObject ** result = 0, OSObject * input = 0, bool mute = false);
+    IOReturn evaluateInteger(const char * guid, UInt8 instance, UInt32 methodId, UInt32 * result, OSObject * input = 0, bool mute = false);
+    IOReturn queryBlock(const char * guid, UInt8 instance, OSObject ** result, bool mute = false);
+
 private:
     OSDictionary* getMethod(const char * guid, UInt8 flg = 0, bool mute = false);
 

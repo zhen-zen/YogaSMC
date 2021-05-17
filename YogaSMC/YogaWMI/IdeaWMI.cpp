@@ -62,21 +62,17 @@ void IdeaWMIYoga::processWMI() {
 }
 
 void IdeaWMIYoga::updateYogaMode() {
+    IOReturn ret;
+    OSNumber *in;
     UInt32 value;
-    OSObject* params[3] = {
-        OSNumber::withNumber(0ULL, 32),
-        OSNumber::withNumber(0ULL, 32),
-        OSNumber::withNumber(0ULL, 32)
-    };
 
-    bool ret = YWMI->executeInteger(GSENSOR_DATA_WMI_METHOD, &value, params, 3);
-    params[0]->release();
-    params[1]->release();
-    params[2]->release();
+    in = OSNumber::withNumber(0ULL, 32);
+    ret = YWMI->evaluateInteger(GSENSOR_DATA_WMI_METHOD, 0, 0, &value, in, true);
+    OSSafeReleaseNULL(in);
 
-    if (!ret) {
+    if (ret != kIOReturnSuccess) {
         setProperty("YogaMode", false);
-        AlwaysLog("YogaMode: detection failed");
+        AlwaysLog("YogaMode evaluation failed");
         return;
     }
 
@@ -182,51 +178,40 @@ void IdeaWMIBattery::processWMI() {
 }
 
 bool IdeaWMIBattery::getBatteryInfo(UInt32 index, OSArray *bat) {
+    IOReturn ret;
     OSObject *result;
-    bool ret;
+    OSString *info;
 
-    OSObject* params[1] = {
-        OSNumber::withNumber(index, 32)
-    };
-
-    ret = YWMI->executeMethod(BAT_INFO_WMI_STRING, &result, params, 1);
-    params[0]->release();
-
-    if (ret) {
-        OSString *info = OSDynamicCast(OSString, result);
-        if (info != nullptr) {
-            AlwaysLog("WBAT %d %s", index, info->getCStringNoCopy());
-            bat->setObject(info);
-        } else {
-            AlwaysLog("WBAT result not a string");
-            ret = false;
-        }
-    } else {
+    ret = YWMI->queryBlock(BAT_INFO_WMI_STRING, index, &result);
+    if (ret != kIOReturnSuccess) {
         AlwaysLog("WBAT evaluation failed");
+    } else if ((info = OSDynamicCast(OSString, result)) == nullptr) {
+        ret = kIOReturnInvalid;
+        AlwaysLog("WBAT result not a string");
+    } else {
+        AlwaysLog("WBAT %d %s", index, info->getCStringNoCopy());
+        bat->setObject(info);
     }
+
     OSSafeReleaseNULL(result);
-    return ret;
+
+    return (ret == kIOReturnSuccess);
 }
 
 OSDefineMetaClassAndStructors(IdeaWMIGameZone, YogaWMI);
 
 bool IdeaWMIGameZone::getGamzeZoneData(UInt32 query, UInt32 *result) {
-    bool ret;
+    IOReturn ret;
+    OSNumber *in;
 
-    OSObject* params[3] = {
-        OSNumber::withNumber(0ULL, 32),
-        OSNumber::withNumber(query, 32),
-        OSNumber::withNumber(0ULL, 32)
-    };
-    
-    ret = YWMI->executeInteger(GAME_ZONE_DATA_WMI_METHOD, result, params, 3, true);
-    params[0]->release();
-    params[1]->release();
-    params[2]->release();
+    in = OSNumber::withNumber(0ULL, 32);
+    ret = YWMI->evaluateInteger(GAME_ZONE_DATA_WMI_METHOD, 0, query, result, in, true);
+    OSSafeReleaseNULL(in);
 
-    if (!ret)
+    if (ret != kIOReturnSuccess)
         AlwaysLog("Query %d evaluation failed", query);
-    return ret;
+
+    return (ret == kIOReturnSuccess);
 }
 
 void IdeaWMIGameZone::processWMI() {

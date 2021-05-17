@@ -11,7 +11,7 @@
 
 #include "YogaWMI.hpp"
 
-#define SENSOR_DATA_WMI_METHOD  "8f1f6435-9f42-42c8-badc-0e9424f20c9a"
+#define SENSOR_DATA_WMI_ARRAY   "8f1f6435-9f42-42c8-badc-0e9424f20c9a"
 #define SENSOR_EVENT_WMI_METHOD "2b814318-4be8-4707-9d84-a190a859b5d0"
 
 #define kIOACPIMessageDYSensor  0xd0

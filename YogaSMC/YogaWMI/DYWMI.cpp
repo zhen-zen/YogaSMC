@@ -18,7 +18,7 @@ OSDefineMetaClassAndStructors(DYWMI, YogaWMI);
 YogaWMI* YogaWMI::withDYWMI(WMI *provider) {
     YogaWMI* dev = nullptr;
 
-    if (provider->hasMethod(SENSOR_DATA_WMI_METHOD, 0))
+    if (provider->hasMethod(SENSOR_DATA_WMI_ARRAY, 0))
         dev = OSTypeAlloc(DYWMI);
     else
         dev = OSTypeAlloc(YogaWMI);
@@ -52,7 +52,7 @@ void DYWMI::setPropertiesGated(OSObject* props) {
                 OSNumber *value;
                 getPropertyNumber(updateSensorPrompt);
 
-                if (value->unsigned8BitValue() > sensorRange) {
+                if (sensorRange <= value->unsigned8BitValue()) {
                     AlwaysLog(valueMatched, updateSensorPrompt, sensorRange);
                     continue;
                 }
@@ -83,23 +83,18 @@ void DYWMI::setPropertiesGated(OSObject* props) {
 
 void DYWMI::processWMI() {
     setProperty("Feature", feature);
-    sensorRange = YWMI->getInstanceCount(SENSOR_DATA_WMI_METHOD);
+    sensorRange = YWMI->getInstanceCount(SENSOR_DATA_WMI_ARRAY);
     registerService();
 }
 
 bool DYWMI::getSensorInfo(UInt8 index, OSObject **result) {
-    bool ret;
+    IOReturn ret;
 
-    OSObject* params[1] = {
-        OSNumber::withNumber(index, 32),
-    };
-
-    ret = YWMI->executeMethod(SENSOR_DATA_WMI_METHOD, result, params, 1, true);
-    params[0]->release();
-
-    if (!ret)
+    ret = YWMI->queryBlock(SENSOR_DATA_WMI_ARRAY, index, result, true);
+    if (ret != kIOReturnSuccess)
         AlwaysLog("Sensor %d evaluation failed", index);
-    return ret;
+
+    return (ret == kIOReturnSuccess);
 }
 
 const char* DYWMI::registerEvent(OSString *guid, UInt32 id) {
