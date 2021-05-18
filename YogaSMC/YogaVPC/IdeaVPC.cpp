@@ -395,14 +395,16 @@ bool IdeaVPC::updateBatteryID(OSDictionary *bat0, OSDictionary *bat1) {
     OSObject *result;
 
     if (vpc->evaluateObject(getBatteryID, &result) != kIOReturnSuccess) {
-        AlwaysLog(updateFailure, "Battery ID");
+        AlwaysLog(updateFailure, "Battery info");
         return false;
     }
-
+#ifdef DEBUG
+    setProperty("raw battery info", result);
+#endif
     OSArray *data;
     data = OSDynamicCast(OSArray, result);
     if (!data) {
-        AlwaysLog("Battery ID not OSArray");
+        AlwaysLog("Battery info not OSArray");
         result->release();
         return false;
     }
