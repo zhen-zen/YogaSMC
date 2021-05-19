@@ -35,6 +35,8 @@ YogaSMC Changelog
 - BaseService: adjust log prefix
 - YogaVPC: skip tb interface with GUID
 - YogaVPC: optimize WMI handling
+- YogaWMI: switch to evaluateMethod and queryBlock
+- IdeaVPC: show raw battery info (DEBUG)
 
 #### v1.4.3
 - YogaWMI: fix BMF parsing
