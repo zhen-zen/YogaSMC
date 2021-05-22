@@ -82,7 +82,7 @@ bool YogaWMI::start(IOService *provider)
             return false;
         }
 
-        auto vpc = IOService::waitForMatchingService(dict, 1000000000);
+        auto vpc = IOService::waitForMatchingService(dict, 2000000000);
         dict->release();
         if (vpc) {
             vpc->release();
