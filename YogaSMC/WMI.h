@@ -29,7 +29,6 @@
 #define kWMIFlags "flags"
 #define kWMIFlagsText "flags-text"
 
-#define DESC_WMI_GUID "05901221-D566-11D1-B2F0-00A0C9062910"
 #define TBT_WMI_GUID  "86ccfd48-205e-4a77-9c48-2021cbede341"
 
 #define ACPIBufferName  "WQ%s" // MOF

@@ -26,7 +26,7 @@
 #include <uuid/uuid.h>
 
 #define kWMIMethod "_WDG"
-#define BMF_DATA_BUFFER "05901221-d566-11d1-b2f0-00a0c9062910"
+#define BMF_DATA_WMI_BUFFER "05901221-d566-11d1-b2f0-00a0c9062910"
 
 struct __attribute__((packed)) WMI_DATA
 {
@@ -326,7 +326,7 @@ void WMI::start()
 bool WMI::parseBMF()
 {
     OSObject *bmf = nullptr;
-    if (!executeMethod(BMF_DATA_BUFFER, &bmf)) {
+    if (!executeMethod(BMF_DATA_WMI_BUFFER, &bmf)) {
         AlwaysLog("Failed to evaluate BMF data");
         return false;
     }
@@ -365,7 +365,7 @@ bool WMI::parseBMF()
     MOF mof(pout, size, mData, iname);
     mDevice->removeProperty("MOF");
 
-    OSObject *result = mof.parse_bmf(BMF_DATA_BUFFER);
+    OSObject *result = mof.parse_bmf(BMF_DATA_WMI_BUFFER);
     mDevice->setProperty("MOF", result);
     if (!mof.parsed)
         mDevice->setProperty("BMF data", data);
