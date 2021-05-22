@@ -78,16 +78,11 @@ void IdeaSMC::addVSMCKey() {
     super::addVSMCKey();
 }
 
-void IdeaSMC::updateEC() {
-    if (!awake)
-        return;
-
+void IdeaSMC::updateECVendor() {
     UInt32 value;
     for (UInt8 index = 0; index < ECSensorBase; ++index)
         if (wmig->getGamzeZoneData(sensorIndex[index], &value))
             atomic_store_explicit(&currentSensor[index], value, memory_order_release);
-
-    super::updateEC();
 }
 
 void IdeaSMC::setWMI(IOService *instance) {

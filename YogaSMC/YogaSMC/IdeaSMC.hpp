@@ -30,13 +30,7 @@ private:
     UInt8 sensorIndex[MAX_SENSOR];
 
     void addVSMCKey() APPLE_KEXT_OVERRIDE;
-    void updateEC() APPLE_KEXT_OVERRIDE;
-    virtual inline IOTimerEventSource *initPoller() APPLE_KEXT_OVERRIDE {
-        return IOTimerEventSource::timerEventSource(this, [](OSObject *object, IOTimerEventSource *sender) {
-            auto smc = OSDynamicCast(IdeaSMC, object);
-            if (smc) smc->updateEC();
-        });
-    };
+    void updateECVendor() APPLE_KEXT_OVERRIDE;
 
 public:
     static IdeaSMC *withDevice(IOService *provider, IOACPIPlatformDevice *device);

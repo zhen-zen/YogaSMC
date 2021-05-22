@@ -198,10 +198,7 @@ void DYSMC::addVSMCKey() {
     super::addVSMCKey();
 }
 
-void DYSMC::updateEC() {
-    if (!awake)
-        return;
-
+void DYSMC::updateECVendor() {
     OSObject *result = nullptr;
 
     for (UInt8 index = 0; index < ECSensorBase; ++index) {
@@ -239,17 +236,11 @@ void DYSMC::updateEC() {
         atomic_store_explicit(&currentSensor[index], value, memory_order_release);
     }
     OSSafeReleaseNULL(result);
-
-    super::updateEC();
 }
 
 void DYSMC::setWMI(IOService *instance) {
     if (wmis)
         return;
 
-    DYWMI *provider = OSDynamicCast(DYWMI, instance);
-    if (!provider)
-        return;
-
-    wmis = provider;
+    wmis = OSDynamicCast(DYWMI, instance);
 }
