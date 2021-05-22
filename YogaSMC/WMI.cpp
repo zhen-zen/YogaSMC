@@ -169,11 +169,11 @@ void WMI::parseWDGEntry(struct WMI_DATA* block)
     }
 
     setPropertyNumber(dict, kWMIInstanceCount, block->instance_count, 8);
+    setPropertyNumber(dict, kWMIFlags, block->flags, 8);
     value = parseWMIFlags(block->flags);
     dict->setObject(kWMIFlagsText, value);
     value->release();
 #ifdef DEBUG
-    setPropertyNumber(dict, kWMIFlags, block->flags, 8);
     setPropertyBytes(dict, "raw", block, WMI_DATA_SIZE);
 #endif
     mData->setObject(guid_string, dict);
