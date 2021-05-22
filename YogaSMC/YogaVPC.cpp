@@ -113,6 +113,9 @@ bool YogaVPC::start(IOService *provider) {
 
     updateAll();
 
+    setProperty(kDeliverNotifications, kOSBooleanTrue);
+    registerService();
+
     if (WMICollection) {
         for (int i=WMICollection->getCount()-1; i >= 0; i--) {
             IOService *wmi = OSDynamicCast(IOService, WMICollection->getObject(i));
@@ -143,8 +146,6 @@ bool YogaVPC::start(IOService *provider) {
         }
     }
 #endif
-    setProperty(kDeliverNotifications, kOSBooleanTrue);
-    registerService();
     return true;
 }
 
