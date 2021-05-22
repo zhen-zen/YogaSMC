@@ -73,17 +73,8 @@ protected:
     /**
      *  Poll EC field for sensor data
      */
-    virtual void updateEC();
-
-    /**
-     *  Initialize Poller
-     */
-    virtual inline IOTimerEventSource *initPoller() {
-        return IOTimerEventSource::timerEventSource(this, [](OSObject *object, IOTimerEventSource *sender) {
-            auto smc = OSDynamicCast(YogaSMC, object);
-            if (smc) smc->updateEC();
-        });
-    };
+    void updateEC();
+    virtual inline void updateECVendor() {};
 
     virtual void setPropertiesGated(OSObject* props);
 

@@ -71,8 +71,12 @@ bool YogaSMC::start(IOService *provider) {
 
     awake = true;
 
-    if (!(poller = initPoller()) ||
-        (workLoop->addEventSource(poller) != kIOReturnSuccess)) {
+    poller = IOTimerEventSource::timerEventSource(this, [](OSObject *object, IOTimerEventSource *sender) {
+        auto smc = OSDynamicCast(YogaSMC, object);
+        if (smc) smc->updateEC();
+    });
+
+    if (!poller || (workLoop->addEventSource(poller) != kIOReturnSuccess)) {
         AlwaysLog("Failed to add poller");
         return false;
     }
@@ -144,6 +148,11 @@ YogaSMC* YogaSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) 
 }
 
 void YogaSMC::updateEC() {
+    if (!awake)
+        return;
+
+    updateECVendor();
+
     UInt32 result = 0;
     for (UInt8 i = ECSensorBase; i < sensorCount; i++)
         if (ec->evaluateInteger(sensorMethods[i], &result) == kIOReturnSuccess && result != 0)

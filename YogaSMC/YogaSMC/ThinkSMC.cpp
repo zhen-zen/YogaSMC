@@ -48,17 +48,10 @@ void ThinkSMC::addVSMCKey() {
     super::addVSMCKey();
 }
 
-void ThinkSMC::updateEC() {
-    if (!awake)
+void ThinkSMC::updateECVendor() {
+    if (!(ECAccessCap & ECReadCap))
         return;
 
-    if (ECAccessCap & ECReadCap)
-        updateECFan();
-
-    super::updateEC();
-}
-
-void ThinkSMC::updateECFan() {
     UInt8 lo, hi;
     if (method_re1b(0x84, &lo) == kIOReturnSuccess &&
         method_re1b(0x85, &hi) == kIOReturnSuccess) {
