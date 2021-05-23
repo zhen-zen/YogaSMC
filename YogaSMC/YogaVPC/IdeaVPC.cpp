@@ -123,7 +123,7 @@ IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
     {
         case kSMC_YogaEvent:
             {
-                UInt32 mode = *((UInt32 *) argument);
+                UInt32 mode = *(reinterpret_cast<UInt32 *>(argument));
                 DebugLog("message: %s Yoga mode 0x%x", provider->getName(), mode);
                 if (client)
                     client->sendNotification(0x10, mode); // Since vpc_bit is less than 16
@@ -148,20 +148,20 @@ IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
             break;
 
         case kSMC_getConservation:
-            *(bool *)argument = conservationMode;
+            *(reinterpret_cast<bool *>(argument)) = conservationMode;
 //            conservationModeLock = false;
             DebugLog("message: %s get conservation mode %d", provider->getName(), conservationMode);
             break;
 
         case kSMC_setConservation:
-            AlwaysLog("message: %s set conservation mode %d -> %d", provider->getName(), conservationMode, *((bool *) argument));
-            if (*((bool *) argument) != conservationMode &&
+            AlwaysLog("message: %s set conservation mode %d -> %d", provider->getName(), conservationMode, *(reinterpret_cast<bool *>(argument)));
+            if (*(reinterpret_cast<bool *>(argument)) != conservationMode &&
                 !conservationModeLock)
                 toggleConservation();
             break;
 
         case kIOACPIMessageDeviceNotification:
-            if (argument && *((UInt32 *) argument) == kIOACPIMessageReserved) {
+            if (argument && *(reinterpret_cast<UInt32 *>(argument)) == kIOACPIMessageReserved) {
                 updateVPC();
                 break;
             }
@@ -391,105 +391,136 @@ void IdeaVPC::updateBatteryCapability(UInt32 batState) {
     bat1->release();
 }
 
+UInt16 extractBatteryCycle(OSObject *raw) {
+    UInt16 ret = 0xffff;
+    OSNumber *number;
+    OSData *data;
+
+    if ((number = OSDynamicCast(OSNumber, raw)) != nullptr)
+        ret = number->unsigned16BitValue();
+    else if ((data = OSDynamicCast(OSData, raw)))
+        ret = reinterpret_cast<const UInt16 *>(data->getBytesNoCopy())[0];
+
+    return ret;
+}
+
+UInt64 extractBatteryID(OSObject *raw) {
+    UInt64 ret = 0xffff;
+    OSNumber *number;
+    OSData *data;
+
+    if ((number = OSDynamicCast(OSNumber, raw)) != nullptr)
+        ret = number->unsigned64BitValue();
+    else if ((data = OSDynamicCast(OSData, raw)))
+        ret = reinterpret_cast<const UInt64 *>(data->getBytesNoCopy())[0];
+
+    return ret;
+}
+
 bool IdeaVPC::updateBatteryID(OSDictionary *bat0, OSDictionary *bat1) {
     OSObject *result;
 
     if (vpc->evaluateObject(getBatteryID, &result) != kIOReturnSuccess) {
-        AlwaysLog(updateFailure, "Battery info");
+        AlwaysLog(updateFailure, "Battery ID");
         return false;
     }
 #ifdef DEBUG
-    setProperty("raw battery info", result);
+    setProperty("raw battery ID", result);
 #endif
     OSArray *data;
     data = OSDynamicCast(OSArray, result);
     if (!data) {
-        AlwaysLog("Battery info not OSArray");
+        AlwaysLog("Battery ID not OSArray");
         result->release();
         return false;
     }
 
     OSString *value;
-    OSData *cycle0 = OSDynamicCast(OSData, data->getObject(0));
-    if (!cycle0) {
+    char batString[20];
+
+    UInt16 cycle;
+    cycle = extractBatteryCycle(data->getObject(0));
+    if (cycle != 0xffff) {
+        snprintf(batString, 5, "%d", cycle);
+        setPropertyString(bat0, "Cycle count", batString);
+        DebugLog("Battery 0 cycle count %d", cycle);
+    } else {
         AlwaysLog("Battery 0 cycle not exist");
-    } else {
-        UInt16 *cycleCount0 = (UInt16 *)cycle0->getBytesNoCopy();
-        if (cycleCount0[0] != 0xffff) {
-            char cycle0String[5];
-            snprintf(cycle0String, 5, "%d", cycleCount0[0]);
-            setPropertyString(bat0, "Cycle count", cycle0String);
-            DebugLog("Battery 0 cycle count %d", cycleCount0[0]);
-        }
     }
 
-    OSData *cycle1 = OSDynamicCast(OSData, data->getObject(1));
-    if (!cycle1) {
+    cycle = extractBatteryCycle(data->getObject(1));
+    if (cycle != 0xffff) {
+        snprintf(batString, 5, "%d", cycle);
+        setPropertyString(bat1, "Cycle count", batString);
+        DebugLog("Battery 1 cycle count %d", cycle);
+    } else {
         DebugLog("Battery 1 cycle not exist");
-    } else {
-        UInt16 *cycleCount1 = (UInt16 *)cycle1->getBytesNoCopy();
-        if (cycleCount1[0] != 0xffff) {
-            char cycle1String[5];
-            snprintf(cycle1String, 5, "%d", cycleCount1[0]);
-            setPropertyString(bat1, "Cycle count", cycle1String);
-            DebugLog("Battery 1 cycle count %d", cycleCount1[0]);
-        }
     }
 
-    OSData *ID0 = OSDynamicCast(OSData, data->getObject(2));
-    if (!ID0) {
+    UInt64 id;
+    UInt16 *idPtr;
+    id = extractBatteryID(data->getObject(2));
+    if ((id & 0xffff) != 0xffff) {
+        idPtr = reinterpret_cast<UInt16 *>(&id);
+        snprintf(batString, 20, "%04x %04x %04x %04x", idPtr[0], idPtr[1], idPtr[2], idPtr[3]);
+        setPropertyString(bat0, "ID", batString);
+        DebugLog("Battery 0 ID %s", batString);
+    } else {
         AlwaysLog("Battery 0 ID not exist");
-    } else {
-        UInt16 *batteryID0 = (UInt16 *)ID0->getBytesNoCopy();
-        if (batteryID0[0] != 0xffff) {
-            char ID0String[20];
-            snprintf(ID0String, 20, "%04x %04x %04x %04x", batteryID0[0], batteryID0[1], batteryID0[2], batteryID0[3]);
-            setPropertyString(bat0, "ID", ID0String);
-            DebugLog("Battery 0 ID %s", ID0String);
-        }
     }
 
-    OSData *ID1 = OSDynamicCast(OSData, data->getObject(3));
-    if (!ID1) {
-        DebugLog("Battery 1 ID not exist");
+    id = extractBatteryID(data->getObject(3));
+    if ((id & 0xffff) != 0xffff) {
+        idPtr = reinterpret_cast<UInt16 *>(&id);
+        snprintf(batString, 20, "%04x %04x %04x %04x", idPtr[0], idPtr[1], idPtr[2], idPtr[3]);
+        setPropertyString(bat1, "ID", batString);
+        DebugLog("Battery 1 ID %s", batString);
     } else {
-        UInt16 *batteryID1 = (UInt16 *)ID1->getBytesNoCopy();
-        if (batteryID1[0] != 0xffff) {
-            char ID1String[20];
-            snprintf(ID1String, 20, "%04x %04x %04x %04x", batteryID1[0], batteryID1[1], batteryID1[2], batteryID1[3]);
-            setPropertyString(bat1, "ID", ID1String);
-            DebugLog("Battery 1 ID %s", ID1String);
-        }
+        DebugLog("Battery 1 ID not exist");
     }
+
     data->release();
     return true;
 }
 
-bool IdeaVPC::updateBatteryInfo(OSDictionary *bat0, OSDictionary *bat1) {
-    OSData *data;
+OSData *IdeaVPC::extractBatteryInfo(UInt32 index) {
+    OSData *data = nullptr;
     OSObject *result;
-    
+
     OSObject* params[1] = {
-        OSNumber::withNumber(0ULL, 32)
+        OSNumber::withNumber(index, 32)
     };
 
     IOReturn ret = vpc->evaluateObject(getBatteryInfo, &result, params, 1);
     params[0]->release();
 
-    if (ret != kIOReturnSuccess) {
-        AlwaysLog(updateFailure, "Battery Info");
-        return false;
+    if (ret == kIOReturnSuccess) {
+        if ((data = OSDynamicCast(OSData, result))) {
+            if (reinterpret_cast<const UInt64*>(data->getBytesNoCopy())[0] != 0) {
+                data->retain();
+            } else {
+                data = nullptr;
+                DebugLog("Battery Info %d is empty", index);
+            }
+        } else {
+            DebugLog("Battery Info %d not OSData", index);
+        }
+    } else {
+        DebugLog(updateFailure, "Battery Info");
     }
-
-    data = OSDynamicCast(OSData, result);
-    if (!data) {
-        AlwaysLog("Battery Info not OSData");
-        result->release();
+    OSSafeReleaseNULL(result);
+    return data;
+}
+bool IdeaVPC::updateBatteryInfo(OSDictionary *bat0, OSDictionary *bat1) {
+    OSData *data;
+    if (!(data = extractBatteryInfo(0)) && !(data = extractBatteryInfo(1)))
         return false;
-    }
 
+#ifdef DEBUG
+    setProperty("raw battery Info", data);
+#endif
     OSString *value;
-    UInt16 * bdata = (UInt16 *)(data->getBytesNoCopy());
+    const UInt16 * bdata = reinterpret_cast<const UInt16 *>(data->getBytesNoCopy());
     // B1TM
     if (bdata[7] != 0) {
         SInt16 celsius = bdata[7] - 2731;

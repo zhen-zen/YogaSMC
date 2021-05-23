@@ -722,7 +722,7 @@ IOReturn ThinkVPC::message(UInt32 type, IOService *provider, void *argument) {
             break;
 
         case kIOACPIMessageDeviceNotification:
-            if (argument && *((UInt32 *) argument) == kIOACPIMessageReserved) {
+            if (argument && *(reinterpret_cast<UInt32 *>(argument)) == kIOACPIMessageReserved) {
                 updateVPC();
                 break;
             }

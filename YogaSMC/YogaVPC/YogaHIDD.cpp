@@ -87,7 +87,7 @@ IOReturn YogaHIDD::message(UInt32 type, IOService *provider, void *argument) {
     if (type != kIOACPIMessageDeviceNotification || !argument)
         return super::message(type, provider, argument);
 
-    UInt32 event = *(reinterpret_cast<uint32_t *>(argument));
+    UInt32 event = *(reinterpret_cast<UInt32 *>(argument));
     DebugLog("message: type=%x, provider=%s, argument=0x%04x", type, provider->getName(), event);
     switch (event) {
         case 0xc0: // HID events

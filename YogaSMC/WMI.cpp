@@ -49,10 +49,10 @@ extern "C" int ds_dec(void* pin,int lin, void* pout, int lout, int flg);
 // Convert UUID to little endian
 void le_uuid_dec(uuid_t *in, uuid_t *out)
 {
-    *((uint32_t *)out + 0) = OSSwapInt32(*((uint32_t *)in + 0));
-    *((uint16_t *)out + 2) = OSSwapInt16(*((uint16_t *)in + 2));
-    *((uint16_t *)out + 3) = OSSwapInt16(*((uint16_t *)in + 3));
-    *((uint64_t *)out + 1) =            (*((uint64_t *)in + 1));
+    *(reinterpret_cast<uint32_t *>(out) + 0) = OSSwapInt32(*(reinterpret_cast<uint32_t *>(in) + 0));
+    *(reinterpret_cast<uint16_t *>(out) + 2) = OSSwapInt16(*(reinterpret_cast<uint16_t *>(in) + 2));
+    *(reinterpret_cast<uint16_t *>(out) + 3) = OSSwapInt16(*(reinterpret_cast<uint16_t *>(in) + 3));
+    *(reinterpret_cast<uint64_t *>(out) + 1) =            (*(reinterpret_cast<uint64_t *>(in) + 1));
 }
 
 // parseWMIFlags - Parse WMI flags to a string

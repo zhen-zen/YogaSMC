@@ -659,12 +659,12 @@ IOReturn YogaVPC::message(UInt32 type, IOService *provider, void *argument) {
             if (!argument)
                 AlwaysLog("message: Unknown ACPI notification");
             else
-                AlwaysLog("message: Unknown ACPI notification 0x%04x", *((UInt32 *) argument));
+                AlwaysLog("message: Unknown ACPI notification 0x%04x", *(reinterpret_cast<UInt32 *>(argument)));
             break;
 
         default:
             if (argument)
-                AlwaysLog("message: type=%x, provider=%s, argument=0x%04x", type, provider->getName(), *((UInt32 *) argument));
+                AlwaysLog("message: type=%x, provider=%s, argument=0x%04x", type, provider->getName(), *(reinterpret_cast<UInt32 *>(argument)));
             else
                 AlwaysLog("message: type=%x, provider=%s", type, provider->getName());
     }
