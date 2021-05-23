@@ -23,6 +23,7 @@ class YogaSMC : public YogaBaseService
 
 protected:
     bool awake {false};
+    bool ready {false};
 
     IOTimerEventSource* poller {nullptr};
 

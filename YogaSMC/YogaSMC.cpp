@@ -69,8 +69,6 @@ bool YogaSMC::start(IOService *provider) {
 
     validateEC();
 
-    awake = true;
-
     poller = IOTimerEventSource::timerEventSource(this, [](OSObject *object, IOTimerEventSource *sender) {
         auto smc = OSDynamicCast(YogaSMC, object);
         if (smc) smc->updateEC();
@@ -87,6 +85,8 @@ bool YogaSMC::start(IOService *provider) {
     setProperty("Key Submitted", vsmcPlugin.data.size(), 32);
     vsmcNotifier = VirtualSMCAPI::registerHandler(vsmcNotificationHandler, this);
 
+    awake = true;
+    ready = true;
     poller->setTimeoutMS(POLLING_INTERVAL);
     poller->enable();
     registerService();
@@ -172,7 +172,7 @@ IOReturn YogaSMC::setPowerState(unsigned long powerStateOrdinal, IOService * wha
             DebugLog("Going to sleep");
         }
     } else {
-        if (!awake) {
+        if (!awake && ready) {
             awake = true;
             workLoop->addEventSource(poller);
             poller->setTimeoutMS(POLLING_INTERVAL);
