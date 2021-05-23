@@ -1,5 +1,11 @@
 YogaSMC Changelog
 ============================
+#### v1.5.1
+- YogaSMC: refactor updateEC
+- YogaWMI: fix panic in release build, thx @Chris2fourlaw
+- YogaWMI: postpone late start to 2s
+- YogaSMC: fix kernel panic when setPowerState is called before poller initialized, thx @Chris2fourlaw
+- IdeaVPC: add workaround to extract battery info, thx @Chris2fourlaw @SukkaW
 
 #### v1.5.0
 - IdeaVPC: wait for EC region init
