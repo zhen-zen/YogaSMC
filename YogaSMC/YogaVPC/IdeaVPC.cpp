@@ -454,7 +454,7 @@ bool IdeaVPC::updateBatteryID(OSDictionary *bat0, OSDictionary *bat1) {
         setPropertyString(bat1, "Cycle count", batString);
         DebugLog("Battery 1 cycle count %d", cycle);
     } else {
-        AlwaysLog("Battery 1 cycle not exist");
+        DebugLog("Battery 1 cycle not exist");
     }
 
     UInt64 id;
