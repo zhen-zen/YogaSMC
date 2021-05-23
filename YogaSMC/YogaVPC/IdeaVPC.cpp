@@ -483,31 +483,42 @@ bool IdeaVPC::updateBatteryID(OSDictionary *bat0, OSDictionary *bat1) {
     return true;
 }
 
-bool IdeaVPC::updateBatteryInfo(OSDictionary *bat0, OSDictionary *bat1) {
+OSData *IdeaVPC::extractBatteryInfo(UInt32 index) {
+    OSData *data = nullptr;
     OSObject *result;
 
     OSObject* params[1] = {
-        OSNumber::withNumber(0ULL, 32)
+        OSNumber::withNumber(index, 32)
     };
 
     IOReturn ret = vpc->evaluateObject(getBatteryInfo, &result, params, 1);
     params[0]->release();
 
-    if (ret != kIOReturnSuccess) {
-        AlwaysLog(updateFailure, "Battery Info");
-        return false;
+    if (ret == kIOReturnSuccess) {
+        if ((data = OSDynamicCast(OSData, result))) {
+            if (reinterpret_cast<const UInt64*>(data->getBytesNoCopy())[0] != 0) {
+                data->retain();
+            } else {
+                data = nullptr;
+                DebugLog("Battery Info %d is empty", index);
+            }
+        } else {
+            DebugLog("Battery Info %d not OSData", index);
+        }
+    } else {
+        DebugLog(updateFailure, "Battery Info");
     }
-#ifdef DEBUG
-    setProperty("raw battery Info", result);
-#endif
+    OSSafeReleaseNULL(result);
+    return data;
+}
+bool IdeaVPC::updateBatteryInfo(OSDictionary *bat0, OSDictionary *bat1) {
     OSData *data;
-    data = OSDynamicCast(OSData, result);
-    if (!data) {
-        AlwaysLog("Battery Info not OSData");
-        result->release();
+    if (!(data = extractBatteryInfo(0)) && !(data = extractBatteryInfo(1)))
         return false;
-    }
 
+#ifdef DEBUG
+    setProperty("raw battery Info", data);
+#endif
     OSString *value;
     const UInt16 * bdata = reinterpret_cast<const UInt16 *>(data->getBytesNoCopy());
     // B1TM

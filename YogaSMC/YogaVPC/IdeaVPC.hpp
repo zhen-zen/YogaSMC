@@ -236,10 +236,21 @@ private:
     bool updateBatteryID(OSDictionary *bat0, OSDictionary *bat1);
 
     /**
+     *  Extract battery information
+     *
+     *  @param index Battery index
+     *
+     *  @return raw battery info
+     */
+    OSData *extractBatteryInfo(UInt32 index);
+
+    /**
      *  Update battery information
      *
      *  @param bat0 Dictionary for Battery 0
      *  @param bat1 Dictionary for Battery 1
+     *
+     *  @return true if success
      */
     bool updateBatteryInfo(OSDictionary *bat0, OSDictionary *bat1);
 
