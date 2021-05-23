@@ -135,7 +135,7 @@ IOReturn DYVPC::message(UInt32 type, IOService *provider, void *argument) {
     if (type != kIOACPIMessageDeviceNotification || !argument)
         return super::message(type, provider, argument);
 
-    updateVPC(*((UInt32 *) argument));
+    updateVPC(*(reinterpret_cast<UInt32 *>(argument)));
 
     return kIOReturnSuccess;
 }
