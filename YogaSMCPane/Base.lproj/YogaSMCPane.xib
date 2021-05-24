@@ -32,6 +32,7 @@
                 <outlet property="vCustomLEDSlider" destination="5gQ-az-9US" id="nY3-qK-vvb"/>
                 <outlet property="vCycleCount" destination="cFi-NC-K0C" id="axy-Rg-jnS"/>
                 <outlet property="vDYTCFuncMode" destination="fZZ-Y6-z0X" id="v6d-fS-QEH"/>
+                <outlet property="vDYTCPSCAvailable" destination="yGD-Vg-eaY" id="UY0-JV-2vn"/>
                 <outlet property="vDYTCRevision" destination="W8B-pr-Ckq" id="JAI-9h-llK"/>
                 <outlet property="vDisableFan" destination="5sT-I1-ipX" id="0X7-Qq-6Zs"/>
                 <outlet property="vECRead" destination="w0X-ID-3TJ" id="8MX-ad-Owg"/>
@@ -396,6 +397,17 @@
                                             </buttonCell>
                                             <connections>
                                                 <action selector="vClamshellModeSet:" target="-2" id="nCo-wo-ZZj"/>
+                                            </connections>
+                                        </button>
+                                        <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="yGD-Vg-eaY">
+                                            <rect key="frame" x="382" y="135" width="105" height="18"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <buttonCell key="cell" type="check" title="PSCFunction" bezelStyle="regularSquare" imagePosition="left" enabled="NO" inset="2" id="6gG-Fb-m9Q">
+                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                            <connections>
+                                                <action selector="vDYTCPSCset:" target="-2" id="gct-7R-UKX"/>
                                             </connections>
                                         </button>
                                     </subviews>

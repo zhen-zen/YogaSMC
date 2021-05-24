@@ -281,51 +281,69 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
                     AlwaysLog(notSupported, DYTCPrompt);
                     continue;
                 }
+                bool ret;
+                UInt32 mode;
                 OSNumber *raw = OSDynamicCast(OSNumber, dict->getObject(DYTCPrompt));
                 if (raw != nullptr) {
-                    DYTC_CMD cmd = {.raw = raw->unsigned32BitValue()};
+                    mode = raw->unsigned32BitValue();
+                    DYTC_CMD cmd = {.raw = mode};
                     DYTC_RESULT res;
-                    if (DYTCCommand(cmd, &res) && parseDYTC(res))
-                        AlwaysLog(toggleSuccess, DYTCPrompt, raw->unsigned32BitValue(), "see ioreg");
-                    else
-                        AlwaysLog(toggleFailure, DYTCPrompt);
-                    continue;
-                }
-                OSString *value;
-                getPropertyString(DYTCPrompt);
-                int mode;
-                switch (value->getChar(0)) {
-                    case 'l':
-                    case 'L':
-                    case 'q':
-                    case 'Q':
-                        mode = DYTC_MODE_QUIET;
-                        break;
-
-                    case 'b':
-                    case 'B':
-                    case 'm':
-                    case 'M':
-                        mode = DYTC_MODE_BALANCE;
-                        break;
-
-                    case 'h':
-                    case 'H':
-                    case 'p':
-                    case 'P':
-                        mode = DYTC_MODE_PERFORM;
-                        break;
-
-                    default:
-                        AlwaysLog(valueInvalid, DYTCPrompt);
-                        continue;
-                }
-                if (!setDYTC(mode)) {
-                    AlwaysLog(toggleFailure, DYTCPrompt);
-                    updateDYTC();
+                    ret = DYTCCommand(cmd, &res) && parseDYTC(res);
                 } else {
-                    DebugLog(toggleSuccess, DYTCPrompt, mode, "see ioreg");
+                    OSString *value;
+                    getPropertyString(DYTCPrompt);
+                    switch (value->getChar(0)) {
+                        case 'l':
+                        case 'L':
+                        case 'q':
+                        case 'Q':
+                            mode = DYTC_MODE_QUIET;
+                            ret = setDYTCMMC(mode);
+                            break;
+
+                        case 'b':
+                        case 'B':
+                        case 'm':
+                        case 'M':
+                            mode = DYTC_MODE_BALANCE;
+                            ret = setDYTCMMC(mode);
+                            break;
+
+                        case 'd':
+                        case 'D':
+                            mode = DYTC_MODE_NEW_DEFAULT;
+                            ret = setDYTCPSC(mode);
+                            break;
+
+                        case 'h':
+                        case 'H':
+                        case 'p':
+                        case 'P':
+                            mode = DYTC_MODE_PERFORM;
+                            ret = setDYTCMMC(mode);
+                            break;
+
+                        case '1':
+                        case '2':
+                        case '3':
+                        case '4':
+                        case '5':
+                        case '6':
+                        case '7':
+                        case '8':
+                            mode = DYTC_MODE_NEW_1 + (value->getChar(0) - '1');
+                            ret = setDYTCPSC(mode);
+                            break;
+
+                        default:
+                            AlwaysLog(valueInvalid, DYTCPrompt);
+                            continue;
+                    }
                 }
+                if (ret)
+                    DebugLog(toggleSuccess, DYTCPrompt, mode, "see ioreg");
+                else
+                    AlwaysLog(toggleFailure, DYTCPrompt);
             } else if (key->isEqualTo(updatePrompt)) {
                 updateAll();
             } else {
@@ -472,7 +490,6 @@ bool YogaVPC::parseDYTC(DYTC_RESULT result) {
         case DYTC_FUNCTION_STD:
             setPropertyString(status, "FuncMode", "Standard");
             break;
-
         case DYTC_FUNCTION_CQL:
             /* We can't get the mode when in CQL mode - so we disable CQL
              * mode retrieve the mode and then enable it again.
@@ -484,13 +501,14 @@ bool YogaVPC::parseDYTC(DYTC_RESULT result) {
                 status->release();
                 return false;
             }
-            setPropertyString(status, "FuncMode", "Lap");
+            setPropertyString(status, "FuncMode", "Lap (Reduced thermals)");
             break;
-
         case DYTC_FUNCTION_MMC:
             setPropertyString(status, "FuncMode", "Desk");
             break;
-
+        case DYTC_FUNCTION_PSC:
+            setPropertyString(status, "FuncMode", "Controlled");
+            break;
         default:
             AlwaysLog(valueUnknown, DYTCFuncPrompt, result.get.funcmode);
             char Unknown[10];
@@ -499,28 +517,64 @@ bool YogaVPC::parseDYTC(DYTC_RESULT result) {
             break;
     }
 
-    switch (result.get.perfmode) {
-        case DYTC_MODE_PERFORM:
-            if (result.get.funcmode == DYTC_FUNCTION_CQL)
-                setPropertyString(status, "PerfMode", "Performance (Reduced as lapmode active)");
-            else
-                setPropertyString(status, "PerfMode", "Performance");
-            break;
+    if (result.get.funcmode ==  DYTC_FUNCTION_PSC) {
+        switch (result.get.perfmode) {
+            case DYTC_MODE_NEW_1:
+            case DYTC_MODE_NEW_2:
+            case DYTC_MODE_NEW_3:
+            case DYTC_MODE_NEW_4: {
+                char pm[20];
+                snprintf(pm, sizeof(pm), "Quiet %d", result.get.perfmode - DYTC_MODE_NEW_1 + 1);
+                setPropertyString(status, "PerfMode", pm);
+                break;
+            }
 
-        case DYTC_MODE_QUIET:
-            setPropertyString(status, "PerfMode", "Quiet");
-            break;
+            case DYTC_MODE_NEW_DEFAULT: {
+                setPropertyString(status, "PerfMode", "Balance");
+                break;
+            }
 
-        case DYTC_MODE_BALANCE:
-            setPropertyString(status, "PerfMode", "Balance");
-            break;
+            case DYTC_MODE_NEW_5:
+            case DYTC_MODE_NEW_6:
+            case DYTC_MODE_NEW_7:
+            case DYTC_MODE_NEW_8: {
+                char pm[20];
+                snprintf(pm, sizeof(pm), "Performance %d", result.get.perfmode - DYTC_MODE_NEW_5 + 1);
+                setPropertyString(status, "PerfMode", pm);
+                break;
+            }
 
-        default:
-            AlwaysLog(valueUnknown, DYTCPerfPrompt, result.get.perfmode);
-            char Unknown[10];
-            snprintf(Unknown, 10, "Unknown:%1x", result.get.perfmode);
-            setPropertyString(status, "PerfMode", Unknown);
-            break;
+            default:
+                AlwaysLog(valueUnknown, DYTCPerfPrompt, result.get.perfmode);
+                char Unknown[10];
+                snprintf(Unknown, sizeof(Unknown), "Unknown:%1x", result.get.perfmode);
+                setPropertyString(status, "PerfMode", Unknown);
+                break;
+        }
+    } else {
+        switch (result.get.perfmode) {
+            case DYTC_MODE_PERFORM:
+                if (result.get.funcmode == DYTC_FUNCTION_CQL)
+                    setPropertyString(status, "PerfMode", "Performance (Reduced as lapmode active)");
+                else
+                    setPropertyString(status, "PerfMode", "Performance");
+                break;
+
+            case DYTC_MODE_QUIET:
+                setPropertyString(status, "PerfMode", "Quiet");
+                break;
+
+            case DYTC_MODE_BALANCE:
+                setPropertyString(status, "PerfMode", "Balance");
+                break;
+
+            default:
+                AlwaysLog(valueUnknown, DYTCPerfPrompt, result.get.perfmode);
+                char Unknown[10];
+                snprintf(Unknown, sizeof(Unknown), "Unknown:%1x", result.get.perfmode);
+                setPropertyString(status, "PerfMode", Unknown);
+                break;
+        }
     }
 
     for (int func_bit = 0; func_bit < 16; func_bit++) {
@@ -536,6 +590,10 @@ bool YogaVPC::parseDYTC(DYTC_RESULT result) {
 
                 case DYTC_FUNCTION_MMC:
                     DebugLog("Found DYTC_FUNCTION_MMC");
+                    break;
+                    
+                case DYTC_FUNCTION_PSC:
+                    DebugLog("Found DYTC_FUNCTION_PSC");
                     break;
 
                 case DYTC_FUNCTION_STP:
@@ -568,7 +626,7 @@ bool YogaVPC::updateDYTC() {
     return parseDYTC(result);
 }
 
-bool YogaVPC::setDYTC(int perfmode) {
+bool YogaVPC::setDYTCMMC(int perfmode) {
     if (!DYTCCap)
         return true;
 
@@ -590,6 +648,66 @@ bool YogaVPC::setDYTC(int perfmode) {
                 return false;
         }
     }
+    return parseDYTC(result);
+}
+
+bool YogaVPC::setDYTCPSC(int newPerfMode) {
+    if (!DYTCCap)
+        return true;
+
+    DYTC_RESULT result;
+    // retrieve current state
+    if (!DYTCCommand(dytc_get_cmd, &result))
+        return false;
+
+    int curFuncMode = result.get.funcmode;
+    int curPerfMode = result.get.perfmode;
+
+    bool lapMode = false;
+    if (curFuncMode == DYTC_FUNCTION_CQL) {
+        // the result of disable command will contain real funcmode & perfmode
+        // the result of enable command will contain lapmode funcmode
+        DYTC_RESULT temp;
+        if (!DYTCCommand(dytc_set_cmd, &temp, DYTC_FUNCTION_CQL, 0xf, false))
+            return false;
+        curFuncMode = temp.get.funcmode;
+        curPerfMode = temp.get.perfmode;
+        lapMode = true;
+    }
+
+    if (curFuncMode == DYTC_FUNCTION_PSC) {
+        // psc mode tends to be glitchy (at least on my laptop), and can lock up cpu in low mhz state so we need to bombard it with resets first
+        // and yes, 1 reset is not enough at some cases so why not hold up kernel while we bombard it with resets :)))
+        DYTC_RESULT temp;
+        for (int a = 0; a < 20; a++) {
+            if (!DYTCCommand(dytc_set_cmd, &temp, DYTC_FUNCTION_PSC, 0xf, false))
+                return false;
+            if (!DYTCCommand(dytc_reset_cmd, &temp))
+                return false;
+        }
+        
+    }
+    
+    {
+        DYTC_RESULT temp;
+        // try reset if we wanna go to default
+        if (newPerfMode == DYTC_MODE_NEW_DEFAULT && !DYTCCommand(dytc_reset_cmd, &temp))
+            return false;
+        // try both new & old if we wanna control
+        else if (newPerfMode != DYTC_MODE_NEW_DEFAULT && !DYTCCommand(dytc_set_cmd, &temp, DYTC_FUNCTION_PSC, newPerfMode, true) &&
+            !DYTCCommand(dytc_set_cmd, &temp, DYTC_FUNCTION_MMC, newPerfMode < DYTC_MODE_NEW_5 ? DYTC_MODE_QUIET : DYTC_MODE_PERFORM, true)) {
+            return false;
+        }
+    }
+    
+    
+    // if we were in lapmode, enable that back and fetch the result that should have funcmode set back to lapmode (so that parse can show correct func)
+    if (lapMode && !DYTCCommand(dytc_set_cmd, &result, DYTC_FUNCTION_CQL, 0xf, true))
+        return false;
+    // if we weren't in lapmode, retrieve the altered mode just to make sure we really got it
+    else if (!lapMode && !DYTCCommand(dytc_get_cmd, &result))
+        return false;
+    
     return parseDYTC(result);
 }
 
