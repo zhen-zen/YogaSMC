@@ -159,12 +159,62 @@ bool YogaVPC::initVPC() {
         if (DYTCCommand(dytc_query_cmd, &result)) {
             DYTCCap = result.query.enable;
             if (DYTCCap) {
-                DYTCVersion = OSDictionary::withCapacity(2);
+                DYTCVersion = OSDictionary::withCapacity(3);
                 OSObject *value;
                 setPropertyNumber(DYTCVersion, "Revision", result.query.rev, 4);
                 setPropertyNumber(DYTCVersion, "SubRevision", (result.query.subrev_hi << 8) + result.query.subrev_lo, 12);
                 if (result.query.rev >= 5)
                     DYTCLapmodeCap = true;
+                if (DYTCCommand(dytc_query_func_cmd, &result)) {
+                    OSDictionary *functions = OSDictionary::withCapacity(16);
+                    for (int func_bit = 0; func_bit < 16; func_bit++) {
+                        if (BIT(func_bit) & result.query_func) {
+                            switch (func_bit) {
+                                case DYTC_FUNCTION_STD:
+                                    DebugLog("Found DYTC_FUNCTION_STD");
+                                    setPropertyBoolean(functions, "STD", true);
+                                    break;
+
+                                case DYTC_FUNCTION_CQL:
+                                    DebugLog("Found DYTC_FUNCTION_CQL");
+                                    setPropertyBoolean(functions, "CQL", true);
+                                    break;
+
+                                case DYTC_FUNCTION_MYH:
+                                    DebugLog("Found DYTC_FUNCTION_MYH");
+                                    setPropertyBoolean(functions, "MYH", true);
+                                    break;
+
+                                case DYTC_FUNCTION_STP:
+                                    DebugLog("Found DYTC_FUNCTION_STP");
+                                    setPropertyBoolean(functions, "STP", true);
+                                    break;
+
+                                case DYTC_FUNCTION_MMC:
+                                    DebugLog("Found DYTC_FUNCTION_MMC");
+                                    setPropertyBoolean(functions, "MMC", true);
+                                    break;
+
+                                case DYTC_FUNCTION_MSC:
+                                    DebugLog("Found DYTC_FUNCTION_MSC");
+                                    setPropertyBoolean(functions, "MSC", true);
+                                    break;
+
+                                case DYTC_FUNCTION_PSC:
+                                    DebugLog("Found DYTC_FUNCTION_PSC");
+                                    setPropertyBoolean(functions, "PSC", true);
+                                    break;
+
+                                default:
+                                    AlwaysLog("Unknown DYTC Function 0x%X", func_bit);
+                                    break;
+                            }
+                        }
+                    }
+                    setPropertyNumber(functions, "raw", result.query_func, 16);
+                    DYTCVersion->setObject("Available Functions", functions);
+                    functions->release();
+                }
             }
             DebugLog(updateSuccess, DYTCPrompt, DYTCCap);
         } else {
@@ -521,32 +571,6 @@ bool YogaVPC::parseDYTC(DYTC_RESULT result) {
             snprintf(Unknown, 10, "Unknown:%1x", result.get.perfmode);
             setPropertyString(status, "PerfMode", Unknown);
             break;
-    }
-
-    for (int func_bit = 0; func_bit < 16; func_bit++) {
-        if (BIT(func_bit) & result.get.vmode) {
-            switch (func_bit) {
-                case DYTC_FUNCTION_STD:
-                    DebugLog("Found DYTC_FUNCTION_STD");
-                    break;
-
-                case DYTC_FUNCTION_CQL:
-                    DebugLog("Found DYTC_FUNCTION_CQL");
-                    break;
-
-                case DYTC_FUNCTION_MMC:
-                    DebugLog("Found DYTC_FUNCTION_MMC");
-                    break;
-
-                case DYTC_FUNCTION_STP:
-                    DebugLog("Found DYTC_FUNCTION_STP");
-                    break;
-
-                default:
-                    AlwaysLog("Unknown DYTC function %x", func_bit);
-                    break;
-            }
-        }
     }
 
     if (DYTCLapmodeCap)

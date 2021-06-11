@@ -17,6 +17,7 @@ enum {
     DYTC_CMD_QUERY = 0,    /* Get DYTC Version */
     DYTC_CMD_SET   = 1,    /* Set current IC function and mode */
     DYTC_CMD_GET   = 2,    /* Get current IC function and mode */
+    DYTC_CMD_QFUNC = 3,    /* Get available IC functions */
     /* 3-7, 0x0100 unknown yet, capability? */
     DYTC_CMD_RESET = 0x1ff,    /* Reset current IC function and mode */
 };
@@ -90,6 +91,7 @@ union DYTC_CMD {
 static const union DYTC_CMD dytc_query_cmd = {.command = DYTC_CMD_QUERY};
 static const union DYTC_CMD dytc_set_cmd = {.command = DYTC_CMD_SET};
 static const union DYTC_CMD dytc_get_cmd = {.command = DYTC_CMD_GET};
+static const union DYTC_CMD dytc_query_func_cmd = {.command = DYTC_CMD_QFUNC};
 static const union DYTC_CMD dytc_reset_cmd = {.command = DYTC_CMD_RESET};
 
 #define DYTC_SET_CMD(func, mode, enable) \
@@ -117,6 +119,7 @@ typedef union {
                 UInt perfmode: 4;
                 UInt16 vmode;
             } get;
+            UInt16 query_func;
         };
     };
 } DYTC_RESULT;
