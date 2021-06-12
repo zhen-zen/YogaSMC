@@ -241,6 +241,11 @@ protected:
     bool DYTCLock {false};
 
     /**
+     *  Initialize DYTC property
+     */
+    void initDYTC();
+    
+    /**
      *  Update DYTC status
      *
      *  @return true if success

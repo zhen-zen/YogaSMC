@@ -79,7 +79,7 @@ union DYTC_CMD {
             struct __attribute__((packed)) {
                 UInt8 command_lo;
                 UInt command_hi: 1;
-                UInt unused: 3;
+                UInt padding: 3;
                 UInt ICFunc: 4;
             };
         };
@@ -119,7 +119,10 @@ typedef union {
                 UInt perfmode: 4;
                 UInt16 vmode;
             } get;
-            UInt16 query_func;
+            struct __attribute__((packed)) {
+                UInt8 padding;
+                UInt16 cap;     // FCAP
+            } query_func;
         };
     };
 } DYTC_RESULT;

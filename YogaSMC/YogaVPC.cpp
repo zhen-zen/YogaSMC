@@ -154,74 +154,8 @@ bool YogaVPC::initVPC() {
         vpc->validateObject(setClamshellMode) == kIOReturnSuccess)
         clamshellCap = true;
 
-    if (vpc->validateObject(setThermalControl) == kIOReturnSuccess) {
-        DYTC_RESULT result;
-        if (DYTCCommand(dytc_query_cmd, &result)) {
-            DYTCCap = result.query.enable;
-            if (DYTCCap) {
-                DYTCVersion = OSDictionary::withCapacity(3);
-                OSObject *value;
-                setPropertyNumber(DYTCVersion, "Revision", result.query.rev, 4);
-                setPropertyNumber(DYTCVersion, "SubRevision", (result.query.subrev_hi << 8) + result.query.subrev_lo, 12);
-                if (result.query.rev >= 5)
-                    DYTCLapmodeCap = true;
-                if (DYTCCommand(dytc_query_func_cmd, &result)) {
-                    OSDictionary *functions = OSDictionary::withCapacity(16);
-                    for (int func_bit = 0; func_bit < 16; func_bit++) {
-                        if (BIT(func_bit) & result.query_func) {
-                            switch (func_bit) {
-                                case DYTC_FUNCTION_STD:
-                                    DebugLog("Found DYTC_FUNCTION_STD");
-                                    setPropertyBoolean(functions, "STD", true);
-                                    break;
-
-                                case DYTC_FUNCTION_CQL:
-                                    DebugLog("Found DYTC_FUNCTION_CQL");
-                                    setPropertyBoolean(functions, "CQL", true);
-                                    break;
-
-                                case DYTC_FUNCTION_MYH:
-                                    DebugLog("Found DYTC_FUNCTION_MYH");
-                                    setPropertyBoolean(functions, "MYH", true);
-                                    break;
-
-                                case DYTC_FUNCTION_STP:
-                                    DebugLog("Found DYTC_FUNCTION_STP");
-                                    setPropertyBoolean(functions, "STP", true);
-                                    break;
-
-                                case DYTC_FUNCTION_MMC:
-                                    DebugLog("Found DYTC_FUNCTION_MMC");
-                                    setPropertyBoolean(functions, "MMC", true);
-                                    break;
-
-                                case DYTC_FUNCTION_MSC:
-                                    DebugLog("Found DYTC_FUNCTION_MSC");
-                                    setPropertyBoolean(functions, "MSC", true);
-                                    break;
-
-                                case DYTC_FUNCTION_PSC:
-                                    DebugLog("Found DYTC_FUNCTION_PSC");
-                                    setPropertyBoolean(functions, "PSC", true);
-                                    break;
-
-                                default:
-                                    AlwaysLog("Unknown DYTC Function 0x%X", func_bit);
-                                    break;
-                            }
-                        }
-                    }
-                    setPropertyNumber(functions, "raw", result.query_func, 16);
-                    DYTCVersion->setObject("Available Functions", functions);
-                    functions->release();
-                }
-            }
-            DebugLog(updateSuccess, DYTCPrompt, DYTCCap);
-        } else {
-            setProperty("DYTC", "error");
-            AlwaysLog(updateFailure, DYTCPrompt);
-        }
-    }
+    if (vpc->validateObject(setThermalControl) == kIOReturnSuccess)
+        initDYTC();
 
     return true;
 }
@@ -512,6 +446,80 @@ bool YogaVPC::DYTCCommand(DYTC_CMD command, DYTC_RESULT* result, UInt8 ICFunc, U
     }
     DYTCLock = false;
     return (result->errorcode == DYTC_SUCCESS);
+}
+
+void YogaVPC::initDYTC() {
+    DYTC_RESULT result;
+    if (!DYTCCommand(dytc_query_cmd, &result)) {
+        setProperty("DYTC", "error");
+        AlwaysLog(updateFailure, DYTCPrompt);
+        return;
+    }
+
+    DYTCCap = result.query.enable;
+    if (!DYTCCap) {
+        AlwaysLog("%s not enabled", DYTCPrompt);
+        return;
+    }
+
+    DYTCVersion = OSDictionary::withCapacity(3);
+    OSObject *value;
+    setPropertyNumber(DYTCVersion, "Revision", result.query.rev, 4);
+    setPropertyNumber(DYTCVersion, "SubRevision", (result.query.subrev_hi << 8) + result.query.subrev_lo, 12);
+    if (result.query.rev >= 5)
+        DYTCLapmodeCap = true;
+
+    if (DYTCCommand(dytc_query_func_cmd, &result)) {
+        OSDictionary *functions = OSDictionary::withCapacity(16);
+        for (int func_bit = 0; func_bit < 16; func_bit++) {
+            if (BIT(func_bit) & result.query_func.cap) {
+                switch (func_bit) {
+                    case DYTC_FUNCTION_STD:
+                        DebugLog("Found DYTC_FUNCTION_STD");
+                        setPropertyBoolean(functions, "STD", true);
+                        break;
+                        
+                    case DYTC_FUNCTION_CQL:
+                        DebugLog("Found DYTC_FUNCTION_CQL");
+                        setPropertyBoolean(functions, "CQL", true);
+                        break;
+                        
+                    case DYTC_FUNCTION_MYH:
+                        DebugLog("Found DYTC_FUNCTION_MYH");
+                        setPropertyBoolean(functions, "MYH", true);
+                        break;
+                        
+                    case DYTC_FUNCTION_STP:
+                        DebugLog("Found DYTC_FUNCTION_STP");
+                        setPropertyBoolean(functions, "STP", true);
+                        break;
+                        
+                    case DYTC_FUNCTION_MMC:
+                        DebugLog("Found DYTC_FUNCTION_MMC");
+                        setPropertyBoolean(functions, "MMC", true);
+                        break;
+                        
+                    case DYTC_FUNCTION_MSC:
+                        DebugLog("Found DYTC_FUNCTION_MSC");
+                        setPropertyBoolean(functions, "MSC", true);
+                        break;
+                        
+                    case DYTC_FUNCTION_PSC:
+                        DebugLog("Found DYTC_FUNCTION_PSC");
+                        setPropertyBoolean(functions, "PSC", true);
+                        break;
+                        
+                    default:
+                        AlwaysLog("Unknown DYTC Function 0x%X", func_bit);
+                        break;
+                }
+            }
+        }
+        setPropertyNumber(functions, "raw", result.query_func.cap, 16);
+        DYTCVersion->setObject("Available Functions", functions);
+        functions->release();
+    }
+    setProperty("DYTC", DYTCVersion);
 }
 
 bool YogaVPC::parseDYTC(DYTC_RESULT result) {
