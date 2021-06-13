@@ -494,51 +494,51 @@ bool YogaVPC::parseDYTC(DYTC_RESULT result) {
     OSDictionary *functionStatus = OSDictionary::withCapacity(16);
     for (int func_bit = 0; func_bit < 16; func_bit++) {
         if (BIT(func_bit) & DYTCCap) {
-            bool func_sta = (BIT(func_bit) & result.get.func_sta);
+            bool func_status = (BIT(func_bit) & result.get.func_sta);
             switch (func_bit) {
                 case DYTC_FUNCTION_STD:
-                    setPropertyBoolean(functionStatus, "STD", func_sta);
+                    setPropertyBoolean(functionStatus, "STD", func_status);
                     break;
-                    
+
                 case DYTC_FUNCTION_CQL:
-                    if (func_sta)
+                    if (func_status)
                         DebugLog("DYTC_FUNCTION_CQL on");
-                    setPropertyBoolean(functionStatus, "CQL", func_sta);
-                    setPropertyBoolean(DYTCStatus, "lapmode", func_sta);
+                    setPropertyBoolean(functionStatus, "CQL", func_status);
+                    setPropertyBoolean(DYTCStatus, "lapmode", func_status);
                     break;
-                    
+
                 case DYTC_FUNCTION_MYH:
-                    if (func_sta)
+                    if (func_status)
                         DebugLog("DYTC_FUNCTION_MYH on");
-                    setPropertyBoolean(functionStatus, "MYH", func_sta);
+                    setPropertyBoolean(functionStatus, "MYH", func_status);
                     break;
-                    
+
                 case DYTC_FUNCTION_STP:
-                    if (func_sta)
+                    if (func_status)
                         DebugLog("DYTC_FUNCTION_STP on");
-                    setPropertyBoolean(functionStatus, "STP", func_sta);
+                    setPropertyBoolean(functionStatus, "STP", func_status);
                     break;
-                    
+
                 case DYTC_FUNCTION_MMC:
-                    if (func_sta)
+                    if (func_status)
                         DebugLog("DYTC_FUNCTION_MMC on");
-                    setPropertyBoolean(functionStatus, "MMC", func_sta);
+                    setPropertyBoolean(functionStatus, "MMC", func_status);
                     break;
-                    
+
                 case DYTC_FUNCTION_MSC:
-                    if (func_sta)
+                    if (func_status)
                         DebugLog("DYTC_FUNCTION_MSC on");
-                    setPropertyBoolean(functionStatus, "MSC", func_sta);
+                    setPropertyBoolean(functionStatus, "MSC", func_status);
                     break;
-                    
+
                 case DYTC_FUNCTION_PSC:
-                    if (func_sta)
+                    if (func_status)
                         DebugLog("DYTC_FUNCTION_PSC on");
-                    setPropertyBoolean(functionStatus, "PSC", func_sta);
+                    setPropertyBoolean(functionStatus, "PSC", func_status);
                     break;
-                    
+
                 default:
-                    if (func_sta)
+                    if (func_status)
                         AlwaysLog("Unknown DYTC Function 0x%X on", func_bit);
                     break;
             }
