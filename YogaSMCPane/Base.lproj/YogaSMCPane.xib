@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="17701" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="18122" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17701"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="18122"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="YogaSMCPane" customModule="YogaSMCPane" customModuleProvider="target">
             <connections>
+                <outlet property="DYTCPSCCheck" destination="bgC-Ln-QG2" id="kXD-iM-upH"/>
                 <outlet property="DYTCSlider" destination="H87-Ly-sql" id="haV-1t-2Re"/>
                 <outlet property="_window" destination="F0z-JX-Cv5" id="gIp-Ho-8D9"/>
                 <outlet property="autoSleepCheck" destination="lHz-fM-CAF" id="QT6-Rq-Xiu"/>
@@ -396,6 +397,17 @@
                                             </buttonCell>
                                             <connections>
                                                 <action selector="vClamshellModeSet:" target="-2" id="nCo-wo-ZZj"/>
+                                            </connections>
+                                        </button>
+                                        <button hidden="YES" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="bgC-Ln-QG2">
+                                            <rect key="frame" x="382" y="135" width="103" height="18"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <buttonCell key="cell" type="check" title="PSC support" bezelStyle="regularSquare" imagePosition="left" inset="2" id="DxG-IC-0u8">
+                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                            <connections>
+                                                <action selector="DYTCPSCSupport:" target="-2" id="tFf-hY-9L4"/>
                                             </connections>
                                         </button>
                                     </subviews>

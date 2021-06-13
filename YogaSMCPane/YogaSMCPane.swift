@@ -111,6 +111,7 @@ class YogaSMCPane: NSPreferencePane {
     @IBOutlet weak var vDYTCRevision: NSTextField!
     @IBOutlet weak var vDYTCFuncMode: NSTextField!
     @IBOutlet weak var DYTCSlider: NSSlider!
+    @IBOutlet weak var DYTCPSCCheck: NSButton!
 
     @IBOutlet weak var backlightSlider: NSSlider!
 
