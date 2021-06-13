@@ -14,33 +14,35 @@
 // based on ibm-acpi-devel
 
 enum {
-    DYTC_CMD_QUERY = 0,    /* Get DYTC Version */
-    DYTC_CMD_SET   = 1,    /* Set current IC function and mode */
-    DYTC_CMD_GET   = 2,    /* Get current IC function and mode */
-    /* 3-7, 0x0100 unknown yet, capability? */
-    DYTC_CMD_RESET = 0x1ff,    /* Reset current IC function and mode */
+    DYTC_CMD_QUERY   = 0,       /* Get DYTC Version */
+    DYTC_CMD_SET     = 1,       /* Set current IC function and mode */
+    DYTC_CMD_GET     = 2,       /* Get current IC function and mode */
+    DYTC_CMD_FCAP    = 3,       /* Get available IC functions */
+    /* 4-7, 0x0100 unknown yet, capability? */
+    DYTC_CMD_MMC_GET = 8,       /* Get MMC mode, only available on 6+ */
+    DYTC_CMD_RESET   = 0x1ff,   /* Reset current IC function and mode */
 };
 
 // Functions
-#define DYTC_FUNCTION_STD     0  /* Function = 0, standard mode */
-#define DYTC_FUNCTION_CQL     1  /* Function = 1, lap mode */
-#define DYTC_FUNCTION_MMC     11 /* Function = 11, desk mode, priority 3 */
+#define DYTC_FUNCTION_STD     0  /* standard mode */
+#define DYTC_FUNCTION_CQL     1  /* lap mode */
+#define DYTC_FUNCTION_MMC   0xB  /* desk mode, priority 5 */
 
 // Functions spotted
-#define DYTC_FUNCTION_MYH     3  /* Function = 3, ? mode, priority 5 */
-#define DYTC_FUNCTION_STP     4  /* Function = 4, ? mode, priority 1 */
-#define DYTC_FUNCTION_DMC     8  /* Function = 8, ? mode */
-#define DYTC_FUNCTION_IFC     10 /* Function = 10, ? mode, priority 4 */
-#define DYTC_FUNCTION_MSC     12 /* Function = 12, ? mode, priority 2 */
-#define DYTC_FUNCTION_PSC     13 /* Function = 13, ? mode */
+#define DYTC_FUNCTION_MYH     3  /* priority 7 */
+#define DYTC_FUNCTION_STP     4  /* priority 1 */
+#define DYTC_FUNCTION_DMC     8
+#define DYTC_FUNCTION_IFC   0xA  /* priority 6, aka AAA */
+#define DYTC_FUNCTION_MSC   0xC  /* priority 4 */
+#define DYTC_FUNCTION_PSC   0xD  /* priority 3 */
 
 // Functions deduced
-#define DYTC_FUNCTION_TIO     2
-#define DYTC_FUNCTION_CQH     5
-#define DYTC_FUNCTION_DCC     6
-#define DYTC_FUNCTION_SFN     7
+#define DYTC_FUNCTION_TIO     2  /* priority 0, aka FBC */
+#define DYTC_FUNCTION_CQH     5  /* aka APM */
+#define DYTC_FUNCTION_DCC     6  /* aka AQM */
+#define DYTC_FUNCTION_SFN     7  /* priority 2 */
 #define DYTC_FUNCTION_FHP     9
-#define DYTC_FUNCTION_CSC     14
+#define DYTC_FUNCTION_CSC   0xE
 
 // Availeble mode
 #define DYTC_MODE_PERFORM     2  /* High power mode aka performance */
@@ -78,7 +80,7 @@ union DYTC_CMD {
             struct __attribute__((packed)) {
                 UInt8 command_lo;
                 UInt command_hi: 1;
-                UInt unused: 3;
+                UInt padding: 3;
                 UInt ICFunc: 4;
             };
         };
@@ -90,6 +92,7 @@ union DYTC_CMD {
 static const union DYTC_CMD dytc_query_cmd = {.command = DYTC_CMD_QUERY};
 static const union DYTC_CMD dytc_set_cmd = {.command = DYTC_CMD_SET};
 static const union DYTC_CMD dytc_get_cmd = {.command = DYTC_CMD_GET};
+static const union DYTC_CMD dytc_func_cap_cmd = {.command = DYTC_CMD_FCAP};
 static const union DYTC_CMD dytc_reset_cmd = {.command = DYTC_CMD_RESET};
 
 #define DYTC_SET_CMD(func, mode, enable) \
@@ -115,8 +118,15 @@ typedef union {
             struct __attribute__((packed)) {
                 UInt funcmode: 4;
                 UInt perfmode: 4;
-                UInt16 vmode;
+                UInt16 func_sta;
             } get;
+            struct __attribute__((packed)) {
+                UInt8 padding;
+                UInt16 bitmap;
+            } func_cap;
+            struct __attribute__((packed)) {
+                UInt funcmode: 4;
+            } mmc_get;
         };
     };
 } DYTC_RESULT;
