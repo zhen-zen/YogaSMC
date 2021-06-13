@@ -67,6 +67,16 @@ private:
     bool dumpECOffset(UInt32 value);
 
     /**
+     *  DYTC capability, will be update on init
+     */
+    UInt16 DYTCCap {0};
+
+    /**
+     *  Simple lock to prevent DYTC update when user setting is in progress
+     */
+    bool DYTCLock {false};
+    
+    /**
      *  Set DYTC mode
      *
      *  @param command  see DYTC_command
@@ -78,6 +88,11 @@ private:
      *  @return true if success
      */
     bool DYTCCommand(DYTC_CMD command, DYTC_RESULT* result, UInt8 ICFunc=0, UInt8 ICMode=0, bool ValidF=false);
+
+    /**
+     *  Initialize DYTC property
+     */
+    void initDYTC();
 
     /**
      *  Parse DYTC status
@@ -225,26 +240,6 @@ protected:
      */
     bool notifyBattery();
 
-    /**
-     *  DYTC capability, will be update on init
-     */
-    bool DYTCCap {false};
-
-    /**
-     *  DYTC lapmode capability, will be update on init
-     */
-    bool DYTCLapmodeCap {false};
-
-    /**
-     *  Simple lock to prevent DYTC update when user setting is in progress
-     */
-    bool DYTCLock {false};
-
-    /**
-     *  Initialize DYTC property
-     */
-    void initDYTC();
-    
     /**
      *  Update DYTC status
      *

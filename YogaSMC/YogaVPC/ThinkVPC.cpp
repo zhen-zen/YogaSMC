@@ -957,8 +957,7 @@ void ThinkVPC::updateVPC(UInt32 event) {
 
                 case TP_HKEY_EV_THM_CSM_COMPLETED:
                     DebugLog("Thermal Control Command set completed (DYTC)");
-                    if (DYTCLapmodeCap && !DYTCLock)
-                        updateDYTC();
+                    updateDYTC();
                     break;
 
                 case TP_HKEY_EV_THM_TRANSFM_CHANGED:
