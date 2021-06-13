@@ -256,6 +256,15 @@ protected:
      */
     bool setDYTC(int perfmode);
 
+    /**
+     *  Set DYTC status for PSC functions
+     *
+     *  @param perfmode Performance mode
+     *
+     *  @return true if success
+     */
+    bool setDYTCPSC(int perfmode);
+
 public:
     virtual IOService *probe(IOService *provider, SInt32 *score) APPLE_KEXT_OVERRIDE;
 

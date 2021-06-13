@@ -35,6 +35,7 @@ static IOPMPowerState IOPMPowerStates[kIOPMNumberPowerStates] = {
 #define DYTCPrompt "DYTCMode"
 #define DYTCFuncPrompt "DYTCFuncMode"
 #define DYTCPerfPrompt "DYTCPerfMode"
+#define DYTCPSCPrompt "DYTCPSCMode"
 #define ECLockPrompt "ECLock"
 #define FnKeyPrompt "FnlockMode"
 #define fanControlPrompt "FanControl"
