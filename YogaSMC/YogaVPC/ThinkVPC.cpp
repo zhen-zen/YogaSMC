@@ -39,6 +39,7 @@ void ThinkVPC::updateAll() {
     updateKBDLocale();
     updateVPC();
     updateYogaMode();
+    super::updateAll();
 }
 
 bool ThinkVPC::updateConservation(const char * method, OSDictionary *bat, bool update) {
@@ -219,8 +220,6 @@ bool ThinkVPC::initVPC() {
     }
     setProperty("HKEY Property", KBDProperty);
     KBDProperty->release();
-
-    updateAll();
 
     setHotkeyStatus(true);
 
@@ -514,7 +513,6 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                     AlwaysLog("%s update failed 0x%x", fanSpeedPrompt, ret);
             } else if (key->isEqualTo(updatePrompt)) {
                 updateAll();
-                super::updateAll();
             } else {
                 OSDictionary *entry = OSDictionary::withCapacity(1);
                 entry->setObject(key, dict->getObject(key));

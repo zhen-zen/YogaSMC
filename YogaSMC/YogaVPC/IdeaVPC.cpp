@@ -18,6 +18,7 @@ void IdeaVPC::updateAll() {
     updateBattery();
     updateKeyboard();
     updateVPC();
+    super::updateAll();
 }
 
 bool IdeaVPC::initVPC() {
@@ -278,7 +279,6 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                 conservationModeLock = value->getValue();
             } else if (key->isEqualTo(updatePrompt)) {
                 updateAll();
-                super::updateAll();
             } else if (key->isEqualTo(resetPrompt)) {
                 UInt32 state;
                 if (vpc->evaluateInteger(getKeyboardMode, &state) == kIOReturnSuccess)
