@@ -453,6 +453,26 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                     DebugLog(updateSuccess, "CRST", value->unsigned8BitValue());
                 else
                     AlwaysLog("%s evaluation failed 0x%x", "CRST", ret);
+            } else if (key->isEqualTo("SCPF")) {
+                OSNumber *value;
+                getPropertyNumber("SCPF");
+                UInt32 raw = value->unsigned32BitValue();
+                OSObject* params[4] = {
+                    OSNumber::withNumber((raw >> 24) & 0xff, 8),
+                    OSNumber::withNumber((raw >> 16) & 0xff, 8),
+                    OSNumber::withNumber((raw >> 8) & 0xff, 8),
+                    OSNumber::withNumber((raw & 0xff), 8)
+                };
+
+                ret = vpc->evaluateObject("SCPF", nullptr, params, 4);
+                if (ret == kIOReturnSuccess)
+                    DebugLog(updateSuccess, "SCPF", value->unsigned8BitValue());
+                else
+                    AlwaysLog("%s evaluation failed 0x%x", "SCPF", ret);
+                params[0]->release();
+                params[1]->release();
+                params[2]->release();
+                params[3]->release();
 #endif
             } else if (key->isEqualTo(mutePrompt)) {
                 OSNumber *value;
