@@ -90,7 +90,7 @@ extension YogaSMCPane {
             if hasMMC {
                 DYTCSlider.numberOfTickMarks = 3
                 DYTCSlider.maxValue = 2
-                DYTCPSCCheck.isHidden = hasPSC
+                DYTCPSCCheck.isHidden = !hasPSC
             } else if hasPSC {
                 DYTCSlider.numberOfTickMarks = 9
                 DYTCSlider.maxValue = 8
