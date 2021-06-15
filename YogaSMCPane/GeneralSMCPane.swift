@@ -90,7 +90,7 @@ extension YogaSMCPane {
             if hasMMC {
                 DYTCSlider.numberOfTickMarks = 3
                 DYTCSlider.maxValue = 2
-                DYTCPSCCheck.isEnabled = hasPSC
+                DYTCPSCCheck.isHidden = hasPSC
             } else if hasPSC {
                 DYTCSlider.numberOfTickMarks = 9
                 DYTCSlider.maxValue = 8
@@ -98,6 +98,9 @@ extension YogaSMCPane {
                 DYTCSlider.isEnabled = false
                 return
             }
+        } else {
+            DYTCSlider.isEnabled = false
+            return
         }
         if let perfMode = dict["PerfMode"] as? String {
             switch perfMode {
