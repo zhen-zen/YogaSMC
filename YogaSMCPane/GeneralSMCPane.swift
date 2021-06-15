@@ -87,20 +87,13 @@ extension YogaSMCPane {
         if let capabilities = dict["Function Status"] as? NSDictionary {
             let hasMMC = (capabilities["MMC"] != nil)
             let hasPSC = (capabilities["PSC"] != nil)
-            if hasMMC {
-                DYTCSlider.numberOfTickMarks = 3
-                DYTCSlider.maxValue = 2
-                DYTCPSCCheck.isHidden = !hasPSC
-            } else if hasPSC {
+            DYTCPSCCheck.isHidden = !(hasPSC && hasMMC)
+            DYTCSlider.isEnabled = hasPSC || hasMMC
+            if hasPSC, !hasMMC {
                 DYTCSlider.numberOfTickMarks = 9
                 DYTCSlider.maxValue = 8
-            } else {
-                DYTCSlider.isEnabled = false
-                return
+                DYTCSlider.integerValue = 0
             }
-        } else {
-            DYTCSlider.isEnabled = false
-            return
         }
         if let perfMode = dict["PerfMode"] as? String {
             switch perfMode {
