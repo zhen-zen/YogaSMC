@@ -61,6 +61,7 @@ extension YogaSMCPane {
     }
 
     @IBAction func DYTCPSCSupport(_ sender: NSButton) {
+        defaults.setValue(sender.state == .on, forKey: "DYTCPSC")
         if sender.state == .on {
             DYTCSlider.numberOfTickMarks = 9
             DYTCSlider.maxValue = 8
@@ -93,6 +94,10 @@ extension YogaSMCPane {
                 DYTCSlider.numberOfTickMarks = 9
                 DYTCSlider.maxValue = 8
                 DYTCSlider.integerValue = 0
+            }
+            if !DYTCPSCCheck.isHidden {
+                DYTCPSCCheck.state = defaults.bool(forKey: "DYTCPSC") ? .on : .off
+                DYTCPSCSupport(DYTCPSCCheck)
             }
         }
         if let perfMode = dict["PerfMode"] as? String {
@@ -151,8 +156,6 @@ extension YogaSMCPane {
             updateDYTC(dict)
         } else {
             vDYTCRevision.stringValue = "Unsupported"
-            vDYTCFuncMode.isHidden = true
-            DYTCSlider.isHidden = true
         }
 
         if defaults.bool(forKey: "HideIcon") {
