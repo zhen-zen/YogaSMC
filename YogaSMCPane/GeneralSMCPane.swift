@@ -101,6 +101,7 @@ extension YogaSMCPane {
             }
         }
         if let perfMode = dict["PerfMode"] as? String {
+            DYTCSlider.toolTip = perfMode
             switch perfMode {
             case "Quiet":
                 DYTCSlider.integerValue = 0
@@ -118,6 +119,7 @@ extension YogaSMCPane {
                 DYTCSlider.isEnabled = false
             }
         } else if let perfMode = dict["PerfMode"] as? NSNumber {
+            DYTCSlider.toolTip = "\(perfMode.intValue)"
             DYTCSlider.integerValue = perfMode.intValue
         } else {
             DYTCSlider.isEnabled = false
