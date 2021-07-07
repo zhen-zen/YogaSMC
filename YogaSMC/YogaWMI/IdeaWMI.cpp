@@ -81,6 +81,8 @@ void IdeaWMIYoga::updateYogaMode() {
     if (YogaMode == value && sync)
         return;
 
+    bool clamshellMode = false;
+
     switch (value) {
         case kYogaMode_laptop:
             setTopCase(true);
