@@ -89,19 +89,19 @@ void IdeaWMIYoga::updateYogaMode() {
 
         case kYogaMode_tablet:
             if (YogaMode == kYogaMode_laptop || !sync)
-                setTopCase(false);
+                setTopCase(clamshellMode);
             setProperty("YogaMode", "Tablet");
             break;
 
         case kYogaMode_stand:
             if (YogaMode == kYogaMode_laptop || !sync)
-                setTopCase(false);
+                setTopCase(clamshellMode);
             setProperty("YogaMode", "Stand");
             break;
 
         case kYogaMode_tent:
             if (YogaMode == kYogaMode_laptop || !sync)
-                setTopCase(false);
+                setTopCase(clamshellMode);
             setProperty("YogaMode", "Tent");
             break;
 

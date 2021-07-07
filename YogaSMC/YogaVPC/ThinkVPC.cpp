@@ -846,7 +846,7 @@ UInt32 ThinkVPC::updateYogaMode() {
             break;
         case 3:
 //            mode = TP_ACPI_MULTI_MODE_TABLET;
-            setTopCase(false);
+            setTopCase(clamshellMode);
             setProperty("YogaMode", "Tablet");
             break;
         case 4:
@@ -854,7 +854,7 @@ UInt32 ThinkVPC::updateYogaMode() {
 //                mode = TP_ACPI_MULTI_MODE_STAND_TENT;
 //            else
 //                mode = TP_ACPI_MULTI_MODE_STAND;
-            setTopCase(false);
+            setTopCase(clamshellMode);
             if ((mode >> 16) == 1)
                 setProperty("YogaMode", "Stand/Tent");
             else
@@ -862,7 +862,7 @@ UInt32 ThinkVPC::updateYogaMode() {
             break;
         case 5:
 //            mode = TP_ACPI_MULTI_MODE_TENT;
-            setTopCase(false);
+            setTopCase(clamshellMode);
             setProperty("YogaMode", "Tent");
             break;
         default:

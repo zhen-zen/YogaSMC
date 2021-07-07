@@ -37,11 +37,6 @@ private:
     bool clamshellCap {false};
 
     /**
-     *  Clamshell mode status, default to false (same in SSDT)
-     */
-    bool clamshellMode {false};
-
-    /**
      *  Update clamshell mode status
      *
      *  @param update  only update internal status when false
@@ -122,6 +117,11 @@ protected:
     
     OSOrderedSet *WMICollection {nullptr};
     OSOrderedSet *WMIProvCollection {nullptr};
+
+    /**
+     *  Clamshell mode status, default to false (same in SSDT)
+     */
+    bool clamshellMode {false};
 
     /**
      *  Vendor specific WMI support
