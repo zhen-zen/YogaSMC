@@ -37,16 +37,16 @@ extension YogaSMCPane {
 
     func updateIdeaCap(_ dict: NSDictionary) {
         if let val = dict["Camera"] as? Bool {
-            vCamera.textColor = val ? NSColor.systemGreen : NSColor.systemRed
+            vCamera.textColor = val ? NSColor.systemGreen : NSColor.systemGray
         }
         if let val = dict["Bluetooth"] as? Bool {
-            vBluetooth.textColor = val ? NSColor.systemGreen : NSColor.systemRed
+            vBluetooth.textColor = val ? NSColor.systemGreen : NSColor.systemGray
         }
         if let val = dict["Wireless"] as? Bool {
-            vWireless.textColor = val ? NSColor.systemGreen : NSColor.systemRed
+            vWireless.textColor = val ? NSColor.systemGreen : NSColor.systemGray
         }
         if let val = dict["3G"] as? Bool {
-            vWWAN.textColor = val ? NSColor.systemGreen : NSColor.systemRed
+            vWWAN.textColor = val ? NSColor.systemGreen : NSColor.systemGray
         }
         if let val = dict["Graphics"] as? NSString {
             vGraphics.toolTip = val as String
