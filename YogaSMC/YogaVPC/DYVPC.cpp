@@ -268,21 +268,38 @@ void DYVPC::setPropertiesGated(OSObject *props) {
                     AlwaysLog("%s 0x%x result: 0x%x", "BIOSQuery", value->unsigned32BitValue(), result);
                 else
                     AlwaysLog("%s failed 0x%x", "BIOSQuery", value->unsigned32BitValue());
-            } else if (key->isEqualTo("TemperatureQuery")) {
+            } else if (key->isEqualTo("ThermalQuery")) {
                 if (!BIOSCap) {
-                    AlwaysLog(notSupported, "TemperatureQuery");
+                    AlwaysLog(notSupported, "ThermalQuery");
                     continue;
                 }
 
                 OSNumber *value;
-                getPropertyNumber("TemperatureQuery");
+                getPropertyNumber("ThermalQuery");
 
                 UInt32 result = value->unsigned32BitValue();
 
                 if (WMIQuery(HPWMI_TEMPERATURE_QUERY, &result))
-                    AlwaysLog("%s 0x%x result: 0x%x", "TemperatureQuery", value->unsigned32BitValue(), result);
+                    AlwaysLog("%s 0x%x result: 0x%x", "ThermalQuery", value->unsigned32BitValue(), result);
                 else
-                    AlwaysLog("%s failed 0x%x", "TemperatureQuery", value->unsigned32BitValue());
+                    AlwaysLog("%s failed 0x%x", "ThermalQuery", value->unsigned32BitValue());
+#ifdef DEBUG
+            } else if (key->isEqualTo("ThermalWrite")) {
+                if (!BIOSCap) {
+                    AlwaysLog(notSupported, "ThermalWrite");
+                    continue;
+                }
+
+                OSNumber *value;
+                getPropertyNumber("ThermalWrite");
+
+                UInt32 result = value->unsigned32BitValue();
+
+                if (WMIQuery(HPWMI_TEMPERATURE_QUERY, &result))
+                    AlwaysLog("%s 0x%x result: 0x%x", "ThermalWrite", value->unsigned32BitValue(), result);
+                else
+                    AlwaysLog("%s failed 0x%x", "ThermalWrite", value->unsigned32BitValue());
+#endif
             } else {
                 OSDictionary *entry = OSDictionary::withCapacity(1);
                 entry->setObject(key, dict->getObject(key));
