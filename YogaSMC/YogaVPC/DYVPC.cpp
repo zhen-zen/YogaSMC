@@ -268,6 +268,21 @@ void DYVPC::setPropertiesGated(OSObject *props) {
                     AlwaysLog("%s 0x%x result: 0x%x", "BIOSQuery", value->unsigned32BitValue(), result);
                 else
                     AlwaysLog("%s failed 0x%x", "BIOSQuery", value->unsigned32BitValue());
+            } else if (key->isEqualTo("TemperatureQuery")) {
+                if (!BIOSCap) {
+                    AlwaysLog(notSupported, "TemperatureQuery");
+                    continue;
+                }
+
+                OSNumber *value;
+                getPropertyNumber("TemperatureQuery");
+
+                UInt32 result = value->unsigned32BitValue();
+
+                if (WMIQuery(HPWMI_TEMPERATURE_QUERY, &result))
+                    AlwaysLog("%s 0x%x result: 0x%x", "TemperatureQuery", value->unsigned32BitValue(), result);
+                else
+                    AlwaysLog("%s failed 0x%x", "TemperatureQuery", value->unsigned32BitValue());
             } else {
                 OSDictionary *entry = OSDictionary::withCapacity(1);
                 entry->setObject(key, dict->getObject(key));

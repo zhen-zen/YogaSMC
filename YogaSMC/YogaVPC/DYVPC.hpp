@@ -75,6 +75,7 @@ enum hp_wmi_commandtype {
     HPWMI_WIRELESS2_QUERY      = 0x1b,      // r:WGWS; w:GVWE
     // 0x25                                 // w:CPMC
     // 0x28                                 // r:GTMS; w:STMM, Arg3; Get/SetThermalStatus
+    HPWMI_TEMPERATURE_QUERY    = 0x28,      // r:WGBC; w:STMM, Arg3
     // 0x29                                 // w:HWWB
     HPWMI_POSTCODEERROR_QUERY  = 0x2a,
     // 0x2b                                 // r:WGBC; w:WSBC, Arg1, Arg2, Arg3; Get/SetBatteryControl
