@@ -74,7 +74,7 @@ enum hp_wmi_commandtype {
     // 0x0f                                 // r:GSAS
     HPWMI_WIRELESS2_QUERY      = 0x1b,      // r:WGWS; w:GVWE
     // 0x25                                 // w:CPMC
-    // 0x28                                 // r:WGBC; w:STMM, Arg3
+    HPWMI_TEMPERATURE_QUERY    = 0x28,      // r:WGBC; w:STMM, Arg3
     // 0x29                                 // w:HWWB
     HPWMI_POSTCODEERROR_QUERY  = 0x2a,
     // 0x2b                                 // w:WSBC, Arg1, Arg2, Arg3
