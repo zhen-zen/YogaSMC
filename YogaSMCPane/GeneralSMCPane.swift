@@ -11,7 +11,11 @@ import Foundation
 
 extension YogaSMCPane {
     @IBAction func DYTCset(_ sender: NSSlider) {
-        _ = sendString("DYTCMode", DYTCCommand[DYTCSlider.integerValue], service)
+        if DYTCSlider.maxValue == 2 {
+            _ = sendString("DYTCMode", DYTCCommand[DYTCSlider.integerValue], service)
+        } else {
+            _ = sendNumber("DYTCPSCMode", (DYTCSlider.integerValue != 0) ? DYTCSlider.integerValue : 0xf, service)
+        }
         if let dict = getDictionary("DYTC", service) {
             updateDYTC(dict)
         }
@@ -29,7 +33,7 @@ extension YogaSMCPane {
     }
 
     @IBAction func vClamshellModeSet(_ sender: NSButton) {
-        _ = sendBoolean("ClamshellMode", (vClamshellMode.state == .on), service)
+        _ = sendBoolean("ClamshellMode", (sender.state == .on), service)
     }
 
     @IBAction func autoBacklightSet(_ sender: NSButton) {
@@ -56,6 +60,19 @@ extension YogaSMCPane {
         }
     }
 
+    @IBAction func DYTCPSCSupport(_ sender: NSButton) {
+        defaults.setValue(sender.state == .on, forKey: "DYTCPSC")
+        if sender.state == .on {
+            DYTCSlider.numberOfTickMarks = 9
+            DYTCSlider.maxValue = 8
+            DYTCSlider.integerValue = 0
+        } else {
+            DYTCSlider.numberOfTickMarks = 3
+            DYTCSlider.maxValue = 2
+            DYTCSlider.integerValue = 1
+        }
+    }
+
     func updateDYTC(_ dict: NSDictionary) {
         if let ver = dict["Revision"] as? NSNumber,
            let subver = dict["SubRevision"] as? NSNumber {
@@ -68,18 +85,42 @@ extension YogaSMCPane {
         } else {
             vDYTCFuncMode.stringValue = "Unknown"
         }
-        if let perfMode = dict["PerfMode"] as? String {
-            if perfMode == "Quiet" {
+        if let capabilities = dict["Function Status"] as? NSDictionary {
+            let hasMMC = (capabilities["MMC"] != nil)
+            let hasPSC = (capabilities["PSC"] != nil)
+            DYTCPSCCheck.isHidden = !(hasPSC && hasMMC)
+            DYTCSlider.isEnabled = hasPSC || hasMMC
+            if hasPSC, !hasMMC {
+                DYTCSlider.numberOfTickMarks = 9
+                DYTCSlider.maxValue = 8
                 DYTCSlider.integerValue = 0
-            } else if perfMode == "Balance" {
-                DYTCSlider.integerValue = 1
-            } else if perfMode == "Performance" {
+            }
+            if !DYTCPSCCheck.isHidden {
+                DYTCPSCCheck.state = defaults.bool(forKey: "DYTCPSC") ? .on : .off
+                DYTCPSCSupport(DYTCPSCCheck)
+            }
+        }
+        if let perfMode = dict["PerfMode"] as? String {
+            DYTCSlider.toolTip = perfMode
+            switch perfMode {
+            case "Quiet":
+                DYTCSlider.integerValue = 0
+            case "Balance":
+                if DYTCSlider.maxValue == 2 {
+                    DYTCSlider.integerValue = 1
+                } else {
+                    DYTCSlider.integerValue = 0
+                }
+            case "Performance":
                 DYTCSlider.integerValue = 2
-            } else if perfMode == "Performance (Reduced as lapmode active)" {
+            case "Performance (Reduced as lapmode active)":
                 DYTCSlider.integerValue = 2
-            } else {
+            default:
                 DYTCSlider.isEnabled = false
             }
+        } else if let perfMode = dict["PerfMode"] as? NSNumber {
+            DYTCSlider.toolTip = "\(perfMode.intValue)"
+            DYTCSlider.integerValue = perfMode.intValue
         } else {
             DYTCSlider.isEnabled = false
         }
@@ -117,8 +158,6 @@ extension YogaSMCPane {
             updateDYTC(dict)
         } else {
             vDYTCRevision.stringValue = "Unsupported"
-            vDYTCFuncMode.isHidden = true
-            DYTCSlider.isHidden = true
         }
 
         if defaults.bool(forKey: "HideIcon") {
