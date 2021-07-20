@@ -99,32 +99,73 @@ extension YogaSMCPane {
 
         switch index {
         case 0:
-            return updateThinkBattery(vChargeThresholdStart, vChargeThresholdStop)
+            return updateThinkBattery(vChargeThresholdStart,
+                                      vChargeThresholdStop,
+                                      vInhibitCharge,
+                                      vForceDischarge)
         case 1:
-            return updateThinkBattery(vPrimaryChargeThresholdStart, vPrimaryChargeThresholdStop)
+            return updateThinkBattery(vPrimaryChargeThresholdStart,
+                                      vPrimaryChargeThresholdStop,
+                                      vPrimaryInhibitCharge,
+                                      vPrimaryForceDischarge)
         case 2:
-            return updateThinkBattery(vSecondaryChargeThresholdStart, vSecondaryChargeThresholdStop)
+            return updateThinkBattery(vSecondaryChargeThresholdStart,
+                                      vSecondaryChargeThresholdStop,
+                                      vSecondaryInhibitCharge,
+                                      vSecondaryForceDischarge)
         default:
             return false
         }
     }
 
-    func updateThinkBattery(_ startThreshold: NSTextField, _ stopThreshold: NSTextField) -> Bool {
-        guard startThreshold.tag == stopThreshold.tag else { return false}
+    func updateThinkBattery(_ startThreshold: NSTextField,
+                            _ stopThreshold: NSTextField,
+                            _ inhibitCharge: NSButton,
+                            _ forceDischarge: NSButton) -> Bool {
         let index = startThreshold.tag
+        guard index == stopThreshold.tag,
+              index == inhibitCharge.tag,
+              index == forceDischarge.tag else { return false}
 
         guard let dict = getDictionary(thinkBatteryName[index], service),
               let vStart = dict["BCTG"] as? NSNumber,
               let vStop = dict["BCSG"] as? NSNumber,
               vStart.int32Value >= 0,
               vStart.int32Value & 0xff < 100,
+              vStart.int32Value & 0x100 != 0,
               vStop.int32Value >= 0,
-              vStop.int32Value & 0xff < 100 else { return false }
+              vStop.int32Value & 0xff < 100,
+              vStop.int32Value & 0x100 != 0 else { return false }
 
         startThreshold.isEnabled = true
         stopThreshold.isEnabled = true
         startThreshold.integerValue = vStart.intValue & 0xff
         stopThreshold.integerValue = (vStop.intValue & 0xff) == 0 ? 100 : vStop.intValue & 0xff
+
+        if let vDischarge = dict["BDSG"] as? NSNumber,
+           vDischarge.int32Value >= 0 {
+            forceDischarge.toolTip = "0x" + String(vDischarge.int32Value, radix: 16, uppercase: false)
+            if vDischarge.int32Value & 0x100 != 0 {
+                os_log("Battery %d support force discharge function", type: .info, index)
+                forceDischarge.isEnabled = true
+                if vDischarge.int32Value & 0x200 != 0 {
+                    os_log("Battery %d support apply parameter for all battery", type: .info, index)
+                }
+                if vDischarge.int32Value & 0x400 != 0 {
+                    os_log("Battery %d support breaking condition by AC detaching", type: .info, index)
+                }
+            }
+        }
+
+        if let vCharge = dict["BICG"] as? NSNumber,
+           vCharge.int32Value >= 0 {
+            inhibitCharge.toolTip = "0x" + String(vCharge.int32Value, radix: 16, uppercase: false)
+            if vCharge.int32Value & 0x20 != 0 {
+                os_log("Battery %d support inhibit charge function", type: .info, index)
+                inhibitCharge.isEnabled = true
+                inhibitCharge.state = (vCharge.int32Value & 0x1) != 0 ? .on : .off
+            }
+        }
 
         thinkBatteryNumber = index
         return true

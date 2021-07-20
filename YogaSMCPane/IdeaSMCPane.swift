@@ -63,6 +63,9 @@ extension YogaSMCPane {
     }
 
     func updateIdea(_ props: NSDictionary) {
+        _ = updateThinkBatteryIndex(0)
+        _ = updateThinkBatteryIndex(1)
+        _ = updateThinkBatteryIndex(2)
         if let val = props["PrimeKeyType"] as? NSString {
             vFnKeyRadio.title = val as String
             if let val = props["FnlockMode"] as? Bool {

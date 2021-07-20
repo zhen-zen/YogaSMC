@@ -89,6 +89,14 @@ class YogaSMCPane: NSPreferencePane {
     @IBOutlet weak var vSecondaryChargeThresholdStart: NSTextField!
     @IBOutlet weak var vSecondaryChargeThresholdStop: NSTextField!
 
+    @IBOutlet weak var vInhibitCharge: NSButton!
+    @IBOutlet weak var vPrimaryInhibitCharge: NSButton!
+    @IBOutlet weak var vSecondaryInhibitCharge: NSButton!
+
+    @IBOutlet weak var vForceDischarge: NSButton!
+    @IBOutlet weak var vPrimaryForceDischarge: NSButton!
+    @IBOutlet weak var vSecondaryForceDischarge: NSButton!
+    
     @IBOutlet weak var vPowerLEDSlider: NSSlider!
     @IBOutlet weak var vStandbyLEDSlider: NSSlider!
     @IBOutlet weak var vThinkDotSlider: NSSliderCell!
