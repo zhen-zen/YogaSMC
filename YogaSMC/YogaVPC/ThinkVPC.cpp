@@ -908,7 +908,8 @@ void ThinkVPC::updateVPC(UInt32 event) {
                     break;
 
                 case TP_HKEY_EV_KEYBOARD:
-                    toggleKeyboard();
+                    if (!updateTopCase())
+                        setTopCase(true);
                     data = Keyboardenabled;
                     break;
 

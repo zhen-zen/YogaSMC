@@ -71,8 +71,8 @@ static IOPMPowerState IOPMPowerStates[kIOPMNumberPowerStates] = {
 enum
 {
     // from keyboard to mouse/touchpad
-    kSMC_setDisableTouchpad = iokit_vendor_specific_msg(100),   // set disable/enable touchpad (data is bool*)
-    kSMC_getDisableTouchpad = iokit_vendor_specific_msg(101),   // get disable/enable touchpad (data is bool*)
+    kSMC_setTouchpadStatus  = iokit_vendor_specific_msg(100),   // set disable/enable touchpad (data is bool*)
+    kSMC_getTouchpadStatus  = iokit_vendor_specific_msg(101),   // get disable/enable touchpad (data is bool*)
 
     // from sensor to keyboard
     kSMC_setKeyboardStatus  = iokit_vendor_specific_msg(200),   // set disable/enable keyboard (data is bool*)

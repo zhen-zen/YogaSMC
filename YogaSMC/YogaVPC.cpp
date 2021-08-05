@@ -698,8 +698,8 @@ IOService* YogaVPC::initSMC() {
 IOReturn YogaVPC::message(UInt32 type, IOService *provider, void *argument) {
     switch (type)
     {
-        case kSMC_setDisableTouchpad:
-        case kSMC_getDisableTouchpad:
+        case kSMC_setTouchpadStatus:
+        case kSMC_getTouchpadStatus:
         case kPS2M_notifyKeyPressed:
         case kPS2M_notifyKeyTime:
         case kPS2M_resetTouchpad:
