@@ -66,19 +66,19 @@ enum hp_wmi_commandtype {
     HPWMI_WIRELESS_QUERY       = 0x05,
     // 0x06                                 // w:SBBC, Arg3
     HPWMI_BATTERY_QUERY        = 0x07,      // r:WGBI, ToInteger (DerefOf (Arg3 [Zero]))
-    HPWMI_BIOS_QUERY           = 0x09,      // w:SHKS, Arg3
-    // 0x0a                                 // r:GHKF, Arg3
+    HPWMI_BIOS_QUERY           = 0x09,      // r:GHKS, w:SHKS, Arg3
+    // 0x0a                                 // r:GHKF, w:SHKF, Arg3
     HPWMI_FEATURE_QUERY        = 0x0b,
     HPWMI_HOTKEY_QUERY         = 0x0c,
     HPWMI_FEATURE2_QUERY       = 0x0d,
     // 0x0f                                 // r:GSAS
     HPWMI_WIRELESS2_QUERY      = 0x1b,      // r:WGWS; w:GVWE
     // 0x25                                 // w:CPMC
-    // 0x28                                 // r:WGBC; w:STMM, Arg3
+    // 0x28                                 // r:GTMS; w:STMM, Arg3; Get/SetThermalStatus
     // 0x29                                 // w:HWWB
     HPWMI_POSTCODEERROR_QUERY  = 0x2a,
-    // 0x2b                                 // w:WSBC, Arg1, Arg2, Arg3
-    // 0x2b                                 // w:STCS, Arg3
+    // 0x2b                                 // r:WGBC; w:WSBC, Arg1, Arg2, Arg3; Get/SetBatteryControl
+    // 0x2c                                 // w:STCS, Arg3
     // 0x30                                 // r:GEID
     // HPWMI_PEAKSHIFT_QUERY  = 0x36        // w:GVWE
     // HPWMI_BATTERY_CHARGE_QUERY = 0x37    // w:GVWE
@@ -115,15 +115,15 @@ enum hp_return_value {
     HPWMI_RET_WRONG_SIGNATURE    = 0x02,
     HPWMI_RET_UNKNOWN_COMMAND    = 0x03,
     HPWMI_RET_UNKNOWN_CMDTYPE    = 0x04,
-    HPWMI_RET_INVALID_PARAMETERS    = 0x05,
+    HPWMI_RET_INVALID_PARAMETERS = 0x05,
 };
 
 enum hp_wireless2_bits {
     HPWMI_POWER_STATE    = 0x01,
-    HPWMI_POWER_SOFT    = 0x02,
-    HPWMI_POWER_BIOS    = 0x04,
-    HPWMI_POWER_HARD    = 0x08,
-    HPWMI_POWER_FW_OR_HW    = HPWMI_POWER_BIOS | HPWMI_POWER_HARD,
+    HPWMI_POWER_SOFT     = 0x02,
+    HPWMI_POWER_BIOS     = 0x04,
+    HPWMI_POWER_HARD     = 0x08,
+    HPWMI_POWER_FW_OR_HW = HPWMI_POWER_BIOS | HPWMI_POWER_HARD,
 };
 
 #define IS_HWBLOCKED(x) ((x & HPWMI_POWER_FW_OR_HW) != HPWMI_POWER_FW_OR_HW)
