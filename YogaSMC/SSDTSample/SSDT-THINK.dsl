@@ -70,26 +70,5 @@ DefinitionBlock ("", "SSDT", 2, "hack", "Think", 0x00000000)
             ESTF,   8
         }
     }
-
-    /*
-     * Deprecated: Write access to fan control register
-     */
-    Scope (\_SB.PCI0.LPCB.EC.HKEY)
-    {
-        Method (CFSP, 1, NotSerialized)
-        {
-            \_SB.PCI0.LPCB.EC.HFSP = Arg0
-        }
-
-        Method (CFNI, 1, NotSerialized)
-        {
-            \_SB.PCI0.LPCB.EC.HFNI = Arg0
-        }
-
-        Method (CRST, 1, NotSerialized)
-        {
-            \_SB.PCI0.LPCB.EC.VRST = Arg0
-        }
-    }
 }
 
