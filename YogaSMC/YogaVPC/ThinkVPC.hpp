@@ -93,10 +93,12 @@ private:
     static constexpr const char *setCMstart            = "BCCS";
     static constexpr const char *getCMstop             = "BCSG";
     static constexpr const char *setCMstop             = "BCSS";
-    static constexpr const char *getCMInhibitCharge    = "BICG";
+    static constexpr const char *getCMInhibitCharge    = "BICG"; // https://sourceforge.net/p/ibm-acpi/mailman/message/36316521/
     static constexpr const char *setCMInhibitCharge    = "BICS";
-    static constexpr const char *getCMForceDischarge   = "BDSG";
+    static constexpr const char *getCMForceDischarge   = "BDSG"; // https://github.com/teleshoes/tpacpi-bat/blob/master/battery_asl
     static constexpr const char *setCMForceDischarge   = "BDSS";
+    // https://sourceforge.net/p/ibm-acpi/mailman/message/36316522/ says PSBS state << 8 | batnum ?
+    // https://www.reddit.com/r/thinkpad/comments/8j4pka/battery_gauge_reset_features_implemented_for_linux/
     static constexpr const char *getCMPeakShiftState   = "PSSG";
     static constexpr const char *setCMPeakShiftState   = "PSSS";
 
@@ -141,6 +143,11 @@ private:
     //    GHSL
     //    SHSL
 
+    /**
+     * Battery dictionary name
+     */
+    static constexpr const char *batteryName[] = {"BAT_ANY", "BAT_PRIMARY", "BAT_SECONDARY"};
+
     bool hotkey_legacy {false};
     /**
      * All events supported by DHKN
@@ -168,7 +175,7 @@ private:
 
     bool LEDSupport {false};
 
-    UInt32 batnum {BAT_ANY};
+    UInt8 batnum {BAT_ANY};
 
     bool ConservationMode {false};
 
@@ -241,11 +248,11 @@ private:
      *  Set battery conservation related setting
      *
      *  @param method method name to be executed
-     *  @param value method argument (excluding battery number)
+     *  @param value method argument (including battery number)
      *
      *  @return true if success
      */
-    bool setConservation(const char* method, UInt8 value);
+    bool setConservation(const char* method, UInt32 value);
 
     bool updateAdaptiveKBD(int arg);
 
