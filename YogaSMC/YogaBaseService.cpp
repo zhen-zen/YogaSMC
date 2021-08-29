@@ -43,6 +43,8 @@ bool YogaBaseService::start(IOService *provider)
 #ifndef ALTER
     setProperty("VersionInfo", kextVersion);
 #else
+    extern kmod_info_t kmod_info;
+    setProperty("VersionInfo", kmod_info.version);
     setProperty("Variant", "Alter");
 #endif
     workLoop = IOWorkLoop::workLoop();
