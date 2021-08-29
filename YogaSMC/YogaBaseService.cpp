@@ -28,18 +28,12 @@ bool YogaBaseService::init(OSDictionary *dictionary)
 
 IOService *YogaBaseService::probe(IOService *provider, SInt32 *score)
 {
-    if (!super::probe(provider, score))
-        return nullptr;
-
     iname = provider->getName();
     return this;
 }
 
 bool YogaBaseService::start(IOService *provider)
 {
-    if (!super::start(provider))
-        return false;
-
 #ifndef ALTER
     setProperty("VersionInfo", kextVersion);
 #else
@@ -144,24 +138,27 @@ bool YogaBaseService::notificationHandler(void *refCon, IOService *newService, I
 }
 
 bool YogaBaseService::findPNP(const char *id, IOACPIPlatformDevice **dev) {
-    auto iterator = IORegistryIterator::iterateOver(gIOACPIPlane, kIORegistryIterateRecursively);
-    if (!iterator) {
-        AlwaysLog("findPNP failed");
-        return false;
-    }
-
-    *dev = nullptr;
+    DebugLog("findPNP for %s", id);
     auto pnp = OSString::withCString(id);
-    while (auto entry = iterator->getNextObject()) {
-        if (entry->compareName(pnp)) {
-            DebugLog("found %s at %s", id, entry->getName());
-            if ((*dev = OSDynamicCast(IOACPIPlatformDevice, entry)))
-                break;
+    if ((*dev) && (*dev)->compareName(pnp, nullptr)) {
+        DebugLog("found %s at %s", id, (*dev)->getName());
+    } else {
+        *dev = nullptr;
+        auto iterator = IORegistryIterator::iterateOver(gIOACPIPlane, kIORegistryIterateRecursively);
+        if (!iterator) {
+            AlwaysLog("findPNP failed to create iterator");
+        } else {
+            while (auto entry = iterator->getNextObject()) {
+                if (entry->compareName(pnp, nullptr)) {
+                    DebugLog("found %s at %s", id, entry->getName());
+                    if ((*dev = OSDynamicCast(IOACPIPlatformDevice, entry)))
+                        break;
+                }
+            }
+            iterator->release();
         }
     }
-    iterator->release();
     pnp->release();
-
     return !!(*dev);
 }
 

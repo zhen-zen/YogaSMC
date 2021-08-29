@@ -18,23 +18,20 @@ IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
 {
     if (!super::probe(provider, score))
         return nullptr;
- 
+
     if (!probeVPC(provider))
         return nullptr;
- 
+
     DebugLog("Probing");
 
-    vpc = OSDynamicCast(IOACPIPlatformDevice, provider);
-    if (!vpc)
+    if (!(vpc = OSDynamicCast(IOACPIPlatformDevice, provider)))
         return nullptr;
 
-    auto pnp = OSString::withCString(PnpDeviceIdEC);
-    ec = OSDynamicCast(IOACPIPlatformDevice, vpc->getParentEntry(gIOACPIPlane));
-    if (!(ec && ec->IORegistryEntry::compareName(pnp)))
-        findPNP(PnpDeviceIdEC, &ec);
-    pnp->release();
+    if ((ec = OSDynamicCast(IOACPIPlatformDevice, vpc->getParentEntry(gIOACPIPlane)))) {
+        DebugLog("Parent ACPI device: %s", ec->getName());
+    }
 
-    if (!ec) {
+    if (!findPNP(PnpDeviceIdEC, &ec)) {
         AlwaysLog("Failed to find EC");
         return nullptr;
     }
@@ -62,14 +59,14 @@ void YogaVPC::probeWMI() {
     IOACPIPlatformDevice *dev;
     WMICollection = OSOrderedSet::withCapacity(1);
     WMIProvCollection = OSOrderedSet::withCapacity(1);
-    
+
     while (auto entry = iterator->getNextObject()) {
         if (entry->compareName(pnp) && (dev = OSDynamicCast(IOACPIPlatformDevice, entry))) {
             if (dev == vpc) {
                 DebugLog("Skip VPC interface");
                 continue;
             }
-            
+
             WMI *candidate = new WMI(dev);
             candidate->initialize();
             if (candidate->hasMethod(TBT_WMI_GUID)) {
@@ -77,7 +74,7 @@ void YogaVPC::probeWMI() {
                 delete candidate;
                 continue;
             }
-            
+
             if (auto wmi = initWMI(candidate)) {
                 DebugLog("WMI available at %s", dev->getName());
                 WMICollection->setObject(wmi);
