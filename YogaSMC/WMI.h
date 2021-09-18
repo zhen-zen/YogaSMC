@@ -31,13 +31,6 @@
 
 #define TBT_WMI_GUID  "86ccfd48-205e-4a77-9c48-2021cbede341"
 
-#define ACPIBufferName  "WQ%s" // MOF
-#define ACPIDataSetName "WS%s" // Arg0 = index, Arg1 = buffer
-#define ACPIMethodName  "WM%s" // ACPI_WMI_METHOD, Arg0 = index, Arg1 = ID, Arg2 = input
-#define ACPIEventName   "WE%02X" // ACPI_WMI_EXPENSIVE, Arg0 = 0 to disable and 1 to enable
-#define ACPICollectName "WC%s" // Arg0 = 0 to disable and 1 to enable
-#define ACPINotifyName  "_WED" // Arg0 = notification code
-
 /*
  * If the GUID data block is marked as expensive, we must enable and
  * explicitily disable data collection.

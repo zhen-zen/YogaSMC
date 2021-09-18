@@ -25,8 +25,14 @@
 #include "WMI.h"
 #include <uuid/uuid.h>
 
-#define kWMIMethod "_WDG"
-#define BMF_DATA_WMI_BUFFER "05901221-d566-11d1-b2f0-00a0c9062910"
+#define kWMIMethod      "_WDG"
+
+#define ACPINotifyName  "_WED" // Arg0 = notification code
+#define ACPIBufferName  "WQ%s" // MOF
+#define ACPIDataSetName "WS%s" // Arg0 = index, Arg1 = buffer
+#define ACPIMethodName  "WM%s" // ACPI_WMI_METHOD, Arg0 = index, Arg1 = ID, Arg2 = input
+#define ACPIEventName   "WE%02X" // ACPI_WMI_EXPENSIVE, Arg0 = 0 to disable and 1 to enable
+#define ACPICollectName "WC%s" // Arg0 = 0 to disable and 1 to enable
 
 struct __attribute__((packed)) WMI_DATA
 {
@@ -282,7 +288,7 @@ bool WMI::executeInteger(const char * guid, UInt32 * result, OSObject * params[]
 bool WMI::enableEvent(const char * guid, bool enable)
 {
     OSObject *params[] = {
-        OSNumber::withNumber(enable, 8)
+        OSNumber::withNumber(enable, 8),
     };
 
     bool ret = executeMethod(guid, nullptr, params, 1);
@@ -294,7 +300,7 @@ bool WMI::enableEvent(const char * guid, bool enable)
 bool WMI::getEventData(UInt32 event, OSObject **result)
 {
     OSObject *params[] = {
-        OSNumber::withNumber(event, 32)
+        OSNumber::withNumber(event, 32),
     };
 
     IOReturn ret = mDevice->evaluateObject(ACPINotifyName, result, params, 1);
@@ -365,7 +371,7 @@ bool WMI::parseBMF()
     MOF mof(pout, size, mData, iname);
     mDevice->removeProperty("MOF");
 
-    OSObject *result = mof.parse_bmf(BMF_DATA_WMI_BUFFER);
+    OSObject *result = mof.parse_bmf();
     mDevice->setProperty("MOF", result);
     if (!mof.parsed)
         mDevice->setProperty("BMF data", data);

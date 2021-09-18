@@ -14,7 +14,7 @@
 
 #include <IOKit/acpi/IOACPIPlatformDevice.h>
 
-#define kWMIEvaluate "evaluated"
+#define BMF_DATA_WMI_BUFFER "05901221-d566-11d1-b2f0-00a0c9062910"
 
 enum mof_offset_type {
   MOF_OFFSET_UNKNOWN,
@@ -23,7 +23,6 @@ enum mof_offset_type {
   MOF_OFFSET_STRING = 0x03,
   MOF_OFFSET_SINT32 = 0x11,
 };
-
 
 enum mof_data_type {
   MOF_UNKNOWN,
@@ -46,8 +45,7 @@ class MOF {
 public:
     MOF(char *data, uint32_t size, OSDictionary *mData, const char* name) : buf(data), size(size), mData(mData), wmi_name(name) {};
     MOF();
-//    OSObject* parse_bmf(uuid_t bmf_guid);
-    OSObject* parse_bmf(const char * bmf_guid_string);
+    OSObject* parse_bmf();
     bool parsed;
 private:
     const char* wmi_name;

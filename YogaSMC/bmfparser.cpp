@@ -616,7 +616,7 @@ OSDictionary* MOF::parse_class(uint32_t *buf) {
 *   |                               |                               |
 *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 */
-OSObject* MOF::parse_bmf(const char * bmf_guid_string) {
+OSObject* MOF::parse_bmf() {
     parsed = true;
     indent = 0;
 
@@ -632,12 +632,12 @@ OSObject* MOF::parse_bmf(const char * bmf_guid_string) {
     OSObject *value;
     OSDictionary *item;
 
-    OSDictionary * entry = OSDynamicCast(OSDictionary, mData->getObject(bmf_guid_string));
+    OSDictionary * entry = OSDynamicCast(OSDictionary, mData->getObject(BMF_DATA_WMI_BUFFER));
     if (entry)
         setPropertyString(dict, "MOF", "Base");
     else
-        IOLog("%d: MOF GUID not found %s\n", indent, bmf_guid_string);
-    setPropertyString(dict, "WDG", bmf_guid_string);
+        IOLog("%d: MOF GUID not found %s\n", indent, BMF_DATA_WMI_BUFFER);
+    setPropertyString(dict, "WDG", BMF_DATA_WMI_BUFFER);
 
 #ifdef DEBUG
     setPropertyNumber(dict, "length", nbuf[1], 32);
