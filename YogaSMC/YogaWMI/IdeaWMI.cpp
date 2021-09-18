@@ -15,6 +15,9 @@ YogaWMI* YogaWMI::withIdeaWMI(WMI *provider) {
     if (provider->hasMethod(GSENSOR_WMI_EVENT, ACPI_WMI_EVENT) && provider->hasMethod(GSENSOR_DATA_WMI_METHOD)) {
         dev = OSTypeAlloc(IdeaWMIYoga);
         dev->isPMsupported = true;
+    } else if (provider->hasMethod(GSENSOR_WMI_EVENT_EXT, ACPI_WMI_EVENT) && provider->hasMethod(GSENSOR_DATA_WMI_METHOD_EXT)) {
+        dev = OSTypeAlloc(IdeaWMIYoga);
+        dev->isPMsupported = true;
     } else if (provider->hasMethod(PAPER_LOOKING_WMI_EVENT, ACPI_WMI_EVENT)) {
         dev = OSTypeAlloc(IdeaWMIPaper);
     } else if (provider->hasMethod(BAT_INFO_WMI_STRING, ACPI_WMI_EXPENSIVE | ACPI_WMI_STRING)) {
@@ -40,11 +43,13 @@ YogaWMI* YogaWMI::withIdeaWMI(WMI *provider) {
 OSDefineMetaClassAndStructors(IdeaWMIYoga, YogaWMI);
 
 const char* IdeaWMIYoga::registerEvent(OSString *guid, UInt32 id) {
-    if (guid->isEqualTo(GSENSOR_WMI_EVENT)) {
-        YogaEvent = id;
-        return feature;
+    if (!guid->isEqualTo(GSENSOR_WMI_EVENT)) {
+        if (!guid->isEqualTo(GSENSOR_WMI_EVENT_EXT))
+            return nullptr;
+        extension = true;
     }
-    return nullptr;
+    YogaEvent = id;
+    return feature;
 }
 
 void IdeaWMIYoga::ACPIEvent(UInt32 argument) {
@@ -67,7 +72,8 @@ void IdeaWMIYoga::updateYogaMode() {
     UInt32 value;
 
     in = OSNumber::withNumber(0ULL, 32);
-    ret = YWMI->evaluateInteger(GSENSOR_DATA_WMI_METHOD, 0, 0, &value, in, true);
+    ret = YWMI->evaluateInteger(extension ? GSENSOR_DATA_WMI_METHOD_EXT : GSENSOR_DATA_WMI_METHOD,
+                                0, GSENSOR_DATA_WMI_UASGE_MODE, &value, in, true);
     OSSafeReleaseNULL(in);
 
     if (ret != kIOReturnSuccess) {

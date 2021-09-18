@@ -22,6 +22,8 @@
 #define BAT_INFO_WMI_STRING         "c3a03776-51ac-49aa-ad0f-f2f7d62c3f3c"
 #define GSENSOR_DATA_WMI_METHOD     "09b0ee6e-c3fd-4243-8da1-7911ff80bb8c"
 #define GSENSOR_WMI_EVENT           "06129d99-6083-4164-81ad-f092f9d773a6"
+#define GSENSOR_DATA_WMI_METHOD_EXT "abbc0f6f-8ea1-11d1-00a0-c90629100000"
+#define GSENSOR_WMI_EVENT_EXT       "abbc0f72-8ea1-11d1-00a0-c90629100000"
 #define PAPER_LOOKING_WMI_EVENT     "56322276-8493-4ce8-a783-98c991274f5e"
 #define GAME_ZONE_DATA_WMI_METHOD   "887b54e3-dddc-4b2c-8b88-68a26a8835d0"
 #define GAME_ZONE_TEMP_WMI_EVENT    "bfd42481-aee3-4501-a107-afb68425c5f8"
@@ -89,6 +91,17 @@ enum {
 
 enum
 {
+    GSENSOR_DATA_WMI_UASGE_MODE = 1,
+    GSENSOR_DATA_WMI_AXIS_X     = 2,
+    GSENSOR_DATA_WMI_AXIS_Y     = 3,
+    GSENSOR_DATA_WMI_AXIS_Z     = 4,
+    GSENSOR_DATA_WMI_ANGLE_4    = 5,
+    GSENSOR_DATA_WMI_ANGLE_5    = 6,
+    GSENSOR_DATA_WMI_ANGLE_6    = 7
+};
+
+enum
+{
     kYogaMode_laptop = 1,   // 0-90 degree
     kYogaMode_tablet = 2,   // 0/360 degree
     kYogaMode_stand  = 3,   // 180-360 degree, ∠ , screen face up
@@ -102,6 +115,7 @@ class IdeaWMIYoga : public YogaWMI
 
     static constexpr const char *feature = "Yoga Mode Control";
     UInt32 YogaEvent {0xd0};
+    bool extension {false};
     /**
      *  Current Yoga Mode, see kYogaMode
      */
