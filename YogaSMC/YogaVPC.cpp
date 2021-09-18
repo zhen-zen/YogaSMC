@@ -375,7 +375,7 @@ bool YogaVPC::toggleClamshell() {
 }
 
 bool YogaVPC::notifyBattery() {
-    if (ec->validateObject("NBAT") != kIOReturnSuccess ||
+    if (ec->validateObject("NBAT") == kIOReturnSuccess &&
         ec->evaluateObject("NBAT") != kIOReturnSuccess ) {
         DebugLog(toggleFailure, "NBAT");
         return false;
