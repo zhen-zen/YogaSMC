@@ -242,6 +242,15 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
                     automaticBacklightMode = value->unsigned8BitValue();
                     setProperty(autoBacklightPrompt, automaticBacklightMode, 8);
                 }
+            } else if (key->isEqualTo(FnKeyPrompt)) {
+                OSBoolean *value;
+                getPropertyBoolean(FnKeyPrompt);
+                updateFnLock();
+
+                if (value->getValue() == FnlockMode)
+                    DebugLog(valueMatched, FnKeyPrompt, FnlockMode);
+                else
+                    setFnLock(!FnlockMode);
             } else if (key->isEqualTo("ReadECOffset")) {
                 if (!(ECAccessCap & ECReadCap)) {
                     AlwaysLog(notSupported, "EC Read");

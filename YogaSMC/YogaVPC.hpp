@@ -231,7 +231,30 @@ protected:
      *
      *  @return true if success
      */
-    inline virtual bool setBacklight(UInt32 level) {return true;};
+    inline virtual bool setBacklight(UInt32 level) {return false;};
+
+    /**
+     *  Fn lock mode status
+     */
+    bool FnlockMode {false};
+
+    /**
+     *  Get FnLock status
+     *
+     *  @param update true if triggered from hardware
+     *
+     *  @return true if success
+     */
+    inline virtual bool updateFnLock(bool update=false) {return false;};
+
+    /**
+     *  Set FnLock status
+     *
+     *  @param enable enable FnLock mode
+     *
+     *  @return true if success
+     */
+    inline virtual bool setFnLock(bool enable) {return false;};
 
     /**
      *  Notify battery on conservation mode change

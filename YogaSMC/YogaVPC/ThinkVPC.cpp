@@ -32,7 +32,7 @@ void ThinkVPC::updateAll() {
         KBDPresent->release();
     }
     updateBattery(BAT_ANY);
-    updateFnLockStatus();
+    updateFnLock();
     updateMutestatus();
     updateMuteLEDStatus();
     updateMicMuteLEDStatus();
@@ -850,7 +850,8 @@ void ThinkVPC::updateVPC(UInt32 event) {
                 case TP_HKEY_EV_KEY_FN_ESC:
                     DebugLog("Fn+Esc");
                     time = 1;
-                    data = updateFnLockStatus();
+                    updateFnLock();
+                    data = FnlockMode;
                     break;
 
                 case TP_HKEY_EV_LID_STATUS_CHANGED:
@@ -892,16 +893,33 @@ void ThinkVPC::updateVPC(UInt32 event) {
     }
 }
 
-bool ThinkVPC::updateFnLockStatus() {
+bool ThinkVPC::updateFnLock(bool update) {
     UInt32 result;
     if (vpc->evaluateInteger(getMediaKeyStatus, &result) != kIOReturnSuccess) {
         AlwaysLog(updateFailure, FnKeyPrompt);
         return false;
     }
 
-    DebugLog(toggleSuccess, FnKeyPrompt, result, (result & 0x1 ? "enabled" : "disabled"));
-    setProperty(FnKeyPrompt, result & 0x1);
-    return result & 0x1;
+    FnlockMode = result & 0x1;
+
+    if (update) {
+        DebugLog(toggleSuccess, FnKeyPrompt, result, (FnlockMode ? "enabled" : "disabled"));
+    }
+    setProperty(FnKeyPrompt, FnlockMode);
+    return true;
+}
+
+bool ThinkVPC::setFnLock(bool enable) {
+    UInt32 result;
+    if (evaluateIntegerParam(setMediaKeyStatus, &result, enable) != kIOReturnSuccess) {
+        AlwaysLog(toggleFailure, FnKeyPrompt);
+        return false;
+    }
+
+    FnlockMode = enable;
+    DebugLog(toggleSuccess, FnKeyPrompt, result, (FnlockMode ? "enabled" : "disabled"));
+    setProperty(FnKeyPrompt, FnlockMode);
+    return true;
 }
 
 bool ThinkVPC::setHotkeyStatus(bool enable) {
@@ -932,7 +950,6 @@ bool ThinkVPC::updateBacklight(bool update) {
         DebugLog(updateSuccess, backlightPrompt, state);
     }
     setProperty(backlightPrompt, backlightLevel, 32);
-
     return true;
 }
 

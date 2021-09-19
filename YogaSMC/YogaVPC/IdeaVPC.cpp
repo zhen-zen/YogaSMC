@@ -137,8 +137,8 @@ IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
 
         case kSMC_FnlockEvent:
             DebugLog("message: %s Fnlock event", provider->getName());
-            updateKeyboard();
-            toggleFnlock();
+            updateFnLock();
+            setFnLock(!FnlockMode);
             break;
 
         case kSMC_getConservation:
@@ -216,15 +216,6 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
                     DebugLog(valueMatched, rapidChargePrompt, rapidChargeMode);
                 else
                     toggleRapidCharge();
-            } else if (key->isEqualTo(FnKeyPrompt)) {
-                OSBoolean *value;
-                getPropertyBoolean(FnKeyPrompt);
-                updateKeyboard(false);
-
-                if (value->getValue() == FnlockMode)
-                    DebugLog(valueMatched, FnKeyPrompt, FnlockMode);
-                else
-                    toggleFnlock();
             } else if (key->isEqualTo(ECLockPrompt)) {
                 OSBoolean *value;
                 getPropertyBoolean(ECLockPrompt);
@@ -485,7 +476,7 @@ OSData *IdeaVPC::extractBatteryInfo(UInt32 index) {
     OSObject *result;
 
     OSObject* params[1] = {
-        OSNumber::withNumber(index, 32)
+        OSNumber::withNumber(index, 32),
     };
 
     IOReturn ret = vpc->evaluateObject(getBatteryInfo, &result, params, 1);
@@ -685,7 +676,7 @@ bool IdeaVPC::setBacklight(UInt32 level) {
     return true;
 }
 
-bool IdeaVPC::toggleFnlock() {
+bool IdeaVPC::setFnLock(bool enable) {
     if (!FnlockCap)
         return true;
 
@@ -698,7 +689,7 @@ bool IdeaVPC::toggleFnlock() {
         return false;
     }
 
-    FnlockMode = !FnlockMode;
+    FnlockMode = enable;
     DebugLog(toggleSuccess, FnKeyPrompt, (FnlockMode ? HACMD_FNLOCK_ON : HACMD_FNLOCK_OFF), (FnlockMode ? "on" : "off"));
     setProperty(FnKeyPrompt, FnlockMode);
 

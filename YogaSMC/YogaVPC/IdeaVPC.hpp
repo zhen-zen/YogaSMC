@@ -160,11 +160,6 @@ private:
     bool FnlockCap {false};
 
     /**
-     *  Fn lock mode status
-     */
-    bool FnlockMode {false};
-
-    /**
      *  Rapid charge mode status
      */
     bool rapidChargeMode {false};
@@ -293,6 +288,9 @@ private:
     inline bool updateBacklight(bool update=false) APPLE_KEXT_OVERRIDE {return updateKeyboard(update);};
     bool setBacklight(UInt32 level) APPLE_KEXT_OVERRIDE;
 
+    inline bool updateFnLock(bool update=false) APPLE_KEXT_OVERRIDE {return updateKeyboard(update);};
+    bool setFnLock(bool enable) APPLE_KEXT_OVERRIDE;
+
     /**
      *  Toggle always on USB mode
      *
@@ -313,13 +311,6 @@ private:
      *  @return true if success
      */
     bool toggleRapidCharge();
-
-    /**
-     *  Toggle Fn lock mode
-     *
-     *  @return true if success
-     */
-    bool toggleFnlock();
 
     /**
      *  Read EC data

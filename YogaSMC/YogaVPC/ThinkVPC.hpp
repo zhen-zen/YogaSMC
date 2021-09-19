@@ -224,6 +224,8 @@ private:
 
     bool updateBacklight(bool update=false) APPLE_KEXT_OVERRIDE;
     bool setBacklight(UInt32 level) APPLE_KEXT_OVERRIDE;
+    bool updateFnLock(bool update=false) APPLE_KEXT_OVERRIDE;
+    bool setFnLock(bool enable) APPLE_KEXT_OVERRIDE;
 
     /**
      *  Update battery conservation related setting
@@ -247,13 +249,6 @@ private:
     bool setConservation(const char* method, UInt8 value);
 
     bool updateAdaptiveKBD(int arg);
-
-    /**
-     *  Get FnLock status
-     *
-     *  @return Fnkey Status, false if false
-     */
-    bool updateFnLockStatus();
 
     /**
      *  Set hotkey reporting status
