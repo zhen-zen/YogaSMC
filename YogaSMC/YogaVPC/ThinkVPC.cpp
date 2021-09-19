@@ -192,7 +192,7 @@ bool ThinkVPC::initVPC() {
     setHotkeyStatus(true);
 
     UInt32 state;
-    if (evaluateIntegerParam(getKBDBacklightLevel, &state, (UInt32) 0) == kIOReturnSuccess)
+    if (evaluateIntegerParam(getKBDBacklightLevel, &state, 0) == kIOReturnSuccess)
         backlightCap = BIT(KBD_BACKLIGHT_CAP_BIT) & state;
 
     if (!backlightCap)
@@ -334,7 +334,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 setConservation(setCMPeakShiftState, value->unsigned8BitValue());
             } else if (key->isEqualTo("GHSL")) {
                 UInt32 result;
-                if (evaluateIntegerParam("GHKL", &result, (UInt32) 0) == kIOReturnSuccess)
+                if (evaluateIntegerParam("GHKL", &result, 0) == kIOReturnSuccess)
                     DebugLog(updateSuccess, "GHSL", result);
                 else
                     AlwaysLog(updateFailure, "GHSL");
@@ -466,7 +466,7 @@ bool ThinkVPC::setFanControl(int level) {
 }
 
 bool ThinkVPC::updateMuteLEDStatus(bool update) {
-    if (evaluateIntegerParam(getAudioMuteLED, &muteLEDstate, (UInt32) 0) != kIOReturnSuccess) {
+    if (evaluateIntegerParam(getAudioMuteLED, &muteLEDstate, 0) != kIOReturnSuccess) {
         AlwaysLog(updateFailure, __func__);
         return false;
     }
@@ -596,7 +596,7 @@ IOReturn ThinkVPC::message(UInt32 type, IOService *provider, void *argument) {
 
 UInt32 ThinkVPC::updateThermalMode() {
     UInt32 mode;
-    if (evaluateIntegerParam(getThermalModeState, &mode, (UInt32) 0) != kIOReturnSuccess)
+    if (evaluateIntegerParam(getThermalModeState, &mode, 0) != kIOReturnSuccess)
         mode = 0;
     return mode;
 }
@@ -606,7 +606,7 @@ UInt32 ThinkVPC::updateYogaMode() {
         return 0;
 
     UInt32 mode;
-    if (evaluateIntegerParam(getMultiModeState, &mode, (UInt32) 0) != kIOReturnSuccess) {
+    if (evaluateIntegerParam(getMultiModeState, &mode, 0) != kIOReturnSuccess) {
         AlwaysLog("failed to evaluate tablet mode");
         return 0;
     }
@@ -918,7 +918,7 @@ bool ThinkVPC::updateBacklight(bool update) {
         return true;
 
     UInt32 state;
-    if (evaluateIntegerParam(getKBDBacklightLevel, &state, (UInt32) 0) != kIOReturnSuccess) {
+    if (evaluateIntegerParam(getKBDBacklightLevel, &state, 0) != kIOReturnSuccess) {
         AlwaysLog(updateFailure, backlightPrompt);
         return false;
     }
