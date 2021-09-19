@@ -190,10 +190,9 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
 #ifdef DEBUG
                 OSNumber *raw = OSDynamicCast(OSNumber, dict->getObject(conservationPrompt));
                 if (raw != nullptr) {
-                    UInt32 result;
-                    IOReturn ret = evaluateIntegerParam(setBatteryMode, &result, raw->unsigned8BitValue());
-                    if (ret != kIOReturnSuccess || result != 0)
-                        AlwaysLog(toggleError, conservationPrompt, ret ?: result);
+                    IOReturn ret = evaluateIntegerParam(setBatteryMode, nullptr, raw->unsigned8BitValue());
+                    if (ret != kIOReturnSuccess)
+                        AlwaysLog(toggleError, conservationPrompt, ret);
                     else
                         AlwaysLog(toggleSuccess, conservationPrompt, raw->unsigned32BitValue(), "see ioreg");
                     continue;
@@ -617,12 +616,9 @@ bool IdeaVPC::toggleAlwaysOnUSB() {
 }
 
 bool IdeaVPC::toggleConservation() {
-    UInt32 result;
-    IOReturn ret;
-
-    ret = evaluateIntegerParam(setBatteryMode, &result, conservationMode ? BMCMD_CONSERVATION_OFF : BMCMD_CONSERVATION_ON);
-    if (ret != kIOReturnSuccess || result != 0) {
-        AlwaysLog(toggleError, conservationPrompt, ret ?: result);
+    IOReturn ret = evaluateIntegerParam(setBatteryMode, nullptr, conservationMode ? BMCMD_CONSERVATION_OFF : BMCMD_CONSERVATION_ON);
+    if (ret != kIOReturnSuccess) {
+        AlwaysLog(toggleError, conservationPrompt, ret);
         return false;
     }
 
@@ -639,12 +635,9 @@ bool IdeaVPC::toggleRapidCharge() {
     if (conservationModeLock)
         return false;
 
-    UInt32 result;
-    IOReturn ret;
-
-    ret = evaluateIntegerParam(setBatteryMode, &result, rapidChargeMode ? BMCMD_RAPIDCHARGE_OFF : BMCMD_RAPIDCHARGE_ON);
-    if (ret != kIOReturnSuccess || result != 0) {
-        AlwaysLog(toggleError, rapidChargePrompt, ret ?: result);
+    IOReturn ret = evaluateIntegerParam(setBatteryMode, nullptr, rapidChargeMode ? BMCMD_RAPIDCHARGE_OFF : BMCMD_RAPIDCHARGE_ON);
+    if (ret != kIOReturnSuccess) {
+        AlwaysLog(toggleError, rapidChargePrompt, ret);
         return false;
     }
 
@@ -659,12 +652,9 @@ bool IdeaVPC::setBacklight(UInt32 level) {
     if (!backlightCap)
         return true;
 
-    UInt32 result;
-    IOReturn ret;
-
-    ret = evaluateIntegerParam(setKeyboardMode, &result, level ? HACMD_BACKLIGHT_ON : HACMD_BACKLIGHT_OFF);
-    if (ret != kIOReturnSuccess || result != 0) {
-        AlwaysLog(toggleError, backlightPrompt, ret ?: result);
+    IOReturn ret = evaluateIntegerParam(setKeyboardMode, nullptr, level ? HACMD_BACKLIGHT_ON : HACMD_BACKLIGHT_OFF);
+    if (ret != kIOReturnSuccess) {
+        AlwaysLog(toggleError, backlightPrompt, ret);
         return false;
     }
 
@@ -680,12 +670,9 @@ bool IdeaVPC::setFnLock(bool enable) {
     if (!FnlockCap)
         return true;
 
-    UInt32 result;
-    IOReturn ret;
-
-    ret = evaluateIntegerParam(setKeyboardMode, &result, FnlockMode ? HACMD_FNLOCK_OFF : HACMD_FNLOCK_ON);
-    if (ret != kIOReturnSuccess || result != 0) {
-        AlwaysLog(toggleError, FnKeyPrompt, ret ?: result);
+    IOReturn ret = evaluateIntegerParam(setKeyboardMode, nullptr, enable ? HACMD_FNLOCK_ON : HACMD_FNLOCK_OFF);
+    if (ret != kIOReturnSuccess) {
+        AlwaysLog(toggleError, FnKeyPrompt, ret);
         return false;
     }
 
