@@ -446,7 +446,10 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
             } else if (key->isEqualTo(SSTPrompt)) {
                 OSNumber *value;
                 getPropertyNumber(SSTPrompt);
-                setSSTStatus(value->unsigned32BitValue());
+                if (value->unsigned32BitValue() >= 5)
+                    AlwaysLog(valueInvalid, SSTPrompt);
+                else
+                    setSSTStatus(value->unsigned32BitValue());
             } else if (key->isEqualTo(LEDPrompt)) {
                 if (!LEDSupport) {
                     AlwaysLog(notSupported, LEDPrompt);
@@ -454,7 +457,7 @@ void ThinkVPC::setPropertiesGated(OSObject *props) {
                 }
                 OSNumber *value;
                 getPropertyNumber(LEDPrompt);
-                if (value->unsigned32BitValue() > 0xff)
+                if (value->unsigned32BitValue() >= 0xff)
                     AlwaysLog(valueInvalid, LEDPrompt);
                 else
                     setLEDStatus(value->unsigned8BitValue());
