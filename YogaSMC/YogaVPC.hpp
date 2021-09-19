@@ -273,11 +273,12 @@ protected:
     /**
      *  Set DYTC status
      *
+     *  @param funcmode Function mode
      *  @param perfmode Performance mode
      *
      *  @return true if success
      */
-    bool setDYTC(int perfmode);
+    bool setDYTC(int funcmode, int perfmode);
 
     /**
      *  Wrapper for single param integer evaluation

@@ -269,6 +269,19 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
                 UInt32 result;
                 if (readECName(value->getCStringNoCopy(), &result) == kIOReturnSuccess)
                     AlwaysLog("%s: 0x%02x", value->getCStringNoCopy(), result);
+            } else if (key->isEqualTo(DYTCPSCPrompt)) {
+                if (!(DYTCCap & BIT(DYTC_FUNCTION_PSC))) {
+                    AlwaysLog(notSupported, DYTCPSCPrompt);
+                    continue;
+                }
+                OSNumber *value;
+                getPropertyNumber(DYTCPSCPrompt);
+                if (!setDYTC(DYTC_FUNCTION_PSC, value->unsigned8BitValue())) {
+                    AlwaysLog(toggleFailure, DYTCPSCPrompt);
+                    updateDYTC();
+                } else {
+                    DebugLog(toggleSuccess, DYTCPSCPrompt, value->unsigned8BitValue(), "see ioreg");
+                }
             } else if (key->isEqualTo(DYTCPrompt)) {
                 if (!DYTCCap) {
                     AlwaysLog(notSupported, DYTCPrompt);
@@ -313,7 +326,7 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
                         AlwaysLog(valueInvalid, DYTCPrompt);
                         continue;
                 }
-                if (!setDYTC(mode)) {
+                if (!setDYTC(DYTC_FUNCTION_MMC, mode)) {
                     AlwaysLog(toggleFailure, DYTCPrompt);
                     updateDYTC();
                 } else {
@@ -481,6 +494,8 @@ bool YogaVPC::parseDYTC(DYTC_RESULT result) {
     OSDictionary *DYTCStatus = OSDictionary::withDictionary(DYTCVersion);
     OSObject *value;
 
+    bool lapmode = false;
+
     OSDictionary *functionStatus = OSDictionary::withCapacity(16);
     for (int func_bit = 0; func_bit < 16; func_bit++) {
         if (BIT(func_bit) & DYTCCap) {
@@ -495,6 +510,7 @@ bool YogaVPC::parseDYTC(DYTC_RESULT result) {
                         DebugLog("DYTC_FUNCTION_CQL on");
                     setPropertyBoolean(functionStatus, "CQL", func_status);
                     setPropertyBoolean(DYTCStatus, "lapmode", func_status);
+                    lapmode = func_status;
                     break;
 
                 case DYTC_FUNCTION_MYH:
@@ -540,59 +556,59 @@ bool YogaVPC::parseDYTC(DYTC_RESULT result) {
     DYTCStatus->setObject("Function Status", functionStatus);
     functionStatus->release();
 
+    if (lapmode && !DYTCCommand(dytc_set_cmd, &result, DYTC_FUNCTION_CQL, 0xf, false)) {
+        DYTCStatus->release();
+        return false;
+    }
+
     switch (result.get.funcmode) {
         case DYTC_FUNCTION_STD:
             setPropertyString(DYTCStatus, "FuncMode", "Standard");
-            break;
-
-        case DYTC_FUNCTION_CQL:
-            /* We can't get the mode when in CQL mode - so we disable CQL
-             * mode retrieve the mode and then enable it again.
-             */
-            DYTC_RESULT dummy;
-            if (!DYTCCommand(dytc_set_cmd, &dummy, DYTC_FUNCTION_CQL, 0xf, false) ||
-                !DYTCCommand(dytc_get_cmd, &result) ||
-                !DYTCCommand(dytc_set_cmd, &dummy, DYTC_FUNCTION_CQL, 0xf, true)) {
-                DYTCStatus->release();
-                return false;
-            }
-            setPropertyString(DYTCStatus, "FuncMode", "Lap");
+            setPropertyString(DYTCStatus, "PerfMode", "Balance");
             break;
 
         case DYTC_FUNCTION_MMC:
             setPropertyString(DYTCStatus, "FuncMode", "Desk");
+            switch (result.get.perfmode) {
+                case DYTC_MODE_PERFORM:
+                    setPropertyString(DYTCStatus, "PerfMode", lapmode ? "Performance (Reduced as lapmode active)" : "Performance");
+                    break;
+
+                case DYTC_MODE_QUIET:
+                    setPropertyString(DYTCStatus, "PerfMode", "Quiet");
+                    break;
+
+                default:
+                    AlwaysLog(valueUnknown, DYTCPerfPrompt, result.get.perfmode);
+                    char Unknown[16];
+                    snprintf(Unknown, 16, "UnknownPerf:0x%x", result.get.perfmode);
+                    setPropertyString(DYTCStatus, "PerfMode", Unknown);
+                    break;
+            }
+            break;
+
+        case DYTC_FUNCTION_PSC:
+            setPropertyString(DYTCStatus, "FuncMode", "Controlled");
+            setPropertyNumber(DYTCStatus, "PerfMode", result.get.perfmode, 16);
             break;
 
         default:
             AlwaysLog(valueUnknown, DYTCFuncPrompt, result.get.funcmode);
-            char Unknown[10];
-            snprintf(Unknown, 10, "Unknown:%1x", result.get.funcmode);
+            AlwaysLog(valueUnknown, DYTCPerfPrompt, result.get.perfmode);
+            char Unknown[16];
+            snprintf(Unknown, 16, "UnknownFunc:0x%x", result.get.funcmode);
             setPropertyString(DYTCStatus, "FuncMode", Unknown);
+            snprintf(Unknown, 16, "UnknownPerf:0x%x", result.get.perfmode);
+            setPropertyString(DYTCStatus, "PerfMode", Unknown);
             break;
     }
 
-    switch (result.get.perfmode) {
-        case DYTC_MODE_PERFORM:
-            if (result.get.funcmode == DYTC_FUNCTION_CQL)
-                setPropertyString(DYTCStatus, "PerfMode", "Performance (Reduced as lapmode active)");
-            else
-                setPropertyString(DYTCStatus, "PerfMode", "Performance");
-            break;
-
-        case DYTC_MODE_QUIET:
-            setPropertyString(DYTCStatus, "PerfMode", "Quiet");
-            break;
-
-        case DYTC_MODE_BALANCE:
-            setPropertyString(DYTCStatus, "PerfMode", "Balance");
-            break;
-
-        default:
-            AlwaysLog(valueUnknown, DYTCPerfPrompt, result.get.perfmode);
-            char Unknown[10];
-            snprintf(Unknown, 10, "Unknown:%1x", result.get.perfmode);
-            setPropertyString(DYTCStatus, "PerfMode", Unknown);
-            break;
+    if (lapmode) {
+        setPropertyString(DYTCStatus, "FuncMode", "Lap");
+        if (!DYTCCommand(dytc_set_cmd, &result, DYTC_FUNCTION_CQL, 0xf, true)) {
+            DYTCStatus->release();
+            return false;
+        }
     }
 
     setProperty("DYTC", DYTCStatus);
@@ -611,28 +627,28 @@ bool YogaVPC::updateDYTC() {
     return parseDYTC(result);
 }
 
-bool YogaVPC::setDYTC(int perfmode) {
+bool YogaVPC::setDYTC(int funcmode, int perfmode) {
     if (!DYTCCap)
         return true;
 
     DYTC_RESULT result;
-    if (perfmode == DYTC_MODE_BALANCE) {
-        // Or set DYTC_FUNCTION_MMC / DYTC_MODE_BALANCE / false
-        if (!DYTCCommand(dytc_reset_cmd, &result))
+
+    if (!DYTCCommand(dytc_get_cmd, &result))
+        return false;
+
+    bool lapmode = (result.get.funcmode == DYTC_FUNCTION_CQL);
+
+    if (!DYTCCommand(dytc_reset_cmd, &result))
             return false;
-    } else {
-        if (!DYTCCommand(dytc_get_cmd, &result))
+
+    if (perfmode != DYTC_MODE_BALANCE)
+        if (!DYTCCommand(dytc_set_cmd, &result, funcmode, perfmode, true))
             return false;
-        if (result.get.funcmode == DYTC_FUNCTION_CQL) {
-            if (!DYTCCommand(dytc_set_cmd, &result, DYTC_FUNCTION_CQL, 0xf, false) ||
-                !DYTCCommand(dytc_set_cmd, &result, DYTC_FUNCTION_MMC, perfmode, true) ||
-                !DYTCCommand(dytc_set_cmd, &result, DYTC_FUNCTION_CQL, 0xf, true))
-                return false;
-        } else {
-            if (!DYTCCommand(dytc_set_cmd, &result, DYTC_FUNCTION_MMC, perfmode, true))
-                return false;
-        }
-    }
+
+    if (lapmode)
+        if (!DYTCCommand(dytc_set_cmd, &result, DYTC_FUNCTION_CQL, 0xf, true))
+            return false;
+
     return parseDYTC(result);
 }
 

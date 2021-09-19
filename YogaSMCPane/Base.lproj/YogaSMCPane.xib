@@ -8,6 +8,7 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="YogaSMCPane" customModule="YogaSMCPane" customModuleProvider="target">
             <connections>
+                <outlet property="DYTCPSCCheck" destination="bgC-Ln-QG2" id="kXD-iM-upH"/>
                 <outlet property="DYTCSlider" destination="H87-Ly-sql" id="haV-1t-2Re"/>
                 <outlet property="_window" destination="F0z-JX-Cv5" id="gIp-Ho-8D9"/>
                 <outlet property="autoSleepCheck" destination="lHz-fM-CAF" id="QT6-Rq-Xiu"/>
@@ -209,7 +210,7 @@
                                         <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="H87-Ly-sql">
                                             <rect key="frame" x="390" y="190" width="160" height="31"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <sliderCell key="cell" state="on" alignment="left" maxValue="2" doubleValue="1" tickMarkPosition="below" numberOfTickMarks="3" allowsTickMarkValuesOnly="YES" sliderType="linear" id="qvo-5v-hS7"/>
+                                            <sliderCell key="cell" enabled="NO" state="on" alignment="left" maxValue="2" doubleValue="1" tickMarkPosition="below" numberOfTickMarks="3" allowsTickMarkValuesOnly="YES" sliderType="linear" id="qvo-5v-hS7"/>
                                             <connections>
                                                 <action selector="DYTCset:" target="-2" id="Nwh-cW-Bdz"/>
                                             </connections>
@@ -396,6 +397,17 @@
                                             </buttonCell>
                                             <connections>
                                                 <action selector="vClamshellModeSet:" target="-2" id="nCo-wo-ZZj"/>
+                                            </connections>
+                                        </button>
+                                        <button hidden="YES" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="bgC-Ln-QG2">
+                                            <rect key="frame" x="382" y="135" width="103" height="18"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <buttonCell key="cell" type="check" title="PSC support" bezelStyle="regularSquare" imagePosition="left" inset="2" id="DxG-IC-0u8">
+                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                            <connections>
+                                                <action selector="DYTCPSCSupport:" target="-2" id="tFf-hY-9L4"/>
                                             </connections>
                                         </button>
                                     </subviews>
