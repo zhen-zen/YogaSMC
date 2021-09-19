@@ -859,6 +859,10 @@ void ThinkVPC::updateVPC(UInt32 event) {
 
                 case TP_HKEY_EV_TABLET_CHANGED:
                     data = updateYogaMode();
+                    if (clamshellMode) {
+                        DebugLog("ClamshellMode enabled, skip Yoga mode notification");
+                        return;
+                    }
                     break;
 
                 case TP_HKEY_EV_PALM_DETECTED:
