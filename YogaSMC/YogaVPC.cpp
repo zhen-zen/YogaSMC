@@ -352,15 +352,7 @@ bool YogaVPC::toggleClamshell() {
         return true;
 
     UInt32 result;
-
-    OSObject* params[1] = {
-        OSNumber::withNumber(!clamshellMode, 32)
-    };
-
-    IOReturn ret = vpc->evaluateInteger(setClamshellMode, &result, params, 1);
-    params[0]->release();
-
-    if (ret != kIOReturnSuccess || result != 0) {
+    if (evaluateIntegerParam(setClamshellMode, &result, !clamshellMode) != kIOReturnSuccess) {
         AlwaysLog(toggleFailure, clamshellPrompt);
         return false;
     }
@@ -410,14 +402,8 @@ bool YogaVPC::DYTCCommand(DYTC_CMD command, DYTC_RESULT* result, UInt8 ICFunc, U
         command.ICMode = ICMode;
         command.validF = ValidF;
     }
-    OSObject* params[1] = {
-        OSNumber::withNumber(command.raw, 32)
-    };
 
-    IOReturn ret = vpc->evaluateInteger(setThermalControl, &(result->raw), params, 1);
-    params[0]->release();
-
-    if (ret != kIOReturnSuccess) {
+    if (evaluateIntegerParam(setThermalControl, &(result->raw), command.raw) != kIOReturnSuccess) {
         AlwaysLog(toggleFailure, DYTCPrompt);
         DYTCLock = false;
         return false;
@@ -718,4 +704,16 @@ IOReturn YogaVPC::message(UInt32 type, IOService *provider, void *argument) {
     }
 
     return kIOReturnSuccess;
+}
+
+IOReturn YogaVPC::evaluateIntegerParam(const char *objectName, UInt32 *resultInt32, UInt32 paramInt32) {
+    IOReturn ret;
+    OSObject* params[] = { OSNumber::withNumber(paramInt32, 32) };
+    if (resultInt32 != nullptr) {
+        ret = vpc->evaluateInteger(objectName, resultInt32, params, 1);
+    } else {
+        ret = vpc->evaluateObject(objectName, nullptr, params, 1);
+    }
+    params[0]->release();
+    return ret;
 }
