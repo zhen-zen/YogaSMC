@@ -238,15 +238,11 @@ bool ThinkVPC::initVPC() {
         setProperty(backlightPrompt, "unsupported");
 
     setProperty(autoBacklightPrompt, automaticBacklightMode, 8);
-    if (ec->validateObject(setLED) == kIOReturnSuccess) {
-        LEDSupport = true;
-        setProperty("LEDSupport", true);
-    } else {
-        setProperty("LEDSupport", false);
-    }
 
-    if (vpc->validateObject(getMultiModeState) == kIOReturnSuccess)
-        yogaModeSupport = true;
+    LEDSupport = (ec->validateObject(setLED) == kIOReturnSuccess);
+    setProperty("LEDSupport", LEDSupport);
+
+    yogaModeSupport = (vpc->validateObject(getMultiModeState) == kIOReturnSuccess);
 
     setMicMuteLEDStatus(0);
     return true;
@@ -1011,8 +1007,7 @@ void ThinkVPC::updateVPC(UInt32 event) {
 
 bool ThinkVPC::updateFnLockStatus() {
     UInt32 result;
-
-    if (vpc->evaluateInteger("GMKS", &result) != kIOReturnSuccess) {
+    if (vpc->evaluateInteger(getMediaKeyStatus, &result) != kIOReturnSuccess) {
         AlwaysLog(updateFailure, FnKeyPrompt);
         return false;
     }
@@ -1162,9 +1157,7 @@ bool ThinkVPC::setSSTStatus(UInt32 value) {
 }
 
 bool ThinkVPC::updateKBDLocale(bool update) {
-    IOReturn ret;
-
-    ret = vpc->validateObject("GSKL");
+    IOReturn ret = vpc->validateObject(getKBDLang);
     if (ret == kIOReturnNoDevice) {
         return true;
     } else if (ret != kIOReturnSuccess) {

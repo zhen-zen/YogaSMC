@@ -103,9 +103,6 @@ private:
     static constexpr const char *getKBDBacklightLevel  = "MLCG";
     static constexpr const char *setKBDBacklightLevel  = "MLCS";
 
-    static constexpr const char *getKBDLang            = "GSKL";
-    static constexpr const char *setKBDLang            = "SSKL";
-
     static constexpr const char *getAudioMutestatus    = "HAUM"; // EC
     static constexpr const char *setAudioMutestatus    = "SAUM";
     static constexpr const char *getAudioMuteLED       = "GSMS";
@@ -134,12 +131,14 @@ private:
     //    INSS
     //
     //    Call FNSC:
-    //    GMKS
-    //    SMKS
-    //    GSKL
-    //    SSKL
     //    GHSL
     //    SHSL
+
+    static constexpr const char *getMediaKeyStatus     = "GMKS";
+    static constexpr const char *setMediaKeyStatus     = "SMKS";
+
+    static constexpr const char *getKBDLang            = "GSKL";
+    static constexpr const char *setKBDLang            = "SSKL";
 
     bool hotkey_legacy {false};
     /**
