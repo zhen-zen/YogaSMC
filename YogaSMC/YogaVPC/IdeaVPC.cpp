@@ -671,7 +671,7 @@ bool IdeaVPC::setBacklight(UInt32 level) {
     UInt32 result;
     IOReturn ret;
 
-    ret = evaluateIntegerParam(setKeyboardMode, &result, level ? HACMD_BACKLIGHT_OFF : HACMD_BACKLIGHT_ON);
+    ret = evaluateIntegerParam(setKeyboardMode, &result, level ? HACMD_BACKLIGHT_ON : HACMD_BACKLIGHT_OFF);
     if (ret != kIOReturnSuccess || result != 0) {
         AlwaysLog(toggleError, backlightPrompt, ret ?: result);
         return false;
