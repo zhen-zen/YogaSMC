@@ -256,6 +256,17 @@ protected:
      */
     bool setDYTC(int perfmode);
 
+    /**
+     *  Wrapper for single param integer evaluation
+     *
+     *  @param objectName    ACPI method name
+     *  @param resultInt32  Pointer to result, skipped if null
+     *  @param paramInt32    Single integer param
+     *
+     *  @return kIOReturnSuccess if success
+     */
+    IOReturn evaluateIntegerParam(const char *objectName, UInt32 *resultInt32 , UInt32 paramInt32);
+
 public:
     virtual IOService *probe(IOService *provider, SInt32 *score) APPLE_KEXT_OVERRIDE;
 
