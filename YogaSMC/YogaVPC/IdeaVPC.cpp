@@ -76,15 +76,8 @@ bool IdeaVPC::initVPC() {
     setProperty("Capability", capabilities);
     capabilities->release();
 
-    if (vpc->evaluateInteger(getKeyboardMode, &config) == kIOReturnSuccess)
-        updateKeyboardCapability(config);
-    else
-        AlwaysLog(updateFailure, keyboardPrompt);
-
-    if (vpc->evaluateInteger(getBatteryMode, &config) == kIOReturnSuccess)
-        updateBatteryCapability(config);
-    else
-        AlwaysLog(updateFailure, batteryPrompt);
+    updateKeyboardCapability();
+    updateBatteryCapability();
 
     int val[16];
     if (PE_parse_boot_argn("-ideabr", val, sizeof(val))) {
@@ -280,16 +273,8 @@ void IdeaVPC::setPropertiesGated(OSObject *props) {
             } else if (key->isEqualTo(updatePrompt)) {
                 updateAll();
             } else if (key->isEqualTo(resetPrompt)) {
-                UInt32 state;
-                if (vpc->evaluateInteger(getKeyboardMode, &state) == kIOReturnSuccess)
-                    updateKeyboardCapability(state);
-                else
-                    AlwaysLog(updateFailure, keyboardPrompt);
-
-                if (vpc->evaluateInteger(getBatteryMode, &state) == kIOReturnSuccess)
-                    updateBatteryCapability(state);
-                else
-                    AlwaysLog(updateFailure, batteryPrompt);
+                updateKeyboardCapability();
+                updateBatteryCapability();
             } else {
                 OSDictionary *entry = OSDictionary::withCapacity(1);
                 entry->setObject(key, dict->getObject(key));
@@ -343,7 +328,16 @@ bool IdeaVPC::initEC() {
     return false;
 }
 
-void IdeaVPC::updateKeyboardCapability(UInt32 kbdState) {
+void IdeaVPC::updateKeyboardCapability() {
+    UInt32 kbdState;
+    IOReturn ret;
+
+    ret = vpc->evaluateInteger(getKeyboardMode, &kbdState);
+    if (ret != kIOReturnSuccess) {
+        AlwaysLog(toggleError, keyboardPrompt, ret);
+        return;
+    }
+
     backlightCap = BIT(HA_BACKLIGHT_CAP_BIT) & kbdState;
     if (!backlightCap)
         setProperty(backlightPrompt, "unsupported");
@@ -364,7 +358,16 @@ void IdeaVPC::updateKeyboardCapability(UInt32 kbdState) {
         setProperty(alwaysOnUSBPrompt, "unsupported");
 }
 
-void IdeaVPC::updateBatteryCapability(UInt32 batState) {
+void IdeaVPC::updateBatteryCapability() {
+    UInt32 batState;
+    IOReturn ret;
+
+    ret = vpc->evaluateInteger(getBatteryMode, &batState);
+    if (ret != kIOReturnSuccess) {
+        AlwaysLog(toggleError, batteryPrompt, ret);
+        return;
+    }
+
     OSDictionary *bat0 = OSDictionary::withCapacity(5);
     OSDictionary *bat1 = OSDictionary::withCapacity(5);
     if (BIT(BM_BATTERY0BAD_BIT) & batState) {
@@ -419,7 +422,6 @@ UInt64 extractBatteryID(OSObject *raw) {
 
 bool IdeaVPC::updateBatteryID(OSDictionary *bat0, OSDictionary *bat1) {
     OSObject *result;
-
     if (vpc->evaluateObject(getBatteryID, &result) != kIOReturnSuccess) {
         AlwaysLog(updateFailure, "Battery ID");
         return false;
@@ -976,7 +978,7 @@ bool IdeaVPC::method_vpcw(UInt32 cmd, UInt32 data) {
 
     OSObject* params[2] = {
         OSNumber::withNumber(cmd, 32),
-        OSNumber::withNumber(data, 32)
+        OSNumber::withNumber(data, 32),
     };
 
     IOReturn ret = vpc->evaluateInteger(writeVPCStatus, &result, params, 2);

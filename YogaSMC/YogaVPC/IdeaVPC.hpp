@@ -256,17 +256,13 @@ private:
 
     /**
      *  Update battery capability
-     *
-     *  @param batState battery state from GBMD
      */
-    void updateBatteryCapability(UInt32 batState);
+    void updateBatteryCapability();
 
     /**
      *  Update keyboard capability
-     *
-     *  @param kbdState keyboard state from HALS
      */
-    void updateKeyboardCapability(UInt32 kbdState);
+    void updateKeyboardCapability();
     /**
      *  Update battery conservation mode status
      *
