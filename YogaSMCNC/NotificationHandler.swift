@@ -17,14 +17,18 @@ func registerNotification(_ conf: inout SharedConfig) -> Bool {
 
     guard let notificationPort = CFMachPortCreate(kCFAllocatorDefault, notificationCallback, &portContext, nil),
        let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, notificationPort, 0) else {
-        os_log("Failed to create mach port", type: .error)
+        if #available(macOS 10.12, *) {
+            os_log("Failed to create mach port", type: .error)
+        }
         return false
     }
 
     CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .defaultMode)
 
     if kIOReturnSuccess != IOConnectSetNotificationPort(conf.connect, 0, CFMachPortGetPort(notificationPort), 0) {
-        os_log("Failed to set notification port", type: .error)
+        if #available(macOS 10.12, *) {
+            os_log("Failed to set notification port", type: .error)
+        }
         return false
     }
     return true
@@ -37,12 +41,16 @@ func notificationCallback(
     _ info: UnsafeMutableRawPointer?
 ) {
     guard var conf = info?.load(as: SharedConfig.self) else {
-        os_log("Invalid config", type: .error)
+        if #available(macOS 10.12, *) {
+            os_log("Invalid config", type: .error)
+        }
         return
     }
 
     guard let notification = msg?.load(as: SMCNotificationMessage.self) else {
-        os_log("Invalid notification", type: .error)
+        if #available(macOS 10.12, *) {
+            os_log("Invalid notification", type: .error)
+        }
         return
     }
 
@@ -58,14 +66,18 @@ func notificationCallback(
         } else {
             let value = String(format: "0x%04x:%d", notification.event, notification.data)
             showOSDRaw("\(NSLocalizedString("EventVar", comment: "Event "))\(value)")
-            os_log("Event %s default data not found", type: .error, value)
+            if #available(macOS 10.12, *) {
+                os_log("Event %s default data not found", type: .error, value)
+            }
         }
     } else {
         let value = String(format: "0x%04x:%d", notification.event, notification.data)
         showOSDRaw("\(NSLocalizedString("EventVar", comment: "Event "))\(value)")
         conf.events[notification.event] = [0: EventDesc("Event \(value)", nil, opt: "Unknown")]
         #if DEBUG
-        os_log("Event %s", type: .debug, value)
+        if #available(macOS 10.12, *) {
+            os_log("Event %s", type: .debug, value)
+        }
         #endif
     }
 }
@@ -74,7 +86,9 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: inout SharedConfig
     switch desc.action {
     case .nothing:
         #if DEBUG
-        os_log("%s: Do nothing", type: .info, desc.name)
+        if #available(macOS 10.12, *) {
+            os_log("%s: Do nothing", type: .info, desc.name)
+        }
         #endif
         if !desc.display { return }
         if desc.name.hasPrefix("Event ") {
@@ -87,18 +101,24 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: inout SharedConfig
         if let scpt = desc.option {
             _ = scriptHelper(scpt, desc.name, desc.display ? desc.image : nil)
         } else {
-            os_log("%s: script not found", type: .error, desc.name)
+            if #available(macOS 10.12, *) {
+                os_log("%s: script not found", type: .error, desc.name)
+            }
         }
     case .launchapp:
         if let name = desc.option,
            NSWorkspace.shared.launchApplication(name) {
             if desc.display { showOSD(desc.name, desc.image) }
         } else {
-            os_log("%s: app name not found", type: .error, desc.name)
+            if #available(macOS 10.12, *) {
+                os_log("%s: app name not found", type: .error, desc.name)
+            }
         }
     case .launchbundle:
         guard let identifier = desc.option else {
-            os_log("%s: bundle not found", type: .error)
+            if #available(macOS 10.12, *) {
+                os_log("%s: bundle not found", type: .error)
+            }
             return
         }
         let collection = NSRunningApplication.runningApplications(withBundleIdentifier: identifier)
@@ -114,7 +134,9 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: inout SharedConfig
                                                            options: .default,
                                                            additionalEventParamDescriptor: nil,
                                                            launchIdentifier: nil) else {
-                    os_log("%s: app identifier not found", type: .error, desc.name)
+                    if #available(macOS 10.12, *) {
+                        os_log("%s: app identifier not found", type: .error, desc.name)
+                    }
                     return
                 }
             }
@@ -192,12 +214,16 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: inout SharedConfig
         _ = scriptHelper(spotlightAS, desc.name)
     case .thermal:
         showOSD(desc.name, desc.image)
-        os_log("%s: thermal event", type: .info, desc.name)
+        if #available(macOS 10.12, *) {
+            os_log("%s: thermal event", type: .info, desc.name)
+        }
     case .wireless:
         wirelessHelper(desc.name, desc.display)
     default:
         #if DEBUG
-        os_log("%s: Not implmented", type: .info, desc.name)
+        if #available(macOS 10.12, *) {
+            os_log("%s: Not implmented", type: .info, desc.name)
+        }
         #endif
         if desc.display {
             showOSD(desc.name, desc.image)

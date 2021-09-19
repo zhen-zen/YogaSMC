@@ -90,7 +90,9 @@ class ThinkFanHelper {
             savedLevel = 0x47 // safety min speed 7
             slider.intValue = 7
         } else {
-            os_log("Unknown fan mode: %s", type: .error, sender.title)
+            if #available(macOS 10.12, *) {
+                os_log("Unknown fan mode: %s", type: .error, sender.title)
+            }
             return
         }
 
@@ -107,7 +109,9 @@ class ThinkFanHelper {
 
     func setFanLevel(_ level: UInt8 = 0) {
         if level != 0 {
-            os_log("Set Fan Level to %x", type: .info, level)
+            if #available(macOS 10.12, *) {
+                os_log("Set Fan Level to %x", type: .info, level)
+            }
             savedLevel = level
         }
 
@@ -116,7 +120,9 @@ class ThinkFanHelper {
         var input = [savedLevel]
         if kIOReturnSuccess != IOConnectCallMethod(connect, UInt32(kYSMCUCWriteEC),
                                                    &fanStatus, 1, &input, 1, nil, nil, nil, nil) {
-            os_log("Write Fan Speed failed!", type: .fault)
+            if #available(macOS 10.12, *) {
+                os_log("Write Fan Speed failed!", type: .fault)
+            }
             showOSD("WriteFanFail")
             enable = false
         }
@@ -130,7 +136,9 @@ class ThinkFanHelper {
         guard kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadEC),
                                                       &fanSpeed, 1, nil, 0, nil, nil, &output, &outputSize),
            outputSize == 2 else {
-            os_log("Failed to access EC", type: .error)
+            if #available(macOS 10.12, *) {
+                os_log("Failed to access EC", type: .error)
+            }
             enable = false
             return
         }
@@ -143,7 +151,9 @@ class ThinkFanHelper {
         guard kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadECName),
                                                       nil, 0, &fanLevel, 4, nil, nil, &output, &outputSize) else {
             showOSD("ReadFanFail")
-            os_log("Failed to read fan level!", type: .error)
+            if #available(macOS 10.12, *) {
+                os_log("Failed to read fan level!", type: .error)
+            }
             enable = false
             return
         }
@@ -162,7 +172,9 @@ class ThinkFanHelper {
             autoMode.state = .off
             fullMode.state = .off
             if output[0] > 7 {
-                os_log("Unknown level 0x%02x", type: .error, output[0])
+                if #available(macOS 10.12, *) {
+                    os_log("Unknown level 0x%02x", type: .error, output[0])
+                }
                 savedLevel = 7
             } else {
                 savedLevel = output[0]
@@ -179,21 +191,29 @@ class ThinkFanHelper {
         guard kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCReadEC),
                                                       &fanSelect, 1, nil, 0, nil, nil, &current, &outputSize),
            outputSize == 1 else {
-            os_log("Failed to read current fan", type: .error)
+            if #available(macOS 10.12, *) {
+                os_log("Failed to read current fan", type: .error)
+            }
             enable = false
             return false
         }
-        os_log("fan reg: 0x%x", type: .info, current[0])
+        if #available(macOS 10.12, *) {
+            os_log("fan reg: 0x%x", type: .info, current[0])
+        }
 
         if (current[0] & 0x1) != 0 {
             if !main {
-                os_log("Already selected second fan", type: .info)
+                if #available(macOS 10.12, *) {
+                    os_log("Already selected second fan", type: .info)
+                }
                 return true
             }
             current[0] &= 0xfe
         } else {
             if main {
-                os_log("Already selected main fan", type: .info)
+                if #available(macOS 10.12, *) {
+                    os_log("Already selected main fan", type: .info)
+                }
                 return true
             }
             current[0] |= 0x1
@@ -201,7 +221,9 @@ class ThinkFanHelper {
 
         guard kIOReturnSuccess == IOConnectCallMethod(connect, UInt32(kYSMCUCWriteEC),
                                                       &fanSelect, 1, &current, 1, nil, nil, nil, nil) else {
-            os_log("Failed to select another fan", type: .error)
+            if #available(macOS 10.12, *) {
+                os_log("Failed to select another fan", type: .error)
+            }
             enable = false
             return false
         }

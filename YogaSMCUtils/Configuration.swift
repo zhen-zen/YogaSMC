@@ -37,7 +37,9 @@ struct EventDesc {
                       res.hasPrefix("/Applications") {
                 self.image = res as NSString
             } else {
-                os_log("Incompatible res path: %s", type: .error, path)
+                if #available(macOS 10.12, *) {
+                    os_log("Incompatible res path: %s", type: .error, path)
+                }
                 self.image = nil
             }
         } else {
@@ -183,7 +185,9 @@ let HIDDEvents: [UInt32: [UInt32: EventDesc]] = [
 
 func loadEvents(_ conf: inout SharedConfig) {
     guard let dict = UserDefaults(suiteName: "org.zhen.YogaSMC")?.object(forKey: "Events") as? [String: Any] else {
-        os_log("Events not found in preference, loading defaults", type: .info)
+        if #available(macOS 10.12, *) {
+            os_log("Events not found in preference, loading defaults", type: .info)
+        }
         return
     }
 
@@ -200,7 +204,9 @@ func loadEvents(_ conf: inout SharedConfig) {
                     if info[data] != nil,
                        action == "nothing",
                        (opt == "Unknown" || (opt == nil && name.hasPrefix("Event 0x"))) {
-                        os_log("Override unknown event 0x%04x : %d", type: .info, eid, data)
+                        if #available(macOS 10.12, *) {
+                            os_log("Override unknown event 0x%04x : %d", type: .info, eid, data)
+                        }
                     } else {
                         info[data] = EventDesc(
                             name,
@@ -210,15 +216,21 @@ func loadEvents(_ conf: inout SharedConfig) {
                             opt: opt)
                     }
                 } else {
-                    os_log("Invalid event for 0x%04x : %s!", type: .info, eid, sdata)
+                    if #available(macOS 10.12, *) {
+                        os_log("Invalid event for 0x%04x : %s!", type: .info, eid, sdata)
+                    }
                 }
             }
             conf.events[eid] = info
         } else {
-            os_log("Invalid event %s!", type: .info, sid)
+            if #available(macOS 10.12, *) {
+                os_log("Invalid event %s!", type: .info, sid)
+            }
         }
     }
-    os_log("Loaded %d events", type: .info, conf.events.count)
+    if #available(macOS 10.12, *) {
+        os_log("Loaded %d events", type: .info, conf.events.count)
+    }
 }
 
 func saveEvents(_ conf: inout SharedConfig) {

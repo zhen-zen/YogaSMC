@@ -71,7 +71,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             sender.state = (sender.state == .on) ? .off : .on
             defaults.setValue((sender.state == .on), forKey: "StartAtLogin")
         } else {
-            os_log("Toggle start at login failed", type: .error)
+            if #available(macOS 10.12, *) {
+                os_log("Toggle start at login failed", type: .error)
+            }
         }
     }
 
@@ -84,7 +86,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let calendar = Calendar.current
         let midnight = calendar.startOfDay(for: Date())
         sender.fireDate = calendar.date(byAdding: .day, value: 1, to: midnight)!
-        os_log("Timer sheduled at %s", type: .info, sender.fireDate.description(with: Locale.current))
+        if #available(macOS 10.12, *) {
+            os_log("Timer sheduled at %s", type: .info, sender.fireDate.description(with: Locale.current))
+        }
     }
 
     @objc func iconWakeup() {
@@ -136,11 +140,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         while let service = IOIteratorNextOptional(iter) {
             guard let IOClass = getString("IOClass", service) else {
-                os_log("Invalid YogaVPC instance", type: .info)
+                if #available(macOS 10.12, *) {
+                    os_log("Invalid YogaVPC instance", type: .info)
+                }
                 continue
             }
 
-            os_log("Found %s", type: .info, IOClass)
+            if #available(macOS 10.12, *) {
+                os_log("Found %s", type: .info, IOClass)
+            }
 
             var connect: io_connect_t = 0
 
@@ -159,27 +167,35 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
 
         guard conf.service != 0 else {
-            os_log("Failed to connect to YogaSMC", type: .fault)
+            if #available(macOS 10.12, *) {
+                os_log("Failed to connect to YogaSMC", type: .fault)
+            }
             showOSD("ConnectFail", duration: 2000)
             NSApp.terminate(nil)
             return
         }
 
         guard let props = getProperties(conf.service) else {
-            os_log("YogaSMC unavailable", type: .error)
+            if #available(macOS 10.12, *) {
+                os_log("YogaSMC unavailable", type: .error)
+            }
             showOSD("YogaSMC Unavailable", duration: 2000)
             NSApp.terminate(nil)
             return
         }
 
         guard conf.connect != 0 else {
-            os_log("Another instance has connected to %s", type: .fault, IOClass)
+            if #available(macOS 10.12, *) {
+                os_log("Another instance has connected to %s", type: .fault, IOClass)
+            }
             showOSD("AlreadyConnected", duration: 2000)
             NSApp.terminate(nil)
             return
         }
 
-        os_log("Connected to %s", type: .info, IOClass)
+        if #available(macOS 10.12, *) {
+            os_log("Connected to %s", type: .info, IOClass)
+        }
 
         loadConfig()
 
@@ -203,7 +219,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func initMenu(_ version: String) {
         if hide {
-            os_log("Icon hidden", type: .info)
+            if #available(macOS 10.12, *) {
+                os_log("Icon hidden", type: .info)
+            }
             return
         }
 
@@ -303,9 +321,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         case "YogaHIDD":
             conf.events = HIDDEvents
             _ = registerNotification(&conf)
-            os_log("Skip loadEvents", type: .info)
+            if #available(macOS 10.12, *) {
+                os_log("Skip loadEvents", type: .info)
+            }
         default:
-            os_log("Unknown class", type: .error)
+            if #available(macOS 10.12, *) {
+                os_log("Unknown class", type: .error)
+            }
             showOSD("Unknown Class", duration: 2000)
         }
         if isOpen { loadEvents(&conf) }
@@ -369,7 +391,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func loadConfig() {
         if defaults.object(forKey: "StartAtLogin") == nil {
-            os_log("First launch", type: .info)
+            if #available(macOS 10.12, *) {
+                os_log("First launch", type: .info)
+            }
             defaults.setValue(false, forKey: "StartAtLogin")
         }
 

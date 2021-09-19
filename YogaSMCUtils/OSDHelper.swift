@@ -54,7 +54,9 @@ enum EventImage: String {
 // from https://github.com/alin23/Lunar/blob/master/Lunar/Data/Hotkeys.swift
 func showOSDRaw(_ prompt: String, _ img: NSString? = nil, duration: UInt32 = 1000, priority: UInt32 = 0x1f4) {
     guard let manager = OSDManager.sharedManager() as? OSDManager else {
-        os_log("OSDManager unavailable", type: .error)
+        if #available(macOS 10.12, *) {
+            os_log("OSDManager unavailable", type: .error)
+        }
         return
     }
 

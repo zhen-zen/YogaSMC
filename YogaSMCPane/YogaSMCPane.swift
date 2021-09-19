@@ -124,7 +124,9 @@ class YogaSMCPane: NSPreferencePane {
 
     override func mainViewDidLoad() {
         super.mainViewDidLoad()
-        os_log(#function, type: .info)
+        if #available(macOS 10.12, *) {
+            os_log(#function, type: .info)
+        }
         // nothing
     }
 
@@ -132,21 +134,27 @@ class YogaSMCPane: NSPreferencePane {
         guard service != 0, sendBoolean("Update", true, service) else { return }
 
         guard let props = getProperties(service) else {
-            os_log("Unable to acquire driver properties!", type: .fault)
+            if #available(macOS 10.12, *) {
+                os_log("Unable to acquire driver properties!", type: .fault)
+            }
             return
         }
 
         if let val = props["VersionInfo"] as? NSString {
             vVersion.stringValue = val as String
         } else {
-            os_log("Unable to identify driver version!", type: .fault)
+            if #available(macOS 10.12, *) {
+                os_log("Unable to identify driver version!", type: .fault)
+            }
             return
         }
 
         if let val = props["EC Capability"] as? NSString {
             vECRead.stringValue = val as String
         } else {
-            os_log("Unable to identify EC capability!", type: .fault)
+            if #available(macOS 10.12, *) {
+                os_log("Unable to identify EC capability!", type: .fault)
+            }
             return
         }
 

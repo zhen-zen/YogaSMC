@@ -54,7 +54,9 @@ func scriptHelper(_ source: String, _ name: String, _ image: NSString? = nil) ->
             return ret
         }
     }
-    os_log("%s: failed to execute script", type: .error, name)
+    if #available(macOS 10.12, *) {
+        os_log("%s: failed to execute script", type: .error, name)
+    }
     return nil
 }
 

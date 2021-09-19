@@ -18,7 +18,9 @@ extension YogaSMCPane {
         #endif
 
         if thinkBatteryNumber != sender.tag, !updateThinkBatteryIndex(sender.tag) {
-            os_log("Failed to update battery %d", type: .error, sender.tag)
+            if #available(macOS 10.12, *) {
+                os_log("Failed to update battery %d", type: .error, sender.tag)
+            }
             sender.isEnabled = false
             return
         }
@@ -32,7 +34,9 @@ extension YogaSMCPane {
         let target = sender.integerValue
 
         if thinkBatteryNumber != sender.tag, !updateThinkBatteryIndex(sender.tag) {
-            os_log("Failed to update battery %d", type: .error, sender.tag)
+            if #available(macOS 10.12, *) {
+                os_log("Failed to update battery %d", type: .error, sender.tag)
+            }
             return
         }
 

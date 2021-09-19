@@ -136,7 +136,9 @@ class AudioHelper {
                 prop: defaultOutputDeviceProp
             ).get().get()
         } catch {
-            os_log("Failed to initialize AudioHelper!", type: .error)
+            if #available(macOS 10.12, *) {
+                os_log("Failed to initialize AudioHelper!", type: .error)
+            }
             return nil
         }
 
@@ -169,7 +171,9 @@ class AudioHelper {
             }
         } catch {
             showOSDRes("Mic", "Toggle failed", .kMic)
-            os_log("Mic toggle failed!", type: .error)
+            if #available(macOS 10.12, *) {
+                os_log("Mic toggle failed!", type: .error)
+            }
         }
     }
 
@@ -179,9 +183,13 @@ class AudioHelper {
             guard sendNumber("MicMuteLED", mute ? 2 : 0, service) else {
                 throw AudioPropertyError.noProperty
             }
-            os_log("Mic Mute LED updated", type: .info)
+            if #available(macOS 10.12, *) {
+                os_log("Mic Mute LED updated", type: .info)
+            }
         } catch {
-            os_log("Failed to update Mic Mute LED", type: .error)
+            if #available(macOS 10.12, *) {
+                os_log("Failed to update Mic Mute LED", type: .error)
+            }
         }
     }
 
@@ -193,9 +201,13 @@ class AudioHelper {
                 throw AudioPropertyError.noProperty
             }
             muteLEDStatus = mute
-            os_log("Mute LED updated", type: .info)
+            if #available(macOS 10.12, *) {
+                os_log("Mute LED updated", type: .info)
+            }
         } catch {
-            os_log("Failed to update Mute LED", type: .error)
+            if #available(macOS 10.12, *) {
+                os_log("Failed to update Mute LED", type: .error)
+            }
         }
     }
 }
@@ -247,11 +259,15 @@ func muteLEDHelper(_ service: io_service_t, _ wake: Bool = true) {
     guard let current = scriptHelper(getAudioMutedAS, "Mute") else { return }
     if !wake, current.booleanValue == muteLEDStatus { return }
     guard sendBoolean("MuteLED", current.booleanValue, service) else {
-        os_log("Failed to update Mute LED", type: .error)
+        if #available(macOS 10.12, *) {
+            os_log("Failed to update Mute LED", type: .error)
+        }
         return
     }
     muteLEDStatus = current.booleanValue
-    os_log("Mute LED updated", type: .info)
+    if #available(macOS 10.12, *) {
+        os_log("Mute LED updated", type: .info)
+    }
 }
 
 var muteVolume: Int32 = 50

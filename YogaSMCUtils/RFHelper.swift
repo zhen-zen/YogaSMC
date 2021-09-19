@@ -14,7 +14,9 @@ import CoreWLAN
 func bluetoothHelper(_ name: String, _ display: Bool) {
     guard IOBluetoothPreferencesAvailable() != 0 else {
         showOSDRes("Bluetooth", "Unavailable", .kBluetooth)
-        os_log("Bluetooth unavailable!", type: .error)
+        if #available(macOS 10.12, *) {
+            os_log("Bluetooth unavailable!", type: .error)
+        }
         return
     }
     let status = (IOBluetoothPreferenceGetControllerPowerState() == 0)
@@ -27,7 +29,9 @@ func bluetoothHelper(_ name: String, _ display: Bool) {
 func bluetoothDiscoverableHelper(_ name: String, _ display: Bool) {
     guard IOBluetoothPreferencesAvailable() != 0 else {
         showOSDRes("Bluetooth", "Unavailable", .kBluetooth)
-        os_log("Bluetooth unavailable!", type: .error)
+        if #available(macOS 10.12, *) {
+            os_log("Bluetooth unavailable!", type: .error)
+        }
         return
     }
     let status = (IOBluetoothPreferenceGetDiscoverableState() == 0)
@@ -40,7 +44,9 @@ func bluetoothDiscoverableHelper(_ name: String, _ display: Bool) {
 func wirelessHelper(_ name: String, _ display: Bool) {
     guard let iface = CWWiFiClient.shared().interface() else {
         showOSDRes("Wireless", "Unavailable", .kWifi)
-        os_log("Wireless unavailable!", type: .error)
+        if #available(macOS 10.12, *) {
+            os_log("Wireless unavailable!", type: .error)
+        }
         return
     }
     let status = !iface.powerOn()
@@ -51,19 +57,25 @@ func wirelessHelper(_ name: String, _ display: Bool) {
         }
     } catch {
         showOSDRes("Wireless", "Toggle failed", .kWifi)
-        os_log("Wireless toggle failed!", type: .error)
+        if #available(macOS 10.12, *) {
+            os_log("Wireless toggle failed!", type: .error)
+        }
     }
 }
 
 func airplaneModeHelper(_ name: String, _ display: Bool) {
     guard IOBluetoothPreferencesAvailable() != 0 else {
         showOSDRes("Bluetooth", "Unavailable", .kBluetooth)
-        os_log("Bluetooth unavailable!", type: .error)
+        if #available(macOS 10.12, *) {
+            os_log("Bluetooth unavailable!", type: .error)
+        }
         return
     }
     guard let iface = CWWiFiClient.shared().interface() else {
         showOSDRes("Wireless", "Unavailable", .kWifi)
-        os_log("Wireless unavailable!", type: .error)
+        if #available(macOS 10.12, *) {
+            os_log("Wireless unavailable!", type: .error)
+        }
         return
     }
     let status = (IOBluetoothPreferenceGetDiscoverableState() == 0 && !iface.powerOn())
@@ -75,6 +87,8 @@ func airplaneModeHelper(_ name: String, _ display: Bool) {
         }
     } catch {
         showOSDRes("Wireless", "Toggle failed", .kWifi)
-        os_log("Wireless toggle failed!", type: .error)
+        if #available(macOS 10.12, *) {
+            os_log("Wireless toggle failed!", type: .error)
+        }
     }
 }
