@@ -105,6 +105,7 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
     OSDictionary *item;
 #ifdef DEBUG
     setPropertyNumber(dict, "length", buf[0], 32);
+    setPropertyString(dict, "type", "method");
 #endif
 
     switch (verify) {
@@ -386,7 +387,12 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
             item->release();
             nbuf = (uint32_t *)((char *)nbuf + nbuf[0]);
         }
-        dict->setObject("quaifiers", quaifiers);
+        if (dict->getCount() == 1 &&
+            (item = OSDynamicCast(OSDictionary, dict->getObject(name)))) {
+            item->setObject("quaifiers", quaifiers);
+        } else {
+            dict->setObject("quaifiers", quaifiers);
+        }
         quaifiers->release();
         if (!parsed) return dict;
     }
@@ -585,6 +591,7 @@ OSDictionary* MOF::parse_class(uint32_t *buf) {
     }
     if (methods->getCount() != 0)
         dict->setObject(type ? "parameters" : "methods", methods);
+    methods->release();
     if (!parsed) return dict;
 
     indent -=1;
