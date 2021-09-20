@@ -1,5 +1,31 @@
 YogaSMC Changelog
 ============================
+#### v1.5.2
+- YogaVPC: query available DYTC functions
+- YogaVPC: fix updateAll call hierarchy, thx @antoniomcr96
+- ThinkVPC: support SCPF method (DEBUG)
+- Pane: adjust text color for Idea variant capability
+- ThinkVPC: don't disable top case when Yoga mode changes with clamshell mode enabled, thx @antoniomcr96
+- YogaBaseService: publish VersionInfo in alter version, thx @marianopela
+- ThinkVPC: remove deprecated methods
+- YogaBaseService: rework findPNP; minor fixes
+- DYVPC: correct comments for command type
+- IdeaWMI: support an extension of Yoga mode control device
+- YogaWMI: simplify WMI parsing
+- YogaVPC: fix battery notification
+- ThinkVPC: minor cleanup
+- IdeaVPC: simplify capabilities update
+- Project: lower executable target to 10.10 (drop console log)
+- YogaVPC: fix notification delivery
+- ThinkVPC: filter invalid value
+- YogaVPC: use evaluateIntegerParam to call methods with only 1 parameter
+- ThinkVPC: implement setFnLock as an override function
+- IdeaVPC: ignore return of SBMC and SALS
+- IdeaVPC: fix conservation backlight update in release build
+- YogaVPC: support DYTC PSC function, thx @Someone52 @1Revenger1
+- ThinkVPC: skip Yoga mode notification when Clamshell mode is enabled, thx @antoniomcr96
+- YogaWMI: temporary fix for missing qualifiers in methods
+
 #### v1.5.1
 - YogaSMC: refactor updateEC
 - YogaWMI: fix panic in release build, thx @Chris2fourlaw
