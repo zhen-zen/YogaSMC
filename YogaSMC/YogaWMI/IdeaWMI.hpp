@@ -31,6 +31,8 @@
 #define GAME_ZONE_GPU_WMI_EVENT     "bfd42481-aee3-4502-a107-afb68425c5f8"
 #define GAME_ZONE_FAN_WMI_EVENT     "bc72a435-e8c1-4275-b3e2-d8b8074aba59"
 #define GAME_ZONE_KEY_WMI_EVENT     "10afc6d9-ea8b-4590-a2e7-1cd3c84bb4b1"
+#define SUPER_RES_DATA_WMI_METHOD   "77e614ed-f19e-46d6-a613-a8669fee1ff0"
+#define SUPER_RES_WMI_EVENT         "95d1df76-d6c0-4e16-9193-7b2a849f3df2"
 
 enum {
     GAME_ZONE_WMI_GET_TMP_IR        = 0x01,
@@ -108,6 +110,16 @@ enum
     kYogaMode_tent   = 4    // 180-360 degree, ∧ , screen upside down, trigger rotation?
 } kYogaMode;
 
+enum
+{
+    SUPER_RES_DATA_WMI_VALUE     = 1,
+    SUPER_RES_DATA_WMI_START     = 2,
+    SUPER_RES_DATA_WMI_STOP      = 3,
+    SUPER_RES_DATA_WMI_CAP       = 4,
+    SUPER_RES_DATA_WMI_RESERVED1 = 5,
+    SUPER_RES_DATA_WMI_RESERVED2 = 6
+};
+
 class IdeaWMIYoga : public YogaWMI
 {
     typedef YogaWMI super;
@@ -147,6 +159,23 @@ class IdeaWMIPaper : public YogaWMI
     void processWMI() APPLE_KEXT_OVERRIDE;
     void ACPIEvent(UInt32 argument) APPLE_KEXT_OVERRIDE;
     const char* registerEvent(OSString *guid, UInt32 id) APPLE_KEXT_OVERRIDE;
+};
+
+class IdeaWMISuperRes : public YogaWMI
+{
+    typedef YogaWMI super;
+    OSDeclareDefaultStructors(IdeaWMISuperRes)
+
+    static constexpr const char *feature = "Super Resolution";
+    UInt32 SREvent {0xd0};
+    virtual void setPropertiesGated(OSObject* props);
+
+    void processWMI() APPLE_KEXT_OVERRIDE;
+    void ACPIEvent(UInt32 argument) APPLE_KEXT_OVERRIDE;
+    const char* registerEvent(OSString *guid, UInt32 id) APPLE_KEXT_OVERRIDE;
+
+public:
+    virtual IOReturn setProperties(OSObject* props) APPLE_KEXT_OVERRIDE;
 };
 
 class IdeaWMIBattery : public YogaWMI
