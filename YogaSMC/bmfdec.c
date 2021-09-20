@@ -109,6 +109,7 @@ INLINE void dblb_rdi(bits_t *pbits,void *pin,unsigned lin)
   pbits->pb=32;
   pbits->pd=(__u16*)pin;
   pbits->pe=pbits->pd+((lin+1)>>1);
+  pbits->buf=0;
 }
 
 /* reads n<=16 bits from bitstream *pbits */
