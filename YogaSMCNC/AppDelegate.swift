@@ -19,7 +19,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var conf = SharedConfig()
     var IOClass = "YogaSMC"
 
-    var statusItem: NSStatusItem?
+    var statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     @IBOutlet weak var appMenu: NSMenu!
     var hide = false
 
@@ -82,7 +82,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     @objc func midnightTimer(sender: Timer) {
-        setHolidayIcon(statusItem!)
+        if let button = statusItem.button { setHolidayIcon(button) }
         let calendar = Calendar.current
         let midnight = calendar.startOfDay(for: Date())
         sender.fireDate = calendar.date(byAdding: .day, value: 1, to: midnight)!
@@ -92,7 +92,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     @objc func iconWakeup() {
-        setHolidayIcon(statusItem!)
+        if let button = statusItem.button { setHolidayIcon(button) }
     }
 
     @objc func update () {
@@ -225,11 +225,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             return
         }
 
-        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        statusItem?.menu = appMenu
+        statusItem.menu = appMenu
         if let title = defaults.string(forKey: "Title") {
-            statusItem?.title = title
-            statusItem?.toolTip = defaults.string(forKey: "ToolTip")
+            statusItem.button?.title = title
+            statusItem.button?.toolTip = defaults.string(forKey: "ToolTip")
         } else {
             _ = Timer.scheduledTimer(
                 timeInterval: 0,

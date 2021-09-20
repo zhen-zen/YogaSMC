@@ -10,7 +10,7 @@ import Foundation
 import AppKit
 
 // based on https://stackoverflow.com/questions/4311930/list-of-all-american-holidays-as-nsdates
-func setHolidayIcon(_ button: NSStatusItem) {
+func setHolidayIcon(_ button: NSStatusBarButton) {
     button.title = "⎇"
     button.toolTip = nil
 
@@ -95,7 +95,7 @@ func applyHolidayIconLunar() -> Bool {
     return false
 }
 
-func setHolidayIconLunar(_ button: NSStatusItem) -> Bool {
+func setHolidayIconLunar(_ button: NSStatusBarButton) -> Bool {
     let calendar: Calendar = Calendar(identifier: .chinese)
     let components = calendar.dateComponents([.year, .month, .day], from: Date())
     guard let year = components.year,
