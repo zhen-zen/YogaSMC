@@ -11,16 +11,23 @@
 #include "common.h"
 #include <uuid/uuid.h>
 
-#define error(str) do { IOLog("YogaBMF::%s %d: error %s at %s:%d\n", wmi_name, indent, str, __func__, __LINE__); parsed = false; return dict;} while (0)
+#define error(str) do { IOLog("YogaBMF::%s %d: error %s at %s:%d\n", wmi_name, indent, str, __func__, __LINE__); OSSafeReleaseNULL(name); parsed = false; return dict;} while (0)
 #define errors(str) do { IOLog("YogaBMF::%s %d: error %s at %s:%d\n", wmi_name, indent, str, __func__, __LINE__); parsed = false;} while (0)
 #define warning(str) do { IOLog("YogaBMF::%s %d: warning %s at %s:%d\n", wmi_name, indent, str, __func__, __LINE__);} while (0)
 
-char *MOF::parse_string(char *buf, uint32_t size) {
-  uint16_t *buf2 = (uint16_t *)buf;
-  if (size % 2 != 0) errors("Invalid size");
-//  char *out = (char *)malloc(size+1);
-//  if (!out) error("malloc failed");
-  char *out = new char[size+1];
+OSString *MOF::parse_string(char *buf, uint32_t size) {
+  uint16_t *buf2 = reinterpret_cast<uint16_t *>(buf);
+  if (size % 2 != 0) {
+    errors("invalid size");
+    return OSString::withCString("invalid size");
+  }
+  char *out = reinterpret_cast<char *>(IOMalloc(size+1));
+  if (!out) {
+    errors("malloc failed");
+    return OSString::withCString("malloc failed");
+  }
+  bzero(out, size+1);
+
   uint32_t i, j;
   for (i=0, j=0; i<size/2; ++i) {
     if (buf2[i] == 0) {
@@ -51,7 +58,9 @@ char *MOF::parse_string(char *buf, uint32_t size) {
     }
   }
   out[j] = 0;
-  return out;
+  OSString *ret = OSString::withCString(out);
+  IOFree(out, size+1);
+  return ret;
 }
 
 uint16_t MOF::parse_valuemap(uint16_t *buf, bool map, uint32_t i) {
@@ -59,7 +68,7 @@ uint16_t MOF::parse_valuemap(uint16_t *buf, bool map, uint32_t i) {
     uint32_t len = 0;
     while (buf[len] != 0 && len < 0x99)
         len++;
-    value = OSString::withCString(parse_string((char *)buf, len*2));
+    value = parse_string((char *)buf, len*2);
     if (map)
       valuemap->setObject(i, value);
     else
@@ -103,6 +112,7 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
     uint8_t *type = (uint8_t *)buf + 4;
     OSObject *value;
     OSDictionary *item;
+    OSString *name = nullptr;
 #ifdef DEBUG
     setPropertyNumber(dict, "length", buf[0], 32);
     setPropertyString(dict, "type", "method");
@@ -188,7 +198,6 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
     
     // Variables or Qualifiers
     if (type[0] != MOF_OBJECT | type[1] != 0x20) {
-        char *name;
         // Variable map or objects
         if (nlen == 0xFFFFFFFF) {
             name = parse_string((char *)nbuf, clen);
@@ -215,8 +224,7 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
                     break;
 
                 case MOF_OFFSET_BOOLEAN:
-                    if (strcasecmp(name, "Dynamic") == 0)
-                    {
+                    if (strcasecmp(name->getCStringNoCopy(), "Dynamic") == 0) {
                         dict->flushCollection();
                         break;
                     }
@@ -226,16 +234,14 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
                     break;
 
                 case MOF_OFFSET_STRING:
-                    if (strcmp(name, "CIMTYPE") == 0)
-                    {
+                    if (name->isEqualTo("CIMTYPE")) {
                         dict->flushCollection();
                         // TODO: verify "object:" of upper item
                         break;
                     }
 
                 case MOF_OFFSET_SINT32:
-                    if (strcmp(name, "ID") == 0)
-                    {
+                    if (name->isEqualTo("ID")) {
                         dict->flushCollection();
                         break;
                     }
@@ -266,9 +272,9 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
                 nbuf +=4;
                 if (!verify) {
                     bool map;
-                    if (strcasecmp(name, "ValueMap") == 0)
+                    if (strcasecmp(name->getCStringNoCopy(), "ValueMap") == 0)
                         map = true;
-                    else if (strcasecmp(name, "Values") == 0)
+                    else if (strcasecmp(name->getCStringNoCopy(), "Values") == 0)
                         map = false;
                     else
                         error("invalid valuemap");
@@ -328,7 +334,10 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
                 case MOF_STRING:
                     if (!verify)
                         dict->flushCollection();
-                    setPropertyString(dict, name, parse_string((char *)nbuf, clen));
+                    value = parse_string((char *)nbuf, clen);
+                    dict->setObject(name, value);
+                    value->release();
+//                    setPropertyString(dict, name, parse_string((char *)nbuf, clen));
                     break;
 
                 case MOF_SINT32:
@@ -348,7 +357,7 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
     }
     // Method, or just a class with name?
     else {
-        char * name = parse_string((char *)(buf+5), nlen);
+        name = parse_string((char *)(buf+5), nlen);
         nbuf = (uint32_t *)((char *)nbuf + nlen);
         if (nbuf[1] != 1) error("pattern mismatch");
         uint32_t count = nbuf[2];
@@ -394,9 +403,9 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
             dict->setObject("quaifiers", quaifiers);
         }
         quaifiers->release();
-        if (!parsed) return dict;
     }
     indent -=1;
+    OSSafeReleaseNULL(name);
     return dict;
 }
 
@@ -436,6 +445,7 @@ OSDictionary* MOF::parse_class(uint32_t *buf) {
     uint32_t type = buf[1];
     OSObject *value;
     OSDictionary *item;
+    OSString *name = nullptr;
 
     switch (type) {
         case 0:
@@ -592,7 +602,6 @@ OSDictionary* MOF::parse_class(uint32_t *buf) {
     if (methods->getCount() != 0)
         dict->setObject(type ? "parameters" : "methods", methods);
     methods->release();
-    if (!parsed) return dict;
 
     indent -=1;
     return dict;
@@ -638,6 +647,7 @@ OSObject* MOF::parse_bmf() {
     OSDictionary *dict = OSDictionary::withCapacity(5+count);
     OSObject *value;
     OSDictionary *item;
+    OSString *name = nullptr;
 
     OSDictionary * entry = OSDynamicCast(OSDictionary, mData->getObject(BMF_DATA_WMI_BUFFER));
     if (entry)
@@ -654,15 +664,15 @@ OSObject* MOF::parse_bmf() {
     if (count > 0xff) error("count exceeded");
     for (uint32_t i=0; i<count; i++) {
         item = parse_class(nbuf);
-        OSString * name = OSDynamicCast(OSString, item->getObject("__CLASS"));
-        if (!name) {
+        if ((name = OSDynamicCast(OSString, item->getObject("__CLASS")))) {
+            dict->setObject(name, item);
+            name = nullptr;
+        } else {
             char res[10];
             snprintf(res, 10, "class %d", i);
             dict->setObject(res, item);
             warning("no __CLASS attribute found");
         }
-        else
-            dict->setObject(name, item);
         item->release();
         nbuf = (uint32_t *)((char *)nbuf + nbuf[0]);
     }

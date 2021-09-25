@@ -49,7 +49,7 @@ public:
     bool parsed;
 private:
     const char* wmi_name;
-    char *parse_string(char *buf, uint32_t size);
+    OSString *parse_string(char *buf, uint32_t size);
     uint16_t parse_valuemap(uint16_t *buf, bool map, uint32_t i);
     uint32_t parse_valuemap(int32_t *buf, bool map, uint32_t i);
 
