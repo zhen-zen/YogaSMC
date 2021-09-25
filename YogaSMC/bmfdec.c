@@ -31,7 +31,7 @@ typedef uint32_t __u32;
 typedef uint16_t __u16;
 
 #ifdef DEBUG
-#define LOG_DECOMP(...) do { IOLog("YogaBMF: " __VA_ARGS__); } while (0)
+#define LOG_DECOMP(...) do { IOLog("YSMC - Debug: YogaBMF: " __VA_ARGS__); } while (0)
 //#define LOG_DECOMP(...) fprintf(stderr, __VA_ARGS__)
 #else
 #define LOG_DECOMP(...)
