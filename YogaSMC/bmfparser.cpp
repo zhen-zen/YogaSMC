@@ -113,10 +113,10 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
     OSObject *value;
     OSDictionary *item;
     OSString *name = nullptr;
-#ifdef DEBUG
-    setPropertyNumber(dict, "length", buf[0], 32);
-    setPropertyString(dict, "type", "method");
-#endif
+//#ifdef DEBUG
+//    setPropertyNumber(dict, "length", buf[0], 32);
+//    setPropertyString(dict, "type", "method");
+//#endif
 
     switch (verify) {
         case 0:
@@ -143,31 +143,31 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
 
     switch (type[0]) {
         case MOF_BOOLEAN:
-            setPropertyString(dict, "type", "BOOLEAN");
-            break;
-
+//            setPropertyString(dict, "type", "BOOLEAN");
+//            break;
+//
         case MOF_STRING:
-            setPropertyString(dict, "type", "STRING");
-            break;
-
+//            setPropertyString(dict, "type", "STRING");
+//            break;
+//
         case MOF_SINT32:
-            setPropertyString(dict, "type", "SINT32");
-            break;
-
+//            setPropertyString(dict, "type", "SINT32");
+//            break;
+//
         case MOF_OBJECT:
-            setPropertyString(dict, "type", "OBJECT");
-            break;
-
+//            setPropertyString(dict, "type", "OBJECT");
+//            break;
+//
         case MOF_UINT8:
-            setPropertyString(dict, "type", "UINT8");
-            break;
-
+//            setPropertyString(dict, "type", "UINT8");
+//            break;
+//
         case MOF_UINT32:
-            setPropertyString(dict, "type", "UINT32");
-            break;
-
+//            setPropertyString(dict, "type", "UINT32");
+//            break;
+//
         case MOF_UINT64:
-            setPropertyString(dict, "type", "UINT64");
+//            setPropertyString(dict, "type", "UINT64");
             break;
 
         default:
@@ -178,11 +178,11 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
 
     switch (type[1]) {
         case 0:
-            dict->setObject("map", kOSBooleanFalse);
-            break;
-
+//            dict->setObject("map", kOSBooleanFalse);
+//            break;
+//
         case 0x20:
-            dict->setObject("map", kOSBooleanTrue);
+//            dict->setObject("map", kOSBooleanTrue);
             break;
 
         default:
@@ -212,7 +212,7 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
                 item->release();
                 nbuf = (uint32_t *)((char *)nbuf + nbuf[0]);
             }
-            dict->flushCollection();
+//            dict->flushCollection();
             dict->setObject(name, variables);
             variables->release();
         }
@@ -225,7 +225,7 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
 
                 case MOF_OFFSET_BOOLEAN:
                     if (strcasecmp(name->getCStringNoCopy(), "Dynamic") == 0) {
-                        dict->flushCollection();
+//                        dict->flushCollection();
                         break;
                     }
 
@@ -235,14 +235,14 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
 
                 case MOF_OFFSET_STRING:
                     if (name->isEqualTo("CIMTYPE")) {
-                        dict->flushCollection();
+//                        dict->flushCollection();
                         // TODO: verify "object:" of upper item
                         break;
                     }
 
                 case MOF_OFFSET_SINT32:
                     if (name->isEqualTo("ID")) {
-                        dict->flushCollection();
+//                        dict->flushCollection();
                         break;
                     }
 
@@ -309,8 +309,8 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
             else {
             switch (type[0]) {
                 case MOF_BOOLEAN:
-                    if (!verify)
-                        dict->flushCollection();
+//                    if (!verify)
+//                        dict->flushCollection();
 
                     if (clen != 4 && clen != 2) {
                         error("boolean length mismatch");
@@ -332,14 +332,14 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
                     break;
 
                 case MOF_STRING:
-                    if (!verify)
-                        dict->flushCollection();
+//                    if (!verify)
+//                        dict->flushCollection();
                     setPropertyObject(dict, name, parse_string((char *)nbuf, clen));
                     break;
 
                 case MOF_SINT32:
-                    if (!verify)
-                        dict->flushCollection();
+//                    if (!verify)
+//                        dict->flushCollection();
                     if (clen != 4) error("sint32 length mismatch");
                     setPropertyNumber(dict, name, nbuf[0], 32); // TODO: should be signed int here
                     break;
@@ -362,27 +362,19 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
         
         nbuf+=4;
 
-        dict->flushCollection();
-        if (count == 1)
-        {
+//        dict->flushCollection();
+        OSDictionary *parameters = OSDictionary::withCapacity(count);
+        for (uint32_t i=0; i<count; i++) {
             item = parse_class(nbuf);
-            dict->setObject(name, item);
+            char pname[16];
+            snprintf(pname, 16, "parameter %d", i+1);
+            parameters->setObject(pname, item);
             item->release();
             nbuf = (uint32_t *)((char *)nbuf + nbuf[0]);
         }
-        else
-        {
-            OSArray *methods = OSArray::withCapacity(count);
-            for (uint32_t i=0; i<count; i++) {
-                item = parse_class(nbuf);
-                methods->setObject(item);
-                item->release();
-                nbuf = (uint32_t *)((char *)nbuf + nbuf[0]);
-            }
-            dict->setObject(name, methods);
-            methods->release();
-        }
-        
+        dict->setObject(name, parameters);
+        parameters->release();
+
         count = nbuf[1];
         if (count > 0xff) error("count exceeded");
         nbuf +=2;
@@ -393,12 +385,7 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
             item->release();
             nbuf = (uint32_t *)((char *)nbuf + nbuf[0]);
         }
-        if (dict->getCount() == 1 &&
-            (item = OSDynamicCast(OSDictionary, dict->getObject(name)))) {
-            item->setObject("quaifiers", quaifiers);
-        } else {
-            dict->setObject("quaifiers", quaifiers);
-        }
+        parameters->setObject("quaifiers", quaifiers);
         quaifiers->release();
     }
     OSSafeReleaseNULL(name);
@@ -447,11 +434,11 @@ OSDictionary* MOF::parse_class(uint32_t *buf) {
 
     switch (type) {
         case 0:
-            setPropertyString(dict, "type", "class");
-            break;
+//            setPropertyString(dict, "type", "class");
+//            break;
 
         case 0xFFFFFFFF:
-            setPropertyString(dict, "type", "parameter");
+//            setPropertyString(dict, "type", "parameter");
             break;
 
         default:
@@ -459,17 +446,17 @@ OSDictionary* MOF::parse_class(uint32_t *buf) {
             break;
     }
 
-#ifdef DEBUG
-    setPropertyNumber(dict, "length", buf[0], 32);
-#endif
+//#ifdef DEBUG
+//    setPropertyNumber(dict, "length", buf[0], 32);
+//#endif
     
     uint32_t count;
     if (type && buf[2] != 0) error("Wrong class pattern");
     if(buf[4] != 0 && buf[4] != 1) error("Wrong class type"); // 0:class 1:parameter
 
-#ifndef DEBUG
-    dict->flushCollection();
-#endif
+//#ifndef DEBUG
+//    dict->flushCollection();
+//#endif
     
     buf += 5;
     
@@ -651,9 +638,9 @@ OSObject* MOF::parse_bmf() {
         IOLog("%d: MOF GUID not found %s\n", indent, BMF_DATA_WMI_BUFFER);
     setPropertyString(dict, "WDG", BMF_DATA_WMI_BUFFER);
 
-#ifdef DEBUG
-    setPropertyNumber(dict, "length", nbuf[1], 32);
-#endif
+//#ifdef DEBUG
+//    setPropertyNumber(dict, "length", nbuf[1], 32);
+//#endif
 
     nbuf+=5;
     if (count > 0xff) error("count exceeded");
