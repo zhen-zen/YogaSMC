@@ -12,14 +12,14 @@
 YogaWMI* YogaWMI::withIdeaWMI(WMI *provider) {
     YogaWMI* dev = nullptr;
 
-    if (provider->hasMethod(GSENSOR_WMI_EVENT, ACPI_WMI_EVENT) && provider->hasMethod(GSENSOR_DATA_WMI_METHOD)) {
-        dev = OSTypeAlloc(IdeaWMIYoga);
-        dev->isPMsupported = true;
-    } else if (provider->hasMethod(GSENSOR_WMI_EVENT_EXT, ACPI_WMI_EVENT) && provider->hasMethod(GSENSOR_DATA_WMI_METHOD_EXT)) {
+    if ((provider->hasMethod(GSENSOR_WMI_EVENT, ACPI_WMI_EVENT) && provider->hasMethod(GSENSOR_DATA_WMI_METHOD)) ||
+        (provider->hasMethod(GSENSOR_WMI_EVENT_EXT, ACPI_WMI_EVENT) && provider->hasMethod(GSENSOR_DATA_WMI_METHOD_EXT))) {
         dev = OSTypeAlloc(IdeaWMIYoga);
         dev->isPMsupported = true;
     } else if (provider->hasMethod(PAPER_LOOKING_WMI_EVENT, ACPI_WMI_EVENT)) {
         dev = OSTypeAlloc(IdeaWMIPaper);
+    } else if (provider->hasMethod(SUPER_RES_WMI_EVENT, ACPI_WMI_EVENT)) {
+        dev = OSTypeAlloc(IdeaWMISuperRes);
     } else if (provider->hasMethod(BAT_INFO_WMI_STRING, ACPI_WMI_EXPENSIVE | ACPI_WMI_STRING)) {
         dev = OSTypeAlloc(IdeaWMIBattery);
     } else if (provider->hasMethod(GAME_ZONE_DATA_WMI_METHOD)) {
@@ -78,7 +78,7 @@ void IdeaWMIYoga::updateYogaMode() {
 
     if (ret != kIOReturnSuccess) {
         setProperty("YogaMode", false);
-        AlwaysLog("YogaMode evaluation failed");
+        AlwaysLog(updateFailure, "YogaMode");
         return;
     }
 
@@ -162,7 +162,7 @@ void IdeaWMIPaper::ACPIEvent(UInt32 argument) {
         return;
     }
 
-    DebugLog("message: ACPI notification 0x%02X", argument);
+    DebugLog("message: ACPI notification 0x%02X, toggle FnLock", argument);
     // force enable keyboard and touchpad
     setTopCase(true);
     dispatchMessage(kSMC_FnlockEvent, NULL);
@@ -171,6 +171,102 @@ void IdeaWMIPaper::ACPIEvent(UInt32 argument) {
 void IdeaWMIPaper::processWMI() {
     setProperty("Feature", feature);
 }
+
+OSDefineMetaClassAndStructors(IdeaWMISuperRes, YogaWMI);
+
+const char* IdeaWMISuperRes::registerEvent(OSString *guid, UInt32 id) {
+    if (guid->isEqualTo(SUPER_RES_WMI_EVENT)) {
+        SREvent = id;
+        return feature;
+    }
+    return nullptr;
+}
+
+void IdeaWMISuperRes::ACPIEvent(UInt32 argument) {
+    if (argument != SREvent) {
+        super::ACPIEvent(argument);
+        return;
+    }
+
+    IOReturn ret;
+    OSNumber *in;
+    UInt32 value;
+
+    in = OSNumber::withNumber(0ULL, 32);
+    ret = YWMI->evaluateInteger(SUPER_RES_DATA_WMI_METHOD, 0, SUPER_RES_DATA_WMI_VALUE, &value, in, true);
+    OSSafeReleaseNULL(in);
+
+    if (ret != kIOReturnSuccess) {
+        AlwaysLog(updateFailure, "Super resolution");
+        DebugLog("message: ACPI notification 0x%02X, toggle FnLock", argument);
+    } else {
+        DebugLog("message: ACPI notification 0x%02X %d, toggle FnLock", argument, value);
+    }
+
+    // force enable keyboard and touchpad
+    setTopCase(true);
+    dispatchMessage(kSMC_FnlockEvent, NULL);
+}
+
+void IdeaWMISuperRes::processWMI() {
+    setProperty("Feature", feature);
+
+    IOReturn ret;
+    OSNumber *in;
+    UInt32 value;
+
+    in = OSNumber::withNumber(0ULL, 32);
+    ret = YWMI->evaluateInteger(SUPER_RES_DATA_WMI_METHOD, 0, SUPER_RES_DATA_WMI_CAP, &value, in, true);
+    OSSafeReleaseNULL(in);
+
+    if (ret != kIOReturnSuccess) {
+        AlwaysLog(updateFailure, "Super resolution");
+        return;
+    }
+    setProperty("Supported", value);
+}
+
+IOReturn IdeaWMISuperRes::setProperties(OSObject *props) {
+    commandGate->runAction(OSMemberFunctionCast(IOCommandGate::Action, this, &IdeaWMISuperRes::setPropertiesGated), props);
+    return kIOReturnSuccess;
+}
+
+void IdeaWMISuperRes::setPropertiesGated(OSObject* props) {
+    OSDictionary* dict = OSDynamicCast(OSDictionary, props);
+    if (!dict)
+        return;
+
+    OSCollectionIterator* i = OSCollectionIterator::withCollection(dict);
+    if (i) {
+        while (OSString* key = OSDynamicCast(OSString, i->getNextObject())) {
+            if (key->isEqualTo("ECMonitor")) {
+                OSBoolean *value;
+                getPropertyBoolean("ECMonitor");
+                IOReturn ret;
+                OSNumber *in;
+                UInt32 result;
+
+                in = OSNumber::withNumber(0ULL, 32);
+                ret = YWMI->evaluateInteger(SUPER_RES_DATA_WMI_METHOD, 0,
+                                            value->getValue() ? SUPER_RES_DATA_WMI_START : SUPER_RES_DATA_WMI_STOP, &result, in, true);
+                OSSafeReleaseNULL(in);
+
+                if (ret != kIOReturnSuccess || result != 1) {
+                    AlwaysLog(toggleError, "ECMonitor", ret ?: result);
+                } else {
+                    DebugLog(toggleSuccess, "ECMonitor", value->getValue() ? SUPER_RES_DATA_WMI_START : SUPER_RES_DATA_WMI_STOP, value->getValue() ? "start" : "stop");
+                }
+                setProperty("ECMonitor started", value);
+            } else {
+                AlwaysLog("Unknown property %s", key->getCStringNoCopy());
+            }
+        }
+        i->release();
+    }
+
+    return;
+}
+
 
 OSDefineMetaClassAndStructors(IdeaWMIBattery, YogaWMI);
 

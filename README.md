@@ -39,7 +39,8 @@ Based on [the-darkvoid/macOS-IOElectrify](https://github.com/the-darkvoid/macOS-
 - `GZFD` Game Zone control center, see header for available functions
 - `WBAT` Extra battery information (requires patching related methods like battery ones)
 - `WMI2` Fn+esc (obsolete paper looking function), currently assigned to Fn mode toggle
-- `WMIY` Yoga Mode detection and disabling keyboard/touchpad when flipped
+- `WMIS` Fn+S (super resolution function), currently assigned to Fn mode toggle
+- `WMIY` (`AMW1`) Yoga Mode detection and disabling keyboard/touchpad when flipped
 
 ### ThinkWMI (WIP)
 ~~Based on [lenovo/thinklmi](https://github.com/lenovo/thinklmi) ([iksaif/thinkpad-wmi](https://github.com/iksaif/thinkpad-wmi))~~
