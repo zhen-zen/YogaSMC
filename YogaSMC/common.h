@@ -86,4 +86,13 @@
         } \
     } while (0)
 
+#define setPropertyObject(dict, name, obj) \
+    do { \
+        value = obj; \
+        if (value != nullptr) { \
+            dict->setObject(name, value); \
+            value->release(); \
+        } \
+    } while (0)
+
 #endif /* common_h */

@@ -46,7 +46,7 @@ public:
     MOF(char *data, uint32_t size, OSDictionary *mData, const char* name) : buf(data), size(size), mData(mData), wmi_name(name) {};
     MOF();
     OSObject* parse_bmf();
-    bool parsed;
+    bool parsed {true};
 private:
     const char* wmi_name;
     OSString *parse_string(char *buf, uint32_t size);
@@ -56,13 +56,14 @@ private:
     OSDictionary* parse_class(uint32_t *buf);
     OSDictionary* parse_method(uint32_t *buf, uint32_t verify = 0);
 
-    int indent;
+    int indent {0};
 
     char * buf;
     uint32_t size;
-    OSArray* valuemap;
-    OSDictionary *vmap;
     OSDictionary *mData;
+
+    OSArray* valuemap {nullptr};
+    OSDictionary *vmap {nullptr};
 };
 
 #endif /* bmfparser_hpp */

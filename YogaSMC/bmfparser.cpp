@@ -107,7 +107,7 @@ uint32_t MOF::parse_valuemap(int32_t *buf, bool map, uint32_t i) {
  */
 
 OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
-    indent +=1;
+    ++indent;
     OSDictionary *dict = OSDictionary::withCapacity(5);
     uint8_t *type = (uint8_t *)buf + 4;
     OSObject *value;
@@ -334,10 +334,7 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
                 case MOF_STRING:
                     if (!verify)
                         dict->flushCollection();
-                    value = parse_string((char *)nbuf, clen);
-                    dict->setObject(name, value);
-                    value->release();
-//                    setPropertyString(dict, name, parse_string((char *)nbuf, clen));
+                    setPropertyObject(dict, name, parse_string((char *)nbuf, clen));
                     break;
 
                 case MOF_SINT32:
@@ -404,8 +401,9 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
         }
         quaifiers->release();
     }
-    indent -=1;
     OSSafeReleaseNULL(name);
+    if (parsed)
+        --indent;
     return dict;
 }
 
@@ -440,7 +438,7 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
 */
 
 OSDictionary* MOF::parse_class(uint32_t *buf) {
-    indent +=1;
+    ++indent;
     OSDictionary *dict = OSDictionary::withCapacity(11);
     uint32_t type = buf[1];
     OSObject *value;
@@ -602,8 +600,8 @@ OSDictionary* MOF::parse_class(uint32_t *buf) {
     if (methods->getCount() != 0)
         dict->setObject(type ? "parameters" : "methods", methods);
     methods->release();
-
-    indent -=1;
+    if (parsed)
+        --indent;
     return dict;
 }
 
@@ -633,9 +631,6 @@ OSDictionary* MOF::parse_class(uint32_t *buf) {
 *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 */
 OSObject* MOF::parse_bmf() {
-    parsed = true;
-    indent = 0;
-
     uint32_t *nbuf = (uint32_t *)buf;
 
     if (nbuf[0] != 0x424D4F46) errors("header mismatch");
