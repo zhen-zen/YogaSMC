@@ -28,6 +28,8 @@ enum mof_data_type {
   MOF_UNKNOWN,
   MOF_SINT16 = 0x02, // Unused
   MOF_SINT32 = 0x03,
+  MOF_REAL64 = 0x04, // Unused
+  MOF_REAL32 = 0x05, // Unused
   MOF_STRING = 0x08,
   MOF_BOOLEAN = 0x0B,
   MOF_OBJECT = 0x0D,
@@ -38,6 +40,7 @@ enum mof_data_type {
   MOF_SINT64 = 0x14, // Unused
   MOF_UINT64 = 0x15, // Unused
   MOF_DATETIME = 0x65, // Unused
+  MOF_CHAR16 = 0x67, // Unused
 };
 
 class MOF {
