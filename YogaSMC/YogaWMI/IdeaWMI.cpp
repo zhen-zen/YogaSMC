@@ -341,10 +341,25 @@ void IdeaWMIGameZone::processWMI() {
 void IdeaWMIGameZone::ACPIEvent(UInt32 argument) {
     OSObject *result;
     OSNumber *id;
-    if (YWMI->getEventData(argument, &result) && (id = (OSDynamicCast(OSNumber, result))))
-        DebugLog("message: ACPI notification 0x%04x - 0x%04x", argument, id->unsigned32BitValue());
-    else
+    if (YWMI->getEventData(argument, &result) && (id = (OSDynamicCast(OSNumber, result)))) {
+        if (argument == GAME_ZONE_COOLING_WMI_EVENT_OVERRIDE) {
+            switch (id->unsigned32BitValue()) {
+                case 1: // GZ44 1 -> 2
+                case 2: // GZ44 2 -> 0
+                case 3: // GZ44 0 -> 1
+                    DebugLog("message: Cooling mode 0x%04x", id->unsigned32BitValue());
+                    break;
+                    
+                default:
+                    AlwaysLog("message: Unknown cooling mode 0x%04x", id->unsigned32BitValue());
+                    break;
+            }
+        } else {
+            DebugLog("message: ACPI notification 0x%04x - 0x%04x", argument, id->unsigned32BitValue());
+        }
+    } else {
         AlwaysLog("message: Unknown ACPI notification 0x%04x", argument);
+    }
     OSSafeReleaseNULL(result);
 }
 

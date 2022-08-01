@@ -34,6 +34,8 @@
 #define SUPER_RES_DATA_WMI_METHOD   "77e614ed-f19e-46d6-a613-a8669fee1ff0"
 #define SUPER_RES_WMI_EVENT         "95d1df76-d6c0-4e16-9193-7b2a849f3df2"
 
+#define GAME_ZONE_COOLING_WMI_EVENT_OVERRIDE 0xD5
+
 #define GAME_ZONE_UPDATE_PROPERTY(id, name) \
     do { \
         if (getGamzeZoneData(id, &result)) \
