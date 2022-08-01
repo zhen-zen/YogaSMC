@@ -17,32 +17,32 @@ import os.log
 let defaultInputDeviceProp = AudioObjectPropertyAddress(
     mSelector: kAudioHardwarePropertyDefaultInputDevice,
     mScope: kAudioObjectPropertyScopeGlobal,
-    mElement: kAudioObjectPropertyElementMaster)
+    mElement: kAudioObjectPropertyElementMain)
 
 let defaultOutputDeviceProp = AudioObjectPropertyAddress(
     mSelector: kAudioHardwarePropertyDefaultOutputDevice,
     mScope: kAudioObjectPropertyScopeGlobal,
-    mElement: kAudioObjectPropertyElementMaster)
+    mElement: kAudioObjectPropertyElementMain)
 
 let primaryInputVolumeProp = AudioObjectPropertyAddress(
-    mSelector: kAudioHardwareServiceDeviceProperty_VirtualMasterVolume,
+    mSelector: kAudioHardwareServiceDeviceProperty_VirtualMainVolume,
     mScope: kAudioDevicePropertyScopeInput,
-    mElement: kAudioObjectPropertyElementMaster)
+    mElement: kAudioObjectPropertyElementMain)
 
 let primaryOutputVolumeProp = AudioObjectPropertyAddress(
-    mSelector: kAudioHardwareServiceDeviceProperty_VirtualMasterVolume,
+    mSelector: kAudioHardwareServiceDeviceProperty_VirtualMainVolume,
     mScope: kAudioDevicePropertyScopeOutput,
-    mElement: kAudioObjectPropertyElementMaster)
+    mElement: kAudioObjectPropertyElementMain)
 
 let muteInputVolumeProp = AudioObjectPropertyAddress(
     mSelector: kAudioDevicePropertyMute,
     mScope: kAudioDevicePropertyScopeInput,
-    mElement: kAudioObjectPropertyElementMaster)
+    mElement: kAudioObjectPropertyElementMain)
 
 let muteOutputVolumeProp = AudioObjectPropertyAddress(
     mSelector: kAudioDevicePropertyMute,
     mScope: kAudioDevicePropertyScopeOutput,
-    mElement: kAudioObjectPropertyElementMaster)
+    mElement: kAudioObjectPropertyElementMain)
 
 enum AudioPropertyError: Error {
     case noProperty
