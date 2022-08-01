@@ -322,21 +322,20 @@ void IdeaWMIGameZone::processWMI() {
     setProperty("Feature", feature);
 
     UInt32 result;
+    OSDictionary *info = OSDictionary::withCapacity(8);
+    OSNumber *value;
 
-    if (getGamzeZoneData(GAME_ZONE_WMI_GET_VERSION, &result))
-        setProperty("Game Zone Version", result, 32);
-    else
-        AlwaysLog("Failed to get version");
+    GAME_ZONE_UPDATE_PROPERTY(GAME_ZONE_WMI_GET_VERSION, "Game Zone Version");
+    GAME_ZONE_UPDATE_PROPERTY(GAME_ZONE_WMI_GET_FAN_NUM, "Fan number");
+    GAME_ZONE_UPDATE_PROPERTY(GAME_ZONE_WMI_CAP_KEYBOARD, "Keyboard Feature");
+    GAME_ZONE_UPDATE_PROPERTY(GAME_ZONE_WMI_GET_THERMAL_TABLE, "Thermal Table");
+    GAME_ZONE_UPDATE_PROPERTY(GAME_ZONE_WMI_GET_CHARGE_MODE, "Charge Mode");
+    GAME_ZONE_UPDATE_PROPERTY(GAME_ZONE_WMI_GET_THERMAL_MODE, "Thermal Mode");
+    GAME_ZONE_UPDATE_PROPERTY(GAME_ZONE_WMI_GET_SMARTFAN_MODE, "Smart Fan Mode");
+    GAME_ZONE_UPDATE_PROPERTY(GAME_ZONE_WMI_GET_SMARTFAN_STA, "Smart Fan Status");
 
-    if (getGamzeZoneData(GAME_ZONE_WMI_GET_FAN_NUM, &result))
-        setProperty("Fan number", result, 32);
-    else
-        AlwaysLog("Failed to get fan number");
-
-    if (getGamzeZoneData(GAME_ZONE_WMI_CAP_KEYBOARD, &result))
-        setProperty("Keyboard Feature", result, 32);
-    else
-        AlwaysLog("Failed to get keyboard feature");
+    setProperty("Info", info);
+    info->release();
 }
 
 void IdeaWMIGameZone::ACPIEvent(UInt32 argument) {
