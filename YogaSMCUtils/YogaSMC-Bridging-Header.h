@@ -11,6 +11,7 @@
 
 #import <Foundation/Foundation.h>
 #import <OSD/OSDManager.h>
+#import <CoreGraphics/CoreGraphics.h>
 
 #import "../YogaSMC/YogaSMCUserClient.h"
 #import "../YogaSMC/YogaVPC/ThinkEvents.h"

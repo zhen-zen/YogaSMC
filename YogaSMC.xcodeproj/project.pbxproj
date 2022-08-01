@@ -129,6 +129,7 @@
 		6F98BCFB25532AD300ACFD99 /* YogaHIDD.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F98BCF725532AD300ACFD99 /* YogaHIDD.hpp */; };
 		6FA75308253D68C600EBE9D7 /* FunctionKey.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 6FA75307253D68C600EBE9D7 /* FunctionKey.pdf */; };
 		6FB5BE15255521E1001BFDFF /* ThinkFanHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FB5BE14255521E1001BFDFF /* ThinkFanHelper.swift */; };
+		6FB613ED28977075005561EF /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FB613EC28977074005561EF /* CoreGraphics.framework */; };
 		6FC40F1F25909D83004A6D48 /* GeneralSMCPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FC40F1E25909D83004A6D48 /* GeneralSMCPane.swift */; };
 		6FC40F3A2592856A004A6D48 /* NotificationHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FC40F392592856A004A6D48 /* NotificationHandler.swift */; };
 		6FCF7F592474B74800A82B13 /* WMI.h in Headers */ = {isa = PBXBuildFile; fileRef = 6FCF7F572474B74800A82B13 /* WMI.h */; };
@@ -306,6 +307,7 @@
 		6F9B2AB124D2ADD800005C16 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		6FA75307253D68C600EBE9D7 /* FunctionKey.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = FunctionKey.pdf; sourceTree = "<group>"; };
 		6FB5BE14255521E1001BFDFF /* ThinkFanHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThinkFanHelper.swift; sourceTree = "<group>"; };
+		6FB613EC28977074005561EF /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		6FC40F1E25909D83004A6D48 /* GeneralSMCPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSMCPane.swift; sourceTree = "<group>"; };
 		6FC40F392592856A004A6D48 /* NotificationHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationHandler.swift; sourceTree = "<group>"; };
 		6FCF7F572474B74800A82B13 /* WMI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WMI.h; sourceTree = "<group>"; };
@@ -340,6 +342,7 @@
 				6F0095B725455F2C002C8E1F /* IOKit.framework in Frameworks */,
 				6F984C33253E1A8A00629109 /* NotificationCenter.framework in Frameworks */,
 				6FD082B42537DA1A00491976 /* OSD.framework in Frameworks */,
+				6FB613ED28977075005561EF /* CoreGraphics.framework in Frameworks */,
 				6F7D487B253465DB004074C7 /* ServiceManagement.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -466,6 +469,7 @@
 		6F1C709E251473CC007D1DFC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				6FB613EC28977074005561EF /* CoreGraphics.framework */,
 				6F8611F1253AC075008FB857 /* ApplicationServices.framework */,
 				6F1C70A3251473E7007D1DFC /* AppKit.framework */,
 				6F1C70A1251473DF007D1DFC /* CoreFoundation.framework */,
@@ -769,7 +773,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1200;
-				LastUpgradeCheck = 1250;
+				LastUpgradeCheck = 1300;
 				ORGANIZATIONNAME = zhen;
 				TargetAttributes = {
 					6F08ACE324746B8B00681A63 = {
