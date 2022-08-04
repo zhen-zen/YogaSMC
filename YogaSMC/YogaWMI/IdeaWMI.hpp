@@ -178,7 +178,7 @@ class IdeaWMISuperRes : public YogaWMI
 
     static constexpr const char *feature = "Super Resolution";
     UInt32 SREvent {0xd0};
-    virtual void setPropertiesGated(OSObject* props);
+    void setPropertiesGated(OSObject* props);
 
     void processWMI() APPLE_KEXT_OVERRIDE;
     void ACPIEvent(UInt32 argument) APPLE_KEXT_OVERRIDE;
