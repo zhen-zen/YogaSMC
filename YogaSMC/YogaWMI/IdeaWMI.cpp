@@ -378,3 +378,38 @@ const char* IdeaWMIGameZone::registerEvent(OSString *guid, UInt32 id) {
         return nullptr;
     return feature;
 }
+
+IOReturn IdeaWMIGameZone::setProperties(OSObject *props) {
+    commandGate->runAction(OSMemberFunctionCast(IOCommandGate::Action, this, &IdeaWMIGameZone::setPropertiesGated), props);
+    return kIOReturnSuccess;
+}
+
+void IdeaWMIGameZone::setPropertiesGated(OSObject* props) {
+    OSDictionary* dict = OSDynamicCast(OSDictionary, props);
+    if (!dict)
+        return;
+
+    OSCollectionIterator* i = OSCollectionIterator::withCollection(dict);
+    if (i) {
+        while (OSString* key = OSDynamicCast(OSString, i->getNextObject())) {
+            if (key->isEqualTo("GetData")) {
+                OSNumber *value;
+                getPropertyNumber("GetData");
+
+                UInt32 result;
+
+                if (!getGamzeZoneData(value->unsigned32BitValue(), &result)) {
+                    AlwaysLog(updateFailure, "GetData");
+                } else {
+                    AlwaysLog(updateSuccess, "GetData", result);
+                }
+            } else {
+                AlwaysLog("Unknown property %s", key->getCStringNoCopy());
+            }
+        }
+        i->release();
+    }
+
+    return;
+}
+
