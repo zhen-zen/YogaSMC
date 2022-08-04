@@ -38,7 +38,7 @@
 
 #define GAME_ZONE_UPDATE_PROPERTY(id, name) \
     do { \
-        if (getGamzeZoneData(id, &result)) \
+        if (sendGamzeZoneData(id, &result)) \
             setPropertyNumber(info, name, result, 32); \
         else \
             AlwaysLog("Failed to get %s", name); \
@@ -218,8 +218,7 @@ class IdeaWMIGameZone : public YogaWMI
     UInt32 fanEvent  {0xe1};
     UInt32 keyEvent  {0xe2};
 
-    bool getGamzeZoneData(UInt32 query, UInt32 *result);
-    bool setGamzeZoneData(UInt32 command, UInt32 data, UInt32 *result);
+    bool sendGamzeZoneData(UInt32 command, UInt32 *result, UInt32 data=0);
     void setPropertiesGated(OSObject* props);
 
 #ifndef ALTER

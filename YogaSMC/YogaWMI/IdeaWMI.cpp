@@ -304,21 +304,7 @@ bool IdeaWMIBattery::getBatteryInfo(UInt32 index, OSArray *bat) {
 
 OSDefineMetaClassAndStructors(IdeaWMIGameZone, YogaWMI);
 
-bool IdeaWMIGameZone::getGamzeZoneData(UInt32 query, UInt32 *result) {
-    IOReturn ret;
-    OSNumber *in;
-
-    in = OSNumber::withNumber(0ULL, 32);
-    ret = YWMI->evaluateInteger(GAME_ZONE_DATA_WMI_METHOD, 0, query, result, in, true);
-    OSSafeReleaseNULL(in);
-
-    if (ret != kIOReturnSuccess)
-        AlwaysLog("Query %d evaluation failed", query);
-
-    return (ret == kIOReturnSuccess);
-}
-
-bool IdeaWMIGameZone::setGamzeZoneData(UInt32 command, UInt32 data, UInt32 *result) {
+bool IdeaWMIGameZone::sendGamzeZoneData(UInt32 command, UInt32 *result, UInt32 data) {
     IOReturn ret;
     OSNumber *in;
 
@@ -412,7 +398,7 @@ void IdeaWMIGameZone::setPropertiesGated(OSObject* props) {
 
                 UInt32 result;
 
-                if (!getGamzeZoneData(value->unsigned32BitValue(), &result)) {
+                if (!sendGamzeZoneData(value->unsigned32BitValue(), &result)) {
                     AlwaysLog(updateFailure, "GetData");
                 } else {
                     AlwaysLog(updateSuccess, "GetData", result);
@@ -425,7 +411,7 @@ void IdeaWMIGameZone::setPropertiesGated(OSObject* props) {
                 UInt32 data = value->unsigned32BitValue() >> 16;
                 UInt32 result;
 
-                if (!setGamzeZoneData(command, data, &result)) {
+                if (!sendGamzeZoneData(command, &result, data)) {
                     AlwaysLog(updateFailure, "SetData");
                 } else {
                     AlwaysLog(updateSuccess, "SetData", result);
