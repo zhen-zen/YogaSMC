@@ -219,6 +219,7 @@ class IdeaWMIGameZone : public YogaWMI
     UInt32 keyEvent  {0xe2};
 
     bool getGamzeZoneData(UInt32 query, UInt32 *result);
+    bool setGamzeZoneData(UInt32 command, UInt32 data, UInt32 *result);
     void setPropertiesGated(OSObject* props);
 
 #ifndef ALTER

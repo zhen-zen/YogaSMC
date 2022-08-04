@@ -318,6 +318,20 @@ bool IdeaWMIGameZone::getGamzeZoneData(UInt32 query, UInt32 *result) {
     return (ret == kIOReturnSuccess);
 }
 
+bool IdeaWMIGameZone::setGamzeZoneData(UInt32 command, UInt32 data, UInt32 *result) {
+    IOReturn ret;
+    OSNumber *in;
+
+    in = OSNumber::withNumber(data, 32);
+    ret = YWMI->evaluateInteger(GAME_ZONE_DATA_WMI_METHOD, 0, command, result, in, true);
+    OSSafeReleaseNULL(in);
+
+    if (ret != kIOReturnSuccess)
+        AlwaysLog("Query %d evaluation failed", command);
+
+    return (ret == kIOReturnSuccess);
+}
+
 void IdeaWMIGameZone::processWMI() {
     setProperty("Feature", feature);
 
@@ -402,6 +416,19 @@ void IdeaWMIGameZone::setPropertiesGated(OSObject* props) {
                     AlwaysLog(updateFailure, "GetData");
                 } else {
                     AlwaysLog(updateSuccess, "GetData", result);
+                }
+            } else if (key->isEqualTo("SetData")) {
+                OSNumber *value;
+                getPropertyNumber("SetData");
+
+                UInt32 command = value->unsigned32BitValue() & 0xFFFF;
+                UInt32 data = value->unsigned32BitValue() >> 16;
+                UInt32 result;
+
+                if (!setGamzeZoneData(command, data, &result)) {
+                    AlwaysLog(updateFailure, "SetData");
+                } else {
+                    AlwaysLog(updateSuccess, "SetData", result);
                 }
             } else {
                 AlwaysLog("Unknown property %s", key->getCStringNoCopy());
