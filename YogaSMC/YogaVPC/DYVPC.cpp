@@ -279,7 +279,7 @@ void DYVPC::setPropertiesGated(OSObject *props) {
 
                 UInt32 result = value->unsigned32BitValue();
 
-                if (WMIQuery(HPWMI_TEMPERATURE_QUERY, &result))
+                if (WMIQuery(HPWMI_TEMPERATURE_QUERY, &result, HPWMI_READ, 8))
                     AlwaysLog("%s 0x%x result: 0x%x", "ThermalQuery", value->unsigned32BitValue(), result);
                 else
                     AlwaysLog("%s failed 0x%x", "ThermalQuery", value->unsigned32BitValue());
