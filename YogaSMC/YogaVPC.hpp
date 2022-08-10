@@ -213,9 +213,24 @@ protected:
     UInt32 backlightLevel {0};
 
     /**
-     *  Backlight level before sleep or yoga mode change
+     *  Saved backlight level for sleep, yoga mode change and timeout
      */
     UInt32 backlightLevelSaved {0};
+
+    /**
+     *  Backlight timeout
+     */
+    UInt32 backlightTimeout {0};
+
+    /**
+     *  Backlight poller
+     */
+    IOTimerEventSource* backlightPoller {nullptr};
+
+    /**
+     *  Action for backlight poller
+     */
+    void backlightAction(OSObject* owner, IOTimerEventSource* timer);
 
     /**
      *  Update keyboad backlight status

@@ -153,10 +153,27 @@ bool YogaVPC::initVPC() {
     if (vpc->validateObject(setThermalControl) == kIOReturnSuccess)
         initDYTC();
 
+    backlightPoller = IOTimerEventSource::timerEventSource(this, OSMemberFunctionCast(IOTimerEventSource::Action, this, &YogaVPC::backlightAction));
+    if (!backlightPoller ||
+        workLoop->addEventSource(backlightPoller) != kIOReturnSuccess) {
+        AlwaysLog("Failed to add brightnessPoller");
+        OSSafeReleaseNULL(backlightPoller);
+    } else {
+        backlightPoller->enable();
+        setProperty(backlightTimeoutPrompt, backlightTimeout, 32);
+        DebugLog("BrightnessPoller enabled");
+    }
+
     return true;
 }
 
 bool YogaVPC::exitVPC() {
+    if (backlightPoller) {
+        backlightPoller->disable();
+        workLoop->removeEventSource(backlightPoller);
+    }
+    OSSafeReleaseNULL(backlightPoller);
+
     if (clamshellMode) {
         AlwaysLog("Disabling clamshell mode");
         toggleClamshell();
@@ -242,6 +259,14 @@ void YogaVPC::setPropertiesGated(OSObject* props) {
                     automaticBacklightMode = value->unsigned8BitValue();
                     setProperty(autoBacklightPrompt, automaticBacklightMode, 8);
                 }
+            } else if (key->isEqualTo(backlightTimeoutPrompt)) {
+                OSNumber *value;
+                getPropertyNumber(backlightTimeoutPrompt);
+                backlightTimeout = value->unsigned32BitValue();
+                backlightLevelSaved = 1;
+                setProperty(backlightTimeoutPrompt, backlightTimeout, 32);
+                if (backlightTimeout == 0)
+                    backlightPoller->cancelTimeout();
             } else if (key->isEqualTo(FnKeyPrompt)) {
                 OSBoolean *value;
                 getPropertyBoolean(FnKeyPrompt);
@@ -399,19 +424,33 @@ IOReturn YogaVPC::setPowerState(unsigned long powerStateOrdinal, IOService * wha
     if (super::setPowerState(powerStateOrdinal, whatDevice) != kIOPMAckImplied)
         return kIOReturnInvalid;
 
-    if (backlightCap && (automaticBacklightMode & BIT(0))) {
+    if (!backlightCap)
+        return kIOPMAckImplied;
+
+    if (automaticBacklightMode & BIT(0) || backlightTimeout != 0) {
         updateBacklight();
         if (powerStateOrdinal == 0) {
-            backlightLevelSaved = backlightLevel;
+            if (backlightTimeout != 0)
+                backlightPoller->cancelTimeout();
+            else
+                backlightLevelSaved = backlightLevel;
             if (backlightLevel)
                 setBacklight(0);
         } else {
             if (!backlightLevel && backlightLevelSaved)
                 setBacklight(backlightLevelSaved);
+            if (backlightTimeout != 0)
+                backlightPoller->setTimeout(backlightTimeout, kSecondScale);
         }
     }
 
     return kIOPMAckImplied;
+}
+
+void YogaVPC::backlightAction(OSObject *owner, IOTimerEventSource *timer) {
+    DebugLog("backlight %x saved %x", backlightLevel, backlightLevelSaved);
+    backlightLevelSaved = backlightLevel;
+    setBacklight(0);
 }
 
 bool YogaVPC::DYTCCommand(DYTC_CMD command, DYTC_RESULT* result, UInt8 ICFunc, UInt8 ICMode, bool ValidF) {
@@ -706,12 +745,21 @@ IOReturn YogaVPC::message(UInt32 type, IOService *provider, void *argument) {
     {
         case kSMC_setDisableTouchpad:
         case kSMC_getDisableTouchpad:
-        case kPS2M_notifyKeyPressed:
         case kPS2M_notifyKeyTime:
         case kPS2M_resetTouchpad:
         case kSMC_setKeyboardStatus:
         case kSMC_getKeyboardStatus:
         case kSMC_notifyKeystroke:
+            break;
+
+        case kPS2M_notifyKeyPressed:
+            if (backlightTimeout != 0 && backlightLevelSaved != 0) {
+                backlightPoller->cancelTimeout();
+                if (backlightLevel == 0) {
+                    setBacklight(backlightLevelSaved);
+                }
+                backlightPoller->setTimeout(backlightTimeout, kSecondScale);
+            }
             break;
 
         case kIOACPIMessageDeviceNotification:
