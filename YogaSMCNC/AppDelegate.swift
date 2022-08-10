@@ -408,6 +408,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if defaults.object(forKey: "AutoBacklight") != nil {
             _ = sendNumber("AutoBacklight", defaults.integer(forKey: "AutoBacklight"), conf.service)
         }
+        if defaults.object(forKey: "BacklightTimeout") != nil {
+            _ = sendNumber("BacklightTimeout", defaults.integer(forKey: "BacklightTimeout"), conf.service)
+        }
     }
 
     func saveConfig() {
@@ -428,5 +431,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         // Save driver settings
         defaults.setValue(getNumber("AutoBacklight", conf.service), forKey: "AutoBacklight")
+        defaults.setValue(getNumber("BacklightTimeout", conf.service), forKey: "BacklightTimeout")
     }
 }
