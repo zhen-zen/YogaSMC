@@ -55,6 +55,18 @@ bool DYVPC::initVPC() {
 
     super::initVPC();
 
+    OSObject * result;
+    if (vpc->evaluateObject("RCDS", &result) == kIOReturnSuccess) {
+        readCommandDateSize = OSDynamicCast(OSArray, result);
+        readCommandDateSize->retain();
+    }
+    OSSafeReleaseNULL(result);
+    if (vpc->evaluateObject("WCDS", &result) == kIOReturnSuccess) {
+        writeCommandDateSize = OSDynamicCast(OSArray, result);
+        writeCommandDateSize->retain();
+    }
+    OSSafeReleaseNULL(result);
+
     YWMI->start();
 
     if (inputCap)
@@ -87,6 +99,8 @@ bool DYVPC::exitVPC() {
     if (YWMI)
         delete YWMI;
 
+    OSSafeReleaseNULL(readCommandDateSize);
+    OSSafeReleaseNULL(writeCommandDateSize);
     return super::exitVPC();
 }
 
@@ -166,6 +180,14 @@ bool DYVPC::WMIQuery(UInt32 query, void *buffer, enum hp_wmi_command command, UI
     else
         mid = 1;
 
+    OSNumber *vsize = nullptr;
+    if (command == HPWMI_READ && readCommandDateSize)
+        vsize = OSDynamicCast(OSNumber, readCommandDateSize->getObject(query-1));
+    if (command == HPWMI_WRITE && writeCommandDateSize)
+        vsize = OSDynamicCast(OSNumber, writeCommandDateSize->getObject(query-1));
+    if (vsize != nullptr && vsize->unsigned32BitValue() != insize)
+        AlwaysLog("Input size mismatch: expected 0x%x, actual 0x%x", vsize->unsigned32BitValue(), insize);
+
     memcpy(&args.data[0], buffer, insize);
     OSData *in = OSData::withBytesNoCopy(&args, sizeof(struct bios_args));
 
@@ -179,7 +201,9 @@ bool DYVPC::WMIQuery(UInt32 query, void *buffer, enum hp_wmi_command command, UI
         OSSafeReleaseNULL(result);
         return false;
     }
-
+#ifdef DEBUG
+    setProperty("WMIQuery", result);
+#endif
     OSData *output = OSDynamicCast(OSData, result);
     if (output == nullptr) {
         AlwaysLog("BIOS query 0x%x: unexpected output type", query);
@@ -190,6 +214,7 @@ bool DYVPC::WMIQuery(UInt32 query, void *buffer, enum hp_wmi_command command, UI
     const struct bios_return *biosRet = reinterpret_cast<const struct bios_return*>(output->getBytesNoCopy());
     switch (biosRet->return_code) {
         case 0:
+            ret = true;
             break;
             
         case HPWMI_RET_UNKNOWN_COMMAND:

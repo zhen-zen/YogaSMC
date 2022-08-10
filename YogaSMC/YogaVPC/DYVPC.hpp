@@ -189,6 +189,16 @@ private:
     bool BIOSCap {false};
 
     /**
+     *  size of read command data
+     */
+    OSArray *readCommandDateSize {nullptr};
+
+    /**
+     *  size of write command data
+     */
+    OSArray *writeCommandDateSize {nullptr};
+
+    /**
      *  BIOS setting capability
      *
      *  @param query commandtype
