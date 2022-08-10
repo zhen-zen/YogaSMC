@@ -277,10 +277,11 @@ void DYVPC::setPropertiesGated(OSObject *props) {
                 OSNumber *value;
                 getPropertyNumber("ThermalQuery");
 
-                UInt32 result = value->unsigned32BitValue();
+                UInt32 result[2];
+                result[0] = value->unsigned32BitValue();
 
-                if (WMIQuery(HPWMI_TEMPERATURE_QUERY, &result, HPWMI_READ, 8))
-                    AlwaysLog("%s 0x%x result: 0x%x", "ThermalQuery", value->unsigned32BitValue(), result);
+                if (WMIQuery(HPWMI_TEMPERATURE_QUERY, result, HPWMI_READ, sizeof(UInt32), sizeof(result)))
+                    AlwaysLog("%s 0x%x result: 0x%x", "ThermalQuery", value->unsigned32BitValue(), result[0]);
                 else
                     AlwaysLog("%s failed 0x%x", "ThermalQuery", value->unsigned32BitValue());
 #ifdef DEBUG
