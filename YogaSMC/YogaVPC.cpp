@@ -153,7 +153,7 @@ bool YogaVPC::initVPC() {
     if (vpc->validateObject(setThermalControl) == kIOReturnSuccess)
         initDYTC();
 
-    backlightPoller = IOTimerEventSource::timerEventSource(this, OSMemberFunctionCast(IOTimerEventSource::Action, this, &YogaVPC::backlightAction));
+    backlightPoller = IOTimerEventSource::timerEventSource(this, OSMemberFunctionCast(IOTimerEventSource::Action, this, &YogaVPC::backlightRest));
     if (!backlightPoller ||
         workLoop->addEventSource(backlightPoller) != kIOReturnSuccess) {
         AlwaysLog("Failed to add brightnessPoller");
@@ -447,7 +447,7 @@ IOReturn YogaVPC::setPowerState(unsigned long powerStateOrdinal, IOService * wha
     return kIOPMAckImplied;
 }
 
-void YogaVPC::backlightAction(OSObject *owner, IOTimerEventSource *timer) {
+void YogaVPC::backlightRest(OSObject *owner, IOTimerEventSource *timer) {
     DebugLog("backlight %x saved %x", backlightLevel, backlightLevelSaved);
     backlightLevelSaved = backlightLevel;
     setBacklight(0);

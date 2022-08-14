@@ -230,7 +230,7 @@ protected:
     /**
      *  Action for backlight poller
      */
-    void backlightAction(OSObject* owner, IOTimerEventSource* timer);
+    void backlightRest(OSObject* owner, IOTimerEventSource* timer);
 
     /**
      *  Update keyboad backlight status
