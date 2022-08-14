@@ -79,6 +79,8 @@ bool IdeaVPC::initVPC() {
     updateKeyboardCapability();
     updateBatteryCapability();
 
+    isPowerChanged();
+
     int val[16];
     if (PE_parse_boot_argn("-ideabr", val, sizeof(val))) {
         brightnessPoller = IOTimerEventSource::timerEventSource(this, OSMemberFunctionCast(IOTimerEventSource::Action, this, &IdeaVPC::brightnessAction));
@@ -740,11 +742,14 @@ void IdeaVPC::updateVPC(UInt32 event) {
                     break;
 
                 case 1: // ENERGY_EVENT_GENERAL / ENERGY_EVENT_KEYBDLED_OLD
-                    DebugLog("Fn+Space keyboard backlight old?");
+                    if (isPowerChanged()) {
+                        DebugLog("AC %s", adapterConnected ? "connected" : "disconnected");
+                        continue;
+                    }
+                    DebugLog("Fn+Space keyboard backlight old");
                     updateKeyboard(true);
                     data = backlightLevel;
                     time = 1;
-                    // also on AC connect / disconnect
                     break;
 
                 case 2:
@@ -768,7 +773,7 @@ void IdeaVPC::updateVPC(UInt32 event) {
 
                 case 4:
                     if (!brightnessPoller) 
-                        break;
+                        continue;
                     if (!read_ec_data(VPCCMD_R_BL, &result, &retries)) {
                         AlwaysLog("Failed to read VPCCMD_R_BL %d", retries);
                     } else {
@@ -953,3 +958,15 @@ IOService* IdeaVPC::initSMC() {
     return IdeaSMC::withDevice(this, ec);
 };
 #endif
+
+bool IdeaVPC::isPowerChanged() {
+    bool ret = false;
+    UInt32 powerState = adapterConnected;
+
+    if (ec->validateObject("RPWR") == kIOReturnSuccess &&
+        ec->evaluateInteger("RPWR", &powerState) == kIOReturnSuccess)
+        ret = (powerState != adapterConnected);
+
+    adapterConnected = powerState;
+    return ret;
+}

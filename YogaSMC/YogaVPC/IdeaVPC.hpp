@@ -354,6 +354,18 @@ private:
      */
     bool method_vpcr(UInt32 cmd, UInt32 *result);
 
+    /**
+     *  Adapter status
+     */
+    bool adapterConnected {false};
+
+    /**
+     *  Toggle battery conservation mode
+     *
+     *  @return true if changed
+     */
+    bool isPowerChanged();
+
 public:
     IOReturn message(UInt32 type, IOService *provider, void *argument) APPLE_KEXT_OVERRIDE;
 };
