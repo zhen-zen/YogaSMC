@@ -223,6 +223,11 @@ protected:
     UInt32 backlightTimeout {0};
 
     /**
+     *  Last backlight change timestamp for timeout
+     */
+    UInt64 backlightStimulation {0};
+
+    /**
      *  Backlight poller
      */
     IOTimerEventSource* backlightPoller {nullptr};

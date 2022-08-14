@@ -187,4 +187,31 @@ public:
 
     friend class YogaSMCUserClient;
 };
+
+/**
+ *  Check if previous event is Active
+ *
+ *  @param start timestamp of previous event
+ *  @param cd cool down time in ns
+ *
+ *  @return false if within cool down time
+ */
+inline bool isActive(UInt64 *start, UInt64 cd = NSEC_PER_SEC) {
+    UInt64 end;
+    UInt64 delta;
+
+    if (*start == 0)
+        return false;
+
+    clock_get_uptime(&end);
+    absolutetime_to_nanoseconds(end - *start, &delta);
+
+    *start = 0;
+
+    if (delta < cd)
+        return true;
+
+    return false;
+};
+
 #endif /* YogaBaseService_hpp */

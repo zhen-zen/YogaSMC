@@ -749,6 +749,8 @@ void IdeaVPC::updateVPC(UInt32 event) {
                     DebugLog("Fn+Space keyboard backlight old");
                     updateKeyboard(true);
                     data = backlightLevel;
+                    if (isActive(&backlightStimulation))
+                        data |= 0x10;
                     time = 1;
                     break;
 
@@ -840,6 +842,8 @@ void IdeaVPC::updateVPC(UInt32 event) {
                     DebugLog("Fn+Space keyboard backlight?");
                     updateKeyboard(true);
                     data = backlightLevel;
+                    if (isActive(&backlightStimulation))
+                        data |= 0x10;
                     time = 1;
                     break;
 

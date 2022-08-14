@@ -450,6 +450,7 @@ IOReturn YogaVPC::setPowerState(unsigned long powerStateOrdinal, IOService * wha
 void YogaVPC::backlightRest(OSObject *owner, IOTimerEventSource *timer) {
     DebugLog("backlight %x saved %x", backlightLevel, backlightLevelSaved);
     backlightLevelSaved = backlightLevel;
+    clock_get_uptime(&backlightStimulation);
     setBacklight(0);
 }
 
@@ -756,6 +757,7 @@ IOReturn YogaVPC::message(UInt32 type, IOService *provider, void *argument) {
             if (backlightTimeout != 0 && backlightLevelSaved != 0) {
                 backlightPoller->cancelTimeout();
                 if (backlightLevel == 0) {
+                    clock_get_uptime(&backlightStimulation);
                     setBacklight(backlightLevelSaved);
                 }
                 backlightPoller->setTimeout(backlightTimeout, kSecondScale);

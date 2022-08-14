@@ -726,6 +726,8 @@ void ThinkVPC::updateVPC(UInt32 event) {
                 case TP_HKEY_EV_KBD_LIGHT:
                     updateBacklight(true);
                     data = backlightLevel;
+                    if (isActive(&backlightStimulation))
+                        data |= 0x10;
                     break;
 
                 case TP_HKEY_EV_SLEEP:
