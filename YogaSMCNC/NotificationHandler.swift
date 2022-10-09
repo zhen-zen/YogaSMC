@@ -164,7 +164,8 @@ func eventActuator(_ desc: EventDesc, _ data: UInt32, _ conf: inout SharedConfig
         bluetoothDiscoverableHelper(desc.name, desc.display)
     case .backlight:
         if !desc.display { return }
-        switch data {
+        if (data & 0x10 != 0) { return }
+        switch data & 0x0f {
         case 0:
             showOSDRes("Backlight", "Off", .kBacklightOff)
         case 1:

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="18122" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="21219" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="18122"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="21219"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -20,6 +20,7 @@
                 <outlet property="muteCheck" destination="EC3-Nq-KoI" id="1Fz-Wd-7AT"/>
                 <outlet property="thinkViewItem" destination="eaw-hp-JIE" id="sTD-qn-Tzl"/>
                 <outlet property="vAlwaysOnUSBMode" destination="MzN-Z3-hnK" id="qku-rb-9Ai"/>
+                <outlet property="vBackLightTimeout" destination="fps-Vx-bqD" id="b4q-Rc-D31"/>
                 <outlet property="vBatteryID" destination="rTr-ll-Qx5" id="4nM-zK-e5s"/>
                 <outlet property="vBatteryTemperature" destination="0xn-Ly-yhc" id="PvZ-fF-JYH"/>
                 <outlet property="vBluetooth" destination="BZO-y6-Hbq" id="Ldm-X4-PdI"/>
@@ -291,7 +292,7 @@
                                             </textFieldCell>
                                         </textField>
                                         <stackView distribution="fill" orientation="vertical" alignment="leading" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" id="JLD-MO-T8u">
-                                            <rect key="frame" x="227" y="82" width="110" height="62"/>
+                                            <rect key="frame" x="227" y="62" width="110" height="62"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Uaf-Ex-Kx2">
@@ -389,7 +390,7 @@
                                             </connections>
                                         </button>
                                         <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="fWe-h7-yii">
-                                            <rect key="frame" x="225" y="50" width="119" height="18"/>
+                                            <rect key="frame" x="225" y="30" width="119" height="18"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="check" title="ClamshellMode" bezelStyle="regularSquare" imagePosition="left" enabled="NO" inset="2" id="ibn-Rf-9jp">
                                                 <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -410,6 +411,27 @@
                                                 <action selector="DYTCPSCSupport:" target="-2" id="tFf-hY-9L4"/>
                                             </connections>
                                         </button>
+                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="MEA-Gq-fzT">
+                                            <rect key="frame" x="225" y="136" width="54" height="16"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <textFieldCell key="cell" lineBreakMode="clipping" title="Timeout" id="6xD-v1-S3P">
+                                                <font key="font" usesAppearanceFont="YES"/>
+                                                <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                            </textFieldCell>
+                                        </textField>
+                                        <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="fps-Vx-bqD">
+                                            <rect key="frame" x="291" y="134" width="54" height="21"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" id="wSd-jL-VGS">
+                                                <font key="font" usesAppearanceFont="YES"/>
+                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                            </textFieldCell>
+                                            <connections>
+                                                <action selector="backlightTimeoutSet:" target="-2" id="soL-Zb-Zkr"/>
+                                            </connections>
+                                        </textField>
                                     </subviews>
                                 </view>
                             </tabViewItem>

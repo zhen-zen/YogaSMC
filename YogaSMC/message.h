@@ -28,6 +28,7 @@ static IOPMPowerState IOPMPowerStates[kIOPMNumberPowerStates] = {
 #define autoBacklightPrompt "AutoBacklight"
 #define batteryPrompt "Battery"
 #define backlightPrompt "BacklightLevel"
+#define backlightTimeoutPrompt "BacklightTimeout"
 #define beepPrompt "Beep"
 #define SSTPrompt "SST"
 #define conservationPrompt "ConservationMode"

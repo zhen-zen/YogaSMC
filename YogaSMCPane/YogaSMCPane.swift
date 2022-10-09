@@ -114,6 +114,7 @@ class YogaSMCPane: NSPreferencePane {
     @IBOutlet weak var DYTCPSCCheck: NSButton!
 
     @IBOutlet weak var backlightSlider: NSSlider!
+    @IBOutlet weak var vBackLightTimeout: NSTextField!
 
     @IBOutlet weak var autoSleepCheck: NSButton!
     @IBOutlet weak var yogaModeCheck: NSButton!

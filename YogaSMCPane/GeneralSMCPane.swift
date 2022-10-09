@@ -32,6 +32,10 @@ extension YogaSMCPane {
         }
     }
 
+    @IBAction func backlightTimeoutSet(_ sender: NSTextField) {
+        _ = sendNumber("BacklightTimeout", sender.integerValue, service)
+    }
+
     @IBAction func vClamshellModeSet(_ sender: NSButton) {
         _ = sendBoolean("ClamshellMode", (sender.state == .on), service)
     }
@@ -152,6 +156,12 @@ extension YogaSMCPane {
             backlightSlider.integerValue = val.intValue
         } else {
             backlightSlider.isEnabled = false
+        }
+
+        if let val = props["BacklightTimeout"] as? NSNumber {
+            vBackLightTimeout.integerValue = val.intValue
+        } else {
+            vBackLightTimeout.isEnabled = false
         }
 
         if let dict = props["DYTC"]  as? NSDictionary {
