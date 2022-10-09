@@ -174,10 +174,6 @@ private:
     IOService* initWMI(WMI *instance) APPLE_KEXT_OVERRIDE;
     bool examineWMI(IOService *provider) APPLE_KEXT_OVERRIDE;
 
-#ifndef ALTER
-    IOService* initSMC() APPLE_KEXT_OVERRIDE;
-#endif
-
     /**
      *  input capability
      */

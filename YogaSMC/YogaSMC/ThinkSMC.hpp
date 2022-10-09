@@ -23,9 +23,6 @@ private:
 
     bool dualFan {false};
 
-public:
-    static ThinkSMC *withDevice(IOService *provider, IOACPIPlatformDevice *device);
-
 };
 
 #endif /* ThinkSMC_hpp */

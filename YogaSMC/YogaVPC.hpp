@@ -146,17 +146,6 @@ protected:
      */
     inline virtual bool examineWMI(IOService *provider) {return true;};
 
-#ifndef ALTER
-    /**
-     *  SMC service
-     */
-    IOService *smc;
-
-    /**
-     *  Initialize SMC
-     */
-    virtual IOService* initSMC();
-#endif
     /**
      *  Initialize VPC EC, get config and update status
      *

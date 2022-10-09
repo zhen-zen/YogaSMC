@@ -44,27 +44,6 @@ static const struct sensorPair DYPresetTemperature[] = {
     {KeyTs0P(0), "Remote Temperature"}
 };
 
-DYSMC* DYSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) {
-    if (!device)
-        return nullptr;
-
-    DYSMC* drv = OSTypeAlloc(DYSMC);
-
-    drv->conf = OSDictionary::withDictionary(OSDynamicCast(OSDictionary, provider->getProperty("Sensors")));
-
-    OSDictionary *dictionary = OSDictionary::withCapacity(1);
-    dictionary->setObject("Sensors", drv->conf);
-
-    drv->ec = device;
-    drv->iname = device->getName();
-
-    if (!drv->init(dictionary))
-        OSSafeReleaseNULL(drv);
-
-    dictionary->release();
-    return drv;
-}
-
 bool DYSMC::addTachometerKey(OSString *name) {
     for (auto &pair : DYPresetTachometer) {
         if (name->isEqualTo(pair.name)) {
@@ -238,9 +217,6 @@ void DYSMC::updateECVendor() {
     OSSafeReleaseNULL(result);
 }
 
-void DYSMC::setWMI(IOService *instance) {
-    if (wmis)
-        return;
-
-    wmis = OSDynamicCast(DYWMI, instance);
+void DYSMC::getWMISensor(IOService *provider) {
+    wmis = OSDynamicCast(DYWMI, provider->getProperty("DYSensor"));
 }

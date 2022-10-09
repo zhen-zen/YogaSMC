@@ -8,9 +8,6 @@
 //
 
 #include "YogaVPC.hpp"
-#ifndef ALTER
-#include "YogaSMC.hpp"
-#endif
 
 OSDefineMetaClassAndStructors(YogaVPC, YogaBaseService);
 
@@ -36,15 +33,12 @@ IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
         return nullptr;
     }
 
+    setProperty("ECDevice", ec);
     isPMsupported = true;
 
     if (vendorWMISupport)
         probeWMI();
 
-#ifndef ALTER
-    if (getProperty("Sensors") != nullptr)
-        smc = initSMC();
-#endif
     return this;
 }
 
@@ -128,18 +122,6 @@ bool YogaVPC::start(IOService *provider) {
             }
         }
     }
-#ifndef ALTER
-    if (smc) {
-        if (!smc->attach(this)) {
-            OSSafeReleaseNULL(smc);
-            AlwaysLog("Failed to attach SMC instance");
-        } else if (!smc->start(this)) {
-            smc->detach(this);
-            AlwaysLog("Failed to start SMC instance");
-            OSSafeReleaseNULL(smc);
-        }
-    }
-#endif
     setProperty(kDeliverNotifications, kOSBooleanTrue);
     registerService();
     return true;
@@ -188,12 +170,6 @@ bool YogaVPC::exitVPC() {
 void YogaVPC::stop(IOService *provider) {
     DebugLog("Stopping");
     exitVPC();
-#ifndef ALTER
-    if (smc) {
-        smc->stop(this);
-        smc->detach(this);
-    }
-#endif
     if (WMICollection) {
         for (int i= WMICollection->getCount()-1; i >= 0; i--) {
             IOService *wmi = OSDynamicCast(IOService, WMICollection->getObject(i));
@@ -734,12 +710,6 @@ bool YogaVPC::dumpECOffset(UInt32 value) {
     }
     return ret;
 }
-
-#ifndef ALTER
-IOService* YogaVPC::initSMC() {
-    return YogaSMC::withDevice(this, ec);
-};
-#endif
 
 IOReturn YogaVPC::message(UInt32 type, IOService *provider, void *argument) {
     switch (type)

@@ -126,25 +126,21 @@ bool YogaSMC::vsmcNotificationHandler(void *sensors, void *refCon, IOService *vs
     return false;
 }
 
-YogaSMC* YogaSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) {
-    if (!device)
+IOService* YogaSMC::probe(IOService *provider, SInt32 *score) {
+    ec = OSDynamicCast(IOACPIPlatformDevice, provider->getProperty("ECDevice"));
+    if (!ec) {
+        DebugLog("EC not found");
         return nullptr;
+    }
+    iname = ec->getName();
 
-    YogaSMC* drv = OSTypeAlloc(YogaSMC);
-
-    drv->conf = OSDictionary::withDictionary(OSDynamicCast(OSDictionary, provider->getProperty("Sensors")));
-
-    OSDictionary *dictionary = OSDictionary::withCapacity(1);
-    dictionary->setObject("Sensors", drv->conf);
-
-    drv->ec = device;
-    drv->iname = device->getName();
-
-    if (!drv->init(dictionary))
-        OSSafeReleaseNULL(drv);
-
-    dictionary->release();
-    return drv;
+    conf = OSDynamicCast(OSDictionary, getProperty("Sensors"));
+    if (!conf) {
+        DebugLog("conf not found");
+        return nullptr;
+    }
+    getWMISensor(provider);
+    return this;
 }
 
 void YogaSMC::updateEC() {

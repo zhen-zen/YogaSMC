@@ -34,6 +34,17 @@
 			<string>IOACPIPlatformDevice</string>
 			<key>IOUserClientClass</key>
 			<string>YogaSMCUserClient</string>
+		</dict>
+		<key>DYSMC</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>DYSMC</string>
+			<key>IOProbeScore</key>
+			<integer>100</integer>
+			<key>IOProviderClass</key>
+			<string>DYVPC</string>
 			<key>Sensors</key>
 			<dict>
 				<key>Airflow Left</key>
@@ -78,6 +89,17 @@
 			<string>IOACPIPlatformDevice</string>
 			<key>IOUserClientClass</key>
 			<string>YogaSMCUserClient</string>
+		</dict>
+		<key>IdeaSMC</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>IdeaSMC</string>
+			<key>IOProbeScore</key>
+			<integer>100</integer>
+			<key>IOProviderClass</key>
+			<string>IdeaVPC</string>
 			<key>Sensors</key>
 			<dict>
 				<key>Airflow Left</key>
@@ -131,6 +153,17 @@
 			<string>IOACPIPlatformDevice</string>
 			<key>IOUserClientClass</key>
 			<string>YogaSMCUserClient</string>
+		</dict>
+		<key>ThinkSMC</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOClass</key>
+			<string>ThinkSMC</string>
+			<key>IOProbeScore</key>
+			<integer>100</integer>
+			<key>IOProviderClass</key>
+			<string>ThinkVPC</string>
 			<key>Sensors</key>
 			<dict>
 				<key>Airflow Left</key>

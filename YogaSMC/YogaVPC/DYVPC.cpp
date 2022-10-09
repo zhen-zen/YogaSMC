@@ -8,9 +8,6 @@
 
 #include "DYVPC.hpp"
 #include "YogaWMI.hpp"
-#ifndef ALTER
-#include "DYSMC.hpp"
-#endif
 OSDefineMetaClassAndStructors(DYVPC, YogaVPC);
 
 bool DYVPC::probeVPC(IOService *provider) {
@@ -282,24 +279,14 @@ void DYVPC::setPropertiesGated(OSObject *props) {
 }
 
 bool DYVPC::examineWMI(IOService *provider) {
-#ifndef ALTER
     OSString *feature;
     if ((feature = OSDynamicCast(OSString, provider->getProperty("Feature"))) &&
         feature->isEqualTo("Sensor")) {
-        DYSMC *sensor = OSDynamicCast(DYSMC, smc);
-        if (sensor)
-            sensor->setWMI(provider);
+        setProperty("DYSensor", provider);
     }
-#endif
     return true;
 }
 
 IOService* DYVPC::initWMI(WMI *instance) {
     return YogaWMI::withDYWMI(instance);
 }
-
-#ifndef ALTER
-IOService* DYVPC::initSMC() {
-    return DYSMC::withDevice(this, ec);
-}
-#endif
