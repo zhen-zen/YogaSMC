@@ -13,7 +13,6 @@ YogaSMC Changelog
 - IdeaWMI: support an extension of Yoga mode control device
 - YogaWMI: simplify WMI parsing
 - YogaVPC: fix battery notification
-- ThinkVPC: minor cleanup
 - IdeaVPC: simplify capabilities update
 - Project: lower executable target to 10.10 (drop console log)
 - YogaVPC: fix notification delivery
@@ -25,6 +24,15 @@ YogaSMC Changelog
 - YogaVPC: support DYTC PSC function, thx @Someone52 @1Revenger1
 - ThinkVPC: skip Yoga mode notification when Clamshell mode is enabled, thx @antoniomcr96
 - YogaWMI: temporary fix for missing qualifiers in methods
+- IdeaWMI: support super resolution device and assign to FnLock
+- YogaWMI: fix clang analysis during mof decompress
+- YogaBMF: return OSString from parse_string; fix remaining memory issues
+- YogaBMF: unify log format; add more data typpr
+- YogaBMF: simplify method handling; remove debug properties
+- YogaSMCUtils: fix broken header; rename deprecated APIs
+- DYVPC: validate input data size; expose WMIQuery (DEBUG)
+- IdeaVPC: check adapter status to isolate keyboard backlight event
+- YogaVPC: support setting timeout on keyboard backlight
 
 #### v1.5.1
 - YogaSMC: refactor updateEC
