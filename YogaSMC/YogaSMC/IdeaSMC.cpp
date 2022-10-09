@@ -10,27 +10,6 @@
 #include "IdeaSMC.hpp"
 OSDefineMetaClassAndStructors(IdeaSMC, YogaSMC);
 
-IdeaSMC* IdeaSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) {
-    if (!device)
-        return nullptr;
-
-    IdeaSMC* drv = OSTypeAlloc(IdeaSMC);
-
-    drv->conf = OSDictionary::withDictionary(OSDynamicCast(OSDictionary, provider->getProperty("Sensors")));
-
-    OSDictionary *dictionary = OSDictionary::withCapacity(1);
-    dictionary->setObject("Sensors", drv->conf);
-
-    drv->ec = device;
-    drv->iname = device->getName();
-
-    if (!drv->init(dictionary))
-        OSSafeReleaseNULL(drv);
-
-    dictionary->release();
-    return drv;
-}
-
 void IdeaSMC::addVSMCKey() {
     // Add message-based key
     VirtualSMCAPI::addKey(KeyBDVT, vsmcPlugin.data, VirtualSMCAPI::valueWithFlag(true, new BDVT(this), SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_WRITE));
@@ -85,9 +64,6 @@ void IdeaSMC::updateECVendor() {
             atomic_store_explicit(&currentSensor[index], value, memory_order_release);
 }
 
-void IdeaSMC::setWMI(IOService *instance) {
-    if (wmig)
-        return;
-
-    wmig = OSDynamicCast(IdeaWMIGameZone, instance);
+void IdeaSMC::getWMISensor(IOService *provder) {
+    wmig = OSDynamicCast(IdeaWMIGameZone, provder->getProperty("Game Zone"));
 }

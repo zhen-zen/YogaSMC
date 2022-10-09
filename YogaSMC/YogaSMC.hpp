@@ -79,6 +79,8 @@ protected:
 
     virtual void setPropertiesGated(OSObject* props);
 
+    inline virtual void getWMISensor(IOService* provider) {};
+
 public:
     virtual IOService *probe(IOService *provider, SInt32 *score) APPLE_KEXT_OVERRIDE;
     virtual bool start(IOService *provider) APPLE_KEXT_OVERRIDE;
@@ -86,8 +88,6 @@ public:
 
     virtual IOReturn setPowerState(unsigned long powerStateOrdinal, IOService * whatDevice) APPLE_KEXT_OVERRIDE;
     virtual IOReturn setProperties(OSObject* props) APPLE_KEXT_OVERRIDE;
-
-    static YogaSMC *withDevice(IOService *provider, IOACPIPlatformDevice *device);
 
     /**
      *  Submit the keys to received VirtualSMC service.

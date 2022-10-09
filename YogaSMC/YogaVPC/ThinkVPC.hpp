@@ -217,10 +217,6 @@ private:
 
     void updateVPC(UInt32 event=0) APPLE_KEXT_OVERRIDE;
     bool exitVPC() APPLE_KEXT_OVERRIDE;
-    
-#ifndef ALTER
-    IOService* initSMC() APPLE_KEXT_OVERRIDE;
-#endif
 
     bool updateBacklight(bool update=false) APPLE_KEXT_OVERRIDE;
     bool setBacklight(UInt32 level) APPLE_KEXT_OVERRIDE;

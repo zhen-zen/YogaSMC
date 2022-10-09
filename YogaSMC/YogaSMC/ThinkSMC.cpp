@@ -11,27 +11,6 @@
 
 OSDefineMetaClassAndStructors(ThinkSMC, YogaSMC);
 
-ThinkSMC* ThinkSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) {
-    if (!device)
-        return nullptr;
-
-    ThinkSMC* drv = OSTypeAlloc(ThinkSMC);
-
-    drv->conf = OSDictionary::withDictionary(OSDynamicCast(OSDictionary, provider->getProperty("Sensors")));
-
-    OSDictionary *dictionary = OSDictionary::withCapacity(1);
-    dictionary->setObject("Sensors", drv->conf);
-
-    drv->ec = device;
-    drv->iname = device->getName();
-
-    if (!drv->init(dictionary))
-        OSSafeReleaseNULL(drv);
-
-    dictionary->release();
-    return drv;
-}
-
 void ThinkSMC::addVSMCKey() {
     // Add message-based key
     VirtualSMCAPI::addKey(KeyBDVT, vsmcPlugin.data, VirtualSMCAPI::valueWithFlag(true, new BDVT(this), SMC_KEY_ATTRIBUTE_READ | SMC_KEY_ATTRIBUTE_WRITE));

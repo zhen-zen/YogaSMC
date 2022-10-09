@@ -9,9 +9,6 @@
 
 #include "IdeaVPC.hpp"
 #include "YogaWMI.hpp"
-#ifndef ALTER
-#include "IdeaSMC.hpp"
-#endif
 OSDefineMetaClassAndStructors(IdeaVPC, YogaVPC);
 
 void IdeaVPC::updateAll() {
@@ -941,27 +938,17 @@ bool IdeaVPC::method_vpcw(UInt32 cmd, UInt32 data) {
 }
 
 bool IdeaVPC::examineWMI(IOService *provider) {
-#ifndef ALTER
     OSString *feature;
     if ((feature = OSDynamicCast(OSString, provider->getProperty("Feature"))) &&
         feature->isEqualTo("Game Zone")) {
-        IdeaSMC *sensor = OSDynamicCast(IdeaSMC, smc);
-        if (sensor)
-            sensor->setWMI(provider);
+        setProperty("Game Zone", provider);
     }
-#endif
     return true;
 }
 
 IOService* IdeaVPC::initWMI(WMI *instance) {
     return YogaWMI::withIdeaWMI(instance);
 };
-
-#ifndef ALTER
-IOService* IdeaVPC::initSMC() {
-    return IdeaSMC::withDevice(this, ec);
-};
-#endif
 
 bool IdeaVPC::isPowerChanged() {
     bool ret = false;

@@ -82,10 +82,7 @@ private:
     void addVSMCKey() APPLE_KEXT_OVERRIDE;
     void updateECVendor() APPLE_KEXT_OVERRIDE;
 
-public:
-    static DYSMC *withDevice(IOService *provider, IOACPIPlatformDevice *device);
-
-    void setWMI(IOService* instance);
+    void getWMISensor(IOService* provider) APPLE_KEXT_OVERRIDE;
 };
 
 #endif /* DYSMC_hpp */

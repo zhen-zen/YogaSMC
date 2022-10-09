@@ -139,28 +139,8 @@ IOService* YogaSMC::probe(IOService *provider, SInt32 *score) {
         DebugLog("conf not found");
         return nullptr;
     }
-    return super::probe(provider, score);
-}
-
-YogaSMC* YogaSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) {
-    if (!device)
-        return nullptr;
-
-    YogaSMC* drv = OSTypeAlloc(YogaSMC);
-
-    drv->conf = OSDictionary::withDictionary(OSDynamicCast(OSDictionary, provider->getProperty("Sensors")));
-
-    OSDictionary *dictionary = OSDictionary::withCapacity(1);
-    dictionary->setObject("Sensors", drv->conf);
-
-    drv->ec = device;
-    drv->iname = device->getName();
-
-    if (!drv->init(dictionary))
-        OSSafeReleaseNULL(drv);
-
-    dictionary->release();
-    return drv;
+    getWMISensor(provider);
+    return this;
 }
 
 void YogaSMC::updateEC() {
