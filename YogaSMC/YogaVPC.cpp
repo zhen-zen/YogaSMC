@@ -36,6 +36,7 @@ IOService *YogaVPC::probe(IOService *provider, SInt32 *score)
         return nullptr;
     }
 
+    setProperty("ECDevice", ec);
     isPMsupported = true;
 
     if (vendorWMISupport)

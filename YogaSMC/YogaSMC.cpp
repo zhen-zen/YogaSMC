@@ -126,6 +126,22 @@ bool YogaSMC::vsmcNotificationHandler(void *sensors, void *refCon, IOService *vs
     return false;
 }
 
+IOService* YogaSMC::probe(IOService *provider, SInt32 *score) {
+    ec = OSDynamicCast(IOACPIPlatformDevice, provider->getProperty("ECDevice"));
+    if (!ec) {
+        DebugLog("EC not found");
+        return nullptr;
+    }
+    iname = ec->getName();
+
+    conf = OSDynamicCast(OSDictionary, getProperty("Sensors"));
+    if (!conf) {
+        DebugLog("conf not found");
+        return nullptr;
+    }
+    return super::probe(provider, score);
+}
+
 YogaSMC* YogaSMC::withDevice(IOService *provider, IOACPIPlatformDevice *device) {
     if (!device)
         return nullptr;
