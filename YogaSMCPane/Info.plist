@@ -19,7 +19,7 @@
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright © 2020 Zhen. All rights reserved.</string>
+	<string>Copyright © 2022 Zhen. All rights reserved.</string>
 	<key>NSMainNibFile</key>
 	<string>YogaSMCPane</string>
 	<key>NSPrefPaneIconFile</key>
