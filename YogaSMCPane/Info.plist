@@ -23,7 +23,7 @@
 	<key>NSMainNibFile</key>
 	<string>YogaSMCPane</string>
 	<key>NSPrefPaneIconFile</key>
-	<string>YogaSMCPane.tiff</string>
+	<string>YogaSMCPane.icns</string>
 	<key>NSPrefPaneIconLabel</key>
 	<string>YogaSMCPane</string>
 	<key>NSPrincipalClass</key>
