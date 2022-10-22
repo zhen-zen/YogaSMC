@@ -25,7 +25,7 @@ YogaWMI* YogaWMI::withIdeaWMI(WMI *provider) {
     } else if (provider->hasMethod(GAME_ZONE_DATA_WMI_METHOD)) {
         dev = OSTypeAlloc(IdeaWMIGameZone);
     } else {
-        dev = OSTypeAlloc(YogaWMI);
+        return nullptr;
     }
 
     OSDictionary *dictionary = OSDictionary::withCapacity(1);

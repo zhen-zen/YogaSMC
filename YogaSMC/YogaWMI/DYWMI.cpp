@@ -18,11 +18,10 @@ OSDefineMetaClassAndStructors(DYWMI, YogaWMI);
 YogaWMI* YogaWMI::withDYWMI(WMI *provider) {
     YogaWMI* dev = nullptr;
 
-    if (provider->hasMethod(SENSOR_DATA_WMI_ARRAY, 0))
-        dev = OSTypeAlloc(DYWMI);
-    else
-        dev = OSTypeAlloc(YogaWMI);
+    if (!(provider->hasMethod(SENSOR_DATA_WMI_ARRAY, 0)))
+        return nullptr;
 
+    dev = OSTypeAlloc(DYWMI);
     OSDictionary *dictionary = OSDictionary::withCapacity(1);
 
     dev->iname = provider->getName();
