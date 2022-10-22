@@ -1,5 +1,8 @@
 YogaSMC Changelog
 ============================
+#### v1.5.3
+- YogaBMF: fix kp caused by variable objects parsing
+
 #### v1.5.2
 - YogaVPC: query available DYTC functions
 - YogaVPC: fix updateAll call hierarchy, thx @antoniomcr96

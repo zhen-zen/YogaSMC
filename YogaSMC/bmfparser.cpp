@@ -196,164 +196,158 @@ OSDictionary* MOF::parse_method(uint32_t *buf, uint32_t verify) {
     uint32_t clen = buf[4];
     uint32_t *nbuf = buf + (buf[4] != 0xFFFFFFFF && buf[4] > 0xFFFF ? 4:5);
     
-    // Variables or Qualifiers
-    if (type[0] != MOF_OBJECT | type[1] != 0x20) {
+    if (nlen == 0xFFFFFFFF) {
         // Variable map or objects
-        if (nlen == 0xFFFFFFFF) {
-            name = parse_string((char *)nbuf, clen);
-            nbuf = (uint32_t *)((char *)nbuf + clen);
-            uint32_t count = nbuf[1];
-            if (count > 0xff) error("count exceeded");
-            OSDictionary *variables = OSDictionary::withCapacity(count+3);
-            nbuf += 2;
-            for (uint32_t i=0; i<count; i++) {
-                item = parse_method(nbuf);
-                variables->merge(item);
-                item->release();
-                nbuf = (uint32_t *)((char *)nbuf + nbuf[0]);
-            }
-//            dict->flushCollection();
-            dict->setObject(name, variables);
-            variables->release();
+        name = parse_string((char *)nbuf, clen);
+        nbuf = (uint32_t *)((char *)nbuf + clen);
+        uint32_t count = nbuf[1];
+        if (count > 0xff) error("count exceeded");
+        OSDictionary *variables = OSDictionary::withCapacity(count+3);
+        nbuf += 2;
+        for (uint32_t i=0; i<count; i++) {
+            item = parse_method(nbuf);
+            variables->merge(item);
+            item->release();
+            nbuf = (uint32_t *)((char *)nbuf + nbuf[0]);
         }
-        else
-        {
-            name = parse_string((char *)nbuf, nlen);
-            switch (verify) {
-                case 0:
+//      dict->flushCollection();
+        dict->setObject(name, variables);
+        variables->release();
+    } else if (type[0] != MOF_OBJECT | type[1] != 0x20) {
+        // Variables or Qualifiers
+        name = parse_string((char *)nbuf, nlen);
+        switch (verify) {
+            case 0:
+                break;
+
+            case MOF_OFFSET_BOOLEAN:
+                if (strcasecmp(name->getCStringNoCopy(), "Dynamic") == 0) {
+//                  dict->flushCollection();
                     break;
-
-                case MOF_OFFSET_BOOLEAN:
-                    if (strcasecmp(name->getCStringNoCopy(), "Dynamic") == 0) {
-//                        dict->flushCollection();
-                        break;
-                    }
-
-                case MOF_OFFSET_OBJECT:
-//                        dict->flushCollection();
-                    break;
-
-                case MOF_OFFSET_STRING:
-                    if (name->isEqualTo("CIMTYPE")) {
-//                        dict->flushCollection();
-                        // TODO: verify "object:" of upper item
-                        break;
-                    }
-
-                case MOF_OFFSET_SINT32:
-                    if (name->isEqualTo("ID")) {
-//                        dict->flushCollection();
-                        break;
-                    }
-
-                default:
-                    dict->setObject("verified", kOSBooleanFalse);
-                    break;
-            }
-
-            nbuf = (uint32_t *)((char *)nbuf + nlen);
-
-            if (clen == 0xFFFFFFFF)
-                clen = buf[0]-0x14-nlen;
-            else if (clen > 0xFFFF)
-                clen = buf[0]-0x10-nlen;
-            else {
-                if (clen != buf[0]-0x1c) error("content length calc error");
-                clen -= nlen;
-            }
-
-            // ValueMap
-            if (type[1] == 0x20) {
-                if (nbuf[0] != clen) error("valuemap length mismatch");
-                if (nbuf[1] != 1) error("valuemap pattern mismatch");
-                if (nbuf[3] != clen-0xc) error("valuemap content length mismatch");
-                uint32_t count = nbuf[2];
-                if (count > 0xff) error("count exceeded");
-                nbuf +=4;
-                if (!verify) {
-                    bool map;
-                    if (strcasecmp(name->getCStringNoCopy(), "ValueMap") == 0)
-                        map = true;
-                    else if (strcasecmp(name->getCStringNoCopy(), "Values") == 0)
-                        map = false;
-                    else
-                        error("invalid valuemap");
-
-                    if (map)
-                    {
-                        valuemap = OSArray::withCapacity(count);
-                        vmap = OSDictionary::withCapacity(count);
-                        setPropertyString(dict, name, "Values");
-                    }
-                    for (uint32_t i=0; i<count; i++) {
-                        switch (type[0]) {
-                            case MOF_STRING:
-                                nbuf = (uint32_t *)((uint16_t *)nbuf + parse_valuemap((uint16_t *)nbuf, map, i));
-                                break;
-                            case MOF_SINT32:
-                                nbuf += parse_valuemap((int32_t *)nbuf, map, i);
-                                break;
-                            default:
-                                break;
-                        }
-                        
-                    }
-                    if (!map)
-                    {
-                        dict->setObject(name, vmap);
-                        valuemap->release();
-                        vmap->release();
-                    }
                 }
-            }
-            else {
-            switch (type[0]) {
-                case MOF_BOOLEAN:
-//                    if (!verify)
-//                        dict->flushCollection();
 
-                    if (clen != 4 && clen != 2) {
-                        error("boolean length mismatch");
+            case MOF_OFFSET_OBJECT:
+//                  dict->flushCollection();
+                break;
+
+            case MOF_OFFSET_STRING:
+                if (name->isEqualTo("CIMTYPE")) {
+//                  dict->flushCollection();
+                    // TODO: verify "object:" of upper item
+                    break;
+                }
+
+            case MOF_OFFSET_SINT32:
+                if (name->isEqualTo("ID")) {
+//                  dict->flushCollection();
+                    break;
+                }
+
+            default:
+                dict->setObject("verified", kOSBooleanFalse);
+                break;
+        }
+
+        nbuf = (uint32_t *)((char *)nbuf + nlen);
+
+        if (clen == 0xFFFFFFFF)
+            clen = buf[0]-0x14-nlen;
+        else if (clen > 0xFFFF)
+            clen = buf[0]-0x10-nlen;
+        else {
+            if (clen != buf[0]-0x1c) error("content length calc error");
+            clen -= nlen;
+        }
+
+        // ValueMap
+        if (type[1] == 0x20) {
+            if (nbuf[0] != clen) error("valuemap length mismatch");
+            if (nbuf[1] != 1) error("valuemap pattern mismatch");
+            if (nbuf[3] != clen-0xc) error("valuemap content length mismatch");
+            uint32_t count = nbuf[2];
+            if (count > 0xff) error("count exceeded");
+            nbuf +=4;
+            if (!verify) {
+                bool map;
+                if (strcasecmp(name->getCStringNoCopy(), "ValueMap") == 0)
+                    map = true;
+                else if (strcasecmp(name->getCStringNoCopy(), "Values") == 0)
+                    map = false;
+                else
+                    error("invalid valuemap");
+
+                if (map)
+                {
+                    valuemap = OSArray::withCapacity(count);
+                    vmap = OSDictionary::withCapacity(count);
+                    setPropertyString(dict, name, "Values");
+                }
+                for (uint32_t i=0; i<count; i++) {
+                    switch (type[0]) {
+                        case MOF_STRING:
+                            nbuf = (uint32_t *)((uint16_t *)nbuf + parse_valuemap((uint16_t *)nbuf, map, i));
+                            break;
+                        case MOF_SINT32:
+                            nbuf += parse_valuemap((int32_t *)nbuf, map, i);
+                            break;
+                        default:
+                            break;
                     }
                     
-                    switch (clen == 4 ? nbuf[0] : nbuf[0] & 0xFFFF) {
-                        case 0:
-                            dict->setObject(name, kOSBooleanFalse);
-                            break;
-
-                        case 0xFFFF:
-                            dict->setObject(name, kOSBooleanTrue);
-                            break;
-
-                        default:
-                            error("invalid boolean");
-                            break;
-                    }
-                    break;
-
-                case MOF_STRING:
-//                    if (!verify)
-//                        dict->flushCollection();
-                    setPropertyObject(dict, name, parse_string((char *)nbuf, clen));
-                    break;
-
-                case MOF_SINT32:
-//                    if (!verify)
-//                        dict->flushCollection();
-                    if (clen != 4) error("sint32 length mismatch");
-                    setPropertyNumber(dict, name, nbuf[0], 32); // TODO: should be signed int here
-                    break;
-
-                default:
-                    errors("unexpected value type");
-                    setPropertyBytes(dict, name, nbuf, buf[0]-0x10-nlen);
-                    break;
+                }
+                if (!map)
+                {
+                    dict->setObject(name, vmap);
+                    valuemap->release();
+                    vmap->release();
                 }
             }
+        } else {
+        switch (type[0]) {
+            case MOF_BOOLEAN:
+//              if (!verify)
+//                  dict->flushCollection();
+
+                if (clen != 4 && clen != 2) {
+                    error("boolean length mismatch");
+                }
+                
+                switch (clen == 4 ? nbuf[0] : nbuf[0] & 0xFFFF) {
+                    case 0:
+                        dict->setObject(name, kOSBooleanFalse);
+                        break;
+
+                    case 0xFFFF:
+                        dict->setObject(name, kOSBooleanTrue);
+                        break;
+
+                    default:
+                        error("invalid boolean");
+                        break;
+                }
+                break;
+
+            case MOF_STRING:
+//              if (!verify)
+//                  dict->flushCollection();
+                setPropertyObject(dict, name, parse_string((char *)nbuf, clen));
+                break;
+
+            case MOF_SINT32:
+//              if (!verify)
+//                  dict->flushCollection();
+                if (clen != 4) error("sint32 length mismatch");
+                setPropertyNumber(dict, name, nbuf[0], 32); // TODO: should be signed int here
+                break;
+
+            default:
+                errors("unexpected value type");
+                setPropertyBytes(dict, name, nbuf, buf[0]-0x10-nlen);
+                break;
+            }
         }
-    }
-    // Method, or just a class with name?
-    else {
+    } else {
+        // Method, or just a class with name?
         name = parse_string((char *)(buf+5), nlen);
         nbuf = (uint32_t *)((char *)nbuf + nlen);
         if (nbuf[1] != 1) error("pattern mismatch");
