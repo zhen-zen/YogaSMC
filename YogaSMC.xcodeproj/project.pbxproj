@@ -772,6 +772,7 @@
 		6F08ACDB24746B8B00681A63 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				BuildIndependentTargetsInParallel = YES;
 				LastSwiftUpdateCheck = 1200;
 				LastUpgradeCheck = 1300;
 				ORGANIZATIONNAME = zhen;
