@@ -30,7 +30,7 @@ jobs:
     - name: Download Lilu / VirtualSMC SDK (script from hieplpvip/AsusSMC (Acidanthera/Lilu))
       run: src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/hieplpvip/AsusSMC/master/Scripts/bootstrap.sh) && eval "$src" || exit 1
     - name: Xcodebuild Debug
-      uses: sersoft-gmbh/xcodebuild-action@v2
+      uses: mxcl/xcodebuild@v1
       with:
         project: YogaSMC.xcodeproj
         # scheme: # optional
@@ -39,7 +39,7 @@ jobs:
         build-settings: -target BuildAll
         action: build
     - name: Xcodebuild Release
-      uses: sersoft-gmbh/xcodebuild-action@v2
+      uses: mxcl/xcodebuild@v1
       with:
         project: YogaSMC.xcodeproj
         # destination: # optional
@@ -111,14 +111,14 @@ jobs:
     - name: Download Lilu / VirtualSMC SDK (script from hieplpvip/AsusSMC (Acidanthera/Lilu))
       run: src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/hieplpvip/AsusSMC/master/Scripts/bootstrap.sh) && eval "$src" || exit 1
     - name: Xcodebuild Debug Analyze
-      uses: sersoft-gmbh/xcodebuild-action@v2
+      uses: mxcl/xcodebuild@v1
       with:
         project: YogaSMC.xcodeproj
         configuration: Debug
         build-settings: -target BuildAll ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES=NO MACOSX_DEPLOYMENT_TARGET=10.14.4
         action: analyze
     - name: Xcodebuild Release Analyze
-      uses: sersoft-gmbh/xcodebuild-action@v2
+      uses: mxcl/xcodebuild@v1
       with:
         project: YogaSMC.xcodeproj
         configuration: Release
