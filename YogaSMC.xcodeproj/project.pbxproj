@@ -39,6 +39,7 @@
 		6F48676324A293A0003AD4CA /* IdeaWMI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F48676124A293A0003AD4CA /* IdeaWMI.cpp */; };
 		6F48676424A293A0003AD4CA /* IdeaWMI.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F48676224A293A0003AD4CA /* IdeaWMI.hpp */; };
 		6F53F8382564C51F00CC4140 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 6F53F83A2564C51F00CC4140 /* Localizable.strings */; };
+		6F5FA081290679FB00267678 /* YogaSMCNC.icns in Resources */ = {isa = PBXBuildFile; fileRef = 6F5FA080290679FB00267678 /* YogaSMCNC.icns */; };
 		6F64A28325A7FA7D00070265 /* DYVPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F64A28125A7FA7D00070265 /* DYVPC.cpp */; };
 		6F64A28425A7FA7D00070265 /* DYVPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F64A28125A7FA7D00070265 /* DYVPC.cpp */; };
 		6F64A28525A7FA7D00070265 /* DYVPC.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6F64A28225A7FA7D00070265 /* DYVPC.hpp */; };
@@ -237,6 +238,7 @@
 		6F48676124A293A0003AD4CA /* IdeaWMI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IdeaWMI.cpp; sourceTree = "<group>"; };
 		6F48676224A293A0003AD4CA /* IdeaWMI.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IdeaWMI.hpp; sourceTree = "<group>"; };
 		6F53F8392564C51F00CC4140 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		6F5FA080290679FB00267678 /* YogaSMCNC.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = YogaSMCNC.icns; sourceTree = "<group>"; };
 		6F64A28125A7FA7D00070265 /* DYVPC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DYVPC.cpp; sourceTree = "<group>"; };
 		6F64A28225A7FA7D00070265 /* DYVPC.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DYVPC.hpp; sourceTree = "<group>"; };
 		6F6CEDA224BC14C2004D553F /* ThinkVPC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ThinkVPC.cpp; sourceTree = "<group>"; };
@@ -542,6 +544,7 @@
 		6F86121D253AF7FA008FB857 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				6F5FA080290679FB00267678 /* YogaSMCNC.icns */,
 				6F86122D253B692C008FB857 /* AirplaneMode.pdf */,
 				6F86122E253B692C008FB857 /* Antenna.pdf */,
 				6F861214253AF7E4008FB857 /* BacklightHigh.pdf */,
@@ -838,6 +841,7 @@
 				6F8B2343253CEF97005BEC5D /* Sleep.pdf in Resources */,
 				6F7E23E726478D2900155D18 /* Dock.pdf in Resources */,
 				6F8B2304253C4241005BEC5D /* MicOff.pdf in Resources */,
+				6F5FA081290679FB00267678 /* YogaSMCNC.icns in Resources */,
 				6F861217253AF7E4008FB857 /* BacklightHigh.pdf in Resources */,
 				6F7E23E626478D2900155D18 /* Undock.pdf in Resources */,
 				6F0A987E25343359002F9F65 /* Assets.xcassets in Resources */,
