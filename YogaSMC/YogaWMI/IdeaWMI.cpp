@@ -337,15 +337,41 @@ void IdeaWMIGameZone::processWMI() {
         setProperty("Keyboard Feature", result, 32);
     else
         AlwaysLog("Failed to get keyboard feature");
+
+    ACPIEvent(smartFanModeEvent);
 }
 
 void IdeaWMIGameZone::ACPIEvent(UInt32 argument) {
     OSObject *result;
     OSNumber *id;
-    if (YWMI->getEventData(argument, &result) && (id = (OSDynamicCast(OSNumber, result))))
-        DebugLog("message: ACPI notification 0x%04x - 0x%04x", argument, id->unsigned32BitValue());
-    else
+    if (YWMI->getEventData(argument, &result) && (id = (OSDynamicCast(OSNumber, result)))) {
+        if (argument == smartFanModeEvent) {
+            switch (id->unsigned32BitValue()) {
+                case 1:
+                    AlwaysLog("Smart Fan mode: Quiet - Low Speed Fan");
+                    break;
+                    
+                case 2:
+                    AlwaysLog("Smart Fan mode: Balance - Balance Acoustic");
+                    break;
+                    
+                case 3:
+                    AlwaysLog("Smart Fan mode: Performance - High Speed Fan");
+                    break;
+                    
+                default:
+                    DebugLog("Smart Fan mode: unknown - 0x%04x", id->unsigned32BitValue());
+                    OSSafeReleaseNULL(result);
+                    return;
+            }
+            smartFanMode = id->unsigned32BitValue();
+            dispatchMessage(kSMC_smartFanEvent, &smartFanMode);
+        } else {
+            DebugLog("message: ACPI notification 0x%04x - 0x%04x", argument, id->unsigned32BitValue());
+        }
+    } else {
         AlwaysLog("message: Unknown ACPI notification 0x%04x", argument);
+    }
     OSSafeReleaseNULL(result);
 }
 

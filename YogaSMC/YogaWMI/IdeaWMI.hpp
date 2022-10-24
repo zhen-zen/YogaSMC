@@ -207,6 +207,9 @@ class IdeaWMIGameZone : public YogaWMI
     UInt32 GPUEvent  {0xe0};
     UInt32 fanEvent  {0xe1};
     UInt32 keyEvent  {0xe2};
+    UInt32 smartFanModeEvent  {0xe3};
+
+    UInt32 smartFanMode {0};
 
     bool getGamzeZoneData(UInt32 query, UInt32 *result);
 
