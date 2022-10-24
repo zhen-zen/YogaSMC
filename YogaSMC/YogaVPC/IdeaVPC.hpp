@@ -17,45 +17,113 @@
 // from linux/drivers/platform/x86/ideapad-laptop.c
 
 enum {
-    CFG_GRAPHICS_BIT       = 8,
-    CFG_BT_BIT             = 16,
-    CFG_3G_BIT             = 17,
-    CFG_WIFI_BIT           = 18,
-    CFG_CAMERA_BIT         = 19,
-    CFG_TOUCHPAD_BIT       = 30,
+    CFG_WIRELESS_COEX_BIT, /* 0 */
+    CFG_RESERVED_BIT, /* 1 */
+    CFG_PROCESSOR_BIT, /* 2 */
+    CFG_QUITE_BIT, /* 3 */
+    CFG_TOUCH_BIT, /* 4 */
+    CFG_SUPER_PERF_BIT, /* 5 */
+    CFG_UNDERCLOCK_BIT, /* 6 */
+    CFG_DCR_BIT, /* 7 */
+    CFG_GRAPHICS_3BIT, /* 8 */
+    CFG_HDMI_BIT = 11,
+    CFG_ACTIVE_VGA_BIT, /* 12 */
+    CFG_EQ_BUTTON_3BIT, /* 13 */
+    CFG_BT_BIT = 16,
+    CFG_3G_BIT, /* 17 */
+    CFG_WIFI_BIT, /* 18 */
+    CFG_CAMERA_BIT, /* 19 */
+    CFG_USER_BUTTON_3BIT, /* 20 */
+    CFG_COLOR_ENGINE_BIT, /* 23 */
+    CFG_PRODUCT_INFO_2BIT, /* 24 */
+    CFG_TOUCHPAD_OSD_BIT, /* 26 */
+    CFG_NUMLK_OSD_BIT, /* 27 */
+    CFG_CAPSLK_OSD_BIT, /* 28 */
+    CFG_MIC_OSD_BIT, /* 29 */
+    CFG_TOUCHPAD_BIT, /* 30 */
+    CFG_CAMERA_OSD_BIT, /* 31 */
 };
 
 enum {
-    BM_RAPIDCHARGE_BIT     = 2,
-    BM_BATTERY0BAD_BIT     = 3,
-    BM_BATTERY1BAD_BIT     = 4,
-    BM_CONSERVATION_BIT    = 5,
+    BM0_CALIBRATION_BIT, /* 0 */
+    BM_STORAGEMODE_SEL_BIT,  /* 1 */
+    BM_RAPIDCHARGE_BIT, /* 2 */
+    BM0_BATTERYBAD_BIT, /* 3 */
+    BM1_BATTERYBAD_BIT, /* 4 */
+    BM0_CONSERVATION_BIT, /* 5 */
+    BM1_CONSERVATION_BIT, /* 6 */
+    BM0_ILLEGAL_BIT, /* 7 */
+    BM0_PERF_DEGRADE_BIT, /* 8 */
+    BM0_STORAGEMODE_STA_BIT, /* 9 */
+    BM1_ILLEGAL_BIT, /* 10 */
+    BM0_NORMAL_BIT, /* 11 */
+    BM1_NORMAL_BIT, /* 12 */
+    BM1_PERF_DEGRADE_BIT, /* 13 */
+    BM_BATTERYNUM_BIT, /* 14 */
+    BM_ADAPTER_TYPE_2BIT, /* 15 */
+    BM_RAPIDCHARGE_CAP, /* 17 */
+    BM_SHIPMODE_CAP, /* 18 */
+    BM_ADAPTER_TYPE_CAP, /* 19 */
+    BM1_CALIBRATION_BIT, /* 20 */
+    BM1_STORAGEMODE_STA_BIT, /* 21 */
+    BM_SHIPMODE_BIT, /* 22 */
+    BM_CHARGE_THRES_BIT, /* 23 */
 };
 
 enum {
-    BMCMD_CONSERVATION_ON  = 0x3,
-    BMCMD_CONSERVATION_OFF = 0x5,
-    BMCMD_RAPIDCHARGE_ON   = 0x7,
-    BMCMD_RAPIDCHARGE_OFF  = 0x8,
+    BMCMD0_CALIBRATION_END, /* 0 */
+    BMCMD0_CALIBRATION_INIT, /* 1 */
+    BMCMD0_CONSERVATION_ON = 3,
+    BMCMD0_CONSERVATION_OFF = 5,
+    BMCMD0_STORAGEMODE_CLR, /* 6 */
+    BMCMD0_RAPIDCHARGE_ON, /* 7 */
+    BMCMD0_RAPIDCHARGE_OFF, /* 8 */
+    BMCMD_SHIPMODE_ENTER, /* 9 */
+    BMCMD1_CALIBRATION_END, /* 10 */
+    BMCMD1_CALIBRATION_INIT, /* 11 */
+    BMCMD1_CONSERVATION_ON = 13,
+    BMCMD1_CONSERVATION_OFF = 15,
+    BMCMD_SHIPMODE_EXIT, /* 16 */
 };
 
 enum {
-    HA_BACKLIGHT_CAP_BIT   = 4,
-    HA_BACKLIGHT_BIT       = 5,
-    HA_AOUSB_CAP_BIT       = 6,
-    HA_AOUSB_BIT           = 7,
-    HA_FNLOCK_CAP_BIT      = 9,
-    HA_FNLOCK_BIT          = 10,
-    HA_PRIMEKEY_BIT        = 11,
+    HA_ALS_BIT, /* 0 */
+    HA_ALSKBC_BIT, /* 1 */
+    HA_ALSKBC_CAP, /* 2 */
+    HA_ALS_CAP, /* 3 */
+    HA_BACKLIGHT_CAP, /* 4 */
+    HA_BACKLIGHT_BIT, /* 5 */
+    HA_AOUSB_CAP, /* 6 */
+    HA_AOUSB_BIT, /* 7 */
+    HA_AUTODIS_CAP, /* 8 */
+    HA_FNLOCK_CAP, /* 9 */
+    HA_FNLOCK_BIT, /* 10 */
+    HA_PRIMEKEY_BIT, /* 11 */
+    HA_S0IL_CAP, /* 12 */
+    HA_ITS_BIT, /* 13 */
+    HA_AOUSBBAT_CAP, /* 14 */
+    HA_AOUSBBAT_BIT, /* 15 */
 };
 
 enum {
-    HACMD_BACKLIGHT_ON     = 0x8,
-    HACMD_BACKLIGHT_OFF    = 0x9,
-    HACMD_AOUSB_ON         = 0xa,
-    HACMD_AOUSB_OFF        = 0xb,
-    HACMD_FNLOCK_ON        = 0xe,
-    HACMD_FNLOCK_OFF       = 0xf,
+    HACMD_S0IL_OFF, /* 0 */
+    HACMD_S0IL_ON, /* 1 */
+    HACMD_COLOR_ENG_ON = 4,
+    HACMD_COLOR_ENG_OFF, /* 5 */
+    HACMD_ALS_OFF, /* 6 */
+    HACMD_ALS_ON, /* 7 */
+    HACMD_BACKLIGHT_ON, /* 8 */
+    HACMD_BACKLIGHT_OFF, /* 9 */
+    HACMD_AOUSB_ON, /* 10 */
+    HACMD_AOUSB_OFF, /* 11 */
+    HACMD_AUTOKT_ON, /* 12 */
+    HACMD_AUTOKT_OFF, /* 13 */
+    HACMD_FNLOCK_ON, /* 14 */
+    HACMD_FNLOCK_OFF, /* 15 */
+    HACMD_S0IL_ENTER, /* 16 */
+    HACMD_S0IL_EXIT, /* 17 */
+    HACMD_AOUSBBAT_OFF, /* 18 */
+    HACMD_AOUSBBAT_ON, /* 19 */
 };
 
 enum {
@@ -158,6 +226,11 @@ private:
      *  Fn lock mode capability, will be update on init
      */
     bool FnlockCap {false};
+
+    /**
+     *  Rapid charge mode capability, will be update on init
+     */
+    bool rapidChargeCap {false};
 
     /**
      *  Rapid charge mode status

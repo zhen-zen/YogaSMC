@@ -42,7 +42,7 @@ bool IdeaVPC::initVPC() {
     setPropertyBoolean(capabilities, "Camera", (config >> CFG_CAMERA_BIT) & 0x1);
     setPropertyBoolean(capabilities, "Touchpad", (config >> CFG_TOUCHPAD_BIT) & 0x1);
 
-    UInt8 cap_graphics = config >> CFG_GRAPHICS_BIT & 0x7;
+    UInt8 cap_graphics = config >> CFG_GRAPHICS_3BIT & 0x7;
     switch (cap_graphics) {
         case 1:
             setPropertyString(capabilities, "Graphics", "Intel");
@@ -322,13 +322,13 @@ void IdeaVPC::updateKeyboardCapability() {
         return;
     }
 
-    backlightCap = BIT(HA_BACKLIGHT_CAP_BIT) & kbdState;
+    backlightCap = BIT(HA_BACKLIGHT_CAP) & kbdState;
     if (!backlightCap)
         setProperty(backlightPrompt, "unsupported");
     else
         setProperty(autoBacklightPrompt, automaticBacklightMode, 8);
 
-    FnlockCap = BIT(HA_FNLOCK_CAP_BIT) & kbdState;
+    FnlockCap = BIT(HA_FNLOCK_CAP) & kbdState;
     if (!FnlockCap)
         setProperty(FnKeyPrompt, "unsupported");
 
@@ -337,7 +337,7 @@ void IdeaVPC::updateKeyboardCapability() {
     else
         setProperty("PrimeKeyType", "FnKey");
 
-    alwaysOnUSBCap = BIT(HA_AOUSB_CAP_BIT) & kbdState;
+    alwaysOnUSBCap = BIT(HA_AOUSB_CAP) & kbdState;
     if (!alwaysOnUSBCap)
         setProperty(alwaysOnUSBPrompt, "unsupported");
 }
@@ -352,16 +352,20 @@ void IdeaVPC::updateBatteryCapability() {
         return;
     }
 
+    rapidChargeCap = BIT(BM_RAPIDCHARGE_CAP) & batState;
+    if (!rapidChargeCap)
+        setProperty(rapidChargePrompt, "unsupported");
+
     OSDictionary *bat0 = OSDictionary::withCapacity(5);
     OSDictionary *bat1 = OSDictionary::withCapacity(5);
-    if (BIT(BM_BATTERY0BAD_BIT) & batState) {
+    if (BIT(BM0_BATTERYBAD_BIT) & batState) {
         bat0->setObject("Critical", kOSBooleanTrue);
         setProperty("Battery", "Critical");
         AlwaysLog("Battery 0 critical!");
         conservationModeLock = true;
     }
 
-    if (BIT(BM_BATTERY1BAD_BIT) & batState) {
+    if (BIT(BM1_BATTERYBAD_BIT) & batState) {
         bat1->setObject("Critical", kOSBooleanTrue);
         setProperty("Battery", "Critical");
         AlwaysLog("Battery 1 critical!");
@@ -546,15 +550,16 @@ bool IdeaVPC::updateBattery(bool update) {
         return false;
     }
 
-    conservationMode = BIT(BM_CONSERVATION_BIT) & state;
-    rapidChargeMode = BIT(BM_RAPIDCHARGE_BIT) & state;
-
     if (update) {
         DebugLog(updateSuccess, batteryPrompt, state);
     }
 
+    conservationMode = BIT(BM0_CONSERVATION_BIT) & state;
     setProperty(conservationPrompt, conservationMode);
-    setProperty(rapidChargePrompt, rapidChargeMode);
+    if (rapidChargeCap) {
+        rapidChargeMode = BIT(BM_RAPIDCHARGE_BIT) & state;
+        setProperty(rapidChargePrompt, rapidChargeMode);
+    }
 
     return true;
 }
@@ -577,10 +582,6 @@ bool IdeaVPC::updateKeyboard(bool update) {
         // Inference from brightness cycle: 0 -> 1 -> 2 -> 0
         backlightLevel = (BIT(HA_BACKLIGHT_BIT) & state) ? (backlightLevel ? 2 : 1) : 0;
     }
-    if (FnlockCap)
-        FnlockMode = BIT(HA_FNLOCK_BIT) & state;
-    if (alwaysOnUSBCap)
-        alwaysOnUSBMode = BIT(HA_AOUSB_BIT) & state;
 
     if (update) {
         DebugLog(updateSuccess, keyboardPrompt, state);
@@ -588,10 +589,14 @@ bool IdeaVPC::updateKeyboard(bool update) {
 
     if (backlightCap)
         setProperty(backlightPrompt, backlightLevel, 32);
-    if (FnlockCap)
+    if (FnlockCap) {
+        FnlockMode = BIT(HA_FNLOCK_BIT) & state;
         setProperty(FnKeyPrompt, FnlockMode);
-    if (alwaysOnUSBCap)
+    }
+    if (alwaysOnUSBCap) {
         setProperty(alwaysOnUSBPrompt, alwaysOnUSBMode);
+        alwaysOnUSBMode = BIT(HA_AOUSB_BIT) & state;
+    }
 
     return true;
 }
@@ -617,14 +622,14 @@ bool IdeaVPC::toggleAlwaysOnUSB() {
 }
 
 bool IdeaVPC::toggleConservation() {
-    IOReturn ret = evaluateIntegerParam(setBatteryMode, nullptr, conservationMode ? BMCMD_CONSERVATION_OFF : BMCMD_CONSERVATION_ON);
+    IOReturn ret = evaluateIntegerParam(setBatteryMode, nullptr, conservationMode ? BMCMD0_CONSERVATION_OFF : BMCMD0_CONSERVATION_ON);
     if (ret != kIOReturnSuccess) {
         AlwaysLog(toggleError, conservationPrompt, ret);
         return false;
     }
 
     conservationMode = !conservationMode;
-    DebugLog(toggleSuccess, conservationPrompt, (conservationMode ? BMCMD_CONSERVATION_ON : BMCMD_CONSERVATION_OFF), (conservationMode ? "on" : "off"));
+    DebugLog(toggleSuccess, conservationPrompt, (conservationMode ? BMCMD0_CONSERVATION_ON : BMCMD0_CONSERVATION_OFF), (conservationMode ? "on" : "off"));
     setProperty(conservationPrompt, conservationMode);
 
     notifyBattery();
@@ -632,18 +637,17 @@ bool IdeaVPC::toggleConservation() {
 }
 
 bool IdeaVPC::toggleRapidCharge() {
-    // experimental, reset required
-    if (conservationModeLock)
-        return false;
+    if (!rapidChargeCap)
+        return true;
 
-    IOReturn ret = evaluateIntegerParam(setBatteryMode, nullptr, rapidChargeMode ? BMCMD_RAPIDCHARGE_OFF : BMCMD_RAPIDCHARGE_ON);
+    IOReturn ret = evaluateIntegerParam(setBatteryMode, nullptr, rapidChargeMode ? BMCMD0_RAPIDCHARGE_OFF : BMCMD0_RAPIDCHARGE_ON);
     if (ret != kIOReturnSuccess) {
         AlwaysLog(toggleError, rapidChargePrompt, ret);
         return false;
     }
 
     rapidChargeMode = !rapidChargeMode;
-    DebugLog(toggleSuccess, rapidChargePrompt, (rapidChargeMode ? BMCMD_RAPIDCHARGE_ON : BMCMD_RAPIDCHARGE_OFF), (rapidChargeMode ? "on" : "off"));
+    DebugLog(toggleSuccess, rapidChargePrompt, (rapidChargeMode ? BMCMD0_RAPIDCHARGE_ON : BMCMD0_RAPIDCHARGE_OFF), (rapidChargeMode ? "on" : "off"));
     setProperty(rapidChargePrompt, conservationMode);
 
     return true;
