@@ -386,6 +386,8 @@ const char* IdeaWMIGameZone::registerEvent(OSString *guid, UInt32 id) {
         fanEvent = id;
     else if (guid->isEqualTo(GAME_ZONE_KEY_WMI_EVENT))
         keyEvent = id;
+    else if (guid->isEqualTo(GAME_ZONE_FAN_MODE_EVENT))
+        smartFanModeEvent = id;
     else
         return nullptr;
     return feature;
