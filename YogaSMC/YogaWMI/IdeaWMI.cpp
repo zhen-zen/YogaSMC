@@ -380,7 +380,7 @@ const char* IdeaWMIGameZone::registerEvent(OSString *guid, UInt32 id) {
         tempEvent = id;
     else if (guid->isEqualTo(GAME_ZONE_OC_EVENT))
         OCEvent = id;
-    else if (guid->isEqualTo(GAME_ZONE_GPU_EVENT))
+    else if (guid->isEqualTo(GAME_ZONE_GPU_TEMP_EVENT))
         GPUEvent = id;
     else if (guid->isEqualTo(GAME_ZONE_FAN_COOLING_EVENT))
         fanEvent = id;
