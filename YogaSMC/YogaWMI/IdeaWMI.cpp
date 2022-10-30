@@ -376,15 +376,15 @@ void IdeaWMIGameZone::ACPIEvent(UInt32 argument) {
 }
 
 const char* IdeaWMIGameZone::registerEvent(OSString *guid, UInt32 id) {
-    if (guid->isEqualTo(GAME_ZONE_TEMP_WMI_EVENT))
+    if (guid->isEqualTo(GAME_ZONE_TEMP_EVENT))
         tempEvent = id;
-    else if (guid->isEqualTo(GAME_ZONE_OC_WMI_EVENT))
+    else if (guid->isEqualTo(GAME_ZONE_OC_EVENT))
         OCEvent = id;
-    else if (guid->isEqualTo(GAME_ZONE_GPU_WMI_EVENT))
+    else if (guid->isEqualTo(GAME_ZONE_GPU_EVENT))
         GPUEvent = id;
-    else if (guid->isEqualTo(GAME_ZONE_FAN_WMI_EVENT))
+    else if (guid->isEqualTo(GAME_ZONE_FAN_COOLING_EVENT))
         fanEvent = id;
-    else if (guid->isEqualTo(GAME_ZONE_KEY_WMI_EVENT))
+    else if (guid->isEqualTo(GAME_ZONE_KEYLOCK_STATUS_EVENT))
         keyEvent = id;
     else if (guid->isEqualTo(GAME_ZONE_FAN_MODE_EVENT))
         smartFanModeEvent = id;
