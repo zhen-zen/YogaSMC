@@ -90,9 +90,7 @@ extension YogaSMCPane {
 
         if let val = props["RapidChargeMode"] as? Bool {
             vRapidChargeMode.state = val ? .on : .off
-            #if DEBUG
             vRapidChargeMode.isEnabled = true
-            #endif
         }
 
         if let dict = props["Battery 0"] as? NSDictionary {
