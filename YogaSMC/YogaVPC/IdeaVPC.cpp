@@ -180,7 +180,7 @@ IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
             break;
 
         case kSMC_smartFanEvent:
-            AlwaysLog("message: %s set smart fan mode %d -> %d", provider->getName(), conservationMode, *(reinterpret_cast<bool *>(argument)));
+            AlwaysLog("message: %s set smart fan mode %d", provider->getName(), *(reinterpret_cast<UInt32 *>(argument)));
             setSmartFanMode(*(reinterpret_cast<bool *>(argument)));
             break;
 
