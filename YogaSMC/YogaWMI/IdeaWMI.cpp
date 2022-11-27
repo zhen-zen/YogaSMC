@@ -323,8 +323,8 @@ void IdeaWMIGameZone::processWMI() {
 
     UInt32 result;
 
-    if (getGamzeZoneData(GAME_ZONE_WMI_GET_VERSION, &result))
-        setProperty("Game Zone Version", result, 32);
+    if (getGamzeZoneData(GAME_ZONE_WMI_GET_VERSION, &version))
+        setProperty("Game Zone Version", version, 32);
     else
         AlwaysLog("Failed to get version");
 
@@ -364,7 +364,7 @@ void IdeaWMIGameZone::ACPIEvent(UInt32 argument) {
                     OSSafeReleaseNULL(result);
                     return;
             }
-            smartFanMode = id->unsigned32BitValue();
+            smartFanMode = id->unsigned32BitValue() | (version << 16);
             dispatchMessage(kSMC_smartFanEvent, &smartFanMode);
         } else {
             DebugLog("message: ACPI notification 0x%04x - 0x%04x", argument, id->unsigned32BitValue());

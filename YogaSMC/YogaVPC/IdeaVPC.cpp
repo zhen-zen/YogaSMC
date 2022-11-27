@@ -116,7 +116,9 @@ void IdeaVPC::setSmartFanMode(UInt32 mode) {
     OSObject *value;
 
     setPropertyString(DYTCStatus, "FuncMode", "GameZone");
+    setPropertyNumber(DYTCStatus, "Revision", mode >> 16, 16);
 
+    mode &= 0xF;
     switch (mode) {
         case 1:
             setPropertyString(DYTCStatus, "PerfMode", "Quiet");
