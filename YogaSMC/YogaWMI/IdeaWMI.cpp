@@ -304,16 +304,16 @@ bool IdeaWMIBattery::getBatteryInfo(UInt32 index, OSArray *bat) {
 
 OSDefineMetaClassAndStructors(IdeaWMIGameZone, YogaWMI);
 
-bool IdeaWMIGameZone::getGamzeZoneData(UInt32 query, UInt32 *result) {
+bool IdeaWMIGameZone::sendGamzeZoneData(UInt32 command, UInt32 *result, UInt32 data) {
     IOReturn ret;
     OSNumber *in;
 
-    in = OSNumber::withNumber(0ULL, 32);
-    ret = YWMI->evaluateInteger(GAME_ZONE_DATA_WMI_METHOD, 0, query, result, in, true);
+    in = OSNumber::withNumber(data, 32);
+    ret = YWMI->evaluateInteger(GAME_ZONE_DATA_WMI_METHOD, 0, command, result, in, true);
     OSSafeReleaseNULL(in);
 
     if (ret != kIOReturnSuccess)
-        AlwaysLog("Query %d evaluation failed", query);
+        AlwaysLog("Query %d evaluation failed", command);
 
     return (ret == kIOReturnSuccess);
 }
@@ -322,30 +322,44 @@ void IdeaWMIGameZone::processWMI() {
     setProperty("Feature", feature);
 
     UInt32 result;
+    OSDictionary *info = OSDictionary::withCapacity(8);
+    OSNumber *value;
 
-    if (getGamzeZoneData(GAME_ZONE_WMI_GET_VERSION, &result))
-        setProperty("Game Zone Version", result, 32);
-    else
-        AlwaysLog("Failed to get version");
+    GAME_ZONE_UPDATE_PROPERTY(GAME_ZONE_WMI_GET_VERSION, "Game Zone Version");
+    GAME_ZONE_UPDATE_PROPERTY(GAME_ZONE_WMI_GET_FAN_NUM, "Fan number");
+    GAME_ZONE_UPDATE_PROPERTY(GAME_ZONE_WMI_CAP_KEYBOARD, "Keyboard Feature");
+    GAME_ZONE_UPDATE_PROPERTY(GAME_ZONE_WMI_GET_THERMAL_TABLE, "Thermal Table");
+    GAME_ZONE_UPDATE_PROPERTY(GAME_ZONE_WMI_GET_CHARGE_MODE, "Charge Mode");
+    GAME_ZONE_UPDATE_PROPERTY(GAME_ZONE_WMI_GET_THERMAL_MODE, "Thermal Mode");
+    GAME_ZONE_UPDATE_PROPERTY(GAME_ZONE_WMI_GET_SMARTFAN_MODE, "Smart Fan Mode");
+    GAME_ZONE_UPDATE_PROPERTY(GAME_ZONE_WMI_GET_SMARTFAN_STA, "Smart Fan Status");
 
-    if (getGamzeZoneData(GAME_ZONE_WMI_GET_FAN_NUM, &result))
-        setProperty("Fan number", result, 32);
-    else
-        AlwaysLog("Failed to get fan number");
-
-    if (getGamzeZoneData(GAME_ZONE_WMI_CAP_KEYBOARD, &result))
-        setProperty("Keyboard Feature", result, 32);
-    else
-        AlwaysLog("Failed to get keyboard feature");
+    setProperty("Info", info);
+    info->release();
 }
 
 void IdeaWMIGameZone::ACPIEvent(UInt32 argument) {
     OSObject *result;
     OSNumber *id;
-    if (YWMI->getEventData(argument, &result) && (id = (OSDynamicCast(OSNumber, result))))
-        DebugLog("message: ACPI notification 0x%04x - 0x%04x", argument, id->unsigned32BitValue());
-    else
+    if (YWMI->getEventData(argument, &result) && (id = (OSDynamicCast(OSNumber, result)))) {
+        if (argument == GAME_ZONE_COOLING_WMI_EVENT_OVERRIDE) {
+            switch (id->unsigned32BitValue()) {
+                case 1: // GZ44 1 -> 2
+                case 2: // GZ44 2 -> 0
+                case 3: // GZ44 0 -> 1
+                    DebugLog("message: Cooling mode 0x%04x", id->unsigned32BitValue());
+                    break;
+                    
+                default:
+                    AlwaysLog("message: Unknown cooling mode 0x%04x", id->unsigned32BitValue());
+                    break;
+            }
+        } else {
+            DebugLog("message: ACPI notification 0x%04x - 0x%04x", argument, id->unsigned32BitValue());
+        }
+    } else {
         AlwaysLog("message: Unknown ACPI notification 0x%04x", argument);
+    }
     OSSafeReleaseNULL(result);
 }
 
@@ -364,3 +378,51 @@ const char* IdeaWMIGameZone::registerEvent(OSString *guid, UInt32 id) {
         return nullptr;
     return feature;
 }
+
+IOReturn IdeaWMIGameZone::setProperties(OSObject *props) {
+    commandGate->runAction(OSMemberFunctionCast(IOCommandGate::Action, this, &IdeaWMIGameZone::setPropertiesGated), props);
+    return kIOReturnSuccess;
+}
+
+void IdeaWMIGameZone::setPropertiesGated(OSObject* props) {
+    OSDictionary* dict = OSDynamicCast(OSDictionary, props);
+    if (!dict)
+        return;
+
+    OSCollectionIterator* i = OSCollectionIterator::withCollection(dict);
+    if (i) {
+        while (OSString* key = OSDynamicCast(OSString, i->getNextObject())) {
+            if (key->isEqualTo("GetData")) {
+                OSNumber *value;
+                getPropertyNumber("GetData");
+
+                UInt32 result;
+
+                if (!sendGamzeZoneData(value->unsigned32BitValue(), &result)) {
+                    AlwaysLog(updateFailure, "GetData");
+                } else {
+                    AlwaysLog(updateSuccess, "GetData", result);
+                }
+            } else if (key->isEqualTo("SetData")) {
+                OSNumber *value;
+                getPropertyNumber("SetData");
+
+                UInt32 command = value->unsigned32BitValue() & 0xFFFF;
+                UInt32 data = value->unsigned32BitValue() >> 16;
+                UInt32 result;
+
+                if (!sendGamzeZoneData(command, &result, data)) {
+                    AlwaysLog(updateFailure, "SetData");
+                } else {
+                    AlwaysLog(updateSuccess, "SetData", result);
+                }
+            } else {
+                AlwaysLog("Unknown property %s", key->getCStringNoCopy());
+            }
+        }
+        i->release();
+    }
+
+    return;
+}
+

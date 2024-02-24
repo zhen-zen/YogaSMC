@@ -72,7 +72,7 @@ private:
      */
     bool getSensorInfo (UInt8 index, OSObject **result);
 
-    virtual void setPropertiesGated(OSObject* props);
+    void setPropertiesGated(OSObject* props);
 
 #ifndef ALTER
     friend class DYSMC;

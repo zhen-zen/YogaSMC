@@ -34,6 +34,16 @@
 #define SUPER_RES_DATA_WMI_METHOD   "77e614ed-f19e-46d6-a613-a8669fee1ff0"
 #define SUPER_RES_WMI_EVENT         "95d1df76-d6c0-4e16-9193-7b2a849f3df2"
 
+#define GAME_ZONE_COOLING_WMI_EVENT_OVERRIDE 0xD5
+
+#define GAME_ZONE_UPDATE_PROPERTY(id, name) \
+    do { \
+        if (sendGamzeZoneData(id, &result)) \
+            setPropertyNumber(info, name, result, 32); \
+        else \
+            AlwaysLog("Failed to get %s", name); \
+    } while (0)
+
 enum {
     GAME_ZONE_WMI_GET_TMP_IR        = 0x01,
     GAME_ZONE_WMI_GET_THERMAL_TABLE = 0x02,
@@ -168,7 +178,7 @@ class IdeaWMISuperRes : public YogaWMI
 
     static constexpr const char *feature = "Super Resolution";
     UInt32 SREvent {0xd0};
-    virtual void setPropertiesGated(OSObject* props);
+    void setPropertiesGated(OSObject* props);
 
     void processWMI() APPLE_KEXT_OVERRIDE;
     void ACPIEvent(UInt32 argument) APPLE_KEXT_OVERRIDE;
@@ -208,7 +218,8 @@ class IdeaWMIGameZone : public YogaWMI
     UInt32 fanEvent  {0xe1};
     UInt32 keyEvent  {0xe2};
 
-    bool getGamzeZoneData(UInt32 query, UInt32 *result);
+    bool sendGamzeZoneData(UInt32 command, UInt32 *result, UInt32 data=0);
+    void setPropertiesGated(OSObject* props);
 
 #ifndef ALTER
     friend class IdeaSMC;
@@ -217,6 +228,9 @@ class IdeaWMIGameZone : public YogaWMI
     void processWMI() APPLE_KEXT_OVERRIDE;
     void ACPIEvent(UInt32 argument) APPLE_KEXT_OVERRIDE;
     const char* registerEvent(OSString *guid, UInt32 id) APPLE_KEXT_OVERRIDE;
+
+public:
+    virtual IOReturn setProperties(OSObject* props) APPLE_KEXT_OVERRIDE;
 };
 
 #endif /* IdeaWMI_hpp */
