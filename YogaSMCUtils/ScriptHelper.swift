@@ -17,6 +17,7 @@ let prefpaneAS = """
                         activate
                     end tell
                  """
+
 let sleepAS = "tell application \"System Events\" to sleep"
 
 let searchAS = "tell application \"System Events\" to keystroke space using {command down, option down}"
@@ -60,43 +61,32 @@ func scriptHelper(_ source: String, _ name: String, _ image: NSString? = nil) ->
     return nil
 }
 
-func prefpaneHelper(_ identifier: String = "YogaSMCPane") {
-    guard let prefpane: SystemPreferencesApplication = SBApplication(bundleIdentifier: "com.apple.systempreferences"),
-          let paneArray = prefpane.panes?() else { return }
-
-    guard paneArray.count != 0 else {
-        #if DEBUG
-        showOSD("AppleEventAccess")
-        #endif
-        if scriptHelper(prefpaneAS, "Prefpane") == nil {
-            let alert = NSAlert()
-            alert.messageText = "Failed to open Preferences"
-            alert.informativeText = "Please install YogaSMCPane"
-            alert.alertStyle = .warning
-            alert.addButton(withTitle: "OK")
-            alert.runModal()
+func prefpaneHelper() {
+    
+    let homeDir = NSHomeDirectory()
+    let path = "\(homeDir)/Library/PreferencePanes/"
+    let path2 = "/Library/PreferencePanes/"
+    let url = NSURL(fileURLWithPath: path)
+    let url2 = NSURL(fileURLWithPath: path2)
+    
+    if let pathComponent = url.appendingPathComponent("YogaSMCPane.prefPane"), let pathComponent2 = url2.appendingPathComponent("YogaSMCPane.prefPane") {
+            let filePath = pathComponent.path
+            let filePath2 = pathComponent2.path
+            let fileManager = FileManager.default
+        
+            if fileManager.fileExists(atPath: filePath ) || fileManager.fileExists(atPath: filePath2 )  {
+                NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference")!)
+                NSWorkspace.shared.open(URL(fileURLWithPath: "\(homeDir)/Library/PreferencePanes/YogaSMCPane.prefPane"))
+                NSWorkspace.shared.open(URL(fileURLWithPath: "/Library/PreferencePanes/YogaSMCPane.prefPane"))
+                return
+            } else {
+                let alert = NSAlert()
+                            alert.messageText = "Failed to open Preferences/Settings"
+                            alert.informativeText = "Please install YogaSMCPane"
+                            alert.alertStyle = .warning
+                            alert.addButton(withTitle: "OK")
+                            alert.runModal()
+            }
         }
-        return
-    }
-
-    var target: SystemPreferencesPane?
-    for object in paneArray {
-        if let pane = object as? SystemPreferencesPane,
-           pane.name == identifier {
-            target = pane
-            break
-        }
-    }
-
-    if target == nil {
-        let alert = NSAlert()
-        alert.messageText = "Failed to open Preferences"
-        alert.informativeText = "Please install YogaSMCPane"
-        alert.alertStyle = .warning
-        alert.addButton(withTitle: "OK")
-        alert.runModal()
-        return
-    }
-    _ = target?.reveal?()
-    prefpane.activate()
+    
 }
