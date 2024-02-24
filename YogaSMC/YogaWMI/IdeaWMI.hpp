@@ -19,20 +19,25 @@
 #define WBAT_BAT1_HwId     4
 #define WBAT_BAT1_MfgDate  5
 
-#define BAT_INFO_WMI_STRING         "c3a03776-51ac-49aa-ad0f-f2f7d62c3f3c"
-#define GSENSOR_DATA_WMI_METHOD     "09b0ee6e-c3fd-4243-8da1-7911ff80bb8c"
-#define GSENSOR_WMI_EVENT           "06129d99-6083-4164-81ad-f092f9d773a6"
-#define GSENSOR_DATA_WMI_METHOD_EXT "abbc0f6f-8ea1-11d1-00a0-c90629100000"
-#define GSENSOR_WMI_EVENT_EXT       "abbc0f72-8ea1-11d1-00a0-c90629100000"
-#define PAPER_LOOKING_WMI_EVENT     "56322276-8493-4ce8-a783-98c991274f5e"
-#define GAME_ZONE_DATA_WMI_METHOD   "887b54e3-dddc-4b2c-8b88-68a26a8835d0"
-#define GAME_ZONE_TEMP_WMI_EVENT    "bfd42481-aee3-4501-a107-afb68425c5f8"
-#define GAME_ZONE_OC_WMI_EVENT      "d062906b-12d4-4510-999d-4831ee80e985"
-#define GAME_ZONE_GPU_WMI_EVENT     "bfd42481-aee3-4502-a107-afb68425c5f8"
-#define GAME_ZONE_FAN_WMI_EVENT     "bc72a435-e8c1-4275-b3e2-d8b8074aba59"
-#define GAME_ZONE_KEY_WMI_EVENT     "10afc6d9-ea8b-4590-a2e7-1cd3c84bb4b1"
-#define SUPER_RES_DATA_WMI_METHOD   "77e614ed-f19e-46d6-a613-a8669fee1ff0"
-#define SUPER_RES_WMI_EVENT         "95d1df76-d6c0-4e16-9193-7b2a849f3df2"
+#define BAT_INFO_WMI_STRING             "c3a03776-51ac-49aa-ad0f-f2f7d62c3f3c"
+#define GSENSOR_DATA_WMI_METHOD         "09b0ee6e-c3fd-4243-8da1-7911ff80bb8c"
+#define GSENSOR_WMI_EVENT               "06129d99-6083-4164-81ad-f092f9d773a6"
+#define GSENSOR_DATA_WMI_METHOD_EXT     "abbc0f6f-8ea1-11d1-00a0-c90629100000"
+#define GSENSOR_WMI_EVENT_EXT           "abbc0f72-8ea1-11d1-00a0-c90629100000"
+#define PAPER_LOOKING_WMI_EVENT         "56322276-8493-4ce8-a783-98c991274f5e"
+#define GAME_ZONE_DATA_WMI_METHOD       "887b54e3-dddc-4b2c-8b88-68a26a8835d0"
+#define GAME_ZONE_TEMP_EVENT            "bfd42481-aee3-4501-a107-afb68425c5f8"
+#define GAME_ZONE_OC_EVENT              "d062906b-12d4-4510-999d-4831ee80e985"
+#define GAME_ZONE_GPU_TEMP_EVENT        "bfd42481-aee3-4502-a107-afb68425c5f8"
+#define GAME_ZONE_FAN_COOLING_EVENT     "bc72a435-e8c1-4275-b3e2-d8b8074aba59"
+#define GAME_ZONE_KEYLOCK_STATUS_EVENT  "10afc6d9-ea8b-4590-a2e7-1cd3c84bb4b1"
+#define GAME_ZONE_FAN_MODE_EVENT        "d320289e-8fea-41e0-86f9-611d83151b5f"
+#define GAME_ZONE_POWER_CHARGE_EVENT    "d320289e-8fea-41e0-86f9-711d83151b5f"
+#define GAME_ZONE_LIGHR_PROFILE_EVENT   "d320289e-8fea-41e0-86f9-811d83151b5f"
+#define GAME_ZONE_THERMAL_MODE_EVENT    "d320289e-8fea-41e0-86f9-911d83151b5f"
+#define GAME_ZONE_FAN_SETTING_EVENT     "d320289e-8fea-41e1-86f9-611d83151b5f"
+#define SUPER_RES_DATA_WMI_METHOD       "77e614ed-f19e-46d6-a613-a8669fee1ff0"
+#define SUPER_RES_WMI_EVENT             "95d1df76-d6c0-4e16-9193-7b2a849f3df2"
 
 enum {
     GAME_ZONE_WMI_GET_TMP_IR        = 0x01,
@@ -207,6 +212,10 @@ class IdeaWMIGameZone : public YogaWMI
     UInt32 GPUEvent  {0xe0};
     UInt32 fanEvent  {0xe1};
     UInt32 keyEvent  {0xe2};
+    UInt32 smartFanModeEvent  {0xe3};
+
+    UInt32 version {0};
+    UInt32 smartFanMode {0};
 
     bool getGamzeZoneData(UInt32 query, UInt32 *result);
 

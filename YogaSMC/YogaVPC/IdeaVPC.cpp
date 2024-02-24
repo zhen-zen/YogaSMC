@@ -111,6 +111,34 @@ bool IdeaVPC::exitVPC() {
     return super::exitVPC();
 }
 
+void IdeaVPC::setSmartFanMode(UInt32 mode) {
+    OSDictionary *DYTCStatus = OSDictionary::withCapacity(4);
+    OSObject *value;
+
+    setPropertyString(DYTCStatus, "FuncMode", "GameZone");
+    setPropertyNumber(DYTCStatus, "Revision", mode >> 16, 16);
+
+    mode &= 0xF;
+    switch (mode) {
+        case 1:
+            setPropertyString(DYTCStatus, "PerfMode", "Quiet");
+            break;
+
+        case 2:
+            setPropertyString(DYTCStatus, "PerfMode", "Balance");
+            break;
+
+        case 3:
+            setPropertyString(DYTCStatus, "PerfMode", "Performance");
+            break;
+    }
+
+    setProperty("DYTC", DYTCStatus);
+    DYTCStatus->release();
+    if (client)
+        client->sendNotification(0x12, mode); // Since vpc_bit is less than 16
+}
+
 IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
     switch (type)
     {
@@ -151,6 +179,11 @@ IOReturn IdeaVPC::message(UInt32 type, IOService *provider, void *argument) {
             if (*(reinterpret_cast<bool *>(argument)) != conservationMode &&
                 !conservationModeLock)
                 toggleConservation();
+            break;
+
+        case kSMC_smartFanEvent:
+            AlwaysLog("message: %s set smart fan mode %d", provider->getName(), *(reinterpret_cast<UInt32 *>(argument)));
+            setSmartFanMode(*(reinterpret_cast<UInt32 *>(argument)));
             break;
 
         case kIOACPIMessageDeviceNotification:

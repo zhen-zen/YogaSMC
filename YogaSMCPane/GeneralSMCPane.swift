@@ -78,9 +78,12 @@ extension YogaSMCPane {
     }
 
     func updateDYTC(_ dict: NSDictionary) {
-        if let ver = dict["Revision"] as? NSNumber,
-           let subver = dict["SubRevision"] as? NSNumber {
-            vDYTCRevision.stringValue = "\(ver.intValue).\(subver.intValue)"
+        if let ver = dict["Revision"] as? NSNumber {
+            if let subver = dict["SubRevision"] as? NSNumber {
+                vDYTCRevision.stringValue = "\(ver.intValue).\(subver.intValue)"
+            } else {
+                vDYTCRevision.stringValue = "\(ver.intValue)"
+            }
         } else {
             vDYTCRevision.stringValue = "Unknown"
         }

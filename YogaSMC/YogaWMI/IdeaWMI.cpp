@@ -323,8 +323,8 @@ void IdeaWMIGameZone::processWMI() {
 
     UInt32 result;
 
-    if (getGamzeZoneData(GAME_ZONE_WMI_GET_VERSION, &result))
-        setProperty("Game Zone Version", result, 32);
+    if (getGamzeZoneData(GAME_ZONE_WMI_GET_VERSION, &version))
+        setProperty("Game Zone Version", version, 32);
     else
         AlwaysLog("Failed to get version");
 
@@ -337,29 +337,57 @@ void IdeaWMIGameZone::processWMI() {
         setProperty("Keyboard Feature", result, 32);
     else
         AlwaysLog("Failed to get keyboard feature");
+
+    ACPIEvent(smartFanModeEvent);
 }
 
 void IdeaWMIGameZone::ACPIEvent(UInt32 argument) {
     OSObject *result;
     OSNumber *id;
-    if (YWMI->getEventData(argument, &result) && (id = (OSDynamicCast(OSNumber, result))))
-        DebugLog("message: ACPI notification 0x%04x - 0x%04x", argument, id->unsigned32BitValue());
-    else
+    if (YWMI->getEventData(argument, &result) && (id = (OSDynamicCast(OSNumber, result)))) {
+        if (argument == smartFanModeEvent) {
+            switch (id->unsigned32BitValue()) {
+                case 1:
+                    AlwaysLog("Smart Fan mode: Quiet - Low Speed Fan");
+                    break;
+                    
+                case 2:
+                    AlwaysLog("Smart Fan mode: Balance - Balance Acoustic");
+                    break;
+                    
+                case 3:
+                    AlwaysLog("Smart Fan mode: Performance - High Speed Fan");
+                    break;
+                    
+                default:
+                    DebugLog("Smart Fan mode: unknown - 0x%04x", id->unsigned32BitValue());
+                    OSSafeReleaseNULL(result);
+                    return;
+            }
+            smartFanMode = id->unsigned32BitValue() | (version << 16);
+            dispatchMessage(kSMC_smartFanEvent, &smartFanMode);
+        } else {
+            DebugLog("message: ACPI notification 0x%04x - 0x%04x", argument, id->unsigned32BitValue());
+        }
+    } else {
         AlwaysLog("message: Unknown ACPI notification 0x%04x", argument);
+    }
     OSSafeReleaseNULL(result);
 }
 
 const char* IdeaWMIGameZone::registerEvent(OSString *guid, UInt32 id) {
-    if (guid->isEqualTo(GAME_ZONE_TEMP_WMI_EVENT))
+    if (guid->isEqualTo(GAME_ZONE_TEMP_EVENT))
         tempEvent = id;
-    else if (guid->isEqualTo(GAME_ZONE_OC_WMI_EVENT))
+    else if (guid->isEqualTo(GAME_ZONE_OC_EVENT))
         OCEvent = id;
-    else if (guid->isEqualTo(GAME_ZONE_GPU_WMI_EVENT))
+    else if (guid->isEqualTo(GAME_ZONE_GPU_TEMP_EVENT))
         GPUEvent = id;
-    else if (guid->isEqualTo(GAME_ZONE_FAN_WMI_EVENT))
+    else if (guid->isEqualTo(GAME_ZONE_FAN_COOLING_EVENT))
         fanEvent = id;
-    else if (guid->isEqualTo(GAME_ZONE_KEY_WMI_EVENT))
+    else if (guid->isEqualTo(GAME_ZONE_KEYLOCK_STATUS_EVENT))
         keyEvent = id;
+    else if (guid->isEqualTo(GAME_ZONE_FAN_MODE_EVENT))
+        smartFanModeEvent = id;
     else
         return nullptr;
     return feature;

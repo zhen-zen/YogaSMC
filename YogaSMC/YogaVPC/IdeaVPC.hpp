@@ -361,6 +361,11 @@ private:
     bool setFnLock(bool enable) APPLE_KEXT_OVERRIDE;
 
     /**
+     *  Set amrt fan mode to DYTC
+     */
+    void setSmartFanMode(UInt32 mode);
+
+    /**
      *  Toggle always on USB mode
      *
      *  @return true if success

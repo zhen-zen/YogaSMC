@@ -113,7 +113,12 @@ let ideaEvents: [UInt32: [UInt32: EventDesc]] = [
         3: EventDesc("Stand Mode"),
         4: EventDesc("Tent Mode")
     ],
-    0x11: [0: EventDesc("FnLock", act: .fnlock)]
+    0x11: [0: EventDesc("FnLock", act: .fnlock)],
+    0x12: [
+        1: EventDesc("Quiet"),
+        2: EventDesc("Balance"),
+        3: EventDesc("Performance")
+    ]
 ]
 
 let thinkEvents: [UInt32: [UInt32: EventDesc]] = [
