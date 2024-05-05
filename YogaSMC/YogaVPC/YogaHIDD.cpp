@@ -265,7 +265,7 @@ IOReturn YogaHIDD::evaluateHIDD(intel_hid_dsm_fn_codes index, UInt64 *value, SIn
     OSObject *obj = nullptr;
     if (fn_mask & BIT(index)) {
         OSArray *arr = nullptr;
-        if (arg > 0) {
+        if (arg >= 0) {
             arr = OSArray::withCapacity(1);
             OSNumber *val = OSNumber::withNumber(arg, 32);
             arr->setObject(val);
@@ -274,7 +274,7 @@ IOReturn YogaHIDD::evaluateHIDD(intel_hid_dsm_fn_codes index, UInt64 *value, SIn
         ret = evaluateDSM(index, &obj, arr);
         OSSafeReleaseNULL(arr);
     } else {
-        if (arg > 0) {
+        if (arg >= 0) {
             OSObject *params[] = {
                 OSNumber::withNumber(arg, 32),
             };
