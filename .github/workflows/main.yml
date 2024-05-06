@@ -25,9 +25,6 @@ jobs:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
-    - uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: '14.3.1'
     - name: Download MacKernelSDK
       run: git clone --depth 1 https://github.com/acidanthera/MacKernelSDK.git
     - name: Download Lilu / VirtualSMC SDK (script from hieplpvip/AsusSMC (Acidanthera/Lilu))
@@ -39,6 +36,7 @@ jobs:
         # scheme: # optional
         # destination: # optional
         configuration: Debug
+        build-settings: ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES=NO MACOSX_DEPLOYMENT_TARGET=10.14.4
         target: BuildAll
         action: build
     - name: Xcodebuild Release
@@ -47,6 +45,7 @@ jobs:
         project: YogaSMC.xcodeproj
         # destination: # optional
         configuration: Release
+        build-settings: ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES=NO MACOSX_DEPLOYMENT_TARGET=10.14.4
         target: BuildAll
         action: build
     - name: Prepare release image
@@ -114,19 +113,17 @@ jobs:
     - name: Download Lilu / VirtualSMC SDK (script from hieplpvip/AsusSMC (Acidanthera/Lilu))
       run: src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/hieplpvip/AsusSMC/master/Scripts/bootstrap.sh) && eval "$src" || exit 1
     - name: Xcodebuild Debug Analyze
-      uses: sersoft-gmbh/xcodebuild-action@v1
+      uses: sersoft-gmbh/xcodebuild-action@v3.2.0
       with:
         project: YogaSMC.xcodeproj
         configuration: Debug
-        build-settings: ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES=NO MACOSX_DEPLOYMENT_TARGET=10.14.4
         target: BuildAll
         action: analyze
     - name: Xcodebuild Release Analyze
-      uses: sersoft-gmbh/xcodebuild-action@v1
+      uses: sersoft-gmbh/xcodebuild-action@v3.2.0
       with:
         project: YogaSMC.xcodeproj
         configuration: Release
-        build-settings: ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES=NO MACOSX_DEPLOYMENT_TARGET=10.14.4
         target: BuildAll
         action: analyze
     - name: Prepare release image
