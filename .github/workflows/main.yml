@@ -22,7 +22,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
     - name: Download MacKernelSDK
@@ -65,7 +65,7 @@ jobs:
         ln -s /Applications build/Debug-App/
         cp -r YogaSMC/SSDTSample build/Debug/
     - name: Upload debug kext
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: YogaSMC-Debug
         path: |
@@ -73,7 +73,7 @@ jobs:
           build/Debug/LICENSE
           build/Debug/SSDTSample
     - name: Upload release kext
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: YogaSMC-Release
         path: |
@@ -86,17 +86,17 @@ jobs:
         create-dmg --no-internet-enable --sandbox-safe --window-size 450 450 build/YogaSMC-App-Debug.dmg build/Debug-App/
         create-dmg --no-internet-enable --sandbox-safe --window-size 450 450 build/YogaSMC-App-Release.dmg build/Release-App/
     - name: Upload debug app
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: YogaSMC-App-Debug
         path: build/YogaSMC-App-Debug.dmg
     - name: Upload release app
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: YogaSMC-App-Release
         path: build/YogaSMC-App-Release.dmg
     - name: Upload release dSYM
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: YogaSMC-Release-dSYM
         path: |
@@ -105,7 +105,7 @@ jobs:
   analyze:
     runs-on: macos-12
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
     - name: Download MacKernelSDK
@@ -143,7 +143,7 @@ jobs:
         ln -s /Applications build/Debug-App/
         cp -r YogaSMC/SSDTSample build/Debug/
     - name: Upload debug kext
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: YogaSMC-Debug-12
         path: |
@@ -151,7 +151,7 @@ jobs:
           build/Debug/LICENSE
           build/Debug/SSDTSample
     - name: Upload release kext
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: YogaSMC-Release-12
         path: |
@@ -164,17 +164,17 @@ jobs:
         create-dmg --no-internet-enable --sandbox-safe --window-size 450 450 build/YogaSMC-App-Debug-12.dmg build/Debug-App/
         create-dmg --no-internet-enable --sandbox-safe --window-size 450 450 build/YogaSMC-App-Release-12.dmg build/Release-App/
     - name: Upload debug app
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: YogaSMC-App-Debug-12
         path: build/YogaSMC-App-Debug-12.dmg
     - name: Upload release app
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: YogaSMC-App-Release-12
         path: build/YogaSMC-App-Release-12.dmg
     - name: Upload release dSYM
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: YogaSMC-Release-dSYM-12
         path: |
